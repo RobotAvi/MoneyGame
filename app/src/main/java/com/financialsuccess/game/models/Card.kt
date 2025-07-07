@@ -41,7 +41,8 @@ data class Dream(
     override val name: String,
     override val description: String,
     val cost: Int,
-    val cashFlowRequired: Int
+    val cashFlowRequired: Int,
+    val fastTrackNumber: Int = 6 // Число на кубике для покупки мечты на скоростной дорожке
 ) : Card(id, name, description, CardType.DREAM)
 
 // Карточка актива

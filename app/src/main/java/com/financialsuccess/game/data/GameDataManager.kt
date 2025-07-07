@@ -67,42 +67,48 @@ object GameDataManager {
             name = "Собственная яхта",
             description = "Роскошная яхта для путешествий",
             cost = 2000000,
-            cashFlowRequired = 50000
+            cashFlowRequired = 50000,
+            fastTrackNumber = 5
         ),
         Dream(
             id = "restaurant",
             name = "Ресторан",
             description = "Открыть собственный ресторан",
             cost = 1500000,
-            cashFlowRequired = 40000
+            cashFlowRequired = 40000,
+            fastTrackNumber = 4
         ),
         Dream(
             id = "charity",
             name = "Благотворительность",
             description = "Помочь детскому дому",
             cost = 500000,
-            cashFlowRequired = 20000
+            cashFlowRequired = 20000,
+            fastTrackNumber = 2
         ),
         Dream(
             id = "island",
             name = "Частный остров",
             description = "Купить остров в тропиках",
             cost = 5000000,
-            cashFlowRequired = 100000
+            cashFlowRequired = 100000,
+            fastTrackNumber = 6
         ),
         Dream(
             id = "space_trip",
             name = "Космический туризм",
             description = "Полёт в космос",
             cost = 3000000,
-            cashFlowRequired = 75000
+            cashFlowRequired = 75000,
+            fastTrackNumber = 6
         ),
         Dream(
             id = "business_empire",
             name = "Бизнес-империя",
             description = "Создать сеть компаний",
             cost = 10000000,
-            cashFlowRequired = 200000
+            cashFlowRequired = 200000,
+            fastTrackNumber = 6
         )
     )
     

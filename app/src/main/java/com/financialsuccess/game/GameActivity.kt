@@ -64,7 +64,7 @@ class GameActivity : AppCompatActivity() {
     
     private fun rollDiceAndMove() {
         val diceValue = gameManager.rollDice()
-        binding.tvDiceValue.text = "Кубик: $diceValue"
+        val player = currentGameState?.player ?: return
         
         // Устанавливаем соответствующее изображение кубика
         val diceRes = when (diceValue) {
@@ -85,11 +85,117 @@ class GameActivity : AppCompatActivity() {
             // Игнорируем если поле не найдено (совместимость)
         }
         
-        currentGameState = gameManager.movePlayer(diceValue)
-        updateUI()
+        if (player.isInFastTrack) {
+            // Логика скоростной дорожки
+            handleFastTrackDice(diceValue)
+        } else {
+            // Обычная логика крысиных бегов
+            binding.tvDiceValue.text = "Кубик: $diceValue"
+            currentGameState = gameManager.movePlayer(diceValue)
+            updateUI()
+            
+            // Проверяем событие на клетке
+            handlePositionEvent()
+        }
+    }
+    
+    private fun handleFastTrackDice(diceValue: Int) {
+        val player = currentGameState?.player ?: return
+        val dreamNumber = player.dream.fastTrackNumber // Нужно добавить это поле в Dream
         
-        // Проверяем событие на клетке
-        handlePositionEvent()
+        binding.tvDiceValue.text = "Результат: $diceValue (Нужно: ${dreamNumber})"
+        
+        if (diceValue == dreamNumber) {
+            // Попал на мечту!
+            if (player.cash >= player.dream.cost) {
+                // Может купить мечту - победа!
+                showVictoryDialog()
+            } else {
+                // Попал, но недостаточно денег
+                val needed = player.dream.cost - player.cash
+                showMessage("🎯 Вы попали на свою мечту!\n\nОднако вам не хватает ${currencyFormat.format(needed)} для её покупки.\n\nПродолжайте инвестировать и накапливать деньги!")
+                
+                // Получаем денежный поток за ход
+                player.cash += player.getCashFlow()
+                updateUI()
+            }
+        } else {
+            // Не попал на мечту
+            val messages = listOf(
+                "🎲 Мимо! Попробуйте ещё раз.",
+                "🎯 Почти попали! Следующий бросок будет удачнее.",
+                "💪 Не сдавайтесь! Ваша мечта близко.",
+                "📈 Время инвестировать больше и копить деньги!",
+                "🚀 Каждый бросок приближает к цели!"
+            )
+            showMessage(messages.random())
+            
+            // Получаем денежный поток за ход
+            player.cash += player.getCashFlow()
+            
+            // Случайные события на скоростной дорожке
+            if (diceValue == 1 || diceValue == 6) {
+                handleFastTrackEvent()
+            }
+            
+            updateUI()
+        }
+    }
+    
+    private fun handleFastTrackEvent() {
+        val events = listOf(
+            "💰 Дивиденды от инвестиций: +50,000₽" to 50000,
+            "📈 Удачная сделка: +100,000₽" to 100000, 
+            "🎁 Бонус от клиента: +25,000₽" to 25000,
+            "💎 Рост акций: +75,000₽" to 75000,
+            "🏆 Премия за результат: +30,000₽" to 30000
+        )
+        
+        val (message, amount) = events.random()
+        currentGameState?.player?.cash = (currentGameState?.player?.cash ?: 0) + amount
+        showMessage(message)
+    }
+    
+    private fun showVictoryDialog() {
+        val player = currentGameState?.player ?: return
+        
+        AlertDialog.Builder(this)
+            .setTitle("🎉 ПОБЕДА!")
+            .setMessage("Поздравляем! Вы достигли своей мечты: ${player.dream.name}!\n\nВы успешно вышли из крысиных бегов и осуществили финансовую мечту!\n\nИтоговый капитал: ${currencyFormat.format(player.cash)}\nПассивный доход: ${currencyFormat.format(player.passiveIncome)}")
+            .setPositiveButton("🎊 Новая игра") { _, _ ->
+                // Перезапуск игры
+                finish()
+            }
+            .setNegativeButton("📊 Итоги") { _, _ ->
+                showFinalStats()
+            }
+            .setCancelable(false)
+            .show()
+    }
+    
+    private fun showFinalStats() {
+        val player = currentGameState?.player ?: return
+        
+        val message = """
+            🏆 ФИНАЛЬНАЯ СТАТИСТИКА
+            
+            🎯 Мечта: ${player.dream.name}
+            💰 Итоговый капитал: ${currencyFormat.format(player.cash)}
+            📊 Пассивный доход: ${currencyFormat.format(player.passiveIncome)}
+            🏠 Активов: ${player.assets.size}
+            💼 Инвестиций: ${player.investments.size}
+            💳 Чистая стоимость: ${currencyFormat.format(player.getNetWorth())}
+            
+            🎉 Вы успешно прошли путь от крысиных бегов до финансовой свободы!
+        """.trimIndent()
+        
+        AlertDialog.Builder(this)
+            .setTitle("📊 Итоги игры")
+            .setMessage(message)
+            .setPositiveButton("🔄 Новая игра") { _, _ ->
+                finish()
+            }
+            .show()
     }
     
     private fun handlePositionEvent() {
@@ -402,7 +508,32 @@ class GameActivity : AppCompatActivity() {
             binding.tvPassiveIncome.text = "Пассивный доход: ${currencyFormat.format(player.passiveIncome)}"
             binding.tvExpenses.text = "Расходы: ${currencyFormat.format(player.totalExpenses)}"
             binding.tvCashFlow.text = "Денежный поток: ${currencyFormat.format(player.getCashFlow())}"
-            binding.tvPosition.text = "Позиция: ${player.position}"
+            
+            // Изменяем интерфейс в зависимости от трека
+            if (player.isInFastTrack) {
+                binding.tvPosition.text = "🎯 СКОРОСТНАЯ ДОРОЖКА"
+                binding.tvDiceValue.text = "Цель: ${player.dream.name} (${currencyFormat.format(player.dream.cost)})"
+                
+                // Меняем фон на скоростную дорожку
+                try {
+                    binding.root.setBackgroundResource(R.drawable.bg_main_screen)
+                } catch (e: Exception) {
+                    // Игнорируем если фон не найден
+                }
+                
+                // Изменяем текст кнопки
+                binding.btnRollDice.text = "🎲 Бросить на мечту"
+            } else {
+                binding.tvPosition.text = "Позиция: ${player.position}"
+                binding.btnRollDice.text = "🎲 Бросить кубик"
+                
+                // Возвращаем обычный фон
+                try {
+                    binding.root.setBackgroundResource(R.drawable.bg_game_field)
+                } catch (e: Exception) {
+                    // Игнорируем если фон не найден
+                }
+            }
             
             // Обновляем список активов
             val adapter = AssetAdapter(player.assets) { assetIndex ->
@@ -429,15 +560,27 @@ class GameActivity : AppCompatActivity() {
     }
     
     private fun showEscapeRatRaceDialog() {
+        val player = currentGameState?.player ?: return
+        
         AlertDialog.Builder(this)
-            .setTitle("Поздравляем!")
-            .setMessage("Ваш пассивный доход превысил расходы! Вы можете выйти из крысиных бегов на скоростную дорожку!")
-            .setPositiveButton("Перейти") { _, _ ->
+            .setTitle("🎉 Поздравляем!")
+            .setMessage("Ваш пассивный доход превысил расходы!\n\nВы можете выйти из крысиных бегов на скоростную дорожку!\n\n🎯 На скоростной дорожке:\n• Ваша цель: ${player.dream.name}\n• Нужно выбросить: ${player.dream.fastTrackNumber}\n• Стоимость мечты: ${currencyFormat.format(player.dream.cost)}\n• Вы получаете денежный поток каждый ход")
+            .setPositiveButton("🚀 Перейти") { _, _ ->
                 currentGameState?.player?.isInFastTrack = true
                 updateUI()
-                showMessage("Добро пожаловать на скоростную дорожку!")
+                showFastTrackWelcome()
             }
             .setNegativeButton("Остаться", null)
+            .show()
+    }
+    
+    private fun showFastTrackWelcome() {
+        val player = currentGameState?.player ?: return
+        
+        AlertDialog.Builder(this)
+            .setTitle("🎯 Скоростная дорожка!")
+            .setMessage("Добро пожаловать на скоростную дорожку!\n\n🎲 Как играть:\n• Бросайте кубик каждый ход\n• Нужно выбросить ${player.dream.fastTrackNumber} для вашей мечты\n• При попадании вы можете купить мечту если хватает денег\n• Каждый ход вы получаете денежный поток\n• При 1 или 6 возможны бонусы!\n\n💰 Ваши деньги: ${currencyFormat.format(player.cash)}\n🎯 Нужно для мечты: ${currencyFormat.format(player.dream.cost)}")
+            .setPositiveButton("🎮 Играть!", null)
             .show()
     }
     
