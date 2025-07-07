@@ -9,6 +9,8 @@ jobs:
   release:
     name: 🎉 Create Release APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Нужно для коммита APK и создания release
     
     steps:
     - name: 📥 Checkout code
@@ -28,7 +30,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-android-sdk-
         
-    - name: �📱 Set up Android SDK
+    - name: �� Set up Android SDK
       run: |
         if [ ! -d "$HOME/android-sdk/cmdline-tools/latest" ]; then
           echo "Installing Android SDK..."
@@ -102,6 +104,37 @@ jobs:
         echo "apk_name=$APK_NAME" >> $GITHUB_OUTPUT
         echo "apk_type=$APK_TYPE" >> $GITHUB_OUTPUT
         echo "📱 APK ready: $APK_NAME ($APK_SIZE, $APK_TYPE)"
+        
+    - name: 📁 Save APK to releases folder
+      run: |
+        # Копируем APK в releases/release/
+        cp "${{ steps.apk_info.outputs.apk_path }}" "releases/release/${{ steps.apk_info.outputs.apk_name }}"
+        
+        # Создаем symlink на latest
+        cd releases/release/
+        ln -sf "${{ steps.apk_info.outputs.apk_name }}" "FinancialSuccess-release-latest.apk" || true
+        
+        echo "✅ Release APK сохранен в releases/release/${{ steps.apk_info.outputs.apk_name }}"
+        
+    - name: 📝 Commit release APK to repository
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add releases/release/
+        
+        # Проверяем есть ли изменения
+        if git diff --staged --quiet; then
+          echo "📭 Нет изменений для коммита"
+        else
+          git commit -m "🏆 Релиз APK: ${{ steps.apk_info.outputs.apk_name }}
+
+📱 Размер: ${{ steps.apk_info.outputs.apk_size }}
+🏷️ Версия: ${{ steps.version.outputs.version }}
+🔧 Тип: ${{ steps.apk_info.outputs.apk_type }}
+⏰ Создан: $(date)"
+          git push
+          echo "✅ Release APK закоммичен в репозиторий"
+        fi
         
     - name: 📝 Generate changelog
       id: changelog
