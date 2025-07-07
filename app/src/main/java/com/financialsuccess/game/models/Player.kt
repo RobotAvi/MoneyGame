@@ -12,6 +12,10 @@ data class Player(
     var totalExpenses: Int = 0,
     var passiveIncome: Int = 0,
     var isInFastTrack: Boolean = false,
+    // Возраст и жизнь
+    var age: Int = 25,
+    var deathAge: Int = 85, // Устанавливается случайно при создании персонажа
+    var monthsPlayed: Int = 0,
     // Детализированные расходы
     var foodExpenses: Int = 0,
     var transportExpenses: Int = 0,
@@ -96,4 +100,32 @@ data class Player(
             updateTotalExpenses()
         }
     }
+    
+    // === ВОЗРАСТ И ЖИЗНЬ ===
+    
+    // Установить случайный возраст смерти
+    fun setRandomDeathAge() {
+        deathAge = (70..110).random()
+    }
+    
+    // Пройти один месяц (увеличивает возраст)
+    fun passMonth() {
+        monthsPlayed++
+        // Каждые 12 месяцев увеличиваем возраст на 1 год
+        if (monthsPlayed % 12 == 0) {
+            age++
+        }
+    }
+    
+    // Проверить, жив ли игрок
+    fun isAlive(): Boolean = age < deathAge
+    
+    // Получить оставшиеся годы жизни
+    fun getYearsLeft(): Int = maxOf(0, deathAge - age)
+    
+    // Получить процент прожитой жизни
+    fun getLifePercentage(): Float = (age.toFloat() / deathAge.toFloat() * 100)
+    
+    // Проверить критический возраст (последние 5 лет)
+    fun isInCriticalAge(): Boolean = getYearsLeft() <= 5
 }

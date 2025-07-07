@@ -7,14 +7,18 @@ class GameManager {
     
     private var gameState: GameState? = null
     
-    fun startNewGame(profession: Profession, dream: Dream): GameState {
+    fun startNewGame(profession: Profession, dream: Dream, playerAge: Int = 25): GameState {
         val player = Player(
             position = 0,
             cash = 5000, // Стартовый капитал
             salary = profession.salary,
+            age = playerAge,
             profession = profession,
             dream = dream
         )
+        
+        // Устанавливаем случайный возраст смерти
+        player.setRandomDeathAge()
         
         // Инициализируем доходы и расходы
         player.updateTotalIncome()
@@ -32,6 +36,9 @@ class GameManager {
     fun movePlayer(steps: Int): GameState? {
         val currentState = gameState ?: return null
         val newPosition = (currentState.player.position + steps) % 24
+        
+        // Каждый ход = один месяц жизни
+        currentState.player.passMonth()
         
         // Если прошли полный круг, изменяем наличные на величину денежного потока
         if (newPosition < currentState.player.position) {

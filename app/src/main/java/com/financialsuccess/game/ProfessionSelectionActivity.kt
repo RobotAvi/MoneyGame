@@ -31,9 +31,18 @@ class ProfessionSelectionActivity : AppCompatActivity() {
         
         binding.btnStartGame.setOnClickListener {
             if (selectedProfession != null && selectedDream != null) {
+                val ageText = binding.etAge.text.toString()
+                val age = ageText.toIntOrNull()
+                
+                if (age == null || age < 18 || age > 65) {
+                    binding.etAge.error = "Возраст должен быть от 18 до 65 лет"
+                    return@setOnClickListener
+                }
+                
                 val intent = Intent(this, GameActivity::class.java).apply {
                     putExtra("profession", selectedProfession)
                     putExtra("dream", selectedDream)
+                    putExtra("playerAge", age)
                 }
                 startActivity(intent)
                 finish()

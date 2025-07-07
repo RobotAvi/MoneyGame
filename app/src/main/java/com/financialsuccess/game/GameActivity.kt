@@ -32,10 +32,11 @@ class GameActivity : AppCompatActivity() {
     private fun initGame() {
         val profession = intent.getParcelableExtra<Profession>("profession")
         val dream = intent.getParcelableExtra<Dream>("dream")
+        val playerAge = intent.getIntExtra("playerAge", 25)
         
         if (profession != null && dream != null) {
             gameManager = GameManager()
-            currentGameState = gameManager.startNewGame(profession, dream)
+            currentGameState = gameManager.startNewGame(profession, dream, playerAge)
             updateUI()
         } else {
             finish()
@@ -503,11 +504,26 @@ class GameActivity : AppCompatActivity() {
     
     private fun updateUI() {
         currentGameState?.player?.let { player ->
+            // Проверяем смерть игрока
+            if (!player.isAlive()) {
+                showDeathDialog()
+                return
+            }
+            
             binding.tvCash.text = "Наличные: ${currencyFormat.format(player.cash)}"
             binding.tvSalary.text = "Зарплата: ${currencyFormat.format(player.salary)}"
             binding.tvPassiveIncome.text = "Пассивный доход: ${currencyFormat.format(player.passiveIncome)}"
             binding.tvExpenses.text = "Расходы: ${currencyFormat.format(player.totalExpenses)}"
             binding.tvCashFlow.text = "Денежный поток: ${currencyFormat.format(player.getCashFlow())}"
+            
+            // Отображаем возраст с цветовой индикацией
+            val ageColor = when {
+                player.isInCriticalAge() -> "🔴" // Критический возраст
+                player.getYearsLeft() <= 10 -> "🟡" // Предупреждение
+                else -> "🟢" // Нормальный возраст
+            }
+            
+            binding.tvAge.text = "$ageColor Возраст: ${player.age} лет (осталось: ${player.getYearsLeft()})"
             
             // Изменяем интерфейс в зависимости от трека
             if (player.isInFastTrack) {
@@ -581,6 +597,37 @@ class GameActivity : AppCompatActivity() {
             .setTitle("🎯 Скоростная дорожка!")
             .setMessage("Добро пожаловать на скоростную дорожку!\n\n🎲 Как играть:\n• Бросайте кубик каждый ход\n• Нужно выбросить ${player.dream?.fastTrackNumber ?: 6} для вашей мечты\n• При попадании вы можете купить мечту если хватает денег\n• Каждый ход вы получаете денежный поток\n• При 1 или 6 возможны бонусы!\n\n💰 Ваши деньги: ${currencyFormat.format(player.cash)}\n🎯 Нужно для мечты: ${currencyFormat.format(player.dream?.cost ?: 0)}")
             .setPositiveButton("🎮 Играть!", null)
+            .show()
+    }
+    
+    private fun showDeathDialog() {
+        val player = currentGameState?.player ?: return
+        
+        val finalStats = """
+            ⚰️ ИГРА ОКОНЧЕНА ⚰️
+            
+            👴 Возраст смерти: ${player.age} лет
+            🎮 Игра длилась: ${player.monthsPlayed} месяцев (${player.monthsPlayed / 12} лет)
+            
+            💰 ФИНАЛЬНЫЕ РЕЗУЛЬТАТЫ:
+            💵 Итоговый капитал: ${currencyFormat.format(player.cash)}
+            📊 Пассивный доход: ${currencyFormat.format(player.passiveIncome)}
+            🏠 Активов: ${player.assets.size}
+            💼 Инвестиций: ${player.investments.size}
+            💳 Чистая стоимость: ${currencyFormat.format(player.getNetWorth())}
+            
+            ${if (player.isInFastTrack) "🎯 Достигли скоростной дорожки!" else "💼 Остались в крысиных бегах"}
+            
+            💡 Помните: жизнь коротка, инвестируйте мудро!
+        """.trimIndent()
+        
+        AlertDialog.Builder(this)
+            .setTitle("💀 Конец жизни")
+            .setMessage(finalStats)
+            .setPositiveButton("🔄 Новая жизнь") { _, _ ->
+                finish() // Возврат к выбору профессии
+            }
+            .setCancelable(false)
             .show()
     }
     
