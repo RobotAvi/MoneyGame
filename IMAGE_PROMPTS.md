@@ -222,14 +222,14 @@ Cash flow icon, circular arrows with money symbol, financial flow concept, moder
 ## 📋 Чек-лист файлов
 
 ### Фоны:
-- [ ] bg_main_screen.jpg (1080x1920)
-- [ ] bg_game_field.jpg (1080x1920)
+- [x] bg_main_screen.jpg (1080x1920)
+- [x] bg_game_field.jpg (1080x1920)
 
 ### Профессии (56x56):
-- [ ] profession_teacher.png
-- [ ] profession_engineer.png  
+- [x] profession_teacher.png
+- [x] profession_engineer.png  
 - [ ] profession_doctor.png
-- [ ] profession_manager.png
+- [x] profession_manager.png
 - [ ] profession_mechanic.png
 - [ ] profession_lawyer.png
 
