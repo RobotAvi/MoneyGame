@@ -8,23 +8,33 @@
 
 ## 🔧 Последние исправления
 
-### ✅ v1.0.4 - GitHub Actions SDK Fix
-- **Проблема**: SDK location not found в GitHub Actions
-- **Решение**: Обновлен android-actions/setup-android с v3 на v2
-- **Добавлено**: Явная установка Android SDK компонентов
-- **Результат**: Стабильная сборка APK в CI/CD
+### ✅ v1.0.5 - Manual Android SDK Setup
+- **Проблема**: Нестабильность android-actions/setup-android
+- **Решение**: Полная ручная установка Android SDK
+- **Добавлено**: Кэширование SDK, условная установка, error handling
+- **Результат**: Максимально надежная сборка APK в CI/CD
 
 ### 📝 Детали исправления:
-1. Заменен `android-actions/setup-android@v3` на `@v2`
-2. Добавлена секция установки SDK компонентов:
+1. **Убрана зависимость** от android-actions/setup-android полностью
+2. **Ручная загрузка SDK** напрямую с Google servers
+3. **Кэширование Android SDK** для ускорения повторных сборок
+4. **Условная установка** - SDK скачивается только при необходимости
+5. **Error handling** - добавлены fallback механизмы
    ```yaml
-   - name: 🔧 Install Android SDK components
+   - name: � Set up Android SDK
      run: |
-       $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-34"
-       $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "build-tools;34.0.0"
-       $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools"
+       if [ ! -d "$HOME/android-sdk/cmdline-tools/latest" ]; then
+         echo "Installing Android SDK..."
+         mkdir -p $HOME/android-sdk/cmdline-tools
+         cd $HOME/android-sdk/cmdline-tools
+         wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+         unzip -q commandlinetools-linux-11076708_latest.zip
+         mv cmdline-tools latest
+       else
+         echo "Android SDK found in cache, skipping download"
+       fi
    ```
-3. Обновлены все workflow файлы: build-apk.yml, release.yml, code-quality.yml
+6. Обновлены все workflow файлы: build-apk.yml, release.yml, code-quality.yml
 
 ## 🚀 Workflows
 

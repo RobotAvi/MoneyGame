@@ -21,14 +21,39 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         
-    - name: 📱 Set up Android SDK
-      uses: android-actions/setup-android@v2
+    - name: � Cache Android SDK
+      uses: actions/cache@v3
+      with:
+        path: $HOME/android-sdk
+        key: ${{ runner.os }}-android-sdk-${{ hashFiles('app/build.gradle') }}
+        restore-keys: |
+          ${{ runner.os }}-android-sdk-
+        
+    - name: �📱 Set up Android SDK
+      run: |
+        if [ ! -d "$HOME/android-sdk/cmdline-tools/latest" ]; then
+          echo "Installing Android SDK..."
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          cd $HOME/android-sdk/cmdline-tools
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q commandlinetools-linux-11076708_latest.zip
+          mv cmdline-tools latest
+        else
+          echo "Android SDK found in cache, skipping download"
+        fi
+        
+    - name: 🌍 Set Android SDK environment variables
+      run: |
+        echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+        echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
+        echo "$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
         
     - name: 🔧 Install Android SDK components
       run: |
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-34"
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "build-tools;34.0.0"
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools"
+        yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
+        $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-34"
+        $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --install "build-tools;34.0.0"
+        $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --install "platform-tools"
         
     - name: 🎯 Grant execute permission for gradlew
       run: chmod +x gradlew
