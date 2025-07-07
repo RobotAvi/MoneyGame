@@ -59,6 +59,16 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/tv_roi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ROI: 0.0%"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary_color"
+            android:layout_marginTop="4dp" />
+
+        <TextView
             android:id="@+id/tv_shares"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

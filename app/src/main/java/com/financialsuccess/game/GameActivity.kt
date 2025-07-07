@@ -8,9 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.financialsuccess.game.adapters.AssetAdapter
 import com.financialsuccess.game.data.GameDataManager
 import com.financialsuccess.game.databinding.ActivityGameBinding
-import com.financialsuccess.game.models.Dream
-import com.financialsuccess.game.models.GameState
-import com.financialsuccess.game.models.Profession
+import com.financialsuccess.game.models.*
 import java.text.NumberFormat
 import java.util.*
 
@@ -136,7 +134,37 @@ class GameActivity : AppCompatActivity() {
     
     private fun showMarketEvent() {
         val event = GameDataManager.getRandomEvent()
-        showMessage(event)
+        
+        // Обработка специальных событий
+        when {
+            event.contains("ребёнок") -> {
+                currentGameState?.player?.let { player ->
+                    player.addChild()
+                    updateUI()
+                }
+            }
+            event.contains("Повышение") -> {
+                currentGameState?.player?.let { player ->
+                    player.salary += 5000
+                    player.updateTotalIncome()
+                    updateUI()
+                }
+            }
+            event.contains("Налоговая") -> {
+                currentGameState?.player?.let { player ->
+                    player.cash -= 15000
+                    updateUI()
+                }
+            }
+            event.contains("Наследство") -> {
+                currentGameState?.player?.let { player ->
+                    player.cash += 100000
+                    updateUI()
+                }
+            }
+        }
+        
+        showMessage("🎲 $event")
     }
     
     private fun showDoodadEvent() {
@@ -169,16 +197,32 @@ class GameActivity : AppCompatActivity() {
     private fun showFinancialStatement() {
         currentGameState?.player?.let { player ->
             val message = """
-                Наличные: ${currencyFormat.format(player.cash)}
-                Общий доход: ${currencyFormat.format(player.totalIncome)}
+                💰 ДОХОДЫ:
+                Зарплата: ${currencyFormat.format(player.totalIncome)}
                 Пассивный доход: ${currencyFormat.format(player.passiveIncome)}
-                Расходы: ${currencyFormat.format(player.totalExpenses)}
+                Общий доход: ${currencyFormat.format(player.totalIncome + player.passiveIncome)}
+                
+                💸 РАСХОДЫ:
+                Еда: ${currencyFormat.format(player.foodExpenses)}
+                Транспорт: ${currencyFormat.format(player.transportExpenses)} 
+                Жильё: ${currencyFormat.format(player.housingExpenses)}
+                Дети: ${currencyFormat.format(player.childrenExpenses)}
+                Налоги: ${currencyFormat.format(player.taxes)}
+                Прочее: ${currencyFormat.format(player.otherExpenses)}
+                Кредиты: ${currencyFormat.format(player.liabilities.sumOf { it.payment })}
+                Общие расходы: ${currencyFormat.format(player.totalExpenses)}
+                
+                📊 ИТОГО:
+                Наличные: ${currencyFormat.format(player.cash)}
                 Денежный поток: ${currencyFormat.format(player.getCashFlow())}
                 Чистая стоимость: ${currencyFormat.format(player.getNetWorth())}
+                Активы: ${player.assets.size} шт.
+                
+                ${if (player.canEscapeRatRace()) "🎉 Готов к скоростной дорожке!" else "💪 Увеличивайте пассивный доход"}
             """.trimIndent()
             
             AlertDialog.Builder(this)
-                .setTitle("Финансовый отчёт")
+                .setTitle("📋 Финансовый отчёт")
                 .setMessage(message)
                 .setPositiveButton("OK", null)
                 .show()
@@ -192,12 +236,140 @@ class GameActivity : AppCompatActivity() {
     }
     
     private fun showMarket() {
-        // Показываем доступные для покупки активы
+        val items = arrayOf("📈 Активы", "💼 Инвестиции", "📊 Портфель")
+        
+        AlertDialog.Builder(this)
+            .setTitle("🏪 Финансовый рынок")
+            .setItems(items) { _, which ->
+                when (which) {
+                    0 -> showAvailableAssets()
+                    1 -> showAvailableInvestments()
+                    2 -> showPortfolio()
+                }
+            }
+            .show()
+    }
+    
+    private fun showAvailableAssets() {
         val smallDeals = GameDataManager.getSmallDeals()
         val bigDeals = GameDataManager.getBigDeals()
         val allDeals = smallDeals + bigDeals
         
-        // Здесь можно показать диалог с выбором активов
+        val names = allDeals.map { "${it.name} - ${currencyFormat.format(it.downPayment)}" }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("📈 Доступные активы")
+            .setItems(names) { _, which ->
+                val asset = allDeals[which]
+                showAssetDetails(asset)
+            }
+            .show()
+    }
+    
+    private fun showAvailableInvestments() {
+        val investments = GameDataManager.getInvestments()
+        val names = investments.map { 
+            "${it.name} - ${currencyFormat.format(it.cost)} (${getRiskText(it.riskLevel)})"
+        }.toTypedArray()
+        
+        AlertDialog.Builder(this)
+            .setTitle("💼 Инвестиционные возможности")
+            .setItems(names) { _, which ->
+                val investment = investments[which]
+                showInvestmentDetails(investment)
+            }
+            .show()
+    }
+    
+    private fun showAssetDetails(asset: Asset) {
+        val roi = if (asset.downPayment > 0) {
+            (asset.cashFlow * 12.0 / asset.downPayment) * 100
+        } else 0.0
+        
+        val message = """
+            ${asset.name}
+            
+            Первоначальный взнос: ${currencyFormat.format(asset.downPayment)}
+            Стоимость: ${currencyFormat.format(asset.value)}
+            Денежный поток: +${currencyFormat.format(asset.cashFlow)}/мес
+            ROI: ${String.format("%.1f", roi)}% годовых
+            
+            ${if (asset.loan > 0) "Кредит: ${currencyFormat.format(asset.loan)} (${currencyFormat.format(asset.loanPayment)}/мес)" else "Без кредита"}
+        """.trimIndent()
+        
+        AlertDialog.Builder(this)
+            .setTitle("📊 Детали актива")
+            .setMessage(message)
+            .setPositiveButton("💰 Купить") { _, _ ->
+                if (gameManager.buyAsset(asset)) {
+                    updateUI()
+                    showMessage("✅ Актив приобретён!")
+                } else {
+                    showMessage("❌ Недостаточно средств")
+                }
+            }
+            .setNegativeButton("❌ Отмена", null)
+            .show()
+    }
+    
+    private fun showInvestmentDetails(investment: Investment) {
+        val roi = if (investment.cost > 0) {
+            (investment.expectedReturn * 12.0 / investment.cost) * 100
+        } else 0.0
+        
+        val message = """
+            ${investment.name}
+            
+            Стоимость: ${currencyFormat.format(investment.cost)}
+            Ожидаемая доходность: ${currencyFormat.format(investment.expectedReturn)}/мес
+            ROI: ${String.format("%.1f", roi)}% годовых
+            Риск: ${getRiskText(investment.riskLevel)}
+        """.trimIndent()
+        
+        AlertDialog.Builder(this)
+            .setTitle("💼 Детали инвестиции")
+            .setMessage(message)
+            .setPositiveButton("💰 Инвестировать") { _, _ ->
+                currentGameState?.player?.let { player ->
+                    if (player.cash >= investment.cost) {
+                        player.cash -= investment.cost
+                        player.investments.add(investment)
+                        updateUI()
+                        showMessage("✅ Инвестиция оформлена!")
+                    } else {
+                        showMessage("❌ Недостаточно средств")
+                    }
+                }
+            }
+            .setNegativeButton("❌ Отмена", null)
+            .show()
+    }
+    
+    private fun showPortfolio() {
+        currentGameState?.player?.let { player ->
+            val message = """
+                📈 АКТИВЫ (${player.assets.size} шт.):
+                ${player.assets.joinToString("\n") { "• ${it.name}: +${currencyFormat.format(it.cashFlow)}/мес" }}
+                
+                💼 ИНВЕСТИЦИИ (${player.investments.size} шт.):
+                ${player.investments.joinToString("\n") { "• ${it.name}: +${currencyFormat.format(it.expectedReturn)}/мес" }}
+                
+                📊 ОБЩИЙ ПАССИВНЫЙ ДОХОД:
+                ${currencyFormat.format(player.passiveIncome + player.investments.sumOf { it.expectedReturn })}
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("📊 Мой портфель")
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show()
+        }
+    }
+    
+    private fun getRiskText(risk: RiskLevel): String = when (risk) {
+        RiskLevel.LOW -> "🟢 Низкий"
+        RiskLevel.MEDIUM -> "🟡 Средний" 
+        RiskLevel.HIGH -> "🔴 Высокий"
     }
     
     private fun setupAssetsRecyclerView() {

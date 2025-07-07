@@ -12,6 +12,13 @@ data class Player(
     var totalExpenses: Int = 0,
     var passiveIncome: Int = 0,
     var isInFastTrack: Boolean = false,
+    // Детализированные расходы
+    var foodExpenses: Int = 0,
+    var transportExpenses: Int = 0,
+    var housingExpenses: Int = 0,
+    var childrenExpenses: Int = 0,
+    var taxes: Int = 0,
+    var otherExpenses: Int = 0,
     val profession: Profession? = null,
     val dream: Dream? = null,
     val assets: MutableList<Asset> = mutableListOf(),
@@ -29,11 +36,44 @@ data class Player(
         passiveIncome > totalExpenses
     
     fun updateTotalIncome() {
-        totalIncome = salary + assets.sumOf { it.cashFlow }
+        totalIncome = salary
+        passiveIncome = assets.sumOf { it.cashFlow } + investments.sumOf { it.expectedReturn }
     }
     
     fun updateTotalExpenses() {
-        totalExpenses = (profession?.expenses ?: 0) + (profession?.taxes ?: 0) + liabilities.sumOf { it.payment }
+        // Базовые расходы из профессии
+        val professionExpenses = profession?.expenses ?: 0
+        val professionTaxes = profession?.taxes ?: 0
+        
+        // Распределяем базовые расходы по категориям
+        foodExpenses = (professionExpenses * 0.4).toInt()
+        transportExpenses = (professionExpenses * 0.15).toInt() 
+        housingExpenses = (professionExpenses * 0.3).toInt()
+        otherExpenses = professionExpenses - foodExpenses - transportExpenses - housingExpenses
+        taxes = professionTaxes
+        
+        // Общие расходы = базовые + кредиты + дети
+        totalExpenses = foodExpenses + transportExpenses + housingExpenses + 
+                       childrenExpenses + taxes + otherExpenses + 
+                       liabilities.sumOf { it.payment }
+    }
+    
+    // Автоматическое списание расходов каждый ход
+    fun payMonthlyExpenses() {
+        cash -= totalExpenses
+    }
+    
+    // Добавить ребенка (увеличивает расходы)
+    fun addChild() {
+        childrenExpenses += 8000 // 8000 рублей на ребенка в месяц
+        updateTotalExpenses()
+    }
+    
+    // Получить ROI для актива
+    fun getAssetROI(asset: Asset): Double {
+        return if (asset.downPayment > 0) {
+            (asset.cashFlow * 12.0 / asset.downPayment) * 100
+        } else 0.0
     }
     
     fun addAsset(asset: Asset) {

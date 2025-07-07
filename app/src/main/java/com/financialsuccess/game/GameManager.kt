@@ -12,11 +12,13 @@ class GameManager {
             position = 0,
             cash = 5000, // Стартовый капитал
             salary = profession.salary,
-            totalIncome = profession.salary,
-            totalExpenses = profession.expenses + profession.taxes,
             profession = profession,
             dream = dream
         )
+        
+        // Инициализируем доходы и расходы
+        player.updateTotalIncome()
+        player.updateTotalExpenses()
         
         gameState = GameState(player = player)
         return gameState!!
@@ -31,9 +33,10 @@ class GameManager {
         val currentState = gameState ?: return null
         val newPosition = (currentState.player.position + steps) % 24
         
-        // Если прошли полный круг, получаем зарплату
+        // Если прошли полный круг, получаем зарплату и списываем расходы
         if (newPosition < currentState.player.position) {
             currentState.player.cash += currentState.player.salary
+            currentState.player.payMonthlyExpenses()
         }
         
         currentState.player.position = newPosition

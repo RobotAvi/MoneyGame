@@ -24,6 +24,20 @@ class AssetAdapter(
             binding.tvAssetValue.text = "Стоимость: ${currencyFormat.format(asset.value)}"
             binding.tvCashFlow.text = "Поток: +${currencyFormat.format(asset.cashFlow)}/мес"
             
+            // Расчет и показ ROI
+            val roi = if (asset.downPayment > 0) {
+                (asset.cashFlow * 12.0 / asset.downPayment) * 100
+            } else 0.0
+            
+            // Проверяем, есть ли поле ROI в layout (добавлено в новой версии)
+            try {
+                val roiField = binding.javaClass.getDeclaredField("tvRoi")
+                val tvRoi = roiField.get(binding) as? android.widget.TextView
+                tvRoi?.text = "ROI: ${String.format("%.1f", roi)}%"
+            } catch (e: Exception) {
+                // Игнорируем если поле не найдено (совместимость со старой версией)
+            }
+            
             if (asset.shares > 1) {
                 binding.tvShares.text = "Количество: ${asset.shares}"
             } else {

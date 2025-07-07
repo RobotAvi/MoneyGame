@@ -203,6 +203,44 @@ object GameDataManager {
         )
     )
     
+    fun getInvestments(): List<Investment> = listOf(
+        Investment(
+            name = "ПИФ Сбербанка",
+            type = AssetType.BONDS,
+            cost = 10000,
+            expectedReturn = 800,
+            riskLevel = RiskLevel.LOW
+        ),
+        Investment(
+            name = "Акции Яндекса",
+            type = AssetType.STOCKS,
+            cost = 50000,
+            expectedReturn = 6000,
+            riskLevel = RiskLevel.MEDIUM
+        ),
+        Investment(
+            name = "Стартап в IT",
+            type = AssetType.BUSINESS,
+            cost = 200000,
+            expectedReturn = 30000,
+            riskLevel = RiskLevel.HIGH
+        ),
+        Investment(
+            name = "Эфириум",
+            type = AssetType.CRYPTO,
+            cost = 100000,
+            expectedReturn = 15000,
+            riskLevel = RiskLevel.HIGH
+        ),
+        Investment(
+            name = "REIT недвижимости",
+            type = AssetType.REAL_ESTATE,
+            cost = 75000,
+            expectedReturn = 7500,
+            riskLevel = RiskLevel.MEDIUM
+        )
+    )
+    
     fun getRandomEvent(): String {
         val events = listOf(
             "Рыночная волатильность! Все ваши акции потеряли 10% стоимости.",
@@ -212,6 +250,7 @@ object GameDataManager {
             "Ремонт автомобиля. Потратьте 25000 рублей.",
             "Наследство от дальнего родственника. Получите 100000 рублей.",
             "Экономический кризис. Все доходы от недвижимости снижены на 20% на следующий ход.",
+            "У вас родился ребёнок! Расходы увеличиваются на 8000₽/мес.",
             "Новые инвестиционные возможности! Выберите дополнительную карточку актива."
         )
         return events.random()
