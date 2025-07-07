@@ -22,7 +22,7 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         
-    - name: � Cache Android SDK
+    - name: 💾 Cache Android SDK
       uses: actions/cache@v3
       with:
         path: $HOME/android-sdk
@@ -30,7 +30,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-android-sdk-
         
-    - name: �� Set up Android SDK
+    - name: 📱 Set up Android SDK
       run: |
         if [ ! -d "$HOME/android-sdk/cmdline-tools/latest" ]; then
           echo "Installing Android SDK..."

@@ -32,7 +32,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-android-sdk-
         
-    - name: � Set up Android SDK
+    - name: 📱 Set up Android SDK
       run: |
         if [ ! -d "$HOME/android-sdk/cmdline-tools/latest" ]; then
           echo "Installing Android SDK..."
@@ -107,7 +107,7 @@ jobs:
         path: ${{ steps.apk_info.outputs.apk_path }}
         retention-days: 30
         
-    - name: � Save APK to releases folder
+    - name: 📁 Save APK to releases folder
       run: |
         # Копируем APK в releases/debug/
         cp "${{ steps.apk_info.outputs.apk_path }}" "releases/debug/${{ steps.apk_info.outputs.new_apk_name }}"
@@ -137,7 +137,7 @@ jobs:
           echo "✅ APK закоммичен в репозиторий"
         fi
         
-    - name: �💬 Comment APK info (on PR)
+    - name: 💬 Comment APK info (on PR)
       if: github.event_name == 'pull_request'
       uses: actions/github-script@v7
       with:
