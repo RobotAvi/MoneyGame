@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Финансовый успех</string>
+    <string name="app_subtitle">Изучай финансовую грамотность\nчерез увлекательную игру</string>
+    <string name="app_logo">Логотип приложения</string>
+    
+    <!-- Main Menu -->
+    <string name="new_game">Новая игра</string>
+    <string name="rules">Правила</string>
+    <string name="exit">Выход</string>
+    
+    <!-- Game Setup -->
+    <string name="select_profession">Выберите профессию</string>
+    <string name="select_dream">Выберите мечту</string>
+    <string name="start_game">Начать игру</string>
+    
+    <!-- Game Interface -->
+    <string name="roll_dice">Бросить кубик</string>
+    <string name="financial_statement">Отчёт</string>
+    <string name="assets">Активы</string>
+    <string name="market">Рынок</string>
+    
+    <!-- Game Messages -->
+    <string name="buy">Купить</string>
+    <string name="sell">Продать</string>
+    <string name="skip">Пропустить</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Отмена</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    
+    <!-- Rules -->
+    <string name="rules_title">Правила игры</string>
+    <string name="rules_text">
+        Добро пожаловать в игру \"Финансовый успех\"!\n\n
+        
+        ЦЕЛЬ ИГРЫ:\n
+        Выйти из \"крысиных бегов\" на \"скоростную дорожку\", создав пассивный доход больше ваших расходов, а затем осуществить свою мечту.\n\n
+        
+        КАК ИГРАТЬ:\n
+        1. Выберите профессию и мечту\n
+        2. Бросайте кубик и двигайтесь по игровому полю\n
+        3. Покупайте активы, которые приносят пассивный доход\n
+        4. Избегайте долгов и ненужных трат\n
+        5. Когда пассивный доход превысит расходы - переходите на скоростную дорожку\n
+        6. Накопите достаточно денег для осуществления мечты\n\n
+        
+        ТИПЫ КЛЕТОК:\n
+        • Зарплата - получите доход\n
+        • Малая сделка - недорогие активы\n
+        • Крупная сделка - дорогие активы\n
+        • Рынок - случайные события\n
+        • Траты - неожиданные расходы\n
+        • Благотворительность - добровольные пожертвования\n\n
+        
+        АКТИВЫ:\n
+        • Недвижимость - стабильный доход\n
+        • Акции - дивиденды\n
+        • Бизнес - прибыль от деятельности\n
+        • Криптовалюта - высокий риск и доходность\n
+        • Облигации - низкий риск, небольшой доход\n\n
+        
+        СОВЕТЫ:\n
+        • Изучайте каждую сделку внимательно\n
+        • Не тратьте все деньги сразу\n
+        • Диверсифицируйте портфель активов\n
+        • Следите за денежным потоком\n
+        • Учитесь на ошибках!
+    </string>
+    
+    <!-- Error Messages -->
+    <string name="error_insufficient_funds">Недостаточно средств</string>
+    <string name="error_invalid_selection">Неверный выбор</string>
+    
+    <!-- Confirmations -->
+    <string name="confirm_sell_asset">Вы уверены, что хотите продать этот актив?</string>
+    <string name="confirm_buy_asset">Купить этот актив?</string>
+</resources>
