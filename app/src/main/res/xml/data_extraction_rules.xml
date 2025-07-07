@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- Include game save data in cloud backup -->
+        <include domain="sharedpref" path="game_saves"/>
+    </cloud-backup>
+    
+    <device-transfer>
+        <!-- Include game save data in device transfer -->
+        <include domain="sharedpref" path="game_saves"/>
+    </device-transfer>
+</data-extraction-rules>
