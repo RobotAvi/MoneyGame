@@ -28,6 +28,16 @@
             android:exported="false"
             android:screenOrientation="portrait" />
             
+        <activity
+            android:name=".ProfessionSelectionActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+            
+        <activity
+            android:name=".RulesActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+            
     </application>
 
 </manifest>
