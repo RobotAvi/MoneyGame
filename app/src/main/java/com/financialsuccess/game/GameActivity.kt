@@ -66,6 +66,25 @@ class GameActivity : AppCompatActivity() {
         val diceValue = gameManager.rollDice()
         binding.tvDiceValue.text = "Кубик: $diceValue"
         
+        // Устанавливаем соответствующее изображение кубика
+        val diceRes = when (diceValue) {
+            1 -> R.drawable.dice_1
+            2 -> R.drawable.dice_2
+            3 -> R.drawable.dice_3
+            4 -> R.drawable.dice_4
+            5 -> R.drawable.dice_5
+            6 -> R.drawable.dice_6
+            else -> R.drawable.dice_1
+        }
+        
+        try {
+            val diceField = binding.javaClass.getDeclaredField("ivDice")
+            val imageView = diceField.get(binding) as? android.widget.ImageView
+            imageView?.setBackgroundResource(diceRes)
+        } catch (e: Exception) {
+            // Игнорируем если поле не найдено (совместимость)
+        }
+        
         currentGameState = gameManager.movePlayer(diceValue)
         updateUI()
         

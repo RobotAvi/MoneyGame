@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/background_color">
+    android:background="@drawable/bg_game_field">
 
     <!-- Финансовая панель -->
     <com.google.android.material.card.MaterialCardView
@@ -104,6 +104,14 @@
             android:orientation="vertical"
             android:padding="16dp"
             android:gravity="center">
+
+            <ImageView
+                android:id="@+id/iv_dice"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/dice_1"
+                android:contentDescription="Кубик" />
 
             <TextView
                 android:id="@+id/tv_dice_value"

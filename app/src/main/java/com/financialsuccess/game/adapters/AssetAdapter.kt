@@ -3,6 +3,7 @@ package com.financialsuccess.game.adapters
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.financialsuccess.game.R
 import com.financialsuccess.game.databinding.ItemAssetBinding
 import com.financialsuccess.game.models.Asset
 import java.text.NumberFormat
@@ -23,6 +24,23 @@ class AssetAdapter(
             binding.tvAssetType.text = getAssetTypeText(asset.type)
             binding.tvAssetValue.text = "Стоимость: ${currencyFormat.format(asset.value)}"
             binding.tvCashFlow.text = "Поток: +${currencyFormat.format(asset.cashFlow)}/мес"
+            
+            // Устанавливаем иконку актива
+            val iconRes = when (asset.type) {
+                com.financialsuccess.game.models.AssetType.REAL_ESTATE -> R.drawable.asset_real_estate
+                com.financialsuccess.game.models.AssetType.STOCKS -> R.drawable.asset_stocks
+                com.financialsuccess.game.models.AssetType.BUSINESS -> R.drawable.asset_business
+                com.financialsuccess.game.models.AssetType.CRYPTO -> R.drawable.asset_crypto
+                com.financialsuccess.game.models.AssetType.BONDS -> R.drawable.asset_bonds
+            }
+            
+            try {
+                val iconField = binding.javaClass.getDeclaredField("ivAssetIcon")
+                val imageView = iconField.get(binding) as? android.widget.ImageView
+                imageView?.setBackgroundResource(iconRes)
+            } catch (e: Exception) {
+                // Игнорируем если поле не найдено (совместимость)
+            }
             
             // Расчет и показ ROI
             val roi = if (asset.downPayment > 0) {

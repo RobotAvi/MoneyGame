@@ -33,10 +33,10 @@ class GameManager {
         val currentState = gameState ?: return null
         val newPosition = (currentState.player.position + steps) % 24
         
-        // Если прошли полный круг, получаем зарплату и списываем расходы
+        // Если прошли полный круг, изменяем наличные на величину денежного потока
         if (newPosition < currentState.player.position) {
-            currentState.player.cash += currentState.player.salary
-            currentState.player.payMonthlyExpenses()
+            val cashFlow = currentState.player.getCashFlow()
+            currentState.player.cash += cashFlow
         }
         
         currentState.player.position = newPosition

@@ -58,7 +58,8 @@ data class Player(
                        liabilities.sumOf { it.payment }
     }
     
-    // Автоматическое списание расходов каждый ход
+    // Автоматическое списание расходов каждый ход (устарела - теперь используется денежный поток)
+    @Deprecated("Используйте getCashFlow() вместо отдельного списания расходов")
     fun payMonthlyExpenses() {
         cash -= totalExpenses
     }
