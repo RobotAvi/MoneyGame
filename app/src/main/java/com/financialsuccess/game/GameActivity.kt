@@ -620,7 +620,7 @@ class GameActivity : AppCompatActivity() {
     private fun updateUI() {
         val player = currentGameState?.player
         // Проверяем смерть игрока
-        if (!player?.isAlive() ?: false) {
+        if (player?.isAlive() == false) {
             showDeathDialog()
             return
         }
