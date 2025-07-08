@@ -49,9 +49,12 @@ jobs:
         # Переименовываем с версией и датой
         for file in *.apk; do
           newname="FinancialSuccess-v${{ steps.version.outputs.version }}-${{ steps.date.outputs.date }}-debug.apk"
-          mv "$file" "$newname"
-          echo "Renamed to: $newname"
-          
+          if [ "$file" != "$newname" ]; then
+            mv "$file" "$newname"
+            echo "Renamed to: $newname"
+          else
+            echo "No rename needed: $file == $newname"
+          fi
           # Создаем симлинк на latest
           ln -sf "$newname" "latest-debug.apk"
         done
