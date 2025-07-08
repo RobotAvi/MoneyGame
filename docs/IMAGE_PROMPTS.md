@@ -249,24 +249,24 @@ Cash flow icon, circular arrows with money symbol, financial flow concept, moder
 - [ ] asset_bonds.png
 
 ### Инвестиции (48x48):
-- [ ] investment_pif.png
-- [ ] investment_yandex.png
-- [ ] investment_startup.png
-- [ ] investment_ethereum.png
-- [ ] investment_reit.png
+- [x] investment_pif.png
+- [x] investment_yandex.png
+- [x] investment_startup.png
+- [x] investment_ethereum.png
+- [x] investment_reit.png
 
 ### Кубики (80x80):
 - [x] dice_1.png
 - [x] dice_2.png
 - [x] dice_3.png
-- [ x dice_4.png
+- [x] dice_4.png
 - [x] dice_5.png
 - [x] dice_6.png
 
 ### Игровые элементы:
-- [ ] player_token.png (32x32)
-- [ ] icon_income.png (24x24)
-- [ ] icon_expenses.png (24x24)
-- [ ] icon_cashflow.png (24x24)
+- [x] player_token.png (32x32)
+- [x] icon_income.png (24x24)
+- [x] icon_expenses.png (24x24)
+- [x] icon_cashflow.png (24x24)
 
 **Всего:** 33 файла
