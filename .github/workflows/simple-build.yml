@@ -1,4 +1,4 @@
-name: Simple APK Build
+name: Build and Release APK
 
 on:
   push:
@@ -27,11 +27,90 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Build APK
+    - name: Build Debug APK
       run: ./gradlew assembleDebug
 
-    - name: Upload APK
+    - name: Get version name
+      id: version
+      run: |
+        VERSION=$(grep -oP 'versionName\s+"\K[^"]+' app/build.gradle)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Version: $VERSION"
+
+    - name: Get current date
+      id: date
+      run: echo "date=$(date +'%Y-%m-%d_%H-%M')" >> $GITHUB_OUTPUT
+
+    - name: Copy APK to releases folder
+      run: |
+        mkdir -p releases/debug
+        cp app/build/outputs/apk/debug/*.apk releases/debug/
+        cd releases/debug
+        # Переименовываем с версией и датой
+        for file in *.apk; do
+          newname="FinancialSuccess-v${{ steps.version.outputs.version }}-${{ steps.date.outputs.date }}-debug.apk"
+          mv "$file" "$newname"
+          echo "Renamed to: $newname"
+          
+          # Создаем симлинк на latest
+          ln -sf "$newname" "latest-debug.apk"
+        done
+        ls -la
+
+    - name: Commit APK files
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add releases/
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "📱 Auto-commit APK v${{ steps.version.outputs.version }} - ${{ steps.date.outputs.date }}
+          
+          🔧 Build info:
+          - Version: ${{ steps.version.outputs.version }}
+          - Date: ${{ steps.date.outputs.date }}
+          - Branch: ${{ github.ref_name }}
+          - Commit: ${{ github.sha }}"
+          git push
+        fi
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ steps.version.outputs.version }}-${{ steps.date.outputs.date }}
+        name: "🎮 Financial Success v${{ steps.version.outputs.version }}"
+        body: |
+          ## 📱 Финансовый успех v${{ steps.version.outputs.version }}
+          
+          ### 🎯 Последние изменения:
+          - 📊 Добавлен журнал финансов с полным логированием
+          - 🎲 Система возраста и смертности игрока
+          - 🚀 Скоростная дорожка с достижением мечты
+          - 💰 21 категория финансовых операций
+          - 📈 Детальная аналитика доходов/расходов
+          
+          ### 🔧 Техническая информация:
+          - **Дата сборки:** ${{ steps.date.outputs.date }}
+          - **Версия:** ${{ steps.version.outputs.version }}
+          - **Commit:** ${{ github.sha }}
+          - **Ветка:** ${{ github.ref_name }}
+          
+          ### 📥 Установка:
+          1. Скачайте APK файл ниже
+          2. Разрешите установку из неизвестных источников
+          3. Установите приложение
+          4. Наслаждайтесь игрой!
+          
+          ---
+          *Автоматически создано GitHub Actions*
+        files: |
+          releases/debug/*.apk
+        draft: false
+        prerelease: false
+
+    - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: FinancialSuccess-APK
-        path: app/build/outputs/apk/debug/*.apk
+        name: FinancialSuccess-v${{ steps.version.outputs.version }}-${{ steps.date.outputs.date }}
+        path: releases/debug/*.apk
