@@ -228,18 +228,18 @@ Cash flow icon, circular arrows with money symbol, financial flow concept, moder
 ### Профессии (56x56):
 - [x] profession_teacher.png
 - [x] profession_engineer.png  
-- [ ] profession_doctor.png
+- [x] profession_doctor.png
 - [x] profession_manager.png
-- [ ] profession_mechanic.png
-- [ ] profession_lawyer.png
+- [x] profession_mechanic.png
+- [x] profession_lawyer.png
 
 ### Мечты (56x56):
-- [ ] dream_yacht.png
-- [ ] dream_restaurant.png
-- [ ] dream_charity.png
-- [ ] dream_island.png
-- [ ] dream_space.png
-- [ ] dream_business.png
+- [x] dream_yacht.png
+- [x] dream_restaurant.png
+- [x] dream_charity.png
+- [x] dream_island.png
+- [x] dream_space.png
+- [x] dream_business.png
 
 ### Активы (48x48):
 - [ ] asset_real_estate.png
