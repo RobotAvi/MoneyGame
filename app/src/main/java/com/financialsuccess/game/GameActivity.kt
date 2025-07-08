@@ -64,6 +64,10 @@ class GameActivity : AppCompatActivity() {
             showFinancialJournal()
         }
         
+        binding.btnHealthStatus.setOnClickListener {
+            showHealthStatus()
+        }
+        
         setupAssetsRecyclerView()
     }
     
@@ -285,6 +289,8 @@ class GameActivity : AppCompatActivity() {
     private fun showMarketEvent() {
         val event = GameDataManager.getRandomEvent()
         
+        // Риски проверяются в processMonthlyOperations, здесь просто показываем событие
+
         // Обработка специальных событий
         when {
             event.contains("ребёнок") -> {
@@ -603,6 +609,13 @@ class GameActivity : AppCompatActivity() {
             }
             
             binding.tvAge.text = "$ageColor Возраст: ${player.age} лет (осталось: ${player.getYearsLeft()})"
+            binding.tvHealthStatus.text = player.getHealthStatus()
+            
+            // Проверяем новые профессиональные риски
+            player.lastRiskActivated?.let { risk ->
+                showMessage("⚠️ ПРОФЕССИОНАЛЬНЫЙ РИСК!\n\n${risk.icon} ${risk.name}\n\n${risk.description}\n\nЭто повлияет на ваши доходы и расходы! Проверьте статус здоровья.")
+                player.lastRiskActivated = null // Сбрасываем флаг
+            }
             
             // Изменяем интерфейс в зависимости от трека
             if (player.isInFastTrack) {
@@ -796,6 +809,120 @@ class GameActivity : AppCompatActivity() {
             .setMessage(analyticsText)
             .setPositiveButton("OK", null)
             .show()
+    }
+    
+    private fun showHealthStatus() {
+        val player = currentGameState?.player ?: return
+        
+        val healthInfo = buildString {
+            append("🏥 СОСТОЯНИЕ ЗДОРОВЬЯ:\n\n")
+            append("📊 Общий статус: ${player.getHealthStatus()}\n\n")
+            
+            if (player.activeRisks.isNotEmpty()) {
+                append("⚠️ АКТИВНЫЕ ПРОФЕССИОНАЛЬНЫЕ РИСКИ:\n")
+                player.activeRisks.forEach { risk ->
+                    append("${risk.icon} ${risk.name}\n")
+                    append("   ${risk.description}\n")
+                    risk.effects.forEach { effect ->
+                        append("   💰 Расходы: +${currencyFormat.format(effect.expenseIncrease)}\n")
+                        if (effect.salaryReduction > 0) {
+                            append("   💼 Снижение зарплаты: -${currencyFormat.format(effect.salaryReduction)}\n")
+                        }
+                        if (effect.recoveryTime > 0) {
+                            append("   ⏰ Восстановление: ${effect.recoveryTime} мес.\n")
+                        }
+                        if (effect.careerEnd) {
+                            append("   🚫 Завершение карьеры\n")
+                        }
+                    }
+                    append("\n")
+                }
+            } else {
+                append("✅ Нет активных профессиональных рисков\n\n")
+            }
+            
+            // Информация о рисках профессии
+            val professionRisks = ProfessionalRisks.getRisksForProfession(player.profession?.name ?: "")
+            if (professionRisks.isNotEmpty()) {
+                append("⚠️ ВОЗМОЖНЫЕ РИСКИ ПРОФЕССИИ:\n")
+                professionRisks.forEach { risk ->
+                    val isActive = player.activeRisks.any { it.name == risk.name }
+                    val ageMatch = player.age in risk.ageRange
+                    
+                    append("${risk.icon} ${risk.name}")
+                    when {
+                        isActive -> append(" (АКТИВЕН)")
+                        !ageMatch -> append(" (возраст ${risk.ageRange.first}-${risk.ageRange.last})")
+                        else -> append(" (риск ${(risk.probability * 100).toInt()}%)")
+                    }
+                    append("\n")
+                }
+            }
+        }
+        
+        AlertDialog.Builder(this)
+            .setTitle("🏥 Здоровье и профессиональные риски")
+            .setMessage(healthInfo)
+            .setPositiveButton("OK", null)
+            .setNeutralButton("💊 Профилактика") { _, _ ->
+                showHealthcareOptions()
+            }
+            .show()
+    }
+    
+    private fun showHealthcareOptions() {
+        val player = currentGameState?.player ?: return
+        
+        val options = arrayOf(
+            "💊 Медосмотр (5,000₽) - Снижает риски на 20%",
+            "🏃 Спорт и диета (3,000₽) - Улучшает общее здоровье", 
+            "🧘 Психотерапия (8,000₽) - Снижает стресс и выгорание",
+            "🏥 Полное обследование (15,000₽) - Выявляет скрытые проблемы"
+        )
+        
+        AlertDialog.Builder(this)
+            .setTitle("💊 Профилактика и лечение")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> buyHealthcare("Медосмотр", 5000, "Профилактический медосмотр")
+                    1 -> buyHealthcare("Спорт и диета", 3000, "Занятия спортом и здоровое питание")
+                    2 -> buyHealthcare("Психотерапия", 8000, "Сеансы психотерапии")
+                    3 -> buyHealthcare("Полное обследование", 15000, "Комплексное медицинское обследование")
+                }
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
+    }
+    
+    private fun buyHealthcare(name: String, cost: Int, description: String) {
+        val player = currentGameState?.player ?: return
+        
+        if (player.cash >= cost) {
+            player.cash -= cost
+            player.logExpense(
+                FinancialCategory.EMERGENCY,
+                cost,
+                "Медицинские услуги: $description"
+            )
+            
+            // Простой эффект - небольшое улучшение здоровья
+            if (player.riskEffects.isNotEmpty()) {
+                // Ускоряем восстановление на 1-2 месяца
+                val effect = player.riskEffects.random()
+                if (effect.recoveryTime > 0) {
+                    val newEffect = effect.copy(recoveryTime = maxOf(0, effect.recoveryTime - 2))
+                    player.riskEffects.remove(effect)
+                    if (newEffect.recoveryTime > 0) {
+                        player.riskEffects.add(newEffect)
+                    }
+                }
+            }
+            
+            updateUI()
+            showMessage("✅ $name оплачен! Состояние здоровья улучшилось.")
+        } else {
+            showMessage("❌ Недостаточно средств для оплаты медицинских услуг")
+        }
     }
     
     private fun showMessage(message: String) {
