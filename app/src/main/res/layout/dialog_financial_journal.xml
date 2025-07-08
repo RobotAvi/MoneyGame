@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Статистика -->
+    <TextView
+        android:id="@+id/tvJournalStats"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/rounded_background"
+        android:padding="12dp"
+        android:text="📊 СТАТИСТИКА:\n\n➕ Общие доходы: 0₽\n➖ Общие расходы: 0₽\n💰 Чистый результат: 0₽"
+        android:textSize="14sp"
+        android:textColor="@color/primary_text_color" />
+
+    <!-- Список записей -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewJournal"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:scrollbars="vertical" />
+
+</LinearLayout>

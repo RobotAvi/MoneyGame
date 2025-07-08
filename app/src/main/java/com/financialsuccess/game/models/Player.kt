@@ -27,7 +27,8 @@ data class Player(
     val dream: Dream? = null,
     val assets: MutableList<Asset> = mutableListOf(),
     val liabilities: MutableList<Liability> = mutableListOf(),
-    val investments: MutableList<Investment> = mutableListOf()
+    val investments: MutableList<Investment> = mutableListOf(),
+    val financialJournal: MutableList<FinancialEntry> = mutableListOf()
 ) : Parcelable {
     
     fun getNetWorth(): Int = 
@@ -128,4 +129,126 @@ data class Player(
     
     // Проверить критический возраст (последние 5 лет)
     fun isInCriticalAge(): Boolean = getYearsLeft() <= 5
+    
+    // === ФИНАНСОВЫЙ ЖУРНАЛ ===
+    
+    // Добавить запись в финансовый журнал
+    fun addFinancialEntry(
+        type: FinancialEntryType,
+        category: FinancialCategory,
+        amount: Int,
+        description: String
+    ) {
+        val entry = FinancialEntry(
+            type = type,
+            category = category,
+            amount = amount,
+            description = description,
+            playerAge = age,
+            monthNumber = monthsPlayed,
+            balanceAfter = cash
+        )
+        financialJournal.add(entry)
+        
+        // Ограничиваем журнал до 500 записей (последние 500 операций)
+        if (financialJournal.size > 500) {
+            financialJournal.removeAt(0)
+        }
+    }
+    
+    // Логировать доход
+    fun logIncome(category: FinancialCategory, amount: Int, description: String) {
+        addFinancialEntry(FinancialEntryType.INCOME, category, amount, description)
+    }
+    
+    // Логировать расход
+    fun logExpense(category: FinancialCategory, amount: Int, description: String) {
+        addFinancialEntry(FinancialEntryType.EXPENSE, category, -amount, description)
+    }
+    
+    // Получить записи за определенный период
+    fun getJournalEntriesForPeriod(startMonth: Int, endMonth: Int): List<FinancialEntry> {
+        return financialJournal.filter { it.monthNumber in startMonth..endMonth }
+    }
+    
+    // Получить последние N записей
+    fun getRecentJournalEntries(count: Int = 50): List<FinancialEntry> {
+        return financialJournal.takeLast(count).reversed() // Новые записи сверху
+    }
+    
+    // Получить общую статистику по категориям
+    fun getCategoryStats(): Map<FinancialCategory, Int> {
+        return financialJournal.groupBy { it.category }
+            .mapValues { (_, entries) -> entries.sumOf { it.amount } }
+    }
+    
+    // Получить доходы/расходы за месяц
+    fun getMonthlyStats(month: Int): Pair<Int, Int> {
+        val monthEntries = financialJournal.filter { it.monthNumber == month }
+        val income = monthEntries.filter { it.type == FinancialEntryType.INCOME }.sumOf { it.amount }
+        val expense = monthEntries.filter { it.type == FinancialEntryType.EXPENSE }.sumOf { kotlin.math.abs(it.amount) }
+        return Pair(income, expense)
+    }
+    
+    // Провести ежемесячные операции с логированием (вызывается при каждом ходе)
+    fun processMonthlyOperations() {
+        // Основные расходы (только если есть деньги)
+        val totalMonthlyExpenses = totalExpenses
+        if (cash >= totalMonthlyExpenses) {
+            // Основные расходы
+            if (foodExpenses > 0) {
+                logExpense(FinancialCategory.FOOD, foodExpenses, "Ежемесячные расходы на еду")
+            }
+            if (transportExpenses > 0) {
+                logExpense(FinancialCategory.TRANSPORT, transportExpenses, "Ежемесячные расходы на транспорт")
+            }
+            if (housingExpenses > 0) {
+                logExpense(FinancialCategory.HOUSING, housingExpenses, "Ежемесячные расходы на жилье")
+            }
+            if (childrenExpenses > 0) {
+                logExpense(FinancialCategory.CHILDREN, childrenExpenses, "Ежемесячные расходы на детей")
+            }
+            if (taxes > 0) {
+                logExpense(FinancialCategory.TAXES, taxes, "Ежемесячные налоги")
+            }
+            if (otherExpenses > 0) {
+                logExpense(FinancialCategory.OTHER_EXPENSES, otherExpenses, "Прочие ежемесячные расходы")
+            }
+            
+            // Выплаты по кредитам
+            liabilities.forEach { liability ->
+                if (liability.payment > 0) {
+                    logExpense(FinancialCategory.LOAN_PAYMENT, liability.payment, "Выплата по кредиту: ${liability.name}")
+                }
+            }
+            
+            // Списываем общие расходы
+            cash -= totalMonthlyExpenses
+        }
+        
+        // Доходы от активов (всегда получаем)
+        assets.forEach { asset ->
+            if (asset.cashFlow > 0) {
+                cash += asset.cashFlow
+                logIncome(FinancialCategory.ASSET_INCOME, asset.cashFlow, "Доход от актива: ${asset.name}")
+            }
+        }
+        
+        // Доходы от инвестиций (всегда получаем)
+        investments.forEach { investment ->
+            if (investment.expectedReturn > 0) {
+                cash += investment.expectedReturn
+                logIncome(FinancialCategory.INVESTMENT_RETURN, investment.expectedReturn, "Доходность инвестиции: ${investment.name}")
+            }
+        }
+        
+        // Дополнительный пассивный доход (всегда получаем)
+        if (passiveIncome > 0) {
+            val additionalPassive = passiveIncome - assets.sumOf { it.cashFlow } - investments.sumOf { it.expectedReturn }
+            if (additionalPassive > 0) {
+                cash += additionalPassive
+                logIncome(FinancialCategory.PASSIVE_INCOME, additionalPassive, "Ежемесячный пассивный доход")
+            }
+        }
+    }
 }

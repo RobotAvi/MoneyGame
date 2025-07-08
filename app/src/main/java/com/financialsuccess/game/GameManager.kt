@@ -24,6 +24,13 @@ class GameManager {
         player.updateTotalIncome()
         player.updateTotalExpenses()
         
+        // Добавляем начальную запись в журнал
+        player.logIncome(
+            FinancialCategory.GAME_START,
+            5000,
+            "Начальный капитал для старта игры"
+        )
+        
         gameState = GameState(player = player)
         return gameState!!
     }
@@ -40,10 +47,17 @@ class GameManager {
         // Каждый ход = один месяц жизни
         currentState.player.passMonth()
         
-        // Если прошли полный круг, изменяем наличные на величину денежного потока
+        // Обрабатываем ежемесячные операции (доходы/расходы) с журналированием
+        currentState.player.processMonthlyOperations()
+        
+        // Если прошли полный круг, получаем дополнительный денежный поток (устарело, теперь в processMonthlyOperations)
         if (newPosition < currentState.player.position) {
-            val cashFlow = currentState.player.getCashFlow()
-            currentState.player.cash += cashFlow
+            // Логируем завершение круга
+            currentState.player.logIncome(
+                FinancialCategory.BONUS,
+                currentState.player.getCashFlow(),
+                "Бонус за завершение полного круга (устарело)"
+            )
         }
         
         currentState.player.position = newPosition

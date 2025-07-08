@@ -149,36 +149,61 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_margin="8dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_financial_statement"
-            android:layout_width="0dp"
+        <!-- Первый ряд кнопок -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="4dp"
-            android:text="@string/financial_statement"
-            style="@style/Widget.Material3.Button.OutlinedButton" />
+            android:orientation="horizontal">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_assets"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            android:text="@string/assets"
-            style="@style/Widget.Material3.Button.OutlinedButton" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_financial_statement"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:text="@string/financial_statement"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_market"
-            android:layout_width="0dp"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_assets"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:text="@string/assets"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_market"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:text="@string/market"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+        </LinearLayout>
+
+        <!-- Второй ряд кнопок -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:text="@string/market"
-            style="@style/Widget.Material3.Button.OutlinedButton" />
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_financial_journal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="📊 Журнал финансов"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

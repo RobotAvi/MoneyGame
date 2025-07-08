@@ -60,6 +60,10 @@ class GameActivity : AppCompatActivity() {
             showMarket()
         }
         
+        binding.btnFinancialJournal.setOnClickListener {
+            showFinancialJournal()
+        }
+        
         setupAssetsRecyclerView()
     }
     
@@ -221,6 +225,12 @@ class GameActivity : AppCompatActivity() {
             .setMessage("${deal.name}\nПервоначальный взнос: ${currencyFormat.format(deal.downPayment)}\nДенежный поток: +${currencyFormat.format(deal.cashFlow)}/мес")
             .setPositiveButton("Купить") { _, _ ->
                 if (gameManager.buyAsset(deal)) {
+                    // Логируем покупку актива
+                    currentGameState?.player?.logExpense(
+                        FinancialCategory.ASSET_PURCHASE,
+                        deal.downPayment,
+                        "Малая сделка: ${deal.name} (денежный поток: +${currencyFormat.format(deal.cashFlow)}/мес)"
+                    )
                     updateUI()
                     showMessage("Актив приобретён!")
                 } else {
@@ -240,6 +250,12 @@ class GameActivity : AppCompatActivity() {
             .setMessage("${deal.name}\nПервоначальный взнос: ${currencyFormat.format(deal.downPayment)}\nДенежный поток: +${currencyFormat.format(deal.cashFlow)}/мес")
             .setPositiveButton("Купить") { _, _ ->
                 if (gameManager.buyAsset(deal)) {
+                    // Логируем покупку актива
+                    currentGameState?.player?.logExpense(
+                        FinancialCategory.ASSET_PURCHASE,
+                        deal.downPayment,
+                        "Крупная сделка: ${deal.name} (денежный поток: +${currencyFormat.format(deal.cashFlow)}/мес)"
+                    )
                     updateUI()
                     showMessage("Актив приобретён!")
                 } else {
@@ -253,6 +269,14 @@ class GameActivity : AppCompatActivity() {
     private fun showPaycheck() {
         currentGameState?.player?.let { player ->
             player.cash += player.salary
+            
+            // Логируем получение зарплаты
+            player.logIncome(
+                FinancialCategory.SALARY,
+                player.salary,
+                "Ежемесячная зарплата по профессии ${player.profession?.name}"
+            )
+            
             updateUI()
             showMessage("Зарплата получена: ${currencyFormat.format(player.salary)}")
         }
@@ -266,25 +290,48 @@ class GameActivity : AppCompatActivity() {
             event.contains("ребёнок") -> {
                 currentGameState?.player?.let { player ->
                     player.addChild()
+                    player.logExpense(
+                        FinancialCategory.CHILDREN,
+                        8000,
+                        "Рождение ребенка - дополнительные расходы 8000₽/мес"
+                    )
                     updateUI()
                 }
             }
             event.contains("Повышение") -> {
                 currentGameState?.player?.let { player ->
-                    player.salary += 5000
+                    val bonus = 5000
+                    player.salary += bonus
                     player.updateTotalIncome()
+                    player.logIncome(
+                        FinancialCategory.BONUS,
+                        bonus,
+                        "Повышение зарплаты на ${currencyFormat.format(bonus)}"
+                    )
                     updateUI()
                 }
             }
             event.contains("Налоговая") -> {
                 currentGameState?.player?.let { player ->
-                    player.cash -= 15000
+                    val taxAmount = 15000
+                    player.cash -= taxAmount
+                    player.logExpense(
+                        FinancialCategory.TAXES,
+                        taxAmount,
+                        "Доплата налогов по результатам проверки"
+                    )
                     updateUI()
                 }
             }
             event.contains("Наследство") -> {
                 currentGameState?.player?.let { player ->
-                    player.cash += 100000
+                    val inheritanceAmount = 100000
+                    player.cash += inheritanceAmount
+                    player.logIncome(
+                        FinancialCategory.INHERITANCE,
+                        inheritanceAmount,
+                        "Неожиданное наследство от дальнего родственника"
+                    )
                     updateUI()
                 }
             }
@@ -297,8 +344,21 @@ class GameActivity : AppCompatActivity() {
         val expenses = listOf(5000, 10000, 15000, 20000, 25000)
         val expense = expenses.random()
         
+        val expenseReasons = listOf(
+            "Поломка автомобиля",
+            "Срочный ремонт бытовой техники", 
+            "Медицинские расходы",
+            "Штраф за нарушение ПДД",
+            "Поломка смартфона"
+        )
+        
         currentGameState?.player?.let { player ->
             player.cash -= expense
+            player.logExpense(
+                FinancialCategory.EMERGENCY,
+                expense,
+                expenseReasons.random()
+            )
             updateUI()
             showMessage("Непредвиденные расходы: ${currencyFormat.format(expense)}")
         }
@@ -312,6 +372,11 @@ class GameActivity : AppCompatActivity() {
                 currentGameState?.player?.let { player ->
                     val donation = (player.totalIncome * 0.1).toInt()
                     player.cash -= donation
+                    player.logExpense(
+                        FinancialCategory.CHARITY,
+                        donation,
+                        "Пожертвование на благотворительность (10% от дохода)"
+                    )
                     updateUI()
                     showMessage("Спасибо за пожертвование: ${currencyFormat.format(donation)}")
                 }
@@ -428,6 +493,12 @@ class GameActivity : AppCompatActivity() {
             .setMessage(message)
             .setPositiveButton("💰 Купить") { _, _ ->
                 if (gameManager.buyAsset(asset)) {
+                    // Логируем покупку актива
+                    currentGameState?.player?.logExpense(
+                        FinancialCategory.ASSET_PURCHASE,
+                        asset.downPayment,
+                        "Покупка на рынке: ${asset.name} (денежный поток: +${currencyFormat.format(asset.cashFlow)}/мес)"
+                    )
                     updateUI()
                     showMessage("✅ Актив приобретён!")
                 } else {
@@ -460,6 +531,14 @@ class GameActivity : AppCompatActivity() {
                     if (player.cash >= investment.cost) {
                         player.cash -= investment.cost
                         player.investments.add(investment)
+                        
+                        // Логируем инвестицию
+                        player.logExpense(
+                            FinancialCategory.INVESTMENT,
+                            investment.cost,
+                            "Инвестиция: ${investment.name} (доходность: +${currencyFormat.format(investment.expectedReturn)}/мес)"
+                        )
+                        
                         updateUI()
                         showMessage("✅ Инвестиция оформлена!")
                     } else {
@@ -558,7 +637,14 @@ class GameActivity : AppCompatActivity() {
                     .setTitle("Продать актив?")
                     .setMessage("Вы уверены, что хотите продать этот актив?")
                     .setPositiveButton("Продать") { _, _ ->
+                        val assetToSell = player.assets[assetIndex]
                         if (gameManager.sellAsset(assetIndex)) {
+                            // Логируем продажу актива
+                            player.logIncome(
+                                FinancialCategory.ASSET_SALE,
+                                assetToSell.value,
+                                "Продажа актива: ${assetToSell.name}"
+                            )
                             updateUI()
                             showMessage("Актив продан!")
                         }
@@ -628,6 +714,87 @@ class GameActivity : AppCompatActivity() {
                 finish() // Возврат к выбору профессии
             }
             .setCancelable(false)
+            .show()
+    }
+    
+    private fun showFinancialJournal() {
+        val player = currentGameState?.player ?: return
+        val entries = player.getRecentJournalEntries(100) // Последние 100 записей
+        
+        if (entries.isEmpty()) {
+            showMessage("📋 Журнал финансов пуст")
+            return
+        }
+        
+        // Создаем диалог с RecyclerView
+        val dialogView = layoutInflater.inflate(R.layout.dialog_financial_journal, null)
+        val recyclerView = dialogView.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerViewJournal)
+        val tvStats = dialogView.findViewById<android.widget.TextView>(R.id.tvJournalStats)
+        
+        // Настраиваем RecyclerView
+        recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+        recyclerView.adapter = com.financialsuccess.game.adapters.FinancialJournalAdapter(entries)
+        
+        // Статистика
+        val totalIncome = entries.filter { it.amount > 0 }.sumOf { it.amount }
+        val totalExpenses = entries.filter { it.amount < 0 }.sumOf { kotlin.math.abs(it.amount) }
+        val balance = totalIncome - totalExpenses
+        
+        tvStats.text = """
+            📊 СТАТИСТИКА (последние ${entries.size} операций):
+            
+            ➕ Общие доходы: ${currencyFormat.format(totalIncome)}
+            ➖ Общие расходы: ${currencyFormat.format(totalExpenses)}
+            💰 Чистый результат: ${currencyFormat.format(balance)}
+            
+            📈 Записей в журнале: ${player.financialJournal.size}
+        """.trimIndent()
+        
+        AlertDialog.Builder(this)
+            .setTitle("📊 Журнал финансов")
+            .setView(dialogView)
+            .setPositiveButton("Закрыть", null)
+            .setNeutralButton("📈 Аналитика") { _, _ ->
+                showJournalAnalytics()
+            }
+            .show()
+    }
+    
+    private fun showJournalAnalytics() {
+        val player = currentGameState?.player ?: return
+        val stats = player.getCategoryStats()
+        
+        val analyticsText = buildString {
+            append("📈 АНАЛИТИКА ПО КАТЕГОРИЯМ:\n\n")
+            
+            append("💰 ДОХОДЫ:\n")
+            stats.filter { it.value > 0 }.toList()
+                .sortedByDescending { it.second }
+                .forEach { (category, amount) ->
+                    append("${category.getIcon()} ${category.getDisplayName()}: ${currencyFormat.format(amount)}\n")
+                }
+            
+            append("\n💸 РАСХОДЫ:\n")
+            stats.filter { it.value < 0 }.toList()
+                .sortedBy { it.second } // От больших расходов к меньшим
+                .forEach { (category, amount) ->
+                    append("${category.getIcon()} ${category.getDisplayName()}: ${currencyFormat.format(kotlin.math.abs(amount))}\n")
+                }
+            
+            val currentMonth = player.monthsPlayed
+            if (currentMonth > 0) {
+                val (monthIncome, monthExpense) = player.getMonthlyStats(currentMonth)
+                append("\n📅 ТЕКУЩИЙ МЕСЯЦ (${currentMonth}):\n")
+                append("➕ Доходы: ${currencyFormat.format(monthIncome)}\n")
+                append("➖ Расходы: ${currencyFormat.format(monthExpense)}\n")
+                append("💰 Баланс: ${currencyFormat.format(monthIncome - monthExpense)}\n")
+            }
+        }
+        
+        AlertDialog.Builder(this)
+            .setTitle("📈 Финансовая аналитика")
+            .setMessage(analyticsText)
+            .setPositiveButton("OK", null)
             .show()
     }
     
