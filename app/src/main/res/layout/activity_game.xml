@@ -99,8 +99,6 @@
                             android:textStyle="bold"
                             android:drawableLeft="@drawable/icon_income"
                             android:drawablePadding="4dp"
-                            android:drawableWidth="20dp"
-                            android:drawableHeight="20dp"
                         />
 
                         <TextView
@@ -118,8 +116,6 @@
                             android:textSize="12sp"
                             android:drawableLeft="@drawable/icon_cashflow"
                             android:drawablePadding="4dp"
-                            android:drawableWidth="20dp"
-                            android:drawableHeight="20dp"
                         />
 
                     </LinearLayout>
@@ -138,8 +134,6 @@
                             android:textSize="12sp"
                             android:drawableLeft="@drawable/icon_expenses"
                             android:drawablePadding="4dp"
-                            android:drawableWidth="20dp"
-                            android:drawableHeight="20dp"
                         />
 
                         <TextView
@@ -152,8 +146,6 @@
                             android:textColor="@color/success_color"
                             android:drawableLeft="@drawable/icon_cashflow"
                             android:drawablePadding="4dp"
-                            android:drawableWidth="20dp"
-                            android:drawableHeight="20dp"
                         />
 
                     </LinearLayout>

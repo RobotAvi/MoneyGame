@@ -1,6 +1,7 @@
 package com.financialsuccess.game.data
 
 import com.financialsuccess.game.models.*
+import com.financialsuccess.game.R
 
 object GameDataManager {
     
@@ -12,7 +13,8 @@ object GameDataManager {
             salary = 45000,
             expenses = 25000,
             taxes = 8000,
-            education = "Высшее педагогическое"
+            education = "Высшее педагогическое",
+            avatarResId = R.drawable.profession_teacher
         ),
         Profession(
             id = "engineer",
@@ -21,7 +23,8 @@ object GameDataManager {
             salary = 80000,
             expenses = 35000,
             taxes = 15000,
-            education = "Высшее техническое"
+            education = "Высшее техническое",
+            avatarResId = R.drawable.profession_engineer
         ),
         Profession(
             id = "doctor",
@@ -30,7 +33,8 @@ object GameDataManager {
             salary = 90000,
             expenses = 40000,
             taxes = 18000,
-            education = "Высшее медицинское"
+            education = "Высшее медицинское",
+            avatarResId = R.drawable.profession_doctor
         ),
         Profession(
             id = "manager",
@@ -39,7 +43,8 @@ object GameDataManager {
             salary = 60000,
             expenses = 30000,
             taxes = 12000,
-            education = "Высшее экономическое"
+            education = "Высшее экономическое",
+            avatarResId = R.drawable.profession_manager
         ),
         Profession(
             id = "mechanic",
@@ -48,7 +53,8 @@ object GameDataManager {
             salary = 50000,
             expenses = 28000,
             taxes = 9000,
-            education = "Среднее специальное"
+            education = "Среднее специальное",
+            avatarResId = R.drawable.profession_mechanic
         ),
         Profession(
             id = "lawyer",
@@ -57,7 +63,8 @@ object GameDataManager {
             salary = 75000,
             expenses = 38000,
             taxes = 14000,
-            education = "Высшее юридическое"
+            education = "Высшее юридическое",
+            avatarResId = R.drawable.profession_lawyer
         )
     )
     

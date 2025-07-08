@@ -989,17 +989,7 @@ class GameActivity : AppCompatActivity() {
     }
     
     private fun updatePlayerAvatar(player: Player) {
-        // Выбираем аватар в зависимости от статуса игры и профессии
-        val avatarResource = when {
-            player.isInFastTrack -> when (player.profession?.name?.contains("Инженер")) {
-                true -> R.drawable.ic_engineer_successful
-                else -> R.drawable.ic_businessman_successful
-            }
-            player.profession?.name?.contains("Доктор") == true -> R.drawable.ic_doctor
-            player.profession?.name?.contains("Инженер") == true -> R.drawable.ic_engineer
-            player.profession?.name?.contains("Учитель") == true -> R.drawable.ic_teacher
-            else -> R.drawable.player_token
-        }
+        val avatarResource = player.profession?.avatarResId ?: R.drawable.player_token
         try {
             binding.ivPlayerAvatar.setImageResource(avatarResource)
         } catch (e: Exception) {
@@ -1068,29 +1058,27 @@ class GameActivity : AppCompatActivity() {
     
     private fun showAgeStatistics() {
         val player = currentGameState?.player ?: return
-        
-        // Получаем статистику по социальной группе (упрощенно - по профессии)
-        val averageLifeExpectancy = when (player.profession?.name) {
-            "Доктор" -> 78
-            "Инженер" -> 75
-            "Учитель" -> 77
-            "Менеджер" -> 73
-            "Программист" -> 74
+        // Получаем статистику по социальной группе (по id профессии)
+        val averageLifeExpectancy = when (player.profession?.id) {
+            "doctor" -> 78
+            "engineer" -> 75
+            "teacher" -> 77
+            "manager" -> 73
+            "mechanic" -> 72
+            "lawyer" -> 76
             else -> 75
         }
-        
-        val socialGroup = when (player.profession?.name) {
-            "Доктор" -> "медицинских работников"
-            "Инженер" -> "инженеров"
-            "Учитель" -> "работников образования"
-            "Менеджер" -> "менеджеров"
-            "Программист" -> "IT-специалистов"
+        val socialGroup = when (player.profession?.id) {
+            "doctor" -> "медицинских работников"
+            "engineer" -> "инженеров"
+            "teacher" -> "работников образования"
+            "manager" -> "менеджеров"
+            "mechanic" -> "механиков"
+            "lawyer" -> "юристов"
             else -> "людей с вашей профессией"
         }
-        
         val remainingYears = maxOf(0, averageLifeExpectancy - player.age)
         val lifeProgress = (player.age.toFloat() / averageLifeExpectancy.toFloat() * 100).toInt()
-        
         val message = """
             📊 СТАТИСТИКА ПО ВОЗРАСТУ
             
@@ -1104,7 +1092,6 @@ class GameActivity : AppCompatActivity() {
             
             ${if (player.passiveIncome > player.totalExpenses) "✅ Ваша финансовая свобода увеличивает качество жизни!" else "⚠️ Финансовый стресс может влиять на здоровье и продолжительность жизни."}
         """.trimIndent()
-        
         AlertDialog.Builder(this)
             .setTitle("📈 Статистика продолжительности жизни")
             .setMessage(message)

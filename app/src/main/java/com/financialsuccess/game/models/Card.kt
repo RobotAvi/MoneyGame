@@ -31,7 +31,8 @@ data class Profession(
     val salary: Int,
     val expenses: Int,
     val taxes: Int,
-    val education: String
+    val education: String,
+    val avatarResId: Int = 0 // ресурс аватара профессии
 ) : Card(id, name, description, CardType.PROFESSION)
 
 // Карточка мечты
