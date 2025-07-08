@@ -42,31 +42,23 @@ class GameManager {
     
     fun movePlayer(steps: Int): GameState? {
         val currentState = gameState ?: return null
-        val newPosition = (currentState.player.position + steps) % 24
-        
-        // Каждый ход = один месяц жизни
-        currentState.player.passMonth()
-        
-        // Обрабатываем ежемесячные операции (доходы/расходы) с журналированием
-        currentState.player.processMonthlyOperations()
-        
-        // Если прошли полный круг, получаем дополнительный денежный поток (устарело, теперь в processMonthlyOperations)
-        if (newPosition < currentState.player.position) {
-            // Логируем завершение круга
-            currentState.player.logIncome(
-                FinancialCategory.BONUS,
-                currentState.player.getCashFlow(),
-                "Бонус за завершение полного круга (устарело)"
-            )
+        val oldPosition = currentState.player.position
+        val newPosition = (oldPosition + steps) % 24
+
+        // Если прошли полный круг (вернулись на старт)
+        val passedStart = (oldPosition + steps) >= 24
+        if (passedStart) {
+            currentState.player.passMonth()
+            currentState.player.processMonthlyOperations()
         }
-        
+
         currentState.player.position = newPosition
-        
+
         // Проверяем, может ли игрок выйти из крысиных бегов
         if (!currentState.player.isInFastTrack && currentState.player.canEscapeRatRace()) {
             currentState.player.isInFastTrack = true
         }
-        
+
         return currentState
     }
     
