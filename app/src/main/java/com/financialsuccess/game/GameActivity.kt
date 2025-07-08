@@ -658,8 +658,7 @@ class GameActivity : AppCompatActivity() {
         
         // Изменяем интерфейс в зависимости от трека
         if (player.isInFastTrack) {
-            binding.tvPosition.text = "🎯 СКОРОСТНАЯ ДОРОЖКА"
-            binding.tvDiceValue.text = "Цель: ${player.dream?.name ?: "неизвестная мечта"} (${currencyFormat.format(player.dream?.cost ?: 0)})"
+            binding.tvTrackInfo.text = "🏎️ Мчитесь к мечте на роскошном автомобиле!"
             
             // Меняем фон на скоростную дорожку
             try {
@@ -671,8 +670,7 @@ class GameActivity : AppCompatActivity() {
             // Изменяем текст кнопки
             binding.btnRollDice.text = "🎲 Бросить на мечту"
         } else {
-            binding.tvPosition.text = "Позиция: ${player.position}"
-            binding.btnRollDice.text = "🎲 Бросить кубик"
+            binding.tvTrackInfo.text = "🏃 Бегите от зарплаты до зарплаты в крысиных бегах"
             
             // Возвращаем обычный фон
             try {
