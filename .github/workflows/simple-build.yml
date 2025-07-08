@@ -50,7 +50,7 @@ jobs:
         for file in *.apk; do
           newname="FinancialSuccess-v${{ steps.version.outputs.version }}-${{ steps.date.outputs.date }}-debug.apk"
           if [ "$file" != "$newname" ]; then
-            mv "$file" "$newname"
+            mv -f "$file" "$newname"
             echo "Renamed to: $newname"
           else
             echo "No rename needed: $file == $newname"
