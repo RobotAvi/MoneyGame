@@ -45,22 +45,15 @@ jobs:
       run: |
         mkdir -p releases/debug
         ls -la app/build/outputs/apk/debug/
-        cp app/build/outputs/apk/debug/*.apk releases/debug/
+        cp app/build/outputs/apk/debug/app-debug.apk releases/debug/
         cd releases/debug
         ls -la
         rm latest-debug.apk
         # Переименовываем с версией и датой
-        for file in *.apk; do
-          newname="FinancialSuccess-v${{ steps.version.outputs.version }}-${{ steps.date.outputs.date }}-debug.apk"
-          if [ "$file" != "$newname" ]; then
-            mv -f "$file" "$newname"
-            echo "Renamed to: $newname"
-          else
-            echo "No rename needed: $file == $newname"
-          fi
-          # Создаем симлинк на latest
-          ln -sf "$newname" "latest-debug.apk"
-        done
+        newname="FinancialSuccess-v${{ steps.version.outputs.version }}-${{ steps.date.outputs.date }}-debug.apk"
+        mv -f app-debug.apk "$newname"
+        echo "app-debug.apk renamed to: $newname"
+        ln -sf "$newname" "latest-debug.apk"
         ls -la
 
     - name: Commit APK files
