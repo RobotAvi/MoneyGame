@@ -256,12 +256,12 @@ Cash flow icon, circular arrows with money symbol, financial flow concept, moder
 - [ ] investment_reit.png
 
 ### Кубики (80x80):
-- [ ] dice_1.png
-- [ ] dice_2.png
-- [ ] dice_3.png
-- [ ] dice_4.png
-- [ ] dice_5.png
-- [ ] dice_6.png
+- [x] dice_1.png
+- [x] dice_2.png
+- [x] dice_3.png
+- [ x dice_4.png
+- [x] dice_5.png
+- [x] dice_6.png
 
 ### Игровые элементы:
 - [ ] player_token.png (32x32)
