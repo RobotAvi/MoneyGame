@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="32dp"
+    android:height="32dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+    
+    <!-- Кузов роскошного автомобиля -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M4,18h24v6H4z"/>
+    
+    <!-- Спортивная верхняя часть -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M8,10h16l-2,8H10z"/>
+    
+    <!-- Колеса -->
+    <path
+        android:fillColor="#333333"
+        android:pathData="M8,22m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0"/>
+    
+    <path
+        android:fillColor="#333333"
+        android:pathData="M24,22m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0"/>
+    
+    <!-- Диски -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M8,22m-1,0a1,1 0,1 1,2 0a1,1 0,1 1,-2 0"/>
+    
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M24,22m-1,0a1,1 0,1 1,2 0a1,1 0,1 1,-2 0"/>
+    
+    <!-- Стекла -->
+    <path
+        android:fillColor="#87CEEB"
+        android:pathData="M10,12h12l-1,5H11z"/>
+    
+    <!-- Символ роскоши -->
+    <path
+        android:fillColor="#FF6B35"
+        android:pathData="M16,8m-1,0a1,1 0,1 1,2 0a1,1 0,1 1,-2 0"/>
+</vector>

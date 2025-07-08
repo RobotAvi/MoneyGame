@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+    
+    <!-- Золотой фон успеха -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M32,32m-30,0a30,30 0,1 1,60 0a30,30 0,1 1,-60 0"/>
+    
+    <!-- Голова -->
+    <path
+        android:fillColor="#FFD8A6"
+        android:pathData="M32,20m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0"/>
+    
+    <!-- Золотая каска -->
+    <path
+        android:fillColor="#FFC107"
+        android:pathData="M24,15h16v6H24z"/>
+    
+    <!-- Дорогой костюм -->
+    <path
+        android:fillColor="#1A237E"
+        android:pathData="M20,50c0,-6 5.5,-12 12,-12s12,6 12,12v4H20v-4z"/>
+    
+    <!-- Золотые инструменты -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M26,42h2v6h-2z"/>
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M29,42h2v6h-2z"/>
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M32,42h2v6h-2z"/>
+    
+    <!-- Звезда успеха на каске -->
+    <path
+        android:fillColor="#00BCD4"
+        android:pathData="M32,16l1,2h2l-1.5,1.5l0.5,2l-2,-1l-2,1l0.5,-2L29,18h2z"/>
+</vector>
