@@ -28,7 +28,10 @@ data class Player(
     val assets: MutableList<Asset> = mutableListOf(),
     val liabilities: MutableList<Liability> = mutableListOf(),
     val investments: MutableList<Investment> = mutableListOf(),
-    val financialJournal: MutableList<FinancialEntry> = mutableListOf()
+    val financialJournal: MutableList<FinancialEntry> = mutableListOf(),
+    val activeRisks: MutableList<ProfessionalRisk> = mutableListOf(),
+    val riskEffects: MutableList<RiskEffect> = mutableListOf(),
+    var lastRiskActivated: ProfessionalRisk? = null
 ) : Parcelable {
     
     fun getNetWorth(): Int = 
@@ -192,6 +195,8 @@ data class Player(
     
     // Провести ежемесячные операции с логированием (вызывается при каждом ходе)
     fun processMonthlyOperations() {
+        // Проверяем профессиональные риски
+        checkProfessionalRisks()
         // Основные расходы (только если есть деньги)
         val totalMonthlyExpenses = totalExpenses
         if (cash >= totalMonthlyExpenses) {
@@ -248,7 +253,134 @@ data class Player(
             if (additionalPassive > 0) {
                 cash += additionalPassive
                 logIncome(FinancialCategory.PASSIVE_INCOME, additionalPassive, "Ежемесячный пассивный доход")
-            }
-        }
-    }
+                         }
+         }
+     }
+     
+     // === ПРОФЕССИОНАЛЬНЫЕ РИСКИ ===
+     
+     // Проверить профессиональные риски (вызывается каждый ход)
+     fun checkProfessionalRisks() {
+         val profession = this.profession ?: return
+         val availableRisks = ProfessionalRisks.getRisksForProfession(profession.name)
+         
+         for (risk in availableRisks) {
+             // Проверяем возрастной диапазон
+             if (age !in risk.ageRange) continue
+             
+             // Проверяем, не активен ли уже этот риск
+             if (activeRisks.any { it.name == risk.name }) continue
+             
+             // Проверяем вероятность наступления
+             if (kotlin.random.Random.nextDouble() <= risk.probability / 100.0) { // Конвертируем в правильную вероятность
+                 // Риск реализовался!
+                 activateRisk(risk)
+             }
+         }
+         
+         // Обновляем активные эффекты рисков
+         updateRiskEffects()
+     }
+     
+     // Активировать профессиональный риск
+     private fun activateRisk(risk: ProfessionalRisk) {
+         activeRisks.add(risk)
+         riskEffects.addAll(risk.effects)
+         
+         // Сохраняем информацию о новом риске для уведомления
+         lastRiskActivated = risk
+         
+         // Логируем событие
+         logExpense(
+             FinancialCategory.EMERGENCY,
+             risk.effects.sumOf { it.expenseIncrease },
+             "Профессиональный риск: ${risk.name} - ${risk.description}"
+         )
+         
+         // Применяем немедленные эффекты
+         risk.effects.forEach { effect ->
+             // Увеличиваем расходы
+             if (effect.expenseIncrease > 0) {
+                 otherExpenses += effect.expenseIncrease
+             }
+             
+             // Уменьшаем зарплату
+             if (effect.salaryReduction > 0) {
+                 salary = maxOf(0, salary - effect.salaryReduction)
+             }
+             
+             // Завершение карьеры
+             if (effect.careerEnd) {
+                 salary = 0
+                 // Можно добавить принудительную смену профессии
+             }
+         }
+         
+         updateTotalIncome()
+         updateTotalExpenses()
+     }
+     
+     // Обновить эффекты рисков (восстановление)
+     private fun updateRiskEffects() {
+         val recoveredEffects = mutableListOf<RiskEffect>()
+         
+         riskEffects.forEach { effect ->
+             if (effect.recoveryTime > 0) {
+                 // Уменьшаем время восстановления
+                 val newEffect = effect.copy(recoveryTime = effect.recoveryTime - 1)
+                 
+                 if (newEffect.recoveryTime <= 0) {
+                     // Восстановились!
+                     recoveredEffects.add(effect)
+                     
+                     // Восстанавливаем зарплату (частично)
+                     if (effect.salaryReduction > 0) {
+                         salary += (effect.salaryReduction * 0.8).toInt() // 80% восстановление
+                     }
+                     
+                     // Уменьшаем расходы на лечение
+                     if (effect.expenseIncrease > 0) {
+                         otherExpenses = maxOf(0, otherExpenses - (effect.expenseIncrease * 0.5).toInt())
+                     }
+                     
+                     logIncome(
+                         FinancialCategory.BONUS,
+                         (effect.salaryReduction * 0.8).toInt(),
+                         "Восстановление после ${effect.description}"
+                     )
+                 }
+             }
+         }
+         
+         // Удаляем восстановленные эффекты
+         riskEffects.removeAll(recoveredEffects)
+         
+         if (recoveredEffects.isNotEmpty()) {
+             updateTotalIncome()
+             updateTotalExpenses()
+         }
+     }
+     
+     // Получить активные профессиональные риски
+     fun getActiveRisksDescription(): String {
+         return if (activeRisks.isEmpty()) {
+             "Нет активных профессиональных рисков"
+         } else {
+             activeRisks.joinToString("\n") { "${it.icon} ${it.name}: ${it.description}" }
+         }
+     }
+     
+     // Проверить серьезность состояния здоровья
+     fun getHealthStatus(): String {
+         val severeRisks = riskEffects.count { it.severity == RiskSeverity.SEVERE }
+         val moderateRisks = riskEffects.count { it.severity == RiskSeverity.MODERATE }
+         val mildRisks = riskEffects.count { it.severity == RiskSeverity.MILD }
+         
+         return when {
+             severeRisks > 0 -> "🔴 Серьезные проблемы со здоровьем"
+             moderateRisks > 1 -> "🟡 Умеренные проблемы со здоровьем"
+             moderateRisks > 0 || mildRisks > 2 -> "🟡 Легкие проблемы со здоровьем"
+             else -> "🟢 Здоров"
+         }
+     }
 }
