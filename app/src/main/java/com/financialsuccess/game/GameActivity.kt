@@ -2,6 +2,8 @@ package com.financialsuccess.game
 
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -991,6 +993,7 @@ class GameActivity : AppCompatActivity() {
     
     private fun updateGameTrackVisualization(player: Player) {
         // Обновляем позицию игрока на треке
+        // Fix: Added proper imports for LinearLayout and ImageView
         val trackLayout = binding.llGameTrack.getChildAt(1) as LinearLayout
         val playerIcon = trackLayout.findViewById<ImageView>(R.id.iv_player_on_track)
         

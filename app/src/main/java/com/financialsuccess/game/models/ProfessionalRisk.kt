@@ -2,13 +2,14 @@ package com.financialsuccess.game.models
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
 
 @Parcelize
 data class ProfessionalRisk(
     val name: String,
     val description: String,
     val probability: Double, // Вероятность в процентах (0.0 - 1.0)
-    val ageRange: IntRange, // Возрастной диапазон риска
+    val ageRange: @RawValue IntRange, // Возрастной диапазон риска
     val effects: List<RiskEffect>,
     val icon: String
 ) : Parcelable
