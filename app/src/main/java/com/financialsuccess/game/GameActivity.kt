@@ -622,9 +622,12 @@ class GameActivity : AppCompatActivity() {
             binding.tvAge.text = "$ageColor Возраст: ${player.age} лет (осталось: ${player.getYearsLeft()})"
             binding.tvHealthStatus.text = player.getHealthStatus()
             
+<<<<<<< HEAD
             // Обновляем визуализацию игрового поля
             updateGameTrackVisualization(player)
             
+=======
+>>>>>>> branch1
             // Проверяем новые профессиональные риски
             player.lastRiskActivated?.let { risk ->
                 showMessage("⚠️ ПРОФЕССИОНАЛЬНЫЙ РИСК!\n\n${risk.icon} ${risk.name}\n\n${risk.description}\n\nЭто повлияет на ваши доходы и расходы! Проверьте статус здоровья.")
