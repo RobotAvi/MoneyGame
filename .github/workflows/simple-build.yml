@@ -44,6 +44,7 @@ jobs:
     - name: Copy APK to releases folder
       run: |
         mkdir -p releases/debug
+        ls -la app/build/outputs/apk/debug/
         cp app/build/outputs/apk/debug/*.apk releases/debug/
         cd releases/debug
         # Переименовываем с версией и датой
