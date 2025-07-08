@@ -26,12 +26,18 @@ class AssetAdapter(
             binding.tvCashFlow.text = "Поток: +${currencyFormat.format(asset.cashFlow)}/мес"
             
             // Устанавливаем иконку актива
-            val iconRes = when (asset.type) {
-                com.financialsuccess.game.models.AssetType.REAL_ESTATE -> R.drawable.asset_real_estate
-                com.financialsuccess.game.models.AssetType.STOCKS -> R.drawable.asset_stocks
-                com.financialsuccess.game.models.AssetType.BUSINESS -> R.drawable.asset_business
-                com.financialsuccess.game.models.AssetType.CRYPTO -> R.drawable.asset_crypto
-                com.financialsuccess.game.models.AssetType.BONDS -> R.drawable.asset_bonds
+            val iconRes = when {
+                asset.name.contains("ПИФ", true) -> R.drawable.investment_pif
+                asset.name.contains("Яндекс", true) -> R.drawable.investment_yandex
+                asset.name.contains("Стартап", true) -> R.drawable.investment_startup
+                asset.name.contains("Ethereum", true) || asset.name.contains("ETH", true) -> R.drawable.investment_ethereum
+                asset.name.contains("REIT", true) -> R.drawable.investment_reit
+                asset.type == com.financialsuccess.game.models.AssetType.REAL_ESTATE -> R.drawable.asset_real_estate
+                asset.type == com.financialsuccess.game.models.AssetType.STOCKS -> R.drawable.asset_stocks
+                asset.type == com.financialsuccess.game.models.AssetType.BUSINESS -> R.drawable.asset_business
+                asset.type == com.financialsuccess.game.models.AssetType.CRYPTO -> R.drawable.asset_crypto
+                asset.type == com.financialsuccess.game.models.AssetType.BONDS -> R.drawable.asset_bonds
+                else -> R.drawable.asset_real_estate
             }
             
             try {

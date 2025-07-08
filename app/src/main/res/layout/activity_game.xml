@@ -38,7 +38,7 @@
                         android:layout_width="64dp"
                         android:layout_height="64dp"
                         android:layout_marginEnd="16dp"
-                        android:src="@drawable/ic_player_default"
+                        android:src="@drawable/player_token"
                         android:contentDescription="Аватар игрока" />
 
                     <LinearLayout
@@ -96,7 +96,10 @@
                             android:layout_height="wrap_content"
                             android:text="Наличные: 0 ₽"
                             android:textSize="14sp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            android:drawableLeft="@drawable/icon_income"
+                            android:drawablePadding="4dp"
+                        />
 
                         <TextView
                             android:id="@+id/tv_salary"
@@ -110,7 +113,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Пассивный доход: 0 ₽"
-                            android:textSize="12sp" />
+                            android:textSize="12sp"
+                            android:drawableLeft="@drawable/icon_cashflow"
+                            android:drawablePadding="4dp"
+                        />
 
                     </LinearLayout>
 
@@ -125,7 +131,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Расходы: 0 ₽"
-                            android:textSize="12sp" />
+                            android:textSize="12sp"
+                            android:drawableLeft="@drawable/icon_expenses"
+                            android:drawablePadding="4dp"
+                        />
 
                         <TextView
                             android:id="@+id/tv_cash_flow"
@@ -134,7 +143,10 @@
                             android:text="Денежный поток: 0 ₽"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/success_color" />
+                            android:textColor="@color/success_color"
+                            android:drawableLeft="@drawable/icon_cashflow"
+                            android:drawablePadding="4dp"
+                        />
 
                     </LinearLayout>
 
@@ -297,93 +309,81 @@
         <!-- Кнопки действий -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:layout_height="64dp"
+            android:orientation="horizontal"
             android:layout_margin="8dp">
 
-            <!-- Первый ряд кнопок -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_financial_statement"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:text="📈"
+                android:textSize="28sp"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:backgroundTint="#F9F9F9"
+                android:strokeColor="@color/primary_color"
+                app:strokeWidth="1dp"
+                app:cornerRadius="12dp" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_financial_statement"
-                    android:layout_width="0dp"
-                    android:layout_height="64dp"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="4dp"
-                    android:text="📈"
-                    android:textSize="28sp"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:backgroundTint="#F9F9F9"
-                    android:strokeColor="@color/primary_color"
-                    app:strokeWidth="1dp"
-                    app:cornerRadius="12dp" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_assets"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:text="💼"
+                android:textSize="28sp"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:backgroundTint="#F9F9F9"
+                android:strokeColor="@color/primary_color"
+                app:strokeWidth="1dp"
+                app:cornerRadius="12dp" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_assets"
-                    android:layout_width="0dp"
-                    android:layout_height="64dp"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginEnd="4dp"
-                    android:text="💼"
-                    android:textSize="28sp"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:backgroundTint="#F9F9F9"
-                    android:strokeColor="@color/primary_color"
-                    app:strokeWidth="1dp"
-                    app:cornerRadius="12dp" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_market"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:text="🏛️"
+                android:textSize="28sp"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:backgroundTint="#F9F9F9"
+                android:strokeColor="@color/primary_color"
+                app:strokeWidth="1dp"
+                app:cornerRadius="12dp" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_market"
-                    android:layout_width="0dp"
-                    android:layout_height="64dp"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
-                    android:text="🏛️"
-                    android:textSize="28sp"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:backgroundTint="#F9F9F9"
-                    android:strokeColor="@color/primary_color"
-                    app:strokeWidth="1dp"
-                    app:cornerRadius="12dp" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_financial_journal"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:text="📜"
+                android:textSize="28sp"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:backgroundTint="#F9F9F9"
+                android:strokeColor="@color/primary_color"
+                app:strokeWidth="1dp"
+                app:cornerRadius="12dp" />
 
-            </LinearLayout>
-
-            <!-- Второй ряд кнопок -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="8dp">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_financial_journal"
-                    android:layout_width="0dp"
-                    android:layout_height="64dp"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="4dp"
-                    android:text="📜"
-                    android:textSize="28sp"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    app:strokeWidth="1dp"
-                    app:cornerRadius="12dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_health_status"
-                    android:layout_width="0dp"
-                    android:layout_height="64dp"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
-                    android:text="💖"
-                    android:textSize="28sp"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    app:strokeWidth="1dp"
-                    app:cornerRadius="12dp" />
-
-            </LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_health_status"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="💖"
+                android:textSize="28sp"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:backgroundTint="#F9F9F9"
+                android:strokeColor="@color/primary_color"
+                app:strokeWidth="1dp"
+                app:cornerRadius="12dp" />
 
         </LinearLayout>
 

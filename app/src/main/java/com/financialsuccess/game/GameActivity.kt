@@ -998,14 +998,12 @@ class GameActivity : AppCompatActivity() {
             player.profession?.name?.contains("Доктор") == true -> R.drawable.ic_doctor
             player.profession?.name?.contains("Инженер") == true -> R.drawable.ic_engineer
             player.profession?.name?.contains("Учитель") == true -> R.drawable.ic_teacher
-            else -> R.drawable.ic_player_default
+            else -> R.drawable.player_token
         }
-        
         try {
             binding.ivPlayerAvatar.setImageResource(avatarResource)
         } catch (e: Exception) {
-            // Если ресурс не найден, используем дефолтный
-            binding.ivPlayerAvatar.setImageResource(R.drawable.ic_player_default)
+            binding.ivPlayerAvatar.setImageResource(R.drawable.player_token)
         }
     }
     
@@ -1039,14 +1037,12 @@ class GameActivity : AppCompatActivity() {
                 player.passiveIncome > 50000 -> R.drawable.ic_car          // Обычный автомобиль
                 else -> R.drawable.ic_motorcycle                           // Мотоцикл
             }
-            else -> R.drawable.ic_runner  // Бегун в крысиных бегах
+            else -> R.drawable.player_token  // Токен игрока по умолчанию
         }
-        
         try {
             playerIcon.setImageResource(trackIconResource)
         } catch (e: Exception) {
-            // Если ресурс не найден, используем дефолтный
-            playerIcon.setImageResource(R.drawable.ic_runner)
+            playerIcon.setImageResource(R.drawable.player_token)
         }
         
         // Обновляем информацию о треке
