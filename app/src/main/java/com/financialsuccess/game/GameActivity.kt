@@ -618,110 +618,98 @@ class GameActivity : AppCompatActivity() {
     }
     
     private fun updateUI() {
-        currentGameState?.player?.let { player ->
-            // Проверяем смерть игрока
-            if (!player.isAlive()) {
-                showDeathDialog()
-                return
-            }
-            
-            // Обновляем дату и статус игры
-            updateCurrentDate(player)
-            updateGameStatus(player)
-            updatePlayerAvatar(player)
-            
-            // Обновляем финансовую информацию
-            binding.tvCash.text = "Наличные: ${currencyFormat.format(player.cash)}"
-            binding.tvSalary.text = "Зарплата: ${currencyFormat.format(player.salary)}"
-            binding.tvPassiveIncome.text = "Пассивный доход: ${currencyFormat.format(player.passiveIncome)}"
-            binding.tvExpenses.text = "Расходы: ${currencyFormat.format(player.totalExpenses)}"
-            binding.tvCashFlow.text = "Денежный поток: ${currencyFormat.format(player.getCashFlow())}"
-            
-            // Отображаем возраст с цветовой индикацией
-            val ageColor = when {
-                player.isInCriticalAge() -> "🔴" // Критический возраст
-                player.getYearsLeft() <= 10 -> "🟡" // Предупреждение
-                else -> "🟢" // Нормальный возраст
-            }
-            
-            binding.tvAge.text = "$ageColor Возраст: ${player.age} лет (осталось: ${player.getYearsLeft()})"
-            binding.tvHealthStatus.text = player.getHealthStatus()
-            
-            // Обновляем визуализацию игрового поля
-            updateGameTrackVisualization(player)
-            
-            // Проверяем новые профессиональные риски
-            player.lastRiskActivated?.let { risk ->
-                showMessage("⚠️ ПРОФЕССИОНАЛЬНЫЙ РИСК!\n\n${risk.icon} ${risk.name}\n\n${risk.description}\n\nЭто повлияет на ваши доходы и расходы! Проверьте статус здоровья.")
-                player.lastRiskActivated = null // Сбрасываем флаг
-            }
-            
-            // Изменяем интерфейс в зависимости от трека
-            if (player.isInFastTrack) {
-                binding.tvPosition.text = "🎯 СКОРОСТНАЯ ДОРОЖКА"
-                binding.tvDiceValue.text = "Цель: ${player.dream?.name ?: "неизвестная мечта"} (${currencyFormat.format(player.dream?.cost ?: 0)})"
-                
-                // Меняем фон на скоростную дорожку
-                try {
-                    binding.root.setBackgroundResource(R.drawable.bg_main_screen)
-                } catch (e: Exception) {
-                    // Игнорируем если фон не найден
-                }
-                
-                // Изменяем текст кнопки
-                binding.btnRollDice.text = "🎲 Бросить на мечту"
-            } else {
-                binding.tvPosition.text = "Позиция: ${player.position}"
-                binding.btnRollDice.text = "🎲 Бросить кубик"
-                
-                // Возвращаем обычный фон
-                try {
-                    binding.root.setBackgroundResource(R.drawable.bg_game_field)
-                } catch (e: Exception) {
-                    // Игнорируем если фон не найден
-                }
-            }
-            
-            // Обновляем список активов
-            val adapter = AssetAdapter(player.assets) { assetIndex ->
-                // Обработка продажи актива
-                AlertDialog.Builder(this)
-                    .setTitle("Продать актив?")
-                    .setMessage("Вы уверены, что хотите продать этот актив?")
-                    .setPositiveButton("Продать") { _, _ ->
-                        val assetToSell = player.assets[assetIndex]
-                        if (gameManager.sellAsset(assetIndex)) {
-                            // Логируем продажу актива
-                            player.logIncome(
-                                FinancialCategory.ASSET_SALE,
-                                assetToSell.value,
-                                "Продажа актива: ${assetToSell.name}"
-                            )
-                            updateUI()
-                            showMessage("Актив продан!")
-                        }
-                    }
-                    .setNegativeButton("Отмена", null)
-                    .show()
-            }
-            binding.recyclerViewAssets.adapter = adapter
-            
-            // Проверяем, может ли игрок выйти из крысиных бегов
-            if (player.canEscapeRatRace() && !player.isInFastTrack) {
-                showEscapeRatRaceDialog()
-            }
-        }
-        // Обновляем дату с учетом дня (позиции)
         val player = currentGameState?.player
-        val monthYear = player?.currentMonthYear ?: "Январь 2024"
-        val day = (player?.position ?: 0) + 1
-        binding.tvCurrentDate.text = "$day $monthYear"
-        if (lastDiceValue == null) {
-            binding.tvDiceValue.text = "Брось кубик!"
-        } else {
-            binding.tvDiceValue.text = "Выпало ${lastDiceValue}. Бросай еще!"
+        // Проверяем смерть игрока
+        if (!player?.isAlive() ?: false) {
+            showDeathDialog()
+            return
         }
+        
+        // Обновляем дату и статус игры
+        updateCurrentDate(player ?: return)
+        updateGameStatus(player ?: return)
         updatePlayerAvatar(player ?: return)
+        
+        // Обновляем финансовую информацию
+        binding.tvCash.text = "Наличные: ${currencyFormat.format(player.cash)}"
+        binding.tvSalary.text = "Зарплата: ${currencyFormat.format(player.salary)}"
+        binding.tvPassiveIncome.text = "Пассивный доход: ${currencyFormat.format(player.passiveIncome)}"
+        binding.tvExpenses.text = "Расходы: ${currencyFormat.format(player.totalExpenses)}"
+        binding.tvCashFlow.text = "Денежный поток: ${currencyFormat.format(player.getCashFlow())}"
+        
+        // Отображаем возраст с цветовой индикацией
+        val ageColor = when {
+            player.isInCriticalAge() -> "🔴" // Критический возраст
+            player.getYearsLeft() <= 10 -> "🟡" // Предупреждение
+            else -> "🟢" // Нормальный возраст
+        }
+        
+        binding.tvAge.text = "$ageColor Возраст: ${player.age} лет (осталось: ${player.getYearsLeft()})"
+        binding.tvHealthStatus.text = player.getHealthStatus()
+        
+        // Обновляем визуализацию игрового поля
+        updateGameTrackVisualization(player)
+        
+        // Проверяем новые профессиональные риски
+        player.lastRiskActivated?.let { risk ->
+            showMessage("⚠️ ПРОФЕССИОНАЛЬНЫЙ РИСК!\n\n${risk.icon} ${risk.name}\n\n${risk.description}\n\nЭто повлияет на ваши доходы и расходы! Проверьте статус здоровья.")
+            player.lastRiskActivated = null // Сбрасываем флаг
+        }
+        
+        // Изменяем интерфейс в зависимости от трека
+        if (player.isInFastTrack) {
+            binding.tvPosition.text = "🎯 СКОРОСТНАЯ ДОРОЖКА"
+            binding.tvDiceValue.text = "Цель: ${player.dream?.name ?: "неизвестная мечта"} (${currencyFormat.format(player.dream?.cost ?: 0)})"
+            
+            // Меняем фон на скоростную дорожку
+            try {
+                binding.root.setBackgroundResource(R.drawable.bg_main_screen)
+            } catch (e: Exception) {
+                // Игнорируем если фон не найден
+            }
+            
+            // Изменяем текст кнопки
+            binding.btnRollDice.text = "🎲 Бросить на мечту"
+        } else {
+            binding.tvPosition.text = "Позиция: ${player.position}"
+            binding.btnRollDice.text = "🎲 Бросить кубик"
+            
+            // Возвращаем обычный фон
+            try {
+                binding.root.setBackgroundResource(R.drawable.bg_game_field)
+            } catch (e: Exception) {
+                // Игнорируем если фон не найден
+            }
+        }
+        
+        // Обновляем список активов
+        val adapter = AssetAdapter(player.assets) { assetIndex ->
+            // Обработка продажи актива
+            AlertDialog.Builder(this)
+                .setTitle("Продать актив?")
+                .setMessage("Вы уверены, что хотите продать этот актив?")
+                .setPositiveButton("Продать") { _, _ ->
+                    val assetToSell = player.assets[assetIndex]
+                    if (gameManager.sellAsset(assetIndex)) {
+                        // Логируем продажу актива
+                        player.logIncome(
+                            FinancialCategory.ASSET_SALE,
+                            assetToSell.value,
+                            "Продажа актива: ${assetToSell.name}"
+                        )
+                        updateUI()
+                        showMessage("Актив продан!")
+                    }
+                }
+                .setNegativeButton("Отмена", null)
+                .show()
+        }
+        binding.recyclerViewAssets.adapter = adapter
+        
+        // Проверяем, может ли игрок выйти из крысиных бегов
+        if (player.canEscapeRatRace() && !player.isInFastTrack) {
+            showEscapeRatRaceDialog()
+        }
     }
     
     private fun showEscapeRatRaceDialog() {
