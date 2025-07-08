@@ -15,6 +15,49 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Bump version (auto-increment)
+      id: bump_version
+      run: |
+        # Получаем текущую версию
+        CURR_VERSION=$(grep -oP 'versionName\s+"\K[^"]+' app/build.gradle)
+        CURR_CODE=$(grep -oP 'versionCode\s+\K[0-9]+' app/build.gradle)
+        # Инкрементируем patch (x.y -> x.(y+1))
+        MAJOR=$(echo $CURR_VERSION | cut -d. -f1)
+        MINOR=$(echo $CURR_VERSION | cut -d. -f2)
+        if [ -z "$MINOR" ]; then MINOR=0; fi
+        NEW_MINOR=$((MINOR+1))
+        NEW_VERSION="$MAJOR.$NEW_MINOR"
+        NEW_CODE=$((CURR_CODE+1))
+        # Обновляем build.gradle
+        sed -i "s/versionName \"$CURR_VERSION\"/versionName \"$NEW_VERSION\"/" app/build.gradle
+        sed -i "s/versionCode $CURR_CODE/versionCode $NEW_CODE/" app/build.gradle
+        echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        echo "new_code=$NEW_CODE" >> $GITHUB_OUTPUT
+        echo "Version bumped: $CURR_VERSION → $NEW_VERSION ($CURR_CODE → $NEW_CODE)"
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add app/build.gradle
+        git commit -m "🔖 Bump version to $NEW_VERSION ($NEW_CODE) [auto]" || echo "No version change to commit"
+        git push || echo "No changes to push"
+
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        echo "## Changelog for v${{ steps.bump_version.outputs.new_version }}" > RELEASE_NOTES.md
+        echo "" >> RELEASE_NOTES.md
+        echo "### Последние коммиты:" >> RELEASE_NOTES.md
+        git log -10 --pretty=format:"- %s (%an)" >> RELEASE_NOTES.md
+        echo "" >> RELEASE_NOTES.md
+        echo "### Изменения из CHANGELOG.md:" >> RELEASE_NOTES.md
+        tail -n 20 docs/CHANGELOG.md >> RELEASE_NOTES.md
+        cat RELEASE_NOTES.md
+
+    - name: Commit release notes
+      run: |
+        git add RELEASE_NOTES.md
+        git commit -m "📝 Update release notes [auto]" || echo "No release notes change to commit"
+        git push || echo "No changes to push"
+
     - name: Setup JDK 21
       uses: actions/setup-java@v4
       with:
@@ -77,32 +120,9 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v${{ steps.version.outputs.version }}-${{ steps.date.outputs.date }}
-        name: "🎮 Financial Success v${{ steps.version.outputs.version }}"
-        body: |
-          ## 📱 Финансовый успех v${{ steps.version.outputs.version }}
-          
-          ### 🎯 Последние изменения:
-          - 📊 Добавлен журнал финансов с полным логированием
-          - 🎲 Система возраста и смертности игрока
-          - 🚀 Скоростная дорожка с достижением мечты
-          - 💰 21 категория финансовых операций
-          - 📈 Детальная аналитика доходов/расходов
-          
-          ### 🔧 Техническая информация:
-          - **Дата сборки:** ${{ steps.date.outputs.date }}
-          - **Версия:** ${{ steps.version.outputs.version }}
-          - **Commit:** ${{ github.sha }}
-          - **Ветка:** ${{ github.ref_name }}
-          
-          ### 📥 Установка:
-          1. Скачайте APK файл ниже
-          2. Разрешите установку из неизвестных источников
-          3. Установите приложение
-          4. Наслаждайтесь игрой!
-          
-          ---
-          *Автоматически создано GitHub Actions*
+        tag_name: v${{ steps.bump_version.outputs.new_version }}-${{ steps.date.outputs.date }}
+        name: "🎮 Financial Success v${{ steps.bump_version.outputs.new_version }}"
+        body_path: RELEASE_NOTES.md
         files: |
           releases/debug/*.apk
         draft: false
