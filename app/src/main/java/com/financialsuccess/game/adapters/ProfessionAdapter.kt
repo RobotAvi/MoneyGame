@@ -24,7 +24,8 @@ class ProfessionAdapter(
             binding.tvProfessionName.text = profession.name
             binding.tvProfessionDescription.text = profession.description
             binding.tvSalary.text = "Зарплата: ${currencyFormat.format(profession.salary)}"
-            binding.tvExpenses.text = "Расходы: ${currencyFormat.format(profession.expenses)}"
+            val total = profession.expenses + profession.taxes
+            binding.tvExpenses.text = "Расходы: ${currencyFormat.format(profession.expenses)}  Налоги: ${currencyFormat.format(profession.taxes)}  Всего: ${currencyFormat.format(total)}"
             binding.tvEducation.text = "Образование: ${profession.education}"
             
             // Устанавливаем иконку профессии

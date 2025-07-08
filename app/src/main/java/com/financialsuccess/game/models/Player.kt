@@ -166,6 +166,7 @@ data class Player(
     
     // Логировать расход
     fun logExpense(category: FinancialCategory, amount: Int, description: String) {
+        cash -= amount
         addFinancialEntry(FinancialEntryType.EXPENSE, category, -amount, description)
     }
     

@@ -62,7 +62,7 @@
                             android:id="@+id/tv_current_date"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Январь 2024"
+                            android:text="Январь 2024, день 1"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             android:textColor="@android:color/black" />
@@ -136,13 +136,6 @@
                             android:textStyle="bold"
                             android:textColor="@color/success_color" />
 
-                        <TextView
-                            android:id="@+id/tv_position"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Позиция: 0"
-                            android:textSize="12sp" />
-
                     </LinearLayout>
 
                 </LinearLayout>
@@ -159,7 +152,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="🟢 Возраст: 25 лет (осталось: 60)"
+                        android:text="🟢 Возраст: 25 лет"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:gravity="center"
@@ -264,10 +257,14 @@
 
         <!-- Игровое поле (кубик и действия) -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_dice"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:cardElevation="4dp">
+            app:cardElevation="4dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -288,18 +285,10 @@
                     android:id="@+id/tv_dice_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Бросьте кубик"
+                    android:text="Брось кубик!"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="16dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_roll_dice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/roll_dice"
-                    android:textSize="16sp"
-                    style="@style/Widget.Material3.Button" />
 
             </LinearLayout>
 
@@ -321,13 +310,11 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_financial_statement"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="64dp"
                     android:layout_weight="1"
                     android:layout_marginEnd="4dp"
-                    app:icon="@drawable/ic_finance_logo"
-                    app:iconGravity="textStart"
-                    app:iconPadding="0dp"
-                    android:text=""
+                    android:text="📈"
+                    android:textSize="28sp"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:backgroundTint="#F9F9F9"
                     android:strokeColor="@color/primary_color"
@@ -337,14 +324,12 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_assets"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="64dp"
                     android:layout_weight="1"
                     android:layout_marginStart="4dp"
                     android:layout_marginEnd="4dp"
-                    app:icon="@drawable/ic_car"
-                    app:iconGravity="textStart"
-                    app:iconPadding="0dp"
-                    android:text=""
+                    android:text="💼"
+                    android:textSize="28sp"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:backgroundTint="#F9F9F9"
                     android:strokeColor="@color/primary_color"
@@ -354,13 +339,11 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_market"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="64dp"
                     android:layout_weight="1"
                     android:layout_marginStart="4dp"
-                    app:icon="@drawable/ic_luxury_car"
-                    app:iconGravity="textStart"
-                    app:iconPadding="0dp"
-                    android:text=""
+                    android:text="🏛️"
+                    android:textSize="28sp"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:backgroundTint="#F9F9F9"
                     android:strokeColor="@color/primary_color"
@@ -379,20 +362,26 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_financial_journal"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="64dp"
                     android:layout_weight="1"
                     android:layout_marginEnd="4dp"
-                    android:text="📊 Журнал финансов"
-                    style="@style/Widget.Material3.Button.OutlinedButton" />
+                    android:text="📜"
+                    android:textSize="28sp"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    app:strokeWidth="1dp"
+                    app:cornerRadius="12dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_health_status"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="64dp"
                     android:layout_weight="1"
                     android:layout_marginStart="4dp"
-                    android:text="🏥 Здоровье"
-                    style="@style/Widget.Material3.Button.OutlinedButton" />
+                    android:text="💖"
+                    android:textSize="28sp"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    app:strokeWidth="1dp"
+                    app:cornerRadius="12dp" />
 
             </LinearLayout>
 

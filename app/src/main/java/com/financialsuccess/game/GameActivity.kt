@@ -13,6 +13,7 @@ import com.financialsuccess.game.databinding.ActivityGameBinding
 import com.financialsuccess.game.models.*
 import java.text.NumberFormat
 import java.util.*
+import android.widget.Toast
 
 class GameActivity : AppCompatActivity() {
     
@@ -21,6 +22,8 @@ class GameActivity : AppCompatActivity() {
     private var currentGameState: GameState? = null
     
     private val currencyFormat = NumberFormat.getCurrencyInstance(Locale("ru", "RU"))
+    
+    private var lastDiceValue: Int? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,27 +49,48 @@ class GameActivity : AppCompatActivity() {
     }
     
     private fun setupUI() {
-        binding.btnRollDice.setOnClickListener {
+        // Клик по карточке с кубиком
+        binding.cardDice.setOnClickListener {
             rollDiceAndMove()
         }
         
         binding.btnFinancialStatement.setOnClickListener {
+            if (!binding.btnFinancialStatement.isEnabled) {
+                Toast.makeText(this, "Кнопка недоступна: отчеты доступны только после первого хода", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             showFinancialStatement()
         }
         
         binding.btnAssets.setOnClickListener {
+            if (!binding.btnAssets.isEnabled) {
+                Toast.makeText(this, "Кнопка недоступна: активы появятся после покупки", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             showAssets()
         }
         
         binding.btnMarket.setOnClickListener {
+            if (!binding.btnMarket.isEnabled) {
+                Toast.makeText(this, "Кнопка недоступна: рынок закрыт в данный момент", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             showMarket()
         }
         
         binding.btnFinancialJournal.setOnClickListener {
+            if (!binding.btnFinancialJournal.isEnabled) {
+                Toast.makeText(this, "Кнопка недоступна: журнал появится после первого события", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             showFinancialJournal()
         }
         
         binding.btnHealthStatus.setOnClickListener {
+            if (!binding.btnHealthStatus.isEnabled) {
+                Toast.makeText(this, "Кнопка недоступна: здоровье недоступно на этом этапе", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             showHealthStatus()
         }
         
@@ -80,6 +104,7 @@ class GameActivity : AppCompatActivity() {
     
     private fun rollDiceAndMove() {
         val diceValue = gameManager.rollDice()
+        lastDiceValue = diceValue
         val player = currentGameState?.player ?: return
         
         // Устанавливаем соответствующее изображение кубика
@@ -101,16 +126,14 @@ class GameActivity : AppCompatActivity() {
             // Игнорируем если поле не найдено (совместимость)
         }
         
+        // Обновляем подпись
+        binding.tvDiceValue.text = "Выпало $diceValue. Бросай еще!"
+        
         if (player.isInFastTrack) {
-            // Логика скоростной дорожки
             handleFastTrackDice(diceValue)
         } else {
-            // Обычная логика крысиных бегов
-            binding.tvDiceValue.text = "Кубик: $diceValue"
             currentGameState = gameManager.movePlayer(diceValue)
             updateUI()
-            
-            // Проверяем событие на клетке
             handlePositionEvent()
         }
     }
@@ -688,6 +711,17 @@ class GameActivity : AppCompatActivity() {
                 showEscapeRatRaceDialog()
             }
         }
+        // Обновляем дату с учетом дня (позиции)
+        val player = currentGameState?.player
+        val monthYear = player?.currentMonthYear ?: "Январь 2024"
+        val day = (player?.position ?: 0) + 1
+        binding.tvCurrentDate.text = "$day $monthYear"
+        if (lastDiceValue == null) {
+            binding.tvDiceValue.text = "Брось кубик!"
+        } else {
+            binding.tvDiceValue.text = "Выпало ${lastDiceValue}. Бросай еще!"
+        }
+        updatePlayerAvatar(player ?: return)
     }
     
     private fun showEscapeRatRaceDialog() {
