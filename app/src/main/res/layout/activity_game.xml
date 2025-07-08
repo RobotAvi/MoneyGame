@@ -331,7 +331,7 @@
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:backgroundTint="#F9F9F9"
                     android:strokeColor="@color/primary_color"
-                    app:strokeWidth="1"
+                    app:strokeWidth="1dp"
                     app:cornerRadius="12dp" />
 
                 <com.google.android.material.button.MaterialButton
@@ -348,7 +348,7 @@
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:backgroundTint="#F9F9F9"
                     android:strokeColor="@color/primary_color"
-                    app:strokeWidth="1"
+                    app:strokeWidth="1dp"
                     app:cornerRadius="12dp" />
 
                 <com.google.android.material.button.MaterialButton
@@ -364,7 +364,7 @@
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:backgroundTint="#F9F9F9"
                     android:strokeColor="@color/primary_color"
-                    app:strokeWidth="1"
+                    app:strokeWidth="1dp"
                     app:cornerRadius="12dp" />
 
             </LinearLayout>
