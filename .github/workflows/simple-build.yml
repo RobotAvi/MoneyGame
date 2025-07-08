@@ -47,6 +47,8 @@ jobs:
         ls -la app/build/outputs/apk/debug/
         cp app/build/outputs/apk/debug/*.apk releases/debug/
         cd releases/debug
+        ls -la
+        rm latest-debug.apk
         # Переименовываем с версией и датой
         for file in *.apk; do
           newname="FinancialSuccess-v${{ steps.version.outputs.version }}-${{ steps.date.outputs.date }}-debug.apk"
