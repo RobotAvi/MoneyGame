@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:background="@drawable/bg_game_field">
 
-    <!-- Финансовая панель -->
+    <!-- Центральная панель с информацией об игре -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -18,6 +18,50 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
+
+            <!-- Центральная панель: аватар, месяц/год -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
+
+                <ImageView
+                    android:id="@+id/iv_player_avatar"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/ic_player_default"
+                    android:contentDescription="Аватар игрока" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/tv_current_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Январь 2024"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/black" />
+
+                    <TextView
+                        android:id="@+id/tv_game_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🐀 Крысиные бега"
+                        android:textSize="14sp"
+                        android:layout_marginTop="4dp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -102,7 +146,11 @@
                     android:text="🟢 Возраст: 25 лет (осталось: 60)"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:gravity="center" />
+                    android:gravity="center"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="8dp" />
 
                 <TextView
                     android:id="@+id/tv_health_status"
@@ -115,6 +163,84 @@
                     android:gravity="center" />
 
             </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Визуализация игрового поля -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        app:cardElevation="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Игровая дорожка -->
+            <LinearLayout
+                android:id="@+id/ll_game_track"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:orientation="horizontal"
+                android:background="@drawable/game_track_background"
+                android:gravity="center_vertical"
+                android:padding="8dp">
+
+                <!-- Старт -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="💼\nСтарт"
+                    android:textSize="10sp"
+                    android:gravity="center"
+                    android:layout_marginEnd="4dp" />
+
+                <!-- Игровая дорожка с позициями -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:background="@drawable/track_line">
+
+                    <!-- Позиция игрока (бегун/транспорт) -->
+                    <ImageView
+                        android:id="@+id/iv_player_on_track"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_gravity="center_vertical"
+                        android:src="@drawable/ic_runner"
+                        android:contentDescription="Игрок на дорожке" />
+
+                </LinearLayout>
+
+                <!-- Финиш/Мечта -->
+                <TextView
+                    android:id="@+id/tv_finish_goal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🎯\nМечта"
+                    android:textSize="10sp"
+                    android:gravity="center"
+                    android:layout_marginStart="4dp" />
+
+            </LinearLayout>
+
+            <!-- Информация о треке -->
+            <TextView
+                android:id="@+id/tv_track_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🏃 Бегите от зарплаты до зарплаты в крысиных бегах"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:layout_marginTop="8dp"
+                android:textStyle="italic" />
 
         </LinearLayout>
 

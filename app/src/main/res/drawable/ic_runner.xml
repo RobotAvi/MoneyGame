@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="32dp"
+    android:height="32dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+    
+    <!-- Бегун -->
+    <path
+        android:fillColor="#FF9800"
+        android:pathData="M16,8m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0"/>
+    
+    <!-- Тело -->
+    <path
+        android:fillColor="#FF9800"
+        android:pathData="M13,12h6v8h-6z"/>
+    
+    <!-- Руки в движении -->
+    <path
+        android:fillColor="#FF9800"
+        android:pathData="M11,14l-3,2l1,2l3,-2z"/>
+    
+    <path
+        android:fillColor="#FF9800"
+        android:pathData="M21,14l3,2l-1,2l-3,-2z"/>
+    
+    <!-- Ноги в беге -->
+    <path
+        android:fillColor="#FF9800"
+        android:pathData="M14,20l-2,6l2,1l2,-6z"/>
+    
+    <path
+        android:fillColor="#FF9800"
+        android:pathData="M18,20l4,4l-1,2l-4,-4z"/>
+</vector>

@@ -197,39 +197,39 @@ data class Player(
     fun processMonthlyOperations() {
         // Проверяем профессиональные риски
         checkProfessionalRisks()
-        // Основные расходы (только если есть деньги)
+        
+        // Основные расходы (ВСЕГДА списываются, даже если недостаточно денег)
         val totalMonthlyExpenses = totalExpenses
-        if (cash >= totalMonthlyExpenses) {
-            // Основные расходы
-            if (foodExpenses > 0) {
-                logExpense(FinancialCategory.FOOD, foodExpenses, "Ежемесячные расходы на еду")
-            }
-            if (transportExpenses > 0) {
-                logExpense(FinancialCategory.TRANSPORT, transportExpenses, "Ежемесячные расходы на транспорт")
-            }
-            if (housingExpenses > 0) {
-                logExpense(FinancialCategory.HOUSING, housingExpenses, "Ежемесячные расходы на жилье")
-            }
-            if (childrenExpenses > 0) {
-                logExpense(FinancialCategory.CHILDREN, childrenExpenses, "Ежемесячные расходы на детей")
-            }
-            if (taxes > 0) {
-                logExpense(FinancialCategory.TAXES, taxes, "Ежемесячные налоги")
-            }
-            if (otherExpenses > 0) {
-                logExpense(FinancialCategory.OTHER_EXPENSES, otherExpenses, "Прочие ежемесячные расходы")
-            }
-            
-            // Выплаты по кредитам
-            liabilities.forEach { liability ->
-                if (liability.payment > 0) {
-                    logExpense(FinancialCategory.LOAN_PAYMENT, liability.payment, "Выплата по кредиту: ${liability.name}")
-                }
-            }
-            
-            // Списываем общие расходы
-            cash -= totalMonthlyExpenses
+        
+        // Логируем и списываем все расходы
+        if (foodExpenses > 0) {
+            logExpense(FinancialCategory.FOOD, foodExpenses, "Ежемесячные расходы на еду")
         }
+        if (transportExpenses > 0) {
+            logExpense(FinancialCategory.TRANSPORT, transportExpenses, "Ежемесячные расходы на транспорт")
+        }
+        if (housingExpenses > 0) {
+            logExpense(FinancialCategory.HOUSING, housingExpenses, "Ежемесячные расходы на жилье")
+        }
+        if (childrenExpenses > 0) {
+            logExpense(FinancialCategory.CHILDREN, childrenExpenses, "Ежемесячные расходы на детей")
+        }
+        if (taxes > 0) {
+            logExpense(FinancialCategory.TAXES, taxes, "Ежемесячные налоги")
+        }
+        if (otherExpenses > 0) {
+            logExpense(FinancialCategory.OTHER_EXPENSES, otherExpenses, "Прочие ежемесячные расходы")
+        }
+        
+        // Выплаты по кредитам
+        liabilities.forEach { liability ->
+            if (liability.payment > 0) {
+                logExpense(FinancialCategory.LOAN_PAYMENT, liability.payment, "Выплата по кредиту: ${liability.name}")
+            }
+        }
+        
+        // Списываем общие расходы (ВСЕГДА, даже если уходим в минус)
+        cash -= totalMonthlyExpenses
         
         // Доходы от активов (всегда получаем)
         assets.forEach { asset ->

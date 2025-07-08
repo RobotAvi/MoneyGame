@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+    
+    <!-- Фон -->
+    <path
+        android:fillColor="#E8F5E8"
+        android:pathData="M32,32m-30,0a30,30 0,1 1,60 0a30,30 0,1 1,-60 0"/>
+    
+    <!-- Голова -->
+    <path
+        android:fillColor="#FFD8A6"
+        android:pathData="M32,20m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0"/>
+    
+    <!-- Тело в халате -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M20,50c0,-6 5.5,-12 12,-12s12,6 12,12v4H20v-4z"/>
+    
+    <!-- Стетоскоп -->
+    <path
+        android:fillColor="#333333"
+        android:pathData="M28,30c0,2 2,4 4,4s4,-2 4,-4"/>
+    
+    <!-- Крест на шапочке -->
+    <path
+        android:fillColor="#FF0000"
+        android:pathData="M30,14h4v6h-4z"/>
+    <path
+        android:fillColor="#FF0000"
+        android:pathData="M29,16h6v2h-6z"/>
+</vector>

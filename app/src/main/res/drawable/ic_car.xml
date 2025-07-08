@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="32dp"
+    android:height="32dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+    
+    <!-- Кузов автомобиля -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M6,18h20v6H6z"/>
+    
+    <!-- Верхняя часть -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M10,12h12v6H10z"/>
+    
+    <!-- Колеса -->
+    <path
+        android:fillColor="#333333"
+        android:pathData="M8,22m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0"/>
+    
+    <path
+        android:fillColor="#333333"
+        android:pathData="M24,22m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0"/>
+    
+    <!-- Окна -->
+    <path
+        android:fillColor="#87CEEB"
+        android:pathData="M11,13h10v4H11z"/>
+</vector>

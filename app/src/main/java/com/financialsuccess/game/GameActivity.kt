@@ -68,6 +68,11 @@ class GameActivity : AppCompatActivity() {
             showHealthStatus()
         }
         
+        // Делаем возраст кликабельным
+        binding.tvAge.setOnClickListener {
+            showAgeStatistics()
+        }
+        
         setupAssetsRecyclerView()
     }
     
@@ -595,6 +600,12 @@ class GameActivity : AppCompatActivity() {
                 return
             }
             
+            // Обновляем дату и статус игры
+            updateCurrentDate(player)
+            updateGameStatus(player)
+            updatePlayerAvatar(player)
+            
+            // Обновляем финансовую информацию
             binding.tvCash.text = "Наличные: ${currencyFormat.format(player.cash)}"
             binding.tvSalary.text = "Зарплата: ${currencyFormat.format(player.salary)}"
             binding.tvPassiveIncome.text = "Пассивный доход: ${currencyFormat.format(player.passiveIncome)}"
@@ -610,6 +621,9 @@ class GameActivity : AppCompatActivity() {
             
             binding.tvAge.text = "$ageColor Возраст: ${player.age} лет (осталось: ${player.getYearsLeft()})"
             binding.tvHealthStatus.text = player.getHealthStatus()
+            
+            // Обновляем визуализацию игрового поля
+            updateGameTrackVisualization(player)
             
             // Проверяем новые профессиональные риски
             player.lastRiskActivated?.let { risk ->
@@ -929,6 +943,158 @@ class GameActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setMessage(message)
             .setPositiveButton("OK", null)
+            .show()
+    }
+    
+    // === НОВЫЕ МЕТОДЫ ДЛЯ УЛУЧШЕННОГО ИНТЕРФЕЙСА ===
+    
+    private fun updateCurrentDate(player: Player) {
+        val months = arrayOf("Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+                            "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь")
+        
+        val startYear = 2024
+        val currentMonth = player.monthsPlayed % 12
+        val currentYear = startYear + player.monthsPlayed / 12
+        
+        binding.tvCurrentDate.text = "${months[currentMonth]} $currentYear"
+    }
+    
+    private fun updateGameStatus(player: Player) {
+        val status = if (player.isInFastTrack) {
+            "🚀 Скоростная дорожка"
+        } else {
+            "🐀 Крысиные бега"
+        }
+        binding.tvGameStatus.text = status
+    }
+    
+    private fun updatePlayerAvatar(player: Player) {
+        // Выбираем аватар в зависимости от статуса игры и профессии
+        val avatarResource = when {
+            player.isInFastTrack -> when (player.profession?.name?.contains("Инженер")) {
+                true -> R.drawable.ic_engineer_successful
+                else -> R.drawable.ic_businessman_successful
+            }
+            player.profession?.name?.contains("Доктор") == true -> R.drawable.ic_doctor
+            player.profession?.name?.contains("Инженер") == true -> R.drawable.ic_engineer
+            player.profession?.name?.contains("Учитель") == true -> R.drawable.ic_teacher
+            else -> R.drawable.ic_player_default
+        }
+        
+        try {
+            binding.ivPlayerAvatar.setImageResource(avatarResource)
+        } catch (e: Exception) {
+            // Если ресурс не найден, используем дефолтный
+            binding.ivPlayerAvatar.setImageResource(R.drawable.ic_player_default)
+        }
+    }
+    
+    private fun updateGameTrackVisualization(player: Player) {
+        // Обновляем позицию игрока на треке
+        val trackLayout = binding.llGameTrack.getChildAt(1) as LinearLayout
+        val playerIcon = trackLayout.findViewById<ImageView>(R.id.iv_player_on_track)
+        
+        // Позиционируем игрока на треке (процент от 0 до 100)
+        val progress = if (player.isInFastTrack) {
+            // На скоростной дорожке показываем прогресс к мечте
+            val dreamCost = player.dream?.cost ?: 1
+            ((player.cash.toFloat() / dreamCost.toFloat()) * 100).coerceAtMost(100f)
+        } else {
+            // В крысиных бегах показываем позицию на круге
+            ((player.position.toFloat() / 24f) * 100)
+        }
+        
+        // Устанавливаем позицию (в процентах от ширины трека)
+        trackLayout.post {
+            val trackWidth = trackLayout.width - playerIcon.width
+            val newX = (trackWidth * progress / 100).toInt()
+            playerIcon.translationX = newX.toFloat()
+        }
+        
+        // Обновляем иконку игрока на треке
+        val trackIconResource = when {
+            player.isInFastTrack -> when {
+                player.passiveIncome > 100000 -> R.drawable.ic_luxury_car  // Роскошный автомобиль
+                player.passiveIncome > 50000 -> R.drawable.ic_car          // Обычный автомобиль
+                else -> R.drawable.ic_motorcycle                           // Мотоцикл
+            }
+            else -> R.drawable.ic_runner  // Бегун в крысиных бегах
+        }
+        
+        try {
+            playerIcon.setImageResource(trackIconResource)
+        } catch (e: Exception) {
+            // Если ресурс не найден, используем дефолтный
+            playerIcon.setImageResource(R.drawable.ic_runner)
+        }
+        
+        // Обновляем информацию о треке
+        val trackInfo = if (player.isInFastTrack) {
+            val vehicleType = when {
+                player.passiveIncome > 100000 -> "🏎️ Мчитесь к мечте на роскошном автомобиле!"
+                player.passiveIncome > 50000 -> "🚗 Едете к мечте на автомобиле!"
+                else -> "🏍️ Летите к мечте на мотоцикле!"
+            }
+            vehicleType
+        } else {
+            "🏃 Бегите от зарплаты до зарплаты в крысиных бегах"
+        }
+        binding.tvTrackInfo.text = trackInfo
+        
+        // Обновляем финиш/мечту
+        binding.tvFinishGoal.text = if (player.isInFastTrack) {
+            "🎯\n${player.dream?.name ?: "Мечта"}"
+        } else {
+            "🔄\nКруг"
+        }
+    }
+    
+    private fun showAgeStatistics() {
+        val player = currentGameState?.player ?: return
+        
+        // Получаем статистику по социальной группе (упрощенно - по профессии)
+        val averageLifeExpectancy = when (player.profession?.name) {
+            "Доктор" -> 78
+            "Инженер" -> 75
+            "Учитель" -> 77
+            "Менеджер" -> 73
+            "Программист" -> 74
+            else -> 75
+        }
+        
+        val socialGroup = when (player.profession?.name) {
+            "Доктор" -> "медицинских работников"
+            "Инженер" -> "инженеров"
+            "Учитель" -> "работников образования"
+            "Менеджер" -> "менеджеров"
+            "Программист" -> "IT-специалистов"
+            else -> "людей с вашей профессией"
+        }
+        
+        val remainingYears = maxOf(0, averageLifeExpectancy - player.age)
+        val lifeProgress = (player.age.toFloat() / averageLifeExpectancy.toFloat() * 100).toInt()
+        
+        val message = """
+            📊 СТАТИСТИКА ПО ВОЗРАСТУ
+            
+            👤 Ваш текущий возраст: ${player.age} лет
+            📈 Средняя продолжительность жизни для $socialGroup: $averageLifeExpectancy лет
+            
+            ⏰ Статистически вам осталось примерно: $remainingYears лет
+            📊 Прожито: $lifeProgress% от средней продолжительности жизни
+            
+            💡 Помните: это средние данные, ваша реальная продолжительность жизни может отличаться в зависимости от образа жизни, здоровья и финансового положения.
+            
+            ${if (player.passiveIncome > player.totalExpenses) "✅ Ваша финансовая свобода увеличивает качество жизни!" else "⚠️ Финансовый стресс может влиять на здоровье и продолжительность жизни."}
+        """.trimIndent()
+        
+        AlertDialog.Builder(this)
+            .setTitle("📈 Статистика продолжительности жизни")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .setNeutralButton("💪 Здоровье") { _, _ ->
+                showHealthStatus()
+            }
             .show()
     }
 }

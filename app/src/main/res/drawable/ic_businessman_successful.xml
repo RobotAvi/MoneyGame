@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+    
+    <!-- Золотой фон успеха -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M32,32m-30,0a30,30 0,1 1,60 0a30,30 0,1 1,-60 0"/>
+    
+    <!-- Голова -->
+    <path
+        android:fillColor="#FFD8A6"
+        android:pathData="M32,20m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0"/>
+    
+    <!-- Дорогой костюм -->
+    <path
+        android:fillColor="#1A237E"
+        android:pathData="M20,50c0,-6 5.5,-12 12,-12s12,6 12,12v4H20v-4z"/>
+    
+    <!-- Галстук -->
+    <path
+        android:fillColor="#D32F2F"
+        android:pathData="M30,28h4v12h-4z"/>
+    
+    <!-- Корона успеха -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M26,12h12l-2,4H28z"/>
+    
+    <!-- Бриллианты на короне -->
+    <path
+        android:fillColor="#00BCD4"
+        android:pathData="M28,13h2v2h-2z"/>
+    <path
+        android:fillColor="#00BCD4"
+        android:pathData="M30,13h2v2h-2z"/>
+    <path
+        android:fillColor="#00BCD4"
+        android:pathData="M32,13h2v2h-2z"/>
+    <path
+        android:fillColor="#00BCD4"
+        android:pathData="M34,13h2v2h-2z"/>
+</vector>
