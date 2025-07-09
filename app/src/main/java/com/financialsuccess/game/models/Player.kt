@@ -31,7 +31,8 @@ data class Player(
     val financialJournal: MutableList<FinancialEntry> = mutableListOf(),
     val activeRisks: MutableList<ProfessionalRisk> = mutableListOf(),
     val riskEffects: MutableList<RiskEffect> = mutableListOf(),
-    var lastRiskActivated: ProfessionalRisk? = null
+    var lastRiskActivated: ProfessionalRisk? = null,
+    var currentDayOfMonth: Int = 1 // Текущий день месяца (игровой)
 ) : Parcelable {
     
     fun getNetWorth(): Int = 
@@ -142,18 +143,12 @@ data class Player(
         amount: Int,
         description: String
     ) {
-        // Вычисляем реальную дату на основе месяца игры
         val months = arrayOf("Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
                             "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь")
-        
         val startYear = 2024
         val currentMonth = monthsPlayed % 12
         val currentYear = startYear + monthsPlayed / 12
-        
-        // Генерируем случайное число месяца (1-28 для простоты)
-        val dayOfMonth = (1..28).random()
-        val realDate = "$dayOfMonth ${months[currentMonth]} $currentYear"
-        
+        val realDate = "$currentDayOfMonth ${months[currentMonth]} $currentYear"
         val entry = FinancialEntry(
             type = type,
             category = category,
@@ -165,8 +160,6 @@ data class Player(
             realDate = realDate
         )
         financialJournal.add(entry)
-        
-        // Ограничиваем журнал до 500 записей (последние 500 операций)
         if (financialJournal.size > 500) {
             financialJournal.removeAt(0)
         }
