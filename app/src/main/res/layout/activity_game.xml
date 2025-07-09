@@ -223,7 +223,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="💼\nСтарт"
+                        android:text="🏠\nСтарт"
                         android:textSize="10sp"
                         android:gravity="center"
                         android:layout_marginEnd="4dp" />
@@ -252,7 +252,7 @@
                         android:id="@+id/tv_finish_goal"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="🎯\nМечта"
+                        android:text="💵\nКруг"
                         android:textSize="10sp"
                         android:gravity="center"
                         android:layout_marginStart="4dp" />
