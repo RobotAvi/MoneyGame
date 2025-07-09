@@ -1,8 +1,8 @@
-## Changelog for v1.14
+## Changelog for v1.15
 
 ### Последние коммиты:
-- 🔖 Bump version to 1.14 (15) [auto] (GitHub Action)
-- Adjust game action buttons layout and styling for better appearance (#8) (Avenir Voronov)
+- 🔖 Bump version to 1.15 (16) [auto] (GitHub Action)
+- Изменить отображение даты на карточке (#9) (Avenir Voronov)
 ### Изменения из CHANGELOG.md:
 # Changelog
 
