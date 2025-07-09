@@ -114,4 +114,34 @@ class GameActivityTest {
             }
         }
     }
+
+    @Test
+    fun testPlayerIconPositionMatchesMonthProgress() {
+        val activityController = Robolectric.buildActivity(GameActivity::class.java).setup()
+        val activity = activityController.get()
+        val currentDay = 15
+        // Устанавливаем день месяца
+        val player = Player(
+            position = 0,
+            cash = 10000,
+            salary = 5000,
+            age = 30,
+            profession = null,
+            dream = null
+        )
+        player.currentDayOfMonth = currentDay
+        activity.currentGameState = GameState(player)
+        // Обновляем UI
+        activity.updateUI()
+        // Получаем layout трека и иконку игрока
+        val llGameTrack = activity.findViewById<LinearLayout>(R.id.ll_game_track)
+        val trackLayout = llGameTrack.getChildAt(1) as LinearLayout
+        val playerIcon = trackLayout.findViewById<View>(R.id.iv_player_on_track)
+        // Проверяем, что позиция иконки соответствует дню месяца (середина трека для 15 дня)
+        val trackWidth = trackLayout.width - playerIcon.width
+        val expectedProgress = ((currentDay - 1).toFloat() / 29f)
+        val expectedX = (trackWidth * expectedProgress)
+        // Погрешность допускается из-за float/int преобразований
+        assertEquals(expectedX, playerIcon.translationX, 2f)
+    }
 } 

@@ -656,7 +656,7 @@ class GameActivity : AppCompatActivity() {
         
         // Обновляем дату и статус игры
         updateCurrentDate(player ?: return)
-        updateMonthProgressBar(player.currentDayOfMonth)
+        updateMonthProgressBar(player.currentDayOfMonth) // <-- снова используем день месяца
         updateGameStatus(player ?: return)
         updatePlayerAvatar(player ?: return)
         
@@ -1052,12 +1052,11 @@ class GameActivity : AppCompatActivity() {
         
         // Позиционируем игрока на треке (процент от 0 до 100)
         val progress = if (player.isInFastTrack) {
-            // На скоростной дорожке показываем прогресс к мечте
             val dreamCost = player.dream?.cost ?: 1
             ((player.cash.toFloat() / dreamCost.toFloat()) * 100).coerceAtMost(100f)
         } else {
-            // В крысиных бегах показываем позицию на круге
-            ((player.position.toFloat() / 24f) * 100)
+            // Теперь используем день месяца (1..30)
+            ((player.currentDayOfMonth.toFloat() - 1f) / 29f) * 100f
         }
         
         // Устанавливаем позицию (в процентах от ширины трека)
