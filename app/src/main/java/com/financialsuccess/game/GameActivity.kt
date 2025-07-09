@@ -132,7 +132,15 @@ class GameActivity : AppCompatActivity() {
         if (player.isInFastTrack) {
             handleFastTrackDice(diceValue)
         } else {
+            val oldPosition = currentGameState?.player?.position ?: 0
             currentGameState = gameManager.movePlayer(diceValue)
+            
+            // Проверяем, завершился ли полный круг
+            val passedStart = (oldPosition + diceValue) >= 24
+            if (passedStart) {
+                showMessage("💼 Зарплата получена: ${currencyFormat.format(currentGameState?.player?.salary ?: 0)}")
+            }
+            
             updateUI()
             handlePositionEvent()
         }
@@ -242,7 +250,7 @@ class GameActivity : AppCompatActivity() {
         
         when (position % 6) {
             0 -> showSmallDeal()
-            1 -> showPaycheck()
+            1 -> showBonusEvent() // Заменяем зарплату на бонусное событие
             2 -> showMarketEvent()
             3 -> showBigDeal()
             4 -> showDoodadEvent()
@@ -259,10 +267,11 @@ class GameActivity : AppCompatActivity() {
             .setMessage("${deal.name}\nПервоначальный взнос: ${currencyFormat.format(deal.downPayment)}\nДенежный поток: +${currencyFormat.format(deal.cashFlow)}/мес")
             .setPositiveButton("Купить") { _, _ ->
                 if (gameManager.buyAsset(deal)) {
-                    // Логируем покупку актива
-                    currentGameState?.player?.logExpense(
+                    // Логируем покупку актива (без повторного списания)
+                    currentGameState?.player?.addFinancialEntry(
+                        FinancialEntryType.EXPENSE,
                         FinancialCategory.ASSET_PURCHASE,
-                        deal.downPayment,
+                        -deal.downPayment,
                         "Малая сделка: ${deal.name} (денежный поток: +${currencyFormat.format(deal.cashFlow)}/мес)"
                     )
                     updateUI()
@@ -284,10 +293,11 @@ class GameActivity : AppCompatActivity() {
             .setMessage("${deal.name}\nПервоначальный взнос: ${currencyFormat.format(deal.downPayment)}\nДенежный поток: +${currencyFormat.format(deal.cashFlow)}/мес")
             .setPositiveButton("Купить") { _, _ ->
                 if (gameManager.buyAsset(deal)) {
-                    // Логируем покупку актива
-                    currentGameState?.player?.logExpense(
+                    // Логируем покупку актива (без повторного списания)
+                    currentGameState?.player?.addFinancialEntry(
+                        FinancialEntryType.EXPENSE,
                         FinancialCategory.ASSET_PURCHASE,
-                        deal.downPayment,
+                        -deal.downPayment,
                         "Крупная сделка: ${deal.name} (денежный поток: +${currencyFormat.format(deal.cashFlow)}/мес)"
                     )
                     updateUI()
@@ -313,6 +323,29 @@ class GameActivity : AppCompatActivity() {
             
             updateUI()
             showMessage("Зарплата получена: ${currencyFormat.format(player.salary)}")
+        }
+    }
+    
+    private fun showBonusEvent() {
+        val bonuses = listOf(
+            "Премия за отличную работу" to 3000,
+            "Бонус за проект" to 5000,
+            "Награда за инициативу" to 2000,
+            "Доплата за сверхурочные" to 4000,
+            "Бонус за экономию" to 2500
+        )
+        
+        val (bonusName, bonusAmount) = bonuses.random()
+        
+        currentGameState?.player?.let { player ->
+            player.cash += bonusAmount
+            player.logIncome(
+                FinancialCategory.BONUS,
+                bonusAmount,
+                bonusName
+            )
+            updateUI()
+            showMessage("🎁 $bonusName: +${currencyFormat.format(bonusAmount)}")
         }
     }
     
@@ -629,6 +662,9 @@ class GameActivity : AppCompatActivity() {
         updateCurrentDate(player ?: return)
         updateGameStatus(player ?: return)
         updatePlayerAvatar(player ?: return)
+        
+        // Обновляем профессию на экране
+        binding.tvProfession.text = "Профессия: ${player?.profession?.name ?: "-"}"
         
         // Обновляем финансовую информацию
         binding.tvCash.text = "Наличные: ${currencyFormat.format(player.cash)}"

@@ -56,4 +56,18 @@ class ProfessionAdapterTest {
         verify(mockCallback, atLeastOnce()).invoke(captor.capture())
         assertEquals("Инженер", captor.value.name)
     }
+
+    @Test
+    fun testAllProfessionsDisplayed() {
+        val allProfessions = listOf(
+            Profession("teacher", "Учитель", "desc", 1, 2, 3, "edu"),
+            Profession("engineer", "Инженер", "desc", 1, 2, 3, "edu"),
+            Profession("doctor", "Врач", "desc", 1, 2, 3, "edu"),
+            Profession("manager", "Менеджер", "desc", 1, 2, 3, "edu"),
+            Profession("mechanic", "Механик", "desc", 1, 2, 3, "edu"),
+            Profession("lawyer", "Юрист", "desc", 1, 2, 3, "edu")
+        )
+        val adapter = ProfessionAdapter(allProfessions, mockCallback)
+        assertEquals(6, adapter.itemCount)
+    }
 } 

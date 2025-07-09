@@ -58,4 +58,34 @@ class GameActivityTest {
         // Проверяем, что showMessage вызывается с "Журнал финансов пуст"
         verify(activity).showMessage(contains("Журнал финансов пуст"))
     }
+
+    @Test
+    fun testBuyAssetDeductsOnlyDownPayment() {
+        val player = Player(
+            position = 0,
+            cash = 55000,
+            salary = 50000,
+            age = 30,
+            profession = null,
+            dream = null
+        )
+        val asset = Asset(
+            name = "Облигации федерального займа",
+            downPayment = 50000,
+            cashFlow = 1000,
+            loan = 0,
+            loanPayment = 0
+        )
+        val manager = GameManager()
+        // Вручную подставляем состояние
+        val state = GameState(player)
+        val field = GameManager::class.java.getDeclaredField("gameState")
+        field.isAccessible = true
+        field.set(manager, state)
+
+        val result = manager.buyAsset(asset)
+        assertTrue(result)
+        assertEquals(5000, player.cash)
+        assertTrue(player.assets.contains(asset))
+    }
 } 

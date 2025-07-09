@@ -8,6 +8,7 @@ import com.financialsuccess.game.databinding.ItemProfessionBinding
 import com.financialsuccess.game.models.Profession
 import java.text.NumberFormat
 import java.util.*
+import android.util.Log
 
 class ProfessionAdapter(
     private val professions: List<Profession>,
@@ -16,11 +17,16 @@ class ProfessionAdapter(
     
     private var selectedPosition = -1
     private val currencyFormat = NumberFormat.getCurrencyInstance(Locale("ru", "RU"))
+
+    init {
+        Log.d("ProfessionAdapter", "Adapter created with professions: ${professions.map { it.id + ":" + it.name }} (size: ${professions.size})")
+    }
     
     inner class ProfessionViewHolder(private val binding: ItemProfessionBinding) : 
         RecyclerView.ViewHolder(binding.root) {
         
         fun bind(profession: Profession, isSelected: Boolean) {
+            Log.d("ProfessionAdapter", "Bind profession: ${profession.id} (${profession.name}) at position $bindingAdapterPosition")
             binding.tvProfessionName.text = profession.name
             binding.tvProfessionDescription.text = profession.description
             binding.tvSalary.text = "Зарплата: ${currencyFormat.format(profession.salary)}"

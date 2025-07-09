@@ -50,6 +50,14 @@ class GameManager {
         if (passedStart) {
             currentState.player.passMonth()
             currentState.player.processMonthlyOperations()
+            
+            // Выплачиваем зарплату при завершении полного круга
+            currentState.player.cash += currentState.player.salary
+            currentState.player.logIncome(
+                com.financialsuccess.game.models.FinancialCategory.SALARY,
+                currentState.player.salary,
+                "Ежемесячная зарплата по профессии ${currentState.player.profession?.name}"
+            )
         }
 
         currentState.player.position = newPosition
