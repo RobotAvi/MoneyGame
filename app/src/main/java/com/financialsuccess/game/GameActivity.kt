@@ -656,6 +656,7 @@ class GameActivity : AppCompatActivity() {
         
         // Обновляем дату и статус игры
         updateCurrentDate(player ?: return)
+        updateMonthProgressBar(player.currentDayOfMonth)
         updateGameStatus(player ?: return)
         updatePlayerAvatar(player ?: return)
         
@@ -700,7 +701,7 @@ class GameActivity : AppCompatActivity() {
             }
             
         } else {
-            binding.tvTrackInfo.text = "🏃 Бегите от зарплаты до зарплаты в крысиных бегах"
+            binding.tvTrackInfo.text = "🏃 Бегите от зарплаты до зарплаты"
             
             // Возвращаем обычный фон
             try {
@@ -737,6 +738,22 @@ class GameActivity : AppCompatActivity() {
         // Проверяем, может ли игрок выйти из крысиных бегов
         if (player.canEscapeRatRace() && !player.isInFastTrack) {
             showEscapeRatRaceDialog()
+        }
+    }
+    
+    private fun updateMonthProgressBar(currentDay: Int) {
+        val progressBar = binding.monthProgressBar
+        progressBar.removeAllViews()
+        val daysInMonth = 30
+        for (i in 1..daysInMonth) {
+            val dayView = View(this)
+            val params = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+            params.marginEnd = 2
+            dayView.layoutParams = params
+            dayView.setBackgroundColor(
+                if (i <= currentDay) android.graphics.Color.WHITE else android.graphics.Color.LTGRAY
+            )
+            progressBar.addView(dayView)
         }
     }
     
@@ -1002,12 +1019,11 @@ class GameActivity : AppCompatActivity() {
     private fun updateCurrentDate(player: Player) {
         val months = arrayOf("Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
                             "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь")
-        
         val startYear = 2024
         val currentMonth = player.monthsPlayed % 12
         val currentYear = startYear + player.monthsPlayed / 12
-        
-        binding.tvCurrentDate.text = "${months[currentMonth]} $currentYear"
+        val currentDay = player.currentDayOfMonth
+        binding.tvCurrentDate.text = "$currentDay ${months[currentMonth].lowercase()} $currentYear"
     }
     
     private fun updateGameStatus(player: Player) {
@@ -1075,7 +1091,7 @@ class GameActivity : AppCompatActivity() {
             }
             vehicleType
         } else {
-            "🏃 Бегите от зарплаты до зарплаты в крысиных бегах"
+            "🏃 Бегите от зарплаты до зарплаты"
         }
         binding.tvTrackInfo.text = trackInfo
         

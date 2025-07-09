@@ -62,10 +62,17 @@
                             android:id="@+id/tv_current_date"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Январь 2024, день 1"
+                            android:text="1 января 2024"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             android:textColor="@android:color/black" />
+
+                        <LinearLayout
+                            android:id="@+id/monthProgressBar"
+                            android:layout_width="match_parent"
+                            android:layout_height="8dp"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="4dp"/>
 
                         <TextView
                             android:id="@+id/tv_game_status"
@@ -216,7 +223,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="💼\nСтарт"
+                        android:text="🏠\nСтарт"
                         android:textSize="10sp"
                         android:gravity="center"
                         android:layout_marginEnd="4dp" />
@@ -245,7 +252,7 @@
                         android:id="@+id/tv_finish_goal"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="🎯\nМечта"
+                        android:text="💵\nКруг"
                         android:textSize="10sp"
                         android:gravity="center"
                         android:layout_marginStart="4dp" />
