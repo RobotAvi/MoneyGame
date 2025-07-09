@@ -656,7 +656,7 @@ class GameActivity : AppCompatActivity() {
         
         // Обновляем дату и статус игры
         updateCurrentDate(player ?: return)
-        updateMonthProgressBar(player.position) // <-- изменено: теперь передаём позицию
+        updateMonthProgressBar(player.currentDayOfMonth) // <-- снова используем день месяца
         updateGameStatus(player ?: return)
         updatePlayerAvatar(player ?: return)
         
@@ -741,17 +741,17 @@ class GameActivity : AppCompatActivity() {
         }
     }
     
-    private fun updateMonthProgressBar(position: Int) {
+    private fun updateMonthProgressBar(currentDay: Int) {
         val progressBar = binding.monthProgressBar
         progressBar.removeAllViews()
-        val cellsOnTrack = 24
-        for (i in 0 until cellsOnTrack) {
+        val daysInMonth = 30
+        for (i in 1..daysInMonth) {
             val dayView = View(this)
             val params = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
             params.marginEnd = 2
             dayView.layoutParams = params
             dayView.setBackgroundColor(
-                if (i <= position) android.graphics.Color.WHITE else android.graphics.Color.LTGRAY
+                if (i <= currentDay) android.graphics.Color.WHITE else android.graphics.Color.LTGRAY
             )
             progressBar.addView(dayView)
         }
@@ -1052,12 +1052,11 @@ class GameActivity : AppCompatActivity() {
         
         // Позиционируем игрока на треке (процент от 0 до 100)
         val progress = if (player.isInFastTrack) {
-            // На скоростной дорожке показываем прогресс к мечте
             val dreamCost = player.dream?.cost ?: 1
             ((player.cash.toFloat() / dreamCost.toFloat()) * 100).coerceAtMost(100f)
         } else {
-            // В крысиных бегах показываем позицию на круге
-            ((player.position.toFloat() / 24f) * 100)
+            // Теперь используем день месяца (1..30)
+            ((player.currentDayOfMonth.toFloat() - 1f) / 29f) * 100f
         }
         
         // Устанавливаем позицию (в процентах от ширины трека)
