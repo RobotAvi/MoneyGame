@@ -35,6 +35,10 @@ data class Player(
     var currentDayOfMonth: Int = 1 // Текущий день месяца (игровой)
 ) : Parcelable {
     
+    companion object {
+        const val DAYS_IN_MONTH = 30
+    }
+
     fun getNetWorth(): Int = 
         assets.sumOf { it.value } - liabilities.sumOf { it.amount }
     
@@ -116,6 +120,7 @@ data class Player(
     // Пройти один месяц (увеличивает возраст)
     fun passMonth() {
         monthsPlayed++
+        currentDayOfMonth = 1
         // Каждые 12 месяцев увеличиваем возраст на 1 год
         if (monthsPlayed % 12 == 0) {
             age++

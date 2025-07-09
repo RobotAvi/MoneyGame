@@ -64,11 +64,7 @@ class FinancialJournalAdapter(
                 tvTimeAge.text = "$time • ${entry.playerAge} лет"
                 
                 // Полная дата
-                tvMonth.text = if (entry.realDate.isNotEmpty()) {
-                    entry.realDate
-                } else {
-                    "Месяц ${entry.monthNumber}"
-                }
+                tvMonth.text = entry.realDate
                 
                 // Баланс после операции
                 tvBalanceAfter.text = "Баланс: ${currencyFormat.format(entry.balanceAfter)}"
