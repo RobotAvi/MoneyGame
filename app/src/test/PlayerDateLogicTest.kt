@@ -47,4 +47,13 @@ class PlayerDateLogicTest {
         val realDate = "${player.currentDayOfMonth} ${months[currentMonth]} $currentYear"
         assertEquals("15 Март 2024", realDate)
     }
+
+    @Test
+    fun testPlayerNameAndStartDate() {
+        val name = "Алексей"
+        val startDate = 1717977600000L // 10.06.2024
+        val player = Player(name = name, startDateMillis = startDate)
+        assertEquals(name, player.name)
+        assertEquals(startDate, player.startDateMillis)
+    }
 }

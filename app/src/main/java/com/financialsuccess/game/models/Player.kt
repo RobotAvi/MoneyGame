@@ -32,7 +32,9 @@ data class Player(
     val activeRisks: MutableList<ProfessionalRisk> = mutableListOf(),
     val riskEffects: MutableList<RiskEffect> = mutableListOf(),
     var lastRiskActivated: ProfessionalRisk? = null,
-    var currentDayOfMonth: Int = 1 // Текущий день месяца (игровой)
+    var currentDayOfMonth: Int = 1, // Текущий день месяца (игровой)
+    var name: String? = null, // Имя персонажа
+    var startDateMillis: Long? = null // Дата начала игры (в миллисекундах)
 ) : Parcelable {
     
     companion object {
