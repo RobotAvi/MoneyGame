@@ -1,7 +1,7 @@
-## Changelog for v1.7
+## Changelog for v1.8
 
 ### Последние коммиты:
-- 🔖 Bump version to 1.7 (8) [auto] (GitHub Action)
+- 🔖 Bump version to 1.8 (9) [auto] (GitHub Action)
 - Merge branch 'main' of https://github.com/RobotAvi/MoneyGame (Avenir)
 ### Изменения из CHANGELOG.md:
 # Changelog
