@@ -1,8 +1,8 @@
-## Changelog for v1.17
+## Changelog for v1.18
 
 ### Последние коммиты:
-- 🔖 Bump version to 1.17 (18) [auto] (GitHub Action)
-- Investigate synchronization issue between icon and progress bar (#11) (Avenir Voronov)
+- 🔖 Bump version to 1.18 (19) [auto] (GitHub Action)
+- Добавить создание персонажа и дату начала (#12) (Avenir Voronov)
 ### Изменения из CHANGELOG.md:
 # Changelog
 
