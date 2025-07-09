@@ -1006,7 +1006,7 @@ class GameActivity : AppCompatActivity() {
         val currentMonth = player.monthsPlayed % 12
         val currentYear = startYear + player.monthsPlayed / 12
         val currentDay = player.currentDayOfMonth
-        binding.tvCurrentDate.text = "${months[currentMonth]} $currentYear, день $currentDay"
+        binding.tvCurrentDate.text = "$currentDay ${months[currentMonth].lowercase()} $currentYear"
     }
     
     private fun updateGameStatus(player: Player) {
