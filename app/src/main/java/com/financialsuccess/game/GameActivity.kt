@@ -35,8 +35,8 @@ class GameActivity : AppCompatActivity() {
     }
     
     private fun initGame() {
-        val profession = intent.getParcelableExtra<Profession>("profession")
-        val dream = intent.getParcelableExtra<Dream>("dream")
+        val profession = intent.getParcelableExtra("profession", Profession::class.java)
+        val dream = intent.getParcelableExtra("dream", Dream::class.java)
         val playerAge = intent.getIntExtra("playerAge", 25)
         
         if (profession != null && dream != null) {

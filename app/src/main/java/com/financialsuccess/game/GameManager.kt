@@ -114,7 +114,7 @@ class GameManager {
         return ""
     }
     
-    fun loadGameState(savedState: String): GameState? {
+    fun loadGameState(): GameState? {
         // Здесь можно добавить десериализацию из JSON для загрузки игры
         return null
     }
