@@ -14,7 +14,8 @@ data class FinancialEntry(
     val description: String,
     val playerAge: Int,
     val monthNumber: Int, // Месяц игры
-    val balanceAfter: Int // Баланс после операции
+    val balanceAfter: Int, // Баланс после операции
+    val realDate: String // Игровая дата в формате "число месяц год"
 ) : Parcelable
 
 @Parcelize

@@ -31,9 +31,14 @@ data class Player(
     val financialJournal: MutableList<FinancialEntry> = mutableListOf(),
     val activeRisks: MutableList<ProfessionalRisk> = mutableListOf(),
     val riskEffects: MutableList<RiskEffect> = mutableListOf(),
-    var lastRiskActivated: ProfessionalRisk? = null
+    var lastRiskActivated: ProfessionalRisk? = null,
+    var currentDayOfMonth: Int = 1 // Текущий день месяца (игровой)
 ) : Parcelable {
     
+    companion object {
+        const val DAYS_IN_MONTH = 30
+    }
+
     fun getNetWorth(): Int = 
         assets.sumOf { it.value } - liabilities.sumOf { it.amount }
     
@@ -115,6 +120,7 @@ data class Player(
     // Пройти один месяц (увеличивает возраст)
     fun passMonth() {
         monthsPlayed++
+        currentDayOfMonth = 1
         // Каждые 12 месяцев увеличиваем возраст на 1 год
         if (monthsPlayed % 12 == 0) {
             age++
@@ -142,6 +148,12 @@ data class Player(
         amount: Int,
         description: String
     ) {
+        val months = arrayOf("Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+                            "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь")
+        val startYear = 2024
+        val currentMonth = monthsPlayed % 12
+        val currentYear = startYear + monthsPlayed / 12
+        val realDate = "$currentDayOfMonth ${months[currentMonth]} $currentYear"
         val entry = FinancialEntry(
             type = type,
             category = category,
@@ -149,11 +161,10 @@ data class Player(
             description = description,
             playerAge = age,
             monthNumber = monthsPlayed,
-            balanceAfter = cash
+            balanceAfter = cash,
+            realDate = realDate
         )
         financialJournal.add(entry)
-        
-        // Ограничиваем журнал до 500 записей (последние 500 операций)
         if (financialJournal.size > 500) {
             financialJournal.removeAt(0)
         }

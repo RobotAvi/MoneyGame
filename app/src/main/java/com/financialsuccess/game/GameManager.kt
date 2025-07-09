@@ -45,11 +45,18 @@ class GameManager {
         val oldPosition = currentState.player.position
         val newPosition = (oldPosition + steps) % 24
 
+        // Увеличиваем игровой день на выпавшее число
+        currentState.player.currentDayOfMonth += steps
+
+        // Если переполнили месяц — переходим к новому месяцу, переносим остаток
+        while (currentState.player.currentDayOfMonth > Player.DAYS_IN_MONTH) {
+            currentState.player.currentDayOfMonth -= Player.DAYS_IN_MONTH
+            currentState.player.passMonth()
+        }
+
         // Если прошли полный круг (вернулись на старт)
         val passedStart = (oldPosition + steps) >= 24
         if (passedStart) {
-            currentState.player.passMonth()
-            
             // Сначала выплачиваем зарплату при завершении полного круга
             currentState.player.cash += currentState.player.salary
             currentState.player.logIncome(
@@ -57,7 +64,6 @@ class GameManager {
                 currentState.player.salary,
                 "Ежемесячная зарплата по профессии ${currentState.player.profession?.name}"
             )
-            
             // Затем списываем ежемесячные расходы
             currentState.player.processMonthlyOperations()
         }
