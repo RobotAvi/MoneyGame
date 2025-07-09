@@ -383,7 +383,6 @@ class GameActivity : AppCompatActivity() {
             event.contains("Налоговая") -> {
                 currentGameState?.player?.let { player ->
                     val taxAmount = 15000
-                    player.cash -= taxAmount
                     player.logExpense(
                         FinancialCategory.TAXES,
                         taxAmount,
@@ -422,7 +421,6 @@ class GameActivity : AppCompatActivity() {
         )
         
         currentGameState?.player?.let { player ->
-            player.cash -= expense
             player.logExpense(
                 FinancialCategory.EMERGENCY,
                 expense,
@@ -440,7 +438,6 @@ class GameActivity : AppCompatActivity() {
             .setPositiveButton("Да") { _, _ ->
                 currentGameState?.player?.let { player ->
                     val donation = (player.totalIncome * 0.1).toInt()
-                    player.cash -= donation
                     player.logExpense(
                         FinancialCategory.CHARITY,
                         donation,
@@ -598,7 +595,6 @@ class GameActivity : AppCompatActivity() {
             .setPositiveButton("💰 Инвестировать") { _, _ ->
                 currentGameState?.player?.let { player ->
                     if (player.cash >= investment.cost) {
-                        player.cash -= investment.cost
                         player.investments.add(investment)
                         
                         // Логируем инвестицию
@@ -968,7 +964,6 @@ class GameActivity : AppCompatActivity() {
         val player = currentGameState?.player ?: return
         
         if (player.cash >= cost) {
-            player.cash -= cost
             player.logExpense(
                 FinancialCategory.EMERGENCY,
                 cost,

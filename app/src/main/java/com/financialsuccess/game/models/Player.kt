@@ -229,9 +229,6 @@ data class Player(
             }
         }
         
-        // Списываем общие расходы (ВСЕГДА, даже если уходим в минус)
-        cash -= totalMonthlyExpenses
-        
         // Доходы от активов (всегда получаем)
         assets.forEach { asset ->
             if (asset.cashFlow > 0) {
