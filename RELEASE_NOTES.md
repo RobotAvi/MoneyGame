@@ -1,8 +1,8 @@
-## Changelog for v1.10
+## Changelog for v1.11
 
 ### Последние коммиты:
-- 🔖 Bump version to 1.10 (11) [auto] (GitHub Action)
-- Refactor game initialization and state loading (Avenir)
+- 🔖 Bump version to 1.11 (12) [auto] (GitHub Action)
+- Merge branch 'main' of https://github.com/RobotAvi/MoneyGame (Avenir)
 ### Изменения из CHANGELOG.md:
 # Changelog
 
