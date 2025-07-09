@@ -10,12 +10,16 @@ import com.financialsuccess.game.data.GameDataManager
 import com.financialsuccess.game.databinding.ActivityProfessionSelectionBinding
 import com.financialsuccess.game.models.Dream
 import com.financialsuccess.game.models.Profession
+import android.app.DatePickerDialog
+import java.util.Calendar
 
 class ProfessionSelectionActivity : AppCompatActivity() {
     
     private lateinit var binding: ActivityProfessionSelectionBinding
     private var selectedProfession: Profession? = null
     private var selectedDream: Dream? = null
+    private var selectedStartDate: Long? = null
+    private var playerName: String? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,27 +32,55 @@ class ProfessionSelectionActivity : AppCompatActivity() {
     private fun setupUI() {
         setupProfessionRecyclerView()
         setupDreamRecyclerView()
-        
+
+        // Date picker for start date
+        val etStartDate = binding.etStartDate
+        etStartDate.setOnClickListener {
+            val calendar = Calendar.getInstance()
+            val datePicker = DatePickerDialog(this,
+                { _, year, month, dayOfMonth ->
+                    calendar.set(year, month, dayOfMonth)
+                    selectedStartDate = calendar.timeInMillis
+                    etStartDate.setText("%02d.%02d.%d".format(dayOfMonth, month + 1, year))
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            )
+            datePicker.show()
+        }
+
         binding.btnStartGame.setOnClickListener {
             if (selectedProfession != null && selectedDream != null) {
                 val ageText = binding.etAge.text.toString()
                 val age = ageText.toIntOrNull()
-                
+                playerName = binding.etPlayerName.text?.toString()?.trim()
+
                 if (age == null || age < 18 || age > 65) {
                     binding.etAge.error = "Возраст должен быть от 18 до 65 лет"
                     return@setOnClickListener
                 }
-                
+                if (playerName.isNullOrEmpty()) {
+                    binding.etPlayerName.error = "Введите имя персонажа"
+                    return@setOnClickListener
+                }
+                if (selectedStartDate == null) {
+                    binding.etStartDate.error = "Выберите дату старта"
+                    return@setOnClickListener
+                }
+
                 val intent = Intent(this, GameActivity::class.java).apply {
                     putExtra("profession", selectedProfession)
                     putExtra("dream", selectedDream)
                     putExtra("playerAge", age)
+                    putExtra("playerName", playerName)
+                    putExtra("startDate", selectedStartDate)
                 }
                 startActivity(intent)
                 finish()
             }
         }
-        
+
         updateStartButtonState()
     }
     

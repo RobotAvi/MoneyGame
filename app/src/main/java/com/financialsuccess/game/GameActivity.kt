@@ -38,10 +38,17 @@ class GameActivity : AppCompatActivity() {
         val profession = intent.getParcelableExtra("profession", Profession::class.java)
         val dream = intent.getParcelableExtra("dream", Dream::class.java)
         val playerAge = intent.getIntExtra("playerAge", 25)
-        
+        val playerName = intent.getStringExtra("playerName")
+        val startDateMillis = intent.getLongExtra("startDate", 0L).takeIf { it != 0L }
         if (profession != null && dream != null) {
             gameManager = GameManager()
-            currentGameState = gameManager.startNewGame(profession, dream, playerAge)
+            currentGameState = gameManager.startNewGame(
+                profession,
+                dream,
+                playerAge,
+                playerName,
+                startDateMillis
+            )
             updateUI()
         } else {
             finish()

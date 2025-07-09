@@ -7,14 +7,22 @@ class GameManager {
     
     private var gameState: GameState? = null
     
-    fun startNewGame(profession: Profession, dream: Dream, playerAge: Int = 25): GameState {
+    fun startNewGame(
+        profession: Profession,
+        dream: Dream,
+        playerAge: Int = 25,
+        playerName: String? = null,
+        startDateMillis: Long? = null
+    ): GameState {
         val player = Player(
             position = 0,
             cash = 5000, // Стартовый капитал
             salary = profession.salary,
             age = playerAge,
             profession = profession,
-            dream = dream
+            dream = dream,
+            name = playerName,
+            startDateMillis = startDateMillis
         )
         
         // Устанавливаем случайный возраст смерти
