@@ -1,8 +1,8 @@
-## Changelog for v1.12
+## Changelog for v1.13
 
 ### Последние коммиты:
-- 🔖 Bump version to 1.12 (13) [auto] (GitHub Action)
-- Merge branch 'main' of https://github.com/RobotAvi/MoneyGame (Avenir)
+- 🔖 Bump version to 1.13 (14) [auto] (GitHub Action)
+- Fix balance calculation bug (#7) (Avenir Voronov)
 ### Изменения из CHANGELOG.md:
 # Changelog
 
