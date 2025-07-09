@@ -63,8 +63,12 @@ class FinancialJournalAdapter(
                 val time = dateFormat.format(Date(entry.timestamp))
                 tvTimeAge.text = "$time • ${entry.playerAge} лет"
                 
-                // Месяц игры
-                tvMonth.text = "Месяц ${entry.monthNumber}"
+                // Полная дата
+                tvMonth.text = if (entry.realDate.isNotEmpty()) {
+                    entry.realDate
+                } else {
+                    "Месяц ${entry.monthNumber}"
+                }
                 
                 // Баланс после операции
                 tvBalanceAfter.text = "Баланс: ${currencyFormat.format(entry.balanceAfter)}"

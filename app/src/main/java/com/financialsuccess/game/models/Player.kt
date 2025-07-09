@@ -142,6 +142,18 @@ data class Player(
         amount: Int,
         description: String
     ) {
+        // Вычисляем реальную дату на основе месяца игры
+        val months = arrayOf("Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+                            "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь")
+        
+        val startYear = 2024
+        val currentMonth = monthsPlayed % 12
+        val currentYear = startYear + monthsPlayed / 12
+        
+        // Генерируем случайное число месяца (1-28 для простоты)
+        val dayOfMonth = (1..28).random()
+        val realDate = "$dayOfMonth ${months[currentMonth]} $currentYear"
+        
         val entry = FinancialEntry(
             type = type,
             category = category,
@@ -149,7 +161,8 @@ data class Player(
             description = description,
             playerAge = age,
             monthNumber = monthsPlayed,
-            balanceAfter = cash
+            balanceAfter = cash,
+            realDate = realDate
         )
         financialJournal.add(entry)
         
