@@ -656,6 +656,7 @@ class GameActivity : AppCompatActivity() {
         
         // Обновляем дату и статус игры
         updateCurrentDate(player ?: return)
+        updateMonthProgressBar(player.currentDayOfMonth)
         updateGameStatus(player ?: return)
         updatePlayerAvatar(player ?: return)
         
@@ -737,6 +738,22 @@ class GameActivity : AppCompatActivity() {
         // Проверяем, может ли игрок выйти из крысиных бегов
         if (player.canEscapeRatRace() && !player.isInFastTrack) {
             showEscapeRatRaceDialog()
+        }
+    }
+    
+    private fun updateMonthProgressBar(currentDay: Int) {
+        val progressBar = binding.monthProgressBar
+        progressBar.removeAllViews()
+        val daysInMonth = 30
+        for (i in 1..daysInMonth) {
+            val dayView = View(this)
+            val params = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+            params.marginEnd = 2
+            dayView.layoutParams = params
+            dayView.setBackgroundColor(
+                if (i <= currentDay) android.graphics.Color.WHITE else android.graphics.Color.LTGRAY
+            )
+            progressBar.addView(dayView)
         }
     }
     

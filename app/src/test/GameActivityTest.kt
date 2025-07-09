@@ -6,7 +6,14 @@ import org.junit.Test
 import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
 import org.mockito.Mock
+import android.graphics.Color
+import android.widget.LinearLayout
+import android.view.View
+import org.robolectric.Robolectric
+import org.robolectric.RobolectricTestRunner
+import org.junit.runner.RunWith
 
+@RunWith(RobolectricTestRunner::class)
 class GameActivityTest {
     private lateinit var activity: GameActivity
     @Mock private lateinit var mockGameManager: GameManager
@@ -87,5 +94,24 @@ class GameActivityTest {
         assertTrue(result)
         assertEquals(5000, player.cash)
         assertTrue(player.assets.contains(asset))
+    }
+
+    @Test
+    fun testMonthProgressBarColors() {
+        val activityController = Robolectric.buildActivity(GameActivity::class.java).setup()
+        val activity = activityController.get()
+        val currentDay = 10
+        activity.updateMonthProgressBar(currentDay)
+        val progressBar = activity.findViewById<LinearLayout>(R.id.monthProgressBar)
+        assertEquals(30, progressBar.childCount)
+        for (i in 0 until 30) {
+            val dayView = progressBar.getChildAt(i)
+            val color = (dayView.background as? android.graphics.drawable.ColorDrawable)?.color
+            if (i < currentDay) {
+                assertEquals(Color.WHITE, color)
+            } else {
+                assertEquals(Color.LTGRAY, color)
+            }
+        }
     }
 } 
