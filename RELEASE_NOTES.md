@@ -1,8 +1,8 @@
-## Changelog for v1.13
+## Changelog for v1.14
 
 ### Последние коммиты:
-- 🔖 Bump version to 1.13 (14) [auto] (GitHub Action)
-- Fix balance calculation bug (#7) (Avenir Voronov)
+- 🔖 Bump version to 1.14 (15) [auto] (GitHub Action)
+- Adjust game action buttons layout and styling for better appearance (#8) (Avenir Voronov)
 ### Изменения из CHANGELOG.md:
 # Changelog
 
