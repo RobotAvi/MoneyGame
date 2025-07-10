@@ -1,1 +1,101 @@
-THIS SHOULD BE A LINTER ERROR
+appId: com.financialsuccess.game
+name: Financial Success Detailed Screenshots
+
+# Главный экран
+- launchApp
+- takeScreenshot: "01_main_screen"
+
+# Пробуем разные способы найти кнопку "Начать игру"
+- runFlow:
+    when:
+      visible: "Начать игру"
+    commands:
+      - tapOn: "Начать игру"
+      - takeScreenshot: "02_profession_selection"
+    else:
+      - tapOn: "Играть"
+      - takeScreenshot: "02_profession_selection_alt"
+
+# Выбираем профессию (пробуем разные варианты)
+- runFlow:
+    when:
+      visible: "Программист"
+    commands:
+      - tapOn: "Программист"
+      - takeScreenshot: "03_profession_programmer"
+    else:
+      - tapOn: "Врач"
+      - takeScreenshot: "03_profession_doctor"
+
+# Начинаем игру
+- runFlow:
+    when:
+      visible: "Начать"
+    commands:
+      - tapOn: "Начать"
+      - takeScreenshot: "04_game_started"
+    else:
+      - tapOn: "Старт"
+      - takeScreenshot: "04_game_started_alt"
+
+# Игровой экран
+- takeScreenshot: "05_game_screen"
+
+# Пробуем найти карточку события
+- runFlow:
+    when:
+      visible: "Карточка"
+    commands:
+      - tapOn: "Карточка"
+      - takeScreenshot: "06_event_card"
+    else:
+      - tapOn: "Событие"
+      - takeScreenshot: "06_event_card_alt"
+
+# Финансовый журнал
+- runFlow:
+    when:
+      visible: "Журнал"
+    commands:
+      - tapOn: "Журнал"
+      - takeScreenshot: "07_financial_journal"
+    else:
+      - tapOn: "Финансы"
+      - takeScreenshot: "07_financial_journal_alt"
+
+# Экран правил
+- runFlow:
+    when:
+      visible: "Правила"
+    commands:
+      - tapOn: "Правила"
+      - takeScreenshot: "08_rules_screen"
+    else:
+      - tapOn: "Помощь"
+      - takeScreenshot: "08_help_screen"
+
+# Возвращаемся в игру
+- pressKey: "back"
+- takeScreenshot: "09_back_to_game"
+
+# Экран снов/целей
+- runFlow:
+    when:
+      visible: "Мечты"
+    commands:
+      - tapOn: "Мечты"
+      - takeScreenshot: "10_dreams_screen"
+    else:
+      - tapOn: "Цели"
+      - takeScreenshot: "10_goals_screen"
+
+# Экран активов
+- runFlow:
+    when:
+      visible: "Активы"
+    commands:
+      - tapOn: "Активы"
+      - takeScreenshot: "11_assets_screen"
+    else:
+      - tapOn: "Инвестиции"
+      - takeScreenshot: "11_investments_screen"
