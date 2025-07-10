@@ -1,8 +1,8 @@
-## Changelog for v1.21
+## Changelog for v1.22
 
 ### Последние коммиты:
-- 🔖 Bump version to 1.21 (22) [auto] (GitHub Action)
-- Adjust skill item layout for better weight distribution and alignment (#16) (Avenir Voronov)
+- 🔖 Bump version to 1.22 (23) [auto] (GitHub Action)
+- Changes from background composer bc-a62a4788-3ec3-4cf2-8a0d-881abfa02fa5 (#17) (Avenir Voronov)
 ### Изменения из CHANGELOG.md:
 # Changelog
 
