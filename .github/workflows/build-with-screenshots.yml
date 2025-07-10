@@ -1,4 +1,4 @@
-name: Build, Release APK and Screenshots
+THIS SHOULD BE A LINTER ERRORname: Build, Release APK and Screenshots
 
 on:
   push:
