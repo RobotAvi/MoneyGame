@@ -66,8 +66,8 @@ class GameManager {
         return diceValue
     }
     
-    fun movePlayer(steps: Int): GameState? {
-        val currentState = gameState ?: return null
+    fun movePlayer(steps: Int): GameState {
+        val currentState = gameState ?: throw IllegalStateException("Game not started")
         val oldPosition = currentState.player.position
         val newPosition = (oldPosition + steps) % 24
 
@@ -141,7 +141,7 @@ class GameManager {
         return false
     }
     
-    fun getCurrentState(): GameState? = gameState
+    fun getCurrentState(): GameState = gameState ?: throw IllegalStateException("Game not started")
     
     fun saveGameState(): String {
         // Здесь можно добавить сериализацию в JSON для сохранения игры
