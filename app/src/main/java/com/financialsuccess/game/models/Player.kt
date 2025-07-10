@@ -49,7 +49,7 @@ data class Player(
     var spouseIncome: Int = 0, // Доход супруга/супруги
     
     // Финансовые предпочтения
-    var riskTolerance: RiskTolerance = RiskTolerance.MEDIUM,
+    var riskTolerance: RiskTolerance = RiskTolerance.MODERATE,
     var investmentStrategy: InvestmentStrategy = InvestmentStrategy.BALANCED,
     var savingsRate: Int = 10, // Процент от дохода на сбережения (0-50)
     

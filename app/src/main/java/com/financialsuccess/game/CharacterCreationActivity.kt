@@ -223,7 +223,8 @@ class CharacterCreationActivity : AppCompatActivity() {
                     selectedSkills.add(skill)
                 }
             }
-            skillAdapter.notifyDataSetChanged()
+            // Уведомляем адаптер об изменениях
+            (binding.recyclerViewSkills.adapter as? SkillAdapter)?.notifyDataSetChanged()
         }
         
         binding.recyclerViewSkills.apply {
