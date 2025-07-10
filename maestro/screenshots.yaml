@@ -1,5 +1,6 @@
 appId: com.financialsuccess.game
 name: Financial Success Screenshots
+outputDir: screenshots/phone
 
 # Главный экран
 - launchApp
@@ -9,7 +10,7 @@ name: Financial Success Screenshots
 - tapOn: "Начать игру"
 - takeScreenshot: "02_profession_selection"
 
-# Выбираем профессию (например, "Программист")
+# Выбираем профессию
 - tapOn: "Программист"
 - takeScreenshot: "03_profession_selected"
 
