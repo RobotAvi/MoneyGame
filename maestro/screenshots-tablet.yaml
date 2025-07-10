@@ -1,0 +1,22 @@
+appId: com.financialsuccess.game
+name: Financial Success Tablet Screenshots
+outputDir: screenshots/tablet
+
+# Главный экран
+- launchApp
+- takeScreenshot: "01_main_screen"
+
+# Экран выбора профессии
+- tapOn: "Начать игру"
+- takeScreenshot: "02_profession_selection"
+
+# Выбираем профессию
+- tapOn: "Врач"
+- takeScreenshot: "03_profession_selected"
+
+# Начинаем игру
+- tapOn: "Начать"
+- takeScreenshot: "04_game_started"
+
+# Игровой экран
+- takeScreenshot: "05_game_screen"

@@ -89,3 +89,10 @@ gradle-8.1.1-bin.zip
 
 # Релизные APK файлы хранятся в репозитории для скачивания
 # *.apk - закомментировано чтобы сохранить готовые релизы
+
+# Maestro screenshots (temporary)
+screenshots/temp/
+screenshots/*.png
+!screenshots/phone/*.png
+!screenshots/tablet/*.png
+!screenshots/7-inch/*.png
