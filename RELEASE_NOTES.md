@@ -1,8 +1,8 @@
-## Changelog for v1.22
+## Changelog for v1.23
 
 ### Последние коммиты:
-- 🔖 Bump version to 1.22 (23) [auto] (GitHub Action)
-- Changes from background composer bc-a62a4788-3ec3-4cf2-8a0d-881abfa02fa5 (#17) (Avenir Voronov)
+- 🔖 Bump version to 1.23 (24) [auto] (GitHub Action)
+- Проверка работы fastlane в приложении (#15) (Avenir Voronov)
 ### Изменения из CHANGELOG.md:
 # Changelog
 
