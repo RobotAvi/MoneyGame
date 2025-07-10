@@ -1,8 +1,8 @@
-## Changelog for v1.20
+## Changelog for v1.21
 
 ### Последние коммиты:
-- 🔖 Bump version to 1.20 (21) [auto] (GitHub Action)
-- Customize character life details (#14) (Avenir Voronov)
+- 🔖 Bump version to 1.21 (22) [auto] (GitHub Action)
+- Adjust skill item layout for better weight distribution and alignment (#16) (Avenir Voronov)
 ### Изменения из CHANGELOG.md:
 # Changelog
 
