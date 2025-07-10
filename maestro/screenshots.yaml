@@ -1,0 +1,45 @@
+appId: com.financialsuccess.game
+name: Financial Success Screenshots
+
+# Главный экран
+- launchApp
+- takeScreenshot: "01_main_screen"
+
+# Экран выбора профессии
+- tapOn: "Начать игру"
+- takeScreenshot: "02_profession_selection"
+
+# Выбираем профессию (например, "Программист")
+- tapOn: "Программист"
+- takeScreenshot: "03_profession_selected"
+
+# Начинаем игру
+- tapOn: "Начать"
+- takeScreenshot: "04_game_started"
+
+# Игровой экран
+- takeScreenshot: "05_game_screen"
+
+# Карточка события
+- tapOn: "Карточка"
+- takeScreenshot: "06_event_card"
+
+# Финансовый журнал
+- tapOn: "Журнал"
+- takeScreenshot: "07_financial_journal"
+
+# Экран правил
+- tapOn: "Правила"
+- takeScreenshot: "08_rules_screen"
+
+# Возвращаемся в игру
+- pressKey: "back"
+- takeScreenshot: "09_back_to_game"
+
+# Экран снов/целей
+- tapOn: "Мечты"
+- takeScreenshot: "10_dreams_screen"
+
+# Экран активов
+- tapOn: "Активы"
+- takeScreenshot: "11_assets_screen"
