@@ -1,8 +1,8 @@
-## Changelog for v1.23
+## Changelog for v1.24
 
 ### Последние коммиты:
-- 🔖 Bump version to 1.23 (24) [auto] (GitHub Action)
-- Проверка работы fastlane в приложении (#15) (Avenir Voronov)
+- 🔖 Bump version to 1.24 (25) [auto] (GitHub Action)
+- Improve error handling and add risk effect type in GameManager and PlayerTest (#18) (Avenir Voronov)
 ### Изменения из CHANGELOG.md:
 # Changelog
 
