@@ -1,4 +1,4 @@
-THIS SHOULD BE A LINTER ERRORname: Build, Release APK and Screenshots
+name: Build, Release APK and Screenshots
 
 on:
   push:
@@ -162,7 +162,7 @@ jobs:
         export PATH="$PATH":"$HOME/.maestro/bin"
         maestro --version
 
-    - name: Start Android Emulator
+    - name: Start Android Emulator (Phone)
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: 30
@@ -173,20 +173,55 @@ jobs:
           adb shell input keyevent 82
           adb shell input keyevent 82
 
-    - name: Install APK on Emulator
+    - name: Install APK on Phone Emulator
       run: |
         export PATH="$PATH":"$HOME/.maestro/bin"
         adb install ./apk/*.apk
         adb shell pm list packages | grep financialsuccess
 
-    - name: Run Maestro Screenshots
+    - name: Create screenshots directory
+      run: |
+        mkdir -p screenshots/phone
+        mkdir -p screenshots/tablet
+
+    - name: Run Maestro Screenshots (Phone)
       run: |
         export PATH="$PATH":"$HOME/.maestro/bin"
-        mkdir -p screenshots
-        maestro test maestro/screenshots.yaml --format junit --output screenshots/
-        echo "Screenshots completed!"
+        maestro test maestro/screenshots.yaml --format junit --output screenshots/phone/
+        echo "Phone screenshots completed!"
 
-    - name: Upload Screenshots
+    - name: Start Android Emulator (Tablet)
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 30
+        target: google_apis
+        arch: x86_64
+        profile: Nexus 10
+        script: |
+          adb shell input keyevent 82
+          adb shell input keyevent 82
+
+    - name: Install APK on Tablet Emulator
+      run: |
+        export PATH="$PATH":"$HOME/.maestro/bin"
+        adb install ./apk/*.apk
+        adb shell pm list packages | grep financialsuccess
+
+    - name: Run Maestro Screenshots (Tablet)
+      run: |
+        export PATH="$PATH":"$HOME/.maestro/bin"
+        maestro test maestro/screenshots-tablet.yaml --format junit --output screenshots/tablet/
+        echo "Tablet screenshots completed!"
+
+    - name: List generated screenshots
+      run: |
+        echo "📱 Phone screenshots:"
+        ls -la screenshots/phone/
+        echo ""
+        echo "📱 Tablet screenshots:"
+        ls -la screenshots/tablet/
+
+    - name: Upload Screenshots Artifact
       uses: actions/upload-artifact@v4
       with:
         name: screenshots-v${{ needs.build.outputs.version }}
@@ -200,6 +235,21 @@ jobs:
         if git diff --staged --quiet; then
           echo "No screenshots to commit"
         else
-          git commit -m "📸 Auto-generated screenshots v${{ needs.build.outputs.version }} - ${{ needs.build.outputs.date }}"
+          git commit -m "📸 Auto-generated screenshots v${{ needs.build.outputs.version }} - ${{ needs.build.outputs.date }}
+          
+          📱 Screenshots:
+          - Phone: $(ls screenshots/phone/*.png | wc -l) files
+          - Tablet: $(ls screenshots/tablet/*.png | wc -l) files
+          - Total: $(find screenshots/ -name "*.png" | wc -l) files"
           git push
         fi
+
+    - name: Update Release with Screenshots
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ needs.build.outputs.new_version }}-${{ needs.build.outputs.date }}
+        files: |
+          screenshots/phone/*.png
+          screenshots/tablet/*.png
+        draft: false
+        prerelease: false
