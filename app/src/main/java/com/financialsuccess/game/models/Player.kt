@@ -34,7 +34,42 @@ data class Player(
     var lastRiskActivated: ProfessionalRisk? = null,
     var currentDayOfMonth: Int = 1, // Текущий день месяца (игровой)
     var name: String? = null, // Имя персонажа
-    var startDateMillis: Long? = null // Дата начала игры (в миллисекундах)
+    var startDateMillis: Long? = null, // Дата начала игры (в миллисекундах)
+    
+    // === НОВЫЕ ПОЛЯ ДЛЯ РАСШИРЕННОЙ ПЕРСОНАЛИЗАЦИИ ===
+    
+    // Образование и опыт
+    var education: EducationLevel = EducationLevel.BACHELOR,
+    var workExperience: Int = 0, // Опыт работы в годах
+    var skills: MutableList<Skill> = mutableListOf(),
+    
+    // Семейное положение
+    var maritalStatus: MaritalStatus = MaritalStatus.SINGLE,
+    var childrenCount: Int = 0,
+    var spouseIncome: Int = 0, // Доход супруга/супруги
+    
+    // Финансовые предпочтения
+    var riskTolerance: RiskTolerance = RiskTolerance.MEDIUM,
+    var investmentStrategy: InvestmentStrategy = InvestmentStrategy.BALANCED,
+    var savingsRate: Int = 10, // Процент от дохода на сбережения (0-50)
+    
+    // Жизненные цели
+    var financialGoals: MutableList<FinancialGoal> = mutableListOf(),
+    var retirementAge: Int = 65,
+    var targetPassiveIncome: Int = 100000, // Целевой пассивный доход
+    
+    // Дополнительные параметры
+    var healthLevel: HealthLevel = HealthLevel.GOOD,
+    var stressLevel: StressLevel = StressLevel.LOW,
+    var workLifeBalance: WorkLifeBalance = WorkLifeBalance.BALANCED,
+    
+    // Статистика и достижения
+    var totalEarned: Int = 0, // Общий заработок за всю жизнь
+    var totalSpent: Int = 0, // Общие траты за всю жизнь
+    var totalInvested: Int = 0, // Общая сумма инвестиций
+    var careerPromotions: Int = 0, // Количество повышений
+    var businessFailures: Int = 0, // Количество неудачных бизнесов
+    var successfulInvestments: Int = 0 // Количество успешных инвестиций
 ) : Parcelable {
     
     companion object {
@@ -51,7 +86,8 @@ data class Player(
         passiveIncome > totalExpenses
     
     fun updateTotalIncome() {
-        totalIncome = salary
+        // Основной доход = зарплата + доход супруга
+        totalIncome = salary + spouseIncome
         passiveIncome = assets.sumOf { it.cashFlow } + investments.sumOf { it.expectedReturn }
     }
     
@@ -67,7 +103,20 @@ data class Player(
         otherExpenses = professionExpenses - foodExpenses - transportExpenses - housingExpenses
         taxes = professionTaxes
         
-        // Общие расходы = базовые + кредиты + дети
+        // Добавляем семейные расходы
+        childrenExpenses = childrenCount * 8000 // 8000 рублей на ребенка в месяц
+        
+        // Добавляем расходы на супруга/супругу
+        if (maritalStatus == MaritalStatus.MARRIED) {
+            otherExpenses += 5000 // Дополнительные расходы на семью
+        }
+        
+        // Применяем модификаторы здоровья
+        val healthMultiplier = healthLevel.expenseMultiplier
+        foodExpenses = (foodExpenses * healthMultiplier).toInt()
+        otherExpenses = (otherExpenses * healthMultiplier).toInt()
+        
+        // Общие расходы = базовые + кредиты + дети + семья
         totalExpenses = foodExpenses + transportExpenses + housingExpenses + 
                        childrenExpenses + taxes + otherExpenses + 
                        liabilities.sumOf { it.payment }
@@ -264,8 +313,15 @@ data class Player(
             if (additionalPassive > 0) {
                 cash += additionalPassive
                 logIncome(FinancialCategory.PASSIVE_INCOME, additionalPassive, "Ежемесячный пассивный доход")
-                         }
-         }
+            }
+        }
+        
+        // Применяем сбережения
+        applySavings()
+        
+        // Обновляем статистику
+        totalEarned += totalIncome + passiveIncome
+        totalSpent += totalExpenses
      }
      
      // === ПРОФЕССИОНАЛЬНЫЕ РИСКИ ===
@@ -394,4 +450,200 @@ data class Player(
              else -> "🟢 Здоров"
          }
      }
+     
+     // === НОВЫЕ МЕТОДЫ ДЛЯ РАСШИРЕННОЙ ПЕРСОНАЛИЗАЦИИ ===
+     
+     // Рассчитать бонус к зарплате на основе образования и опыта
+     fun calculateEducationBonus(): Int {
+         val educationBonus = when (education) {
+             EducationLevel.HIGH_SCHOOL -> 0
+             EducationLevel.COLLEGE -> 5000
+             EducationLevel.BACHELOR -> 10000
+             EducationLevel.MASTER -> 15000
+             EducationLevel.PHD -> 20000
+         }
+         
+         val experienceBonus = workExperience * 2000 // 2000 рублей за каждый год опыта
+         
+         return educationBonus + experienceBonus
+     }
+     
+     // Рассчитать бонус к зарплате на основе навыков
+     fun calculateSkillsBonus(): Int {
+         return skills.sumOf { it.salaryBonus }
+     }
+     
+     // Обновить зарплату с учетом всех бонусов
+     fun updateSalaryWithBonuses() {
+         val baseSalary = profession?.salary ?: 0
+         val educationBonus = calculateEducationBonus()
+         val skillsBonus = calculateSkillsBonus()
+         val experienceBonus = workExperience * 1000
+         
+         salary = baseSalary + educationBonus + skillsBonus + experienceBonus
+         updateTotalIncome()
+     }
+     
+     // Рассчитать семейные расходы
+     fun calculateFamilyExpenses(): Int {
+         var familyExpenses = 0
+         
+         // Расходы на детей
+         familyExpenses += childrenCount * 8000
+         
+         // Расходы на супруга/супругу
+         if (maritalStatus == MaritalStatus.MARRIED) {
+             familyExpenses += 5000 // Дополнительные расходы на семью
+         }
+         
+         return familyExpenses
+     }
+     
+     // Рассчитать сбережения
+     fun calculateSavings(): Int {
+         return (totalIncome * savingsRate) / 100
+     }
+     
+     // Применить сбережения
+     fun applySavings() {
+         val savings = calculateSavings()
+         if (cash >= savings) {
+             cash -= savings
+             totalInvested += savings
+             logExpense(FinancialCategory.SAVINGS, savings, "Ежемесячные сбережения")
+         }
+     }
+     
+     // Проверить достижение финансовых целей
+     fun checkFinancialGoals(): List<FinancialGoal> {
+         val achievedGoals = mutableListOf<FinancialGoal>()
+         
+         financialGoals.forEach { goal ->
+             when (goal.type) {
+                 GoalType.PASSIVE_INCOME -> {
+                     if (passiveIncome >= goal.targetAmount) {
+                         achievedGoals.add(goal)
+                     }
+                 }
+                 GoalType.NET_WORTH -> {
+                     if (getNetWorth() >= goal.targetAmount) {
+                         achievedGoals.add(goal)
+                     }
+                 }
+                 GoalType.SAVINGS -> {
+                     if (cash >= goal.targetAmount) {
+                         achievedGoals.add(goal)
+                     }
+                 }
+                 GoalType.RETIREMENT -> {
+                     if (age >= retirementAge && passiveIncome >= targetPassiveIncome) {
+                         achievedGoals.add(goal)
+                     }
+                 }
+             }
+         }
+         
+         return achievedGoals
+     }
+     
+     // Получить общую статистику жизни
+     fun getLifeStatistics(): Map<String, Any> {
+         return mapOf(
+             "totalEarned" to totalEarned,
+             "totalSpent" to totalSpent,
+             "totalInvested" to totalInvested,
+             "careerPromotions" to careerPromotions,
+             "businessFailures" to businessFailures,
+             "successfulInvestments" to successfulInvestments,
+             "yearsWorked" to workExperience,
+             "childrenCount" to childrenCount,
+             "netWorth" to getNetWorth(),
+             "passiveIncome" to passiveIncome,
+             "lifePercentage" to getLifePercentage()
+         )
+     }
 }
+
+// === НОВЫЕ ENUM КЛАССЫ И DATA КЛАССЫ ===
+
+enum class EducationLevel(val displayName: String, val salaryMultiplier: Double) {
+    HIGH_SCHOOL("Среднее образование", 0.8),
+    COLLEGE("Среднее специальное", 0.9),
+    BACHELOR("Высшее образование", 1.0),
+    MASTER("Магистратура", 1.2),
+    PHD("Докторантура", 1.4)
+}
+
+enum class MaritalStatus(val displayName: String) {
+    SINGLE("Холост/Не замужем"),
+    MARRIED("Женат/Замужем"),
+    DIVORCED("Разведен/Разведена"),
+    WIDOWED("Вдовец/Вдова")
+}
+
+enum class RiskTolerance(val displayName: String, val investmentMultiplier: Double) {
+    CONSERVATIVE("Консервативный", 0.7),
+    MODERATE("Умеренный", 1.0),
+    AGGRESSIVE("Агрессивный", 1.3)
+}
+
+enum class InvestmentStrategy(val displayName: String) {
+    CONSERVATIVE("Консервативная"),
+    BALANCED("Сбалансированная"),
+    AGGRESSIVE("Агрессивная"),
+    DIVIDEND("Дивидендная"),
+    GROWTH("Ростовая")
+}
+
+enum class HealthLevel(val displayName: String, val expenseMultiplier: Double) {
+    EXCELLENT("Отличное", 0.8),
+    GOOD("Хорошее", 1.0),
+    FAIR("Удовлетворительное", 1.2),
+    POOR("Плохое", 1.5)
+}
+
+enum class StressLevel(val displayName: String, val healthImpact: Double) {
+    LOW("Низкий", 1.0),
+    MODERATE("Умеренный", 1.1),
+    HIGH("Высокий", 1.3),
+    CRITICAL("Критический", 1.5)
+}
+
+enum class WorkLifeBalance(val displayName: String, val stressMultiplier: Double) {
+    WORK_FOCUSED("Работа", 1.3),
+    BALANCED("Баланс", 1.0),
+    LIFE_FOCUSED("Личная жизнь", 0.8)
+}
+
+enum class GoalType(val displayName: String) {
+    PASSIVE_INCOME("Пассивный доход"),
+    NET_WORTH("Чистая стоимость"),
+    SAVINGS("Сбережения"),
+    RETIREMENT("Пенсия")
+}
+
+@Parcelize
+data class Skill(
+    val name: String,
+    val description: String,
+    val salaryBonus: Int,
+    val category: SkillCategory
+) : Parcelable
+
+enum class SkillCategory(val displayName: String) {
+    TECHNICAL("Технические"),
+    SOFT_SKILLS("Мягкие навыки"),
+    LEADERSHIP("Лидерство"),
+    FINANCIAL("Финансовые"),
+    CREATIVE("Творческие")
+}
+
+@Parcelize
+data class FinancialGoal(
+    val name: String,
+    val description: String,
+    val type: GoalType,
+    val targetAmount: Int,
+    val deadline: Int, // В месяцах от начала игры
+    val isAchieved: Boolean = false
+) : Parcelable

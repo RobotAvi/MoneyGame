@@ -35,23 +35,35 @@ class GameActivity : AppCompatActivity() {
     }
     
     private fun initGame() {
-        val profession = intent.getParcelableExtra("profession", Profession::class.java)
-        val dream = intent.getParcelableExtra("dream", Dream::class.java)
-        val playerAge = intent.getIntExtra("playerAge", 25)
-        val playerName = intent.getStringExtra("playerName")
-        val startDateMillis = intent.getLongExtra("startDate", 0L).takeIf { it != 0L }
-        if (profession != null && dream != null) {
+        // Проверяем, передан ли готовый игрок
+        val player = intent.getParcelableExtra("player", Player::class.java)
+        
+        if (player != null) {
+            // Используем готового игрока
             gameManager = GameManager()
-            currentGameState = gameManager.startNewGame(
-                profession,
-                dream,
-                playerAge,
-                playerName,
-                startDateMillis
-            )
+            currentGameState = gameManager.startNewGameWithPlayer(player)
             updateUI()
         } else {
-            finish()
+            // Старый способ - создаем игрока из отдельных параметров
+            val profession = intent.getParcelableExtra("profession", Profession::class.java)
+            val dream = intent.getParcelableExtra("dream", Dream::class.java)
+            val playerAge = intent.getIntExtra("playerAge", 25)
+            val playerName = intent.getStringExtra("playerName")
+            val startDateMillis = intent.getLongExtra("startDate", 0L).takeIf { it != 0L }
+            
+            if (profession != null && dream != null) {
+                gameManager = GameManager()
+                currentGameState = gameManager.startNewGame(
+                    profession,
+                    dream,
+                    playerAge,
+                    playerName,
+                    startDateMillis
+                )
+                updateUI()
+            } else {
+                finish()
+            }
         }
     }
     

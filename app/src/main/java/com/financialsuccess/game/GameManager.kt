@@ -43,6 +43,24 @@ class GameManager {
         return gameState!!
     }
     
+    fun startNewGameWithPlayer(player: Player): GameState {
+        // Обновляем зарплату с учетом всех бонусов
+        player.updateSalaryWithBonuses()
+        
+        // Обновляем расходы с учетом семьи
+        player.updateTotalExpenses()
+        
+        // Добавляем начальную запись в журнал
+        player.logIncome(
+            FinancialCategory.GAME_START,
+            player.cash,
+            "Начальный капитал для старта игры"
+        )
+        
+        gameState = GameState(player = player)
+        return gameState!!
+    }
+    
     fun rollDice(): Int {
         val diceValue = Random.nextInt(1, 7)
         return diceValue
