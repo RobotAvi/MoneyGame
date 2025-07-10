@@ -173,6 +173,7 @@ class PlayerTest {
         
         // Добавляем риски для тестирования
         val riskEffect = RiskEffect(
+            type = RiskEffectType.STRESS_DISORDER,
             description = "Тестовый эффект",
             expenseIncrease = 1000,
             salaryReduction = 0,
