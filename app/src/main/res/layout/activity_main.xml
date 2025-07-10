@@ -43,6 +43,15 @@
         style="@style/Widget.Material3.Button" />
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_advanced_character"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Создать персонажа"
+        android:textSize="18sp"
+        android:layout_marginBottom="16dp"
+        style="@style/Widget.Material3.Button.OutlinedButton" />
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_rules"
         android:layout_width="match_parent"
         android:layout_height="56dp"

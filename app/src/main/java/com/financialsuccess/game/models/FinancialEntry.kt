@@ -45,6 +45,7 @@ enum class FinancialCategory : Parcelable {
     LOAN_PAYMENT,        // Выплаты по кредитам
     ASSET_PURCHASE,      // Покупка активов
     INVESTMENT,          // Инвестиции
+    SAVINGS,             // Сбережения
     EMERGENCY,           // Непредвиденные расходы
     CHARITY,             // Благотворительность
     
@@ -75,6 +76,7 @@ fun FinancialCategory.getIcon(): String = when (this) {
     FinancialCategory.LOAN_PAYMENT -> "🏦"
     FinancialCategory.ASSET_PURCHASE -> "🏠"
     FinancialCategory.INVESTMENT -> "📊"
+    FinancialCategory.SAVINGS -> "💰"
     FinancialCategory.EMERGENCY -> "⚠️"
     FinancialCategory.CHARITY -> "❤️"
     
@@ -104,6 +106,7 @@ fun FinancialCategory.getDisplayName(): String = when (this) {
     FinancialCategory.LOAN_PAYMENT -> "Кредиты"
     FinancialCategory.ASSET_PURCHASE -> "Покупка активов"
     FinancialCategory.INVESTMENT -> "Инвестиции"
+    FinancialCategory.SAVINGS -> "Сбережения"
     FinancialCategory.EMERGENCY -> "Непредвиденные расходы"
     FinancialCategory.CHARITY -> "Благотворительность"
     

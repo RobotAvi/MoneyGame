@@ -23,6 +23,11 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         
+        binding.btnAdvancedCharacter.setOnClickListener {
+            val intent = Intent(this, CharacterCreationActivity::class.java)
+            startActivity(intent)
+        }
+        
         binding.btnRules.setOnClickListener {
             val intent = Intent(this, RulesActivity::class.java)
             startActivity(intent)
