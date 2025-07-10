@@ -1,8 +1,8 @@
-## Changelog for v1.18
+## Changelog for v1.19
 
 ### Последние коммиты:
-- 🔖 Bump version to 1.18 (19) [auto] (GitHub Action)
-- Добавить создание персонажа и дату начала (#12) (Avenir Voronov)
+- 🔖 Bump version to 1.19 (20) [auto] (GitHub Action)
+- Checkpoint before follow-up message (#13) (Avenir Voronov)
 ### Изменения из CHANGELOG.md:
 # Changelog
 
