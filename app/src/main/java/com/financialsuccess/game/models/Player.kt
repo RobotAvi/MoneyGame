@@ -261,7 +261,6 @@ data class Player(
         checkProfessionalRisks()
         
         // Основные расходы (ВСЕГДА списываются, даже если недостаточно денег)
-        val totalMonthlyExpenses = totalExpenses
         
         // Логируем и списываем все расходы
         if (foodExpenses > 0) {

@@ -141,7 +141,6 @@ class GameManagerTest {
     fun `test month progression`() {
         val gameState = gameManager.startNewGame(profession, dream)
         val initialMonth = gameState.player.monthsPlayed
-        val initialDay = gameState.player.currentDayOfMonth
         
         // Двигаемся на 30 дней (полный месяц)
         val newGameState = gameManager.movePlayer(30)
