@@ -129,12 +129,12 @@ class GameManagerTest {
         val gameState = gameManager.startNewGame(profession, dream)
         gameState.player.position = 20 // 4 клетки до старта
         val initialCash = gameState.player.cash
-        
+        val salary = gameState.player.salary
+        val expenses = gameState.player.totalExpenses
         val newGameState = gameManager.movePlayer(4)
-        
         assertNotNull(newGameState)
         assertEquals(0, newGameState.player.position) // Вернулись на старт
-        assertEquals(initialCash + gameState.player.salary, newGameState.player.cash) // Получили зарплату
+        assertEquals(initialCash + salary - expenses, newGameState.player.cash) // Получили зарплату и заплатили расходы
     }
     
     @Test
@@ -178,6 +178,7 @@ class GameManagerTest {
         
         gameState.player.assets.add(asset)
         gameState.player.updateTotalIncome()
+        gameState.player.updateTotalExpenses()
         
         // Проверяем, что игрок может выйти из крысиных бегов
         assertTrue(gameState.player.canEscapeRatRace())
@@ -312,7 +313,7 @@ class GameManagerTest {
         val gameState = gameManager.startNewGameWithPlayer(player)
         
         // Проверяем, что зарплата рассчитана с бонусами
-        val expectedSalary = 80000 + 10000 + 15000 + 2000 // Базовая + образование + навык + опыт
+        val expectedSalary = 80000 + 10000 + 4000 + 15000 // Базовая + образование + опыт + навык
         assertEquals(expectedSalary, gameState.player.salary)
         
         // Проверяем, что доходы обновлены

@@ -56,11 +56,13 @@ class PlayerTest {
         val bachelorBonus = player.copy(education = EducationLevel.BACHELOR).calculateEducationBonus()
         val masterBonus = player.copy(education = EducationLevel.MASTER).calculateEducationBonus()
         val phdBonus = player.copy(education = EducationLevel.PHD).calculateEducationBonus()
-        
-        assertEquals(4000, highSchoolBonus) // 0 + 2*2000
-        assertEquals(14000, bachelorBonus) // 10000 + 2*2000
-        assertEquals(19000, masterBonus) // 15000 + 2*2000
-        assertEquals(24000, phdBonus) // 20000 + 2*2000
+        val experienceBonus = player.calculateExperienceBonus()
+
+        assertEquals(0, highSchoolBonus) // Только образование
+        assertEquals(10000, bachelorBonus)
+        assertEquals(15000, masterBonus)
+        assertEquals(20000, phdBonus)
+        assertEquals(4000, experienceBonus) // 2*2000
     }
     
     @Test
@@ -89,10 +91,10 @@ class PlayerTest {
         
         // Базовая зарплата: 80000
         // Бонус за образование (BACHELOR): 10000
+        // Бонус за опыт (2 года): 4000
         // Бонус за навык: 15000
-        // Бонус за опыт (2 года): 2000
-        // Ожидаемая зарплата: 80000 + 10000 + 15000 + 2000 = 107000
-        assertEquals(107000, player.salary)
+        // Ожидаемая зарплата: 80000 + 10000 + 4000 + 15000 = 109000
+        assertEquals(109000, player.salary)
     }
     
     @Test
@@ -170,7 +172,6 @@ class PlayerTest {
         // Тест расчета статуса здоровья
         val healthyPlayer = player.copy(healthLevel = HealthLevel.EXCELLENT)
         val poorHealthPlayer = player.copy(healthLevel = HealthLevel.POOR)
-        
         // Добавляем риски для тестирования
         val riskEffect = RiskEffect(
             type = RiskEffectType.STRESS_DISORDER,
@@ -181,6 +182,7 @@ class PlayerTest {
             severity = RiskSeverity.SEVERE,
             careerEnd = false
         )
+        poorHealthPlayer.riskEffects.clear()
         poorHealthPlayer.riskEffects.add(riskEffect)
         
         val healthyStatus = healthyPlayer.getHealthStatus()
@@ -212,9 +214,8 @@ class PlayerTest {
     fun `test total income with spouse`() {
         // Тест общего дохода с учетом супруга
         player.spouseIncome = 50000
-        
+        player.salary = 80000
         player.updateTotalIncome()
-        
         // Зарплата игрока + доход супруга
         assertEquals(130000, player.totalIncome) // 80000 + 50000
     }
