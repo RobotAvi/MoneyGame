@@ -476,7 +476,6 @@ data class Player(
          val baseSalary = profession.salary
          val educationBonus = calculateEducationBonus()
          val skillsBonus = calculateSkillsBonus()
-         
          salary = baseSalary + educationBonus + skillsBonus
          updateTotalIncome()
      }
