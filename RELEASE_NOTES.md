@@ -1,8 +1,8 @@
-## Changelog for v1.26
+## Changelog for v1.27
 
 ### Последние коммиты:
-- 🔖 Bump version to 1.26 (27) [auto] (GitHub Action)
-- Refactor null checks and simplify player state handling in GameActivity (#20) (Avenir Voronov)
+- 🔖 Bump version to 1.27 (28) [auto] (GitHub Action)
+- Fix code warnings and failing tests (#21) (Avenir Voronov)
 ### Изменения из CHANGELOG.md:
 # Changelog
 
