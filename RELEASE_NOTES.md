@@ -1,8 +1,8 @@
-## Changelog for v1.32
+## Changelog for v1.33
 
 ### Последние коммиты:
-- 🔖 Bump version to 1.32 (33) [auto] (GitHub Action)
-- 🚀 Add GitHub Actions workflows for Android app build and release (#26) (Avenir Voronov)
+- 🔖 Bump version to 1.33 (34) [auto] (GitHub Action)
+- Fix RecyclerView scrolling and wrap layout in ScrollView (#27) (Avenir Voronov)
 ### Изменения из CHANGELOG.md:
 # Changelog
 
