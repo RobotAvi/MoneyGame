@@ -666,21 +666,21 @@ class GameActivity : AppCompatActivity() {
     }
     
     private fun updateUI() {
-        val player = currentGameState?.player
+        val player = currentGameState?.player ?: return
         // Проверяем смерть игрока
-        if (player?.isAlive() == false) {
+        if (!player.isAlive()) {
             showDeathDialog()
             return
         }
         
         // Обновляем дату и статус игры
-        updateCurrentDate(player ?: return)
+        updateCurrentDate(player)
         updateMonthProgressBar(player.currentDayOfMonth) // <-- снова используем день месяца
-        updateGameStatus(player ?: return)
-        updatePlayerAvatar(player ?: return)
+        updateGameStatus(player)
+        updatePlayerAvatar(player)
         
         // Обновляем профессию на экране
-        binding.tvProfession.text = "Профессия: ${player?.profession?.name ?: "-"}"
+        binding.tvProfession.text = "Профессия: ${player.profession?.name ?: "-"}"
         
         // Обновляем финансовую информацию
         binding.tvCash.text = "Наличные: ${currencyFormat.format(player.cash)}"
