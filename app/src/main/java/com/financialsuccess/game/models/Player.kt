@@ -95,29 +95,25 @@ data class Player(
         // Базовые расходы из профессии
         val professionExpenses = profession.expenses
         val professionTaxes = profession.taxes
-        
-        // Распределяем базовые расходы по категориям
-        foodExpenses = (professionExpenses * 0.4).toInt()
-        transportExpenses = (professionExpenses * 0.15).toInt() 
-        housingExpenses = (professionExpenses * 0.3).toInt()
-        otherExpenses = professionExpenses - foodExpenses - transportExpenses - housingExpenses
+        val healthMultiplier = healthLevel.expenseMultiplier
+
+        // Распределяем базовые расходы по категориям и применяем health-модификатор
+        foodExpenses = (professionExpenses * 0.4 * healthMultiplier).toInt()
+        transportExpenses = (professionExpenses * 0.15 * healthMultiplier).toInt()
+        housingExpenses = (professionExpenses * 0.3 * healthMultiplier).toInt()
+        otherExpenses = ((professionExpenses - professionExpenses * 0.4 - professionExpenses * 0.15 - professionExpenses * 0.3) * healthMultiplier).toInt()
         taxes = professionTaxes
-        
+
         // Добавляем семейные расходы
         childrenExpenses = childrenCount * 8000 // 8000 рублей на ребенка в месяц
-        
-        // Применяем модификаторы здоровья
-        val healthMultiplier = healthLevel.expenseMultiplier
-        foodExpenses = (foodExpenses * healthMultiplier).toInt()
-        otherExpenses = (otherExpenses * healthMultiplier).toInt()
-        
+
         // Общие расходы = базовые + кредиты + дети + семья
         totalExpenses = foodExpenses + transportExpenses + housingExpenses + 
                        childrenExpenses + taxes + otherExpenses + 
                        liabilities.sumOf { it.payment }
         // Добавляем расходы на супруга/супругу после healthMultiplier
         if (maritalStatus == MaritalStatus.MARRIED) {
-            totalExpenses += 5000 // Дополнительные расходы на семью
+            totalExpenses += (5000 * healthMultiplier).toInt() // Дополнительные расходы на семью с учетом здоровья
         }
     }
     
@@ -451,33 +447,34 @@ data class Player(
      
      // === НОВЫЕ МЕТОДЫ ДЛЯ РАСШИРЕННОЙ ПЕРСОНАЛИЗАЦИИ ===
      
-     // Рассчитать бонус к зарплате на основе образования и опыта
+     // Рассчитать бонус к зарплате на основе образования
      fun calculateEducationBonus(): Int {
-         val educationBonus = when (education) {
+         return when (education) {
              EducationLevel.HIGH_SCHOOL -> 0
              EducationLevel.COLLEGE -> 5000
              EducationLevel.BACHELOR -> 10000
              EducationLevel.MASTER -> 15000
              EducationLevel.PHD -> 20000
          }
-         
-         val experienceBonus = workExperience * 2000 // 2000 рублей за каждый год опыта
-         
-         return educationBonus + experienceBonus
      }
-     
+
+     // Рассчитать бонус к зарплате за опыт работы
+     fun calculateExperienceBonus(): Int {
+         return workExperience * 2000 // 2000 рублей за каждый год опыта
+     }
+
      // Рассчитать бонус к зарплате на основе навыков
      fun calculateSkillsBonus(): Int {
          return skills.sumOf { it.salaryBonus }
      }
-     
+
      // Обновить зарплату с учетом всех бонусов
      fun updateSalaryWithBonuses() {
          val baseSalary = profession.salary
          val educationBonus = calculateEducationBonus()
+         val experienceBonus = calculateExperienceBonus()
          val skillsBonus = calculateSkillsBonus()
-         
-         salary = baseSalary + educationBonus + skillsBonus
+         salary = baseSalary + educationBonus + experienceBonus + skillsBonus
          updateTotalIncome()
      }
      
