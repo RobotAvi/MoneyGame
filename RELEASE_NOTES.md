@@ -1,8 +1,8 @@
-## Changelog for v1.27
+## Changelog for v1.28
 
 ### Последние коммиты:
-- 🔖 Bump version to 1.27 (28) [auto] (GitHub Action)
-- Fix code warnings and failing tests (#21) (Avenir Voronov)
+- 🔖 Bump version to 1.28 (29) [auto] (GitHub Action)
+- Build project and verify tests (#22) (Avenir Voronov)
 ### Изменения из CHANGELOG.md:
 # Changelog
 
