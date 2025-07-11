@@ -102,6 +102,12 @@ jobs:
         ln -sf "$newname" "latest-debug.apk"
         ls -la
 
+    - name: Clean up old APKs (keep only 3 latest)
+      run: |
+        cd releases/debug
+        ls -tp FinancialSuccess-v*-debug.apk | grep -v '/$' | tail -n +4 | xargs -r rm --
+        ls -la
+
     - name: Commit APK files
       run: |
         git config --local user.email "action@github.com"
