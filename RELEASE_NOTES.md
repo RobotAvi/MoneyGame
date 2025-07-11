@@ -1,8 +1,8 @@
-## Changelog for v1.28
+## Changelog for v1.29
 
 ### Последние коммиты:
-- 🔖 Bump version to 1.28 (29) [auto] (GitHub Action)
-- Build project and verify tests (#22) (Avenir Voronov)
+- 🔖 Bump version to 1.29 (30) [auto] (GitHub Action)
+- Remove unnecessary build without emulator (#23) (Avenir Voronov)
 ### Изменения из CHANGELOG.md:
 # Changelog
 
