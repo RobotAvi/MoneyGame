@@ -1,8 +1,8 @@
-## Changelog for v1.31
+## Changelog for v1.32
 
 ### Последние коммиты:
-- 🔖 Bump version to 1.31 (32) [auto] (GitHub Action)
-- Add emulator stability fixes and CI/CD workflow improvements (#25) (Avenir Voronov)
+- 🔖 Bump version to 1.32 (33) [auto] (GitHub Action)
+- 🚀 Add GitHub Actions workflows for Android app build and release (#26) (Avenir Voronov)
 ### Изменения из CHANGELOG.md:
 # Changelog
 
