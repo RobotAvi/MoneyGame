@@ -173,12 +173,12 @@ class GameActivity : AppCompatActivity() {
         
         if (diceValue == dreamNumber) {
             // Попал на мечту!
-            if (player.cash >= (player.dream?.cost ?: return)) {
+            if (player.cash >= player.dream.cost) {
                 // Может купить мечту - победа!
                 showVictoryDialog()
             } else {
                 // Попал, но недостаточно денег
-                val needed = (player.dream?.cost ?: 0) - player.cash
+                val needed = player.dream.cost - player.cash
                 showMessage("🎯 Вы попали на свою мечту!\n\nОднако вам не хватает ${currencyFormat.format(needed)} для её покупки.\n\nПродолжайте инвестировать и накапливать деньги!")
                 
                 // Получаем денежный поток за ход
