@@ -337,7 +337,7 @@ class GameActivity : AppCompatActivity() {
             player.logIncome(
                 FinancialCategory.SALARY,
                 player.salary,
-                "Ежемесячная зарплата по профессии ${player.profession?.name}"
+                "Ежемесячная зарплата по профессии ${player.profession.name}"
             )
             
             updateUI()
@@ -680,7 +680,7 @@ class GameActivity : AppCompatActivity() {
         updatePlayerAvatar(player)
         
         // Обновляем профессию на экране
-        binding.tvProfession.text = "Профессия: ${player.profession?.name ?: "-"}"
+        binding.tvProfession.text = "Профессия: ${player.profession.name}"
         
         // Обновляем финансовую информацию
         binding.tvCash.text = "Наличные: ${currencyFormat.format(player.cash)}"
@@ -944,7 +944,7 @@ class GameActivity : AppCompatActivity() {
             }
             
             // Информация о рисках профессии
-            val professionRisks = ProfessionalRisks.getRisksForProfession(player.profession?.name ?: "")
+            val professionRisks = ProfessionalRisks.getRisksForProfession(player.profession.name)
             if (professionRisks.isNotEmpty()) {
                 append("⚠️ ВОЗМОЖНЫЕ РИСКИ ПРОФЕССИИ:\n")
                 professionRisks.forEach { risk ->
@@ -1055,7 +1055,7 @@ class GameActivity : AppCompatActivity() {
     }
     
     private fun updatePlayerAvatar(player: Player) {
-        val avatarResource = player.profession?.avatarResId ?: R.drawable.player_token
+        val avatarResource = player.profession.avatarResId
         try {
             binding.ivPlayerAvatar.setImageResource(avatarResource)
         } catch (e: Exception) {
@@ -1124,7 +1124,7 @@ class GameActivity : AppCompatActivity() {
     private fun showAgeStatistics() {
         val player = currentGameState?.player ?: return
         // Получаем статистику по социальной группе (по id профессии)
-        val averageLifeExpectancy = when (player.profession?.id) {
+        val averageLifeExpectancy = when (player.profession.id) {
             "doctor" -> 78
             "engineer" -> 75
             "teacher" -> 77
@@ -1133,7 +1133,7 @@ class GameActivity : AppCompatActivity() {
             "lawyer" -> 76
             else -> 75
         }
-        val socialGroup = when (player.profession?.id) {
+        val socialGroup = when (player.profession.id) {
             "doctor" -> "медицинских работников"
             "engineer" -> "инженеров"
             "teacher" -> "работников образования"

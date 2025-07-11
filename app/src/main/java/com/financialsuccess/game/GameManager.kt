@@ -88,7 +88,7 @@ class GameManager {
             currentState.player.logIncome(
                 com.financialsuccess.game.models.FinancialCategory.SALARY,
                 currentState.player.salary,
-                "Ежемесячная зарплата по профессии ${currentState.player.profession?.name}"
+                "Ежемесячная зарплата по профессии ${currentState.player.profession.name}"
             )
             // Затем списываем ежемесячные расходы
             currentState.player.processMonthlyOperations()
