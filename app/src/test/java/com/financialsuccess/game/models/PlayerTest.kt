@@ -168,7 +168,6 @@ class PlayerTest {
     }
     
     @Test
-    @Ignore("Temporarily disabled due to string comparison issues")
     fun `test health status calculation`() {
         // Тест расчета статуса здоровья
         val healthyPlayer = player.copy(healthLevel = HealthLevel.EXCELLENT)
