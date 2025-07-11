@@ -8,6 +8,8 @@ on:
   workflow_dispatch:
 
 env:
+  ACTIONS_RUNNER_DEBUG: true
+  RUNNER_DEBUG: 1
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true
 
 jobs:
@@ -204,7 +206,9 @@ jobs:
         export PATH="$PATH":"$HOME/.maestro/bin"
         maestro --version
 
-    - name: 📱 Start Android Emulator (Phone)
+    - name: � Debug ADB Devices (before emulator)
+      run: adb devices || true
+    - name: �📱 Start Android Emulator (Phone)
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: 30
@@ -212,9 +216,12 @@ jobs:
         arch: arm64-v8a
         profile: Nexus 6
         script: |
+          adb devices
           adb shell input keyevent 82
           adb shell input keyevent 82
           sleep 5
+          adb devices
+          adb logcat -d | tail -n 100
 
     - name: 📲 Install APK on Phone Emulator
       run: |
@@ -222,22 +229,28 @@ jobs:
         adb install releases/debug/*.apk
         adb shell pm list packages | grep financialsuccess
         sleep 3
+        adb devices
+        adb logcat -d | tail -n 100
 
     - name: 📸 Run Maestro Screenshots (Phone)
       run: |
         export PATH="$PATH":"$HOME/.maestro/bin"
         mkdir -p screenshots/phone
-        
-        # Пробуем стабильную конфигурацию
+        adb devices
+        adb logcat -d | tail -n 100
         if [ -f "maestro/screenshots-stable.yaml" ]; then
           echo "Using stable screenshots configuration"
-          maestro test maestro/screenshots-stable.yaml --format junit --output screenshots/phone/
+          maestro test maestro/screenshots-stable.yaml --verbose --format junit --output screenshots/phone/
         else
           echo "Using default screenshots configuration"
-          maestro test maestro/screenshots.yaml --format junit --output screenshots/phone/
+          maestro test maestro/screenshots.yaml --verbose --format junit --output screenshots/phone/
         fi
-        
         echo "📱 Phone screenshots completed!"
+        adb devices
+        adb logcat -d | tail -n 100
+
+    - name: 🐞 Debug ADB Devices (after screenshots)
+      run: adb devices && adb logcat -d | tail -n 100
 
     - name: 📤 Upload Phone Screenshots
       uses: actions/upload-artifact@v4
@@ -267,7 +280,9 @@ jobs:
         export PATH="$PATH":"$HOME/.maestro/bin"
         maestro --version
 
-    - name: 📱 Start Android Emulator (Tablet)
+    - name: � Debug ADB Devices (after emulator tablet)
+      run: adb devices && adb logcat -d | tail -n 100
+    - name: �📱 Start Android Emulator (Tablet)
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: 30
@@ -275,9 +290,12 @@ jobs:
         arch: arm64-v8a
         profile: Nexus 10
         script: |
+          adb devices
           adb shell input keyevent 82
           adb shell input keyevent 82
           sleep 5
+          adb devices
+          adb logcat -d | tail -n 100
 
     - name: 📲 Install APK on Tablet Emulator
       run: |
@@ -285,29 +303,28 @@ jobs:
         adb install releases/debug/*.apk
         adb shell pm list packages | grep financialsuccess
         sleep 3
+        adb devices
+        adb logcat -d | tail -n 100
 
     - name: 📸 Run Maestro Screenshots (Tablet)
       run: |
         export PATH="$PATH":"$HOME/.maestro/bin"
         mkdir -p screenshots/tablet
-        
-        # Пробуем планшетную конфигурацию
+        adb devices
+        adb logcat -d | tail -n 100
         if [ -f "maestro/screenshots-tablet.yaml" ]; then
           echo "Using tablet screenshots configuration"
-          maestro test maestro/screenshots-tablet.yaml --format junit --output screenshots/tablet/
+          maestro test maestro/screenshots-tablet.yaml --verbose --format junit --output screenshots/tablet/
         else
           echo "Using default screenshots configuration for tablet"
-          maestro test maestro/screenshots.yaml --format junit --output screenshots/tablet/
+          maestro test maestro/screenshots.yaml --verbose --format junit --output screenshots/tablet/
         fi
-        
         echo "📱 Tablet screenshots completed!"
+        adb devices
+        adb logcat -d | tail -n 100
 
-    - name: 📤 Upload Tablet Screenshots
-      uses: actions/upload-artifact@v4
-      with:
-        name: tablet-screenshots-v${{ needs.build-and-test.outputs.version }}
-        path: screenshots/tablet/
-        retention-days: 30
+    - name: 🐞 Debug ADB Devices (after screenshots tablet)
+      run: adb devices && adb logcat -d | tail -n 100
 
   # Финальная сборка релиза
   create-release:
