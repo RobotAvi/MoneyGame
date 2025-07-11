@@ -1,8 +1,8 @@
-## Changelog for v1.25
+## Changelog for v1.26
 
 ### Последние коммиты:
-- 🔖 Bump version to 1.25 (26) [auto] (GitHub Action)
-- Refactor Player model: adjust expense and income calculations (#19) (Avenir Voronov)
+- 🔖 Bump version to 1.26 (27) [auto] (GitHub Action)
+- Refactor null checks and simplify player state handling in GameActivity (#20) (Avenir Voronov)
 ### Изменения из CHANGELOG.md:
 # Changelog
 
