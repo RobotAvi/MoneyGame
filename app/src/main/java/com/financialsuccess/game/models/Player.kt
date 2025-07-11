@@ -83,7 +83,7 @@ data class Player(
         totalIncome + passiveIncome - totalExpenses
     
     fun canEscapeRatRace(): Boolean = 
-        passiveIncome > totalExpenses
+        passiveIncome >= totalExpenses
     
     fun updateTotalIncome() {
         // Основной доход = зарплата + доход супруга
@@ -106,11 +106,6 @@ data class Player(
         // Добавляем семейные расходы
         childrenExpenses = childrenCount * 8000 // 8000 рублей на ребенка в месяц
         
-        // Добавляем расходы на супруга/супругу
-        if (maritalStatus == MaritalStatus.MARRIED) {
-            otherExpenses += 5000 // Дополнительные расходы на семью
-        }
-        
         // Применяем модификаторы здоровья
         val healthMultiplier = healthLevel.expenseMultiplier
         foodExpenses = (foodExpenses * healthMultiplier).toInt()
@@ -120,6 +115,10 @@ data class Player(
         totalExpenses = foodExpenses + transportExpenses + housingExpenses + 
                        childrenExpenses + taxes + otherExpenses + 
                        liabilities.sumOf { it.payment }
+        // Добавляем расходы на супруга/супругу после healthMultiplier
+        if (maritalStatus == MaritalStatus.MARRIED) {
+            totalExpenses += 5000 // Дополнительные расходы на семью
+        }
     }
     
     // Автоматическое списание расходов каждый ход (устарела - теперь используется денежный поток)
@@ -478,9 +477,8 @@ data class Player(
          val baseSalary = profession?.salary ?: 0
          val educationBonus = calculateEducationBonus()
          val skillsBonus = calculateSkillsBonus()
-         val experienceBonus = workExperience * 1000
          
-         salary = baseSalary + educationBonus + skillsBonus + experienceBonus
+         salary = baseSalary + educationBonus + skillsBonus
          updateTotalIncome()
      }
      
