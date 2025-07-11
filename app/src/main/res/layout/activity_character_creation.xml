@@ -304,6 +304,15 @@
             android:layout_marginBottom="16dp"
             style="@style/Widget.Material3.Button.OutlinedButton" />
 
+        <!-- Список добавленных целей -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewGoals"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:nestedScrollingEnabled="false"
+            android:visibility="gone" />
+
         <!-- Здоровье и образ жизни -->
         <TextView
             android:layout_width="wrap_content"
