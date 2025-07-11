@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.financialsuccess.game.adapters.ProfessionAdapter
 import com.financialsuccess.game.adapters.DreamAdapter
+import com.financialsuccess.game.adapters.FinancialGoalAdapter
 import com.financialsuccess.game.adapters.SkillAdapter
 import com.financialsuccess.game.data.GameDataManager
 import com.financialsuccess.game.databinding.ActivityCharacterCreationBinding
@@ -24,6 +25,7 @@ class CharacterCreationActivity : AppCompatActivity() {
     private var selectedStartDate: Long? = null
     private var selectedSkills: MutableList<Skill> = mutableListOf()
     private var selectedFinancialGoals: MutableList<FinancialGoal> = mutableListOf()
+    private lateinit var goalAdapter: FinancialGoalAdapter
     
     // Данные персонажа
     private var playerName: String = ""
@@ -231,6 +233,18 @@ class CharacterCreationActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@CharacterCreationActivity, LinearLayoutManager.HORIZONTAL, false)
             adapter = skillAdapter
         }
+        
+        // Финансовые цели
+        goalAdapter = FinancialGoalAdapter(selectedFinancialGoals) { position ->
+            selectedFinancialGoals.removeAt(position)
+            goalAdapter.removeGoal(position)
+            updateGoalsVisibility()
+        }
+        
+        binding.recyclerViewGoals.apply {
+            layoutManager = LinearLayoutManager(this@CharacterCreationActivity, LinearLayoutManager.VERTICAL, false)
+            adapter = goalAdapter
+        }
     }
     
     private fun setupListeners() {
@@ -389,16 +403,44 @@ class CharacterCreationActivity : AppCompatActivity() {
     }
     
     private fun addFinancialGoal() {
-        // Здесь можно добавить диалог для создания финансовой цели
-        // Пока просто добавляем базовую цель
+        // Получаем текущие значения из полей
+        val targetIncome = binding.etTargetPassiveIncome.text.toString().toIntOrNull() ?: targetPassiveIncome
+        val retirement = binding.etRetirementAge.text.toString().toIntOrNull() ?: retirementAge
+        val age = binding.etAge.text.toString().toIntOrNull() ?: playerAge
+        
+        // Создаем финансовую цель
         val goal = FinancialGoal(
-            name = "Пассивный доход ${targetPassiveIncome}₽",
-            description = "Достичь пассивного дохода ${targetPassiveIncome}₽ в месяц",
+            name = "Пассивный доход ${targetIncome}₽",
+            description = "Достичь пассивного дохода ${targetIncome}₽ в месяц",
             type = GoalType.PASSIVE_INCOME,
-            targetAmount = targetPassiveIncome,
-            deadline = (retirementAge - playerAge) * 12
+            targetAmount = targetIncome,
+            deadline = (retirement - age) * 12
         )
+        
+        // Добавляем цель в список и адаптер
         selectedFinancialGoals.add(goal)
+        goalAdapter.addGoal(goal)
+        
+        // Показываем RecyclerView с целями
+        updateGoalsVisibility()
+        
+        // Показываем обратную связь пользователю
+        binding.btnAddGoal.text = "Цель добавлена! ✅"
+        binding.btnAddGoal.isEnabled = false
+        
+        // Через 2 секунды возвращаем кнопку в исходное состояние
+        binding.btnAddGoal.postDelayed({
+            binding.btnAddGoal.text = "Добавить цель"
+            binding.btnAddGoal.isEnabled = true
+        }, 2000)
+    }
+    
+    private fun updateGoalsVisibility() {
+        if (selectedFinancialGoals.isNotEmpty()) {
+            binding.recyclerViewGoals.visibility = View.VISIBLE
+        } else {
+            binding.recyclerViewGoals.visibility = View.GONE
+        }
     }
     
     private fun updateStartButtonState() {
