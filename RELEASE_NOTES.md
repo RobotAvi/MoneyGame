@@ -1,8 +1,8 @@
-## Changelog for v1.30
+## Changelog for v1.31
 
 ### Последние коммиты:
-- 🔖 Bump version to 1.30 (31) [auto] (GitHub Action)
-- Checkpoint before follow-up message (#24) (Avenir Voronov)
+- 🔖 Bump version to 1.31 (32) [auto] (GitHub Action)
+- Add emulator stability fixes and CI/CD workflow improvements (#25) (Avenir Voronov)
 ### Изменения из CHANGELOG.md:
 # Changelog
 
