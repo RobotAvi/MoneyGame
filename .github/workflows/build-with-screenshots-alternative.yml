@@ -1,0 +1,408 @@
+name: Build, Release APK and Screenshots (Alternative - Stable)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  # Параллельная сборка и подготовка
+  build-and-prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      version_code: ${{ steps.version.outputs.version_code }}
+      date: ${{ steps.date.outputs.date }}
+      apk_path: ${{ steps.apk_path.outputs.path }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Bump version (auto-increment)
+      id: bump_version
+      run: |
+        CURR_VERSION=$(grep -oP 'versionName\s+"\K[^"]+' app/build.gradle)
+        CURR_CODE=$(grep -oP 'versionCode\s+\K[0-9]+' app/build.gradle)
+        MAJOR=$(echo $CURR_VERSION | cut -d. -f1)
+        MINOR=$(echo $CURR_VERSION | cut -d. -f2)
+        if [ -z "$MINOR" ]; then MINOR=0; fi
+        NEW_MINOR=$((MINOR+1))
+        NEW_VERSION="$MAJOR.$NEW_MINOR"
+        NEW_CODE=$((CURR_CODE+1))
+        sed -i "s/versionName \"$CURR_VERSION\"/versionName \"$NEW_VERSION\"/" app/build.gradle
+        sed -i "s/versionCode $CURR_CODE/versionCode $NEW_CODE/" app/build.gradle
+        echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        echo "new_code=$NEW_CODE" >> $GITHUB_OUTPUT
+        echo "Version bumped: $CURR_VERSION → $NEW_VERSION ($CURR_CODE → $NEW_CODE)"
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add app/build.gradle
+        git commit -m "🔖 Bump version to $NEW_VERSION ($NEW_CODE) [auto]" || echo "No version change to commit"
+        git push || echo "No changes to push"
+
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        echo "## Changelog for v${{ steps.bump_version.outputs.new_version }}" > RELEASE_NOTES.md
+        echo "" >> RELEASE_NOTES.md
+        echo "### Последние коммиты:" >> RELEASE_NOTES.md
+        git log -10 --pretty=format:"- %s (%an)" >> RELEASE_NOTES.md
+        echo "" >> RELEASE_NOTES.md
+        echo "### Изменения из CHANGELOG.md:" >> RELEASE_NOTES.md
+        tail -n 20 docs/CHANGELOG.md >> RELEASE_NOTES.md
+        cat RELEASE_NOTES.md
+
+    - name: Commit release notes
+      run: |
+        git add RELEASE_NOTES.md
+        git commit -m "📝 Update release notes [auto]" || echo "No release notes change to commit"
+        git push || echo "No changes to push"
+
+    - name: Setup JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Run Unit Tests
+      run: ./gradlew test
+
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug
+
+    - name: Get version info
+      id: version
+      run: |
+        VERSION=$(grep -oP 'versionName\s+"\K[^"]+' app/build.gradle)
+        VERSION_CODE=$(grep -oP 'versionCode\s+\K[0-9]+' app/build.gradle)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+        echo "Version: $VERSION ($VERSION_CODE)"
+
+    - name: Get current date
+      id: date
+      run: echo "date=$(date +'%Y-%m-%d_%H-%M')" >> $GITHUB_OUTPUT
+
+    - name: Prepare APK for distribution
+      id: apk_path
+      run: |
+        mkdir -p releases/debug
+        cp app/build/outputs/apk/debug/app-debug.apk releases/debug/
+        cd releases/debug
+        newname="FinancialSuccess-v${{ steps.version.outputs.version }}-${{ steps.date.outputs.date }}-debug.apk"
+        mv -f app-debug.apk "$newname"
+        echo "path=releases/debug/$newname" >> $GITHUB_OUTPUT
+        ln -sf "$newname" "latest-debug.apk"
+        ls -la
+
+    - name: Clean up old APKs (keep only 3 latest)
+      run: |
+        cd releases/debug
+        ls -tp FinancialSuccess-v*-debug.apk | grep -v '/$' | tail -n +4 | xargs -r rm --
+
+    - name: Commit APK files
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add releases/
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "📱 Auto-commit APK v${{ steps.version.outputs.version }} - ${{ steps.date.outputs.date }}"
+          git push
+        fi
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: FinancialSuccess-v${{ steps.version.outputs.version }}-${{ steps.date.outputs.date }}
+        path: releases/debug/*.apk
+
+  # Альтернативный подход: использование Appium + реального эмулятора
+  screenshots-phone-stable:
+    runs-on: ubuntu-latest
+    needs: build-and-prepare
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Download APK
+      uses: actions/download-artifact@v4
+      with:
+        name: FinancialSuccess-v${{ needs.build-and-prepare.outputs.version }}-${{ needs.build-and-prepare.outputs.date }}
+
+    - name: Install Maestro
+      run: |
+        curl -Ls "https://get.maestro.mobile.dev" | bash
+        export PATH="$PATH":"$HOME/.maestro/bin"
+        maestro --version
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Install Appium
+      run: |
+        npm install -g appium
+        appium --version
+
+    - name: Start Android Emulator (Stable Configuration)
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 29
+        target: google_apis
+        arch: x86_64
+        profile: Nexus 6
+        avd-name: stable-phone
+        emulator-options: |
+          -no-window
+          -no-audio
+          -no-boot-anim
+          -gpu swiftshader_indirect
+          -camera-back none
+          -camera-front none
+          -memory 1536
+          -cores 1
+          -skin 1080x1920
+          -accel on
+          -qemu -enable-kvm
+        script: |
+          echo "Starting stable emulator configuration..."
+          
+          # Ждем подключения устройства
+          adb wait-for-device
+          echo "Device connected"
+          
+          # Ждем полной загрузки системы
+          echo "Waiting for system to boot..."
+          while ! adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; do
+            echo "Boot not completed yet..."
+            sleep 10
+          done
+          echo "System boot completed"
+          
+          # Дополнительное ожидание для стабилизации
+          sleep 15
+          
+          # Разблокируем экран
+          adb shell input keyevent 82
+          sleep 3
+          adb shell input keyevent 82
+          sleep 3
+          
+          # Проверяем стабильность
+          adb shell echo "Emulator is stable and ready"
+          echo "Stable emulator setup completed"
+
+    - name: Install APK with Stability Checks
+      run: |
+        export PATH="$PATH":"$HOME/.maestro/bin"
+        
+        # Функция для стабильной установки APK
+        stable_install_apk() {
+          local max_attempts=3
+          local attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "Installation attempt $attempt/$max_attempts"
+            
+            # Проверяем статус эмулятора
+            if ! adb devices | grep -q "emulator-5554.*device"; then
+              echo "Emulator not ready, waiting..."
+              sleep 15
+              attempt=$((attempt + 1))
+              continue
+            fi
+            
+            # Очищаем кэш пакетного менеджера
+            adb shell pm clear com.android.packageinstaller 2>/dev/null || true
+            
+            # Устанавливаем APK
+            if adb install -r releases/debug/*.apk; then
+              echo "APK installed successfully!"
+              
+              # Проверяем что приложение установлено
+              if adb shell pm list packages | grep -q financialsuccess; then
+                echo "Application verified as installed"
+                return 0
+              else
+                echo "Application not found after installation"
+                attempt=$((attempt + 1))
+                sleep 10
+              fi
+            else
+              echo "Installation failed"
+              attempt=$((attempt + 1))
+              sleep 15
+            fi
+          done
+          
+          echo "Failed to install APK after $max_attempts attempts"
+          return 1
+        }
+        
+        stable_install_apk
+
+    - name: Run Maestro with Enhanced Stability
+      run: |
+        export PATH="$PATH":"$HOME/.maestro/bin"
+        mkdir -p screenshots/phone
+        
+        # Создаем упрощенный тест для стабильности
+        cat > maestro/screenshots-stable.yaml << 'EOF'
+appId: com.financialsuccess.game
+name: Financial Success Screenshots (Stable)
+outputDir: screenshots/phone
+
+# Простой тест с минимальными действиями
+- launchApp
+- takeScreenshot: "01_main_screen_stable"
+
+# Ждем стабилизации UI
+- runFlow:
+    when:
+      visible: "Начать игру"
+    commands:
+      - tapOn: "Начать игру"
+      - takeScreenshot: "02_profession_selection_stable"
+
+# Дополнительные скриншоты с проверками
+- runFlow:
+    when:
+      visible: "Программист"
+    commands:
+      - tapOn: "Программист"
+      - takeScreenshot: "03_profession_selected_stable"
+
+- runFlow:
+    when:
+      visible: "Начать"
+    commands:
+      - tapOn: "Начать"
+      - takeScreenshot: "04_game_started_stable"
+
+# Финальный скриншот
+- takeScreenshot: "05_final_screen_stable"
+EOF
+        
+        # Запускаем стабильный тест
+        maestro test maestro/screenshots-stable.yaml --format junit --output screenshots/phone/ || {
+          echo "Maestro failed, trying simplified test..."
+          # Резервный тест - только запуск приложения
+          cat > maestro/screenshots-minimal.yaml << 'EOF'
+appId: com.financialsuccess.game
+name: Financial Success Screenshots (Minimal)
+outputDir: screenshots/phone
+
+- launchApp
+- takeScreenshot: "01_main_screen_minimal"
+EOF
+          maestro test maestro/screenshots-minimal.yaml --format junit --output screenshots/phone/
+        }
+
+    - name: Upload Phone Screenshots
+      uses: actions/upload-artifact@v4
+      with:
+        name: phone-screenshots-stable-v${{ needs.build-and-prepare.outputs.version }}
+        path: screenshots/phone/
+
+  # Альтернативный подход: использование Firebase Test Lab (если доступен)
+  screenshots-firebase:
+    runs-on: ubuntu-latest
+    needs: build-and-prepare
+    if: false  # Отключено по умолчанию, требует настройки Firebase
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Download APK
+      uses: actions/download-artifact@v4
+      with:
+        name: FinancialSuccess-v${{ needs.build-and-prepare.outputs.version }}-${{ needs.build-and-prepare.outputs.date }}
+
+    - name: Setup Google Cloud CLI
+      uses: google-github-actions/setup-gcloud@v0
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
+
+    - name: Run Firebase Test Lab
+      run: |
+        gcloud firebase test android run \
+          --type instrumentation \
+          --app releases/debug/*.apk \
+          --test maestro/screenshots.yaml \
+          --device model=redfin,version=30,locale=en,orientation=portrait \
+          --timeout 30m \
+          --results-dir=firebase-test-results
+
+  # Финальная сборка и релиз
+  final-release:
+    runs-on: ubuntu-latest
+    needs: [build-and-prepare, screenshots-phone-stable]
+    permissions:
+      contents: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts/
+
+    - name: Combine screenshots
+      run: |
+        mkdir -p screenshots/phone screenshots/tablet
+        cp -r artifacts/phone-screenshots-stable-v${{ needs.build-and-prepare.outputs.version }}/* screenshots/phone/ || true
+        echo "📱 Phone screenshots:"
+        ls -la screenshots/phone/ || echo "No phone screenshots"
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ needs.build-and-prepare.outputs.version }}-${{ needs.build-and-prepare.outputs.date }}
+        name: "🎮 Financial Success v${{ needs.build-and-prepare.outputs.version }}"
+        body_path: RELEASE_NOTES.md
+        files: |
+          artifacts/FinancialSuccess-v${{ needs.build-and-prepare.outputs.version }}-${{ needs.build-and-prepare.outputs.date }}/*.apk
+          screenshots/phone/*.png
+        draft: false
+        prerelease: false
+
+    - name: Commit Screenshots to Repository
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add screenshots/
+        if git diff --staged --quiet; then
+          echo "No screenshots to commit"
+        else
+          git commit -m "📸 Auto-generated screenshots v${{ needs.build-and-prepare.outputs.version }} - ${{ needs.build-and-prepare.outputs.date }}"
+          git push
+        fi
+
+    - name: Upload Combined Screenshots Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: screenshots-v${{ needs.build-and-prepare.outputs.version }}
+        path: screenshots/
