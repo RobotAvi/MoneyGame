@@ -5,10 +5,28 @@ import org.junit.Test
 
 class PlayerDateLogicTest {
     private lateinit var player: Player
+    private lateinit var profession: com.financialsuccess.game.models.Profession
+    private lateinit var dream: com.financialsuccess.game.models.Dream
 
     @Before
     fun setUp() {
-        player = Player()
+        profession = com.financialsuccess.game.models.Profession(
+            id = "test_prof",
+            name = "Тестовая профессия",
+            description = "desc",
+            salary = 1000,
+            expenses = 500,
+            taxes = 100,
+            education = ""
+        )
+        dream = com.financialsuccess.game.models.Dream(
+            id = "test_dream",
+            name = "Тестовая мечта",
+            description = "desc",
+            cost = 10000,
+            cashFlowRequired = 1000
+        )
+        player = Player(profession = profession, dream = dream)
     }
 
     @Test
@@ -52,7 +70,7 @@ class PlayerDateLogicTest {
     fun testPlayerNameAndStartDate() {
         val name = "Алексей"
         val startDate = 1717977600000L // 10.06.2024
-        val player = Player(name = name, startDateMillis = startDate)
+        val player = Player(name = name, startDateMillis = startDate, profession = profession, dream = dream)
         assertEquals(name, player.name)
         assertEquals(startDate, player.startDateMillis)
     }
