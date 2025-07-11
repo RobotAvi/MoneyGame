@@ -1,18 +1,18 @@
-## 🎮 Financial Success v1.35
+## 🎮 Financial Success v1.36
 
-### 📅 Дата релиза: 2025-07-11 18:51 UTC
+### 📅 Дата релиза: 2025-07-11 18:59 UTC
 
 ### 🔄 Последние изменения:
+0f1259c 🔖 Bump version to 1.36 (37) [auto]
+59d90ce Просмотреть все задачи проекта (#32)
+07c2ed7 📱 Auto-commit APK v1.35 - 2025-07-11_18-52
+9ef0409 📝 Update release notes [auto]
 08d79fd 🔖 Bump version to 1.35 (36) [auto]
 eb89be6 Merge pull request #30 from RobotAvi/cursor/fix-android-emulator-setup-issues-f885
 d859f81 Change Android emulator architecture from x86_64 to arm64-v8a
 b1cff2f 📱 Auto-commit APK v1.34 - 2025-07-11_14-55
 97c1a35 📝 Update release notes [auto]
 418f041 🔖 Bump version to 1.34 (35) [auto]
-dde5386 Remove all fucking workflows
-57e8e04 Remove deprecated GitHub workflow files for build and screenshots
-74b6994 📱 Auto-commit APK v1.33 - 2025-07-11_13-22
-d77e987 📝 Update release notes [auto]
 
 ### 📋 Изменения из CHANGELOG.md:
 # Changelog
