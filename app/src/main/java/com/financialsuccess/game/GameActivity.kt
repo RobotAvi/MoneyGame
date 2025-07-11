@@ -167,18 +167,18 @@ class GameActivity : AppCompatActivity() {
     
     private fun handleFastTrackDice(diceValue: Int) {
         val player = currentGameState?.player ?: return
-        val dreamNumber = player.dream?.fastTrackNumber ?: return
+        val dreamNumber = player.dream.fastTrackNumber
         
         binding.tvDiceValue.text = "Результат: $diceValue (Нужно: ${dreamNumber})"
         
         if (diceValue == dreamNumber) {
             // Попал на мечту!
-            if (player.cash >= (player.dream?.cost ?: return)) {
+            if (player.cash >= player.dream.cost) {
                 // Может купить мечту - победа!
                 showVictoryDialog()
             } else {
                 // Попал, но недостаточно денег
-                val needed = (player.dream?.cost ?: 0) - player.cash
+                val needed = player.dream.cost - player.cash
                 showMessage("🎯 Вы попали на свою мечту!\n\nОднако вам не хватает ${currencyFormat.format(needed)} для её покупки.\n\nПродолжайте инвестировать и накапливать деньги!")
                 
                 // Получаем денежный поток за ход
@@ -227,7 +227,7 @@ class GameActivity : AppCompatActivity() {
         
         AlertDialog.Builder(this)
             .setTitle("🎉 ПОБЕДА!")
-            .setMessage("Поздравляем! Вы достигли своей мечты: ${player.dream?.name ?: "неизвестная мечта"}!\n\nВы успешно вышли из крысиных бегов и осуществили финансовую мечту!\n\nИтоговый капитал: ${currencyFormat.format(player.cash)}\nПассивный доход: ${currencyFormat.format(player.passiveIncome)}")
+            .setMessage("Поздравляем! Вы достигли своей мечты: ${player.dream.name}!\n\nВы успешно вышли из крысиных бегов и осуществили финансовую мечту!\n\nИтоговый капитал: ${currencyFormat.format(player.cash)}\nПассивный доход: ${currencyFormat.format(player.passiveIncome)}")
             .setPositiveButton("🎊 Новая игра") { _, _ ->
                 // Перезапуск игры
                 finish()
@@ -245,7 +245,7 @@ class GameActivity : AppCompatActivity() {
         val message = """
             🏆 ФИНАЛЬНАЯ СТАТИСТИКА
             
-            🎯 Мечта: ${player.dream?.name ?: "неизвестная мечта"}
+            🎯 Мечта: ${player.dream.name}
             💰 Итоговый капитал: ${currencyFormat.format(player.cash)}
             📊 Пассивный доход: ${currencyFormat.format(player.passiveIncome)}
             🏠 Активов: ${player.assets.size}
@@ -337,7 +337,7 @@ class GameActivity : AppCompatActivity() {
             player.logIncome(
                 FinancialCategory.SALARY,
                 player.salary,
-                "Ежемесячная зарплата по профессии ${player.profession?.name}"
+                "Ежемесячная зарплата по профессии ${player.profession.name}"
             )
             
             updateUI()
@@ -680,7 +680,7 @@ class GameActivity : AppCompatActivity() {
         updatePlayerAvatar(player)
         
         // Обновляем профессию на экране
-        binding.tvProfession.text = "Профессия: ${player.profession?.name ?: "-"}"
+        binding.tvProfession.text = "Профессия: ${player.profession.name}"
         
         // Обновляем финансовую информацию
         binding.tvCash.text = "Наличные: ${currencyFormat.format(player.cash)}"
@@ -781,7 +781,7 @@ class GameActivity : AppCompatActivity() {
         
         AlertDialog.Builder(this)
             .setTitle("🎉 Поздравляем!")
-            .setMessage("Ваш пассивный доход превысил расходы!\n\nВы можете выйти из крысиных бегов на скоростную дорожку!\n\n🎯 На скоростной дорожке:\n• Ваша цель: ${player.dream?.name ?: "неизвестная мечта"}\n• Нужно выбросить: ${player.dream?.fastTrackNumber ?: 6}\n• Стоимость мечты: ${currencyFormat.format(player.dream?.cost ?: 0)}\n• Вы получаете денежный поток каждый ход")
+            .setMessage("Ваш пассивный доход превысил расходы!\n\nВы можете выйти из крысиных бегов на скоростную дорожку!\n\n🎯 На скоростной дорожке:\n• Ваша цель: ${player.dream.name}\n• Нужно выбросить: ${player.dream.fastTrackNumber}\n• Стоимость мечты: ${currencyFormat.format(player.dream.cost)}\n• Вы получаете денежный поток каждый ход")
             .setPositiveButton("🚀 Перейти") { _, _ ->
                 currentGameState?.player?.isInFastTrack = true
                 updateUI()
@@ -796,7 +796,7 @@ class GameActivity : AppCompatActivity() {
         
         AlertDialog.Builder(this)
             .setTitle("🎯 Скоростная дорожка!")
-            .setMessage("Добро пожаловать на скоростную дорожку!\n\n🎲 Как играть:\n• Бросайте кубик каждый ход\n• Нужно выбросить ${player.dream?.fastTrackNumber ?: 6} для вашей мечты\n• При попадании вы можете купить мечту если хватает денег\n• Каждый ход вы получаете денежный поток\n• При 1 или 6 возможны бонусы!\n\n💰 Ваши деньги: ${currencyFormat.format(player.cash)}\n🎯 Нужно для мечты: ${currencyFormat.format(player.dream?.cost ?: 0)}")
+            .setMessage("Добро пожаловать на скоростную дорожку!\n\n🎲 Как играть:\n• Бросайте кубик каждый ход\n• Нужно выбросить ${player.dream.fastTrackNumber} для вашей мечты\n• При попадании вы можете купить мечту если хватает денег\n• Каждый ход вы получаете денежный поток\n• При 1 или 6 возможны бонусы!\n\n💰 Ваши деньги: ${currencyFormat.format(player.cash)}\n🎯 Нужно для мечты: ${currencyFormat.format(player.dream.cost)}")
             .setPositiveButton("🎮 Играть!", null)
             .show()
     }
@@ -944,7 +944,7 @@ class GameActivity : AppCompatActivity() {
             }
             
             // Информация о рисках профессии
-            val professionRisks = ProfessionalRisks.getRisksForProfession(player.profession?.name ?: "")
+            val professionRisks = ProfessionalRisks.getRisksForProfession(player.profession.name)
             if (professionRisks.isNotEmpty()) {
                 append("⚠️ ВОЗМОЖНЫЕ РИСКИ ПРОФЕССИИ:\n")
                 professionRisks.forEach { risk ->
@@ -1055,7 +1055,7 @@ class GameActivity : AppCompatActivity() {
     }
     
     private fun updatePlayerAvatar(player: Player) {
-        val avatarResource = player.profession?.avatarResId ?: R.drawable.player_token
+        val avatarResource = player.profession.avatarResId
         try {
             binding.ivPlayerAvatar.setImageResource(avatarResource)
         } catch (e: Exception) {
@@ -1071,7 +1071,7 @@ class GameActivity : AppCompatActivity() {
         
         // Позиционируем игрока на треке (процент от 0 до 100)
         val progress = if (player.isInFastTrack) {
-            val dreamCost = player.dream?.cost ?: 1
+            val dreamCost = player.dream.cost
             ((player.cash.toFloat() / dreamCost.toFloat()) * 100).coerceAtMost(100f)
         } else {
             // Теперь используем день месяца (1..30)
@@ -1115,7 +1115,7 @@ class GameActivity : AppCompatActivity() {
         
         // Обновляем финиш/мечту
         binding.tvFinishGoal.text = if (player.isInFastTrack) {
-            "🎯\n${player.dream?.name ?: "Мечта"}"
+            "🎯\n${player.dream.name}"
         } else {
             "🔄\nКруг"
         }
@@ -1124,7 +1124,7 @@ class GameActivity : AppCompatActivity() {
     private fun showAgeStatistics() {
         val player = currentGameState?.player ?: return
         // Получаем статистику по социальной группе (по id профессии)
-        val averageLifeExpectancy = when (player.profession?.id) {
+        val averageLifeExpectancy = when (player.profession.id) {
             "doctor" -> 78
             "engineer" -> 75
             "teacher" -> 77
@@ -1133,7 +1133,7 @@ class GameActivity : AppCompatActivity() {
             "lawyer" -> 76
             else -> 75
         }
-        val socialGroup = when (player.profession?.id) {
+        val socialGroup = when (player.profession.id) {
             "doctor" -> "медицинских работников"
             "engineer" -> "инженеров"
             "teacher" -> "работников образования"

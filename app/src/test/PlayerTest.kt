@@ -57,7 +57,18 @@ class PlayerTest {
     
     @Test
     fun `test player initialization with default values`() {
-        val defaultPlayer = Player()
+        val defaultProfession = Profession(
+            name = "Default",
+            salary = 0,
+            expenses = 0,
+            taxes = 0
+        )
+        val defaultDream = Dream(
+            name = "Default",
+            cost = 0,
+            description = ""
+        )
+        val defaultPlayer = Player(profession = defaultProfession, dream = defaultDream)
         
         assertEquals(25, defaultPlayer.age)
         assertEquals(0, defaultPlayer.cash)
