@@ -1,0 +1,395 @@
+name: 🚀 Stable Build & Release
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true
+
+jobs:
+  # Основная сборка и тестирование
+  build-and-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      version_code: ${{ steps.version.outputs.version_code }}
+      date: ${{ steps.date.outputs.date }}
+      apk_path: ${{ steps.apk_path.outputs.path }}
+      should_release: ${{ steps.should_release.outputs.value }}
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Получаем полную историю для changelog
+
+    - name: 🔍 Determine if this is a release build
+      id: should_release
+      run: |
+        if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+          echo "value=true" >> $GITHUB_OUTPUT
+        else
+          echo "value=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: 🔖 Bump version (only for releases)
+      id: bump_version
+      if: steps.should_release.outputs.value == 'true'
+      run: |
+        # Получаем текущую версию
+        CURR_VERSION=$(grep -oP 'versionName\s+"\K[^"]+' app/build.gradle)
+        CURR_CODE=$(grep -oP 'versionCode\s+\K[0-9]+' app/build.gradle)
+        
+        # Инкрементируем minor версию (x.y -> x.(y+1))
+        MAJOR=$(echo $CURR_VERSION | cut -d. -f1)
+        MINOR=$(echo $CURR_VERSION | cut -d. -f2)
+        if [ -z "$MINOR" ]; then MINOR=0; fi
+        NEW_MINOR=$((MINOR+1))
+        NEW_VERSION="$MAJOR.$NEW_MINOR"
+        NEW_CODE=$((CURR_CODE+1))
+        
+        # Обновляем build.gradle
+        sed -i "s/versionName \"$CURR_VERSION\"/versionName \"$NEW_VERSION\"/" app/build.gradle
+        sed -i "s/versionCode $CURR_CODE/versionCode $NEW_CODE/" app/build.gradle
+        
+        echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        echo "new_code=$NEW_CODE" >> $GITHUB_OUTPUT
+        echo "Version bumped: $CURR_VERSION → $NEW_VERSION ($CURR_CODE → $NEW_CODE)"
+        
+        # Коммитим изменения
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add app/build.gradle
+        git commit -m "🔖 Bump version to $NEW_VERSION ($NEW_CODE) [auto]" || echo "No version change to commit"
+        git push || echo "No changes to push"
+
+    - name: 📝 Generate release notes (only for releases)
+      id: release_notes
+      if: steps.should_release.outputs.value == 'true'
+      run: |
+        echo "## 🎮 Financial Success v${{ steps.bump_version.outputs.new_version }}" > RELEASE_NOTES.md
+        echo "" >> RELEASE_NOTES.md
+        echo "### 📅 Дата релиза: $(date '+%Y-%m-%d %H:%M UTC')" >> RELEASE_NOTES.md
+        echo "" >> RELEASE_NOTES.md
+        echo "### 🔄 Последние изменения:" >> RELEASE_NOTES.md
+        git log --oneline -10 >> RELEASE_NOTES.md
+        echo "" >> RELEASE_NOTES.md
+        echo "### 📋 Изменения из CHANGELOG.md:" >> RELEASE_NOTES.md
+        if [ -f "docs/CHANGELOG.md" ]; then
+          tail -n 20 docs/CHANGELOG.md >> RELEASE_NOTES.md
+        fi
+        cat RELEASE_NOTES.md
+
+    - name: 📝 Commit release notes (only for releases)
+      if: steps.should_release.outputs.value == 'true'
+      run: |
+        git add RELEASE_NOTES.md
+        git commit -m "📝 Update release notes [auto]" || echo "No release notes change to commit"
+        git push || echo "No changes to push"
+
+    - name: ☕ Setup JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: 🤖 Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: 📦 Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          ~/.android/build-cache
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: 🔧 Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: 🧪 Run Unit Tests
+      run: ./gradlew test --no-daemon
+
+    - name: 🔨 Build Debug APK
+      run: ./gradlew assembleDebug --no-daemon
+
+    - name: 📊 Get version info
+      id: version
+      run: |
+        VERSION=$(grep -oP 'versionName\s+"\K[^"]+' app/build.gradle)
+        VERSION_CODE=$(grep -oP 'versionCode\s+\K[0-9]+' app/build.gradle)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+        echo "Version: $VERSION ($VERSION_CODE)"
+
+    - name: 📅 Get current date
+      id: date
+      run: echo "date=$(date +'%Y-%m-%d_%H-%M')" >> $GITHUB_OUTPUT
+
+    - name: 📱 Prepare APK for distribution
+      id: apk_path
+      run: |
+        mkdir -p releases/debug
+        cp app/build/outputs/apk/debug/app-debug.apk releases/debug/
+        cd releases/debug
+        
+        # Переименовываем с версией и датой
+        newname="FinancialSuccess-v${{ steps.version.outputs.version }}-${{ steps.date.outputs.date }}-debug.apk"
+        mv -f app-debug.apk "$newname"
+        echo "path=releases/debug/$newname" >> $GITHUB_OUTPUT
+        
+        # Создаем символическую ссылку на latest
+        ln -sf "$newname" "latest-debug.apk"
+        
+        # Очищаем старые APK (оставляем только 5 последних)
+        ls -tp FinancialSuccess-v*-debug.apk | grep -v '/$' | tail -n +6 | xargs -r rm --
+        
+        echo "📱 APK prepared: $newname"
+        ls -la
+
+    - name: 📤 Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: FinancialSuccess-v${{ steps.version.outputs.version }}-${{ steps.date.outputs.date }}
+        path: releases/debug/*.apk
+        retention-days: 30
+
+    - name: 💾 Commit APK files (only for releases)
+      if: steps.should_release.outputs.value == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add releases/
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "📱 Auto-commit APK v${{ steps.version.outputs.version }} - ${{ steps.date.outputs.date }}
+          
+          🔧 Build info:
+          - Version: ${{ steps.version.outputs.version }}
+          - Version Code: ${{ steps.version.outputs.version_code }}
+          - Date: ${{ steps.date.outputs.date }}
+          - Branch: ${{ github.ref_name }}
+          - Commit: ${{ github.sha }}"
+          git push
+        fi
+
+  # Параллельная генерация скриншотов для телефона
+  screenshots-phone:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: needs.build-and-test.outputs.should_release == 'true'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 📥 Download APK
+      uses: actions/download-artifact@v4
+      with:
+        name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}
+
+    - name: 🎭 Install Maestro
+      run: |
+        curl -Ls "https://get.maestro.mobile.dev" | bash
+        export PATH="$PATH":"$HOME/.maestro/bin"
+        maestro --version
+
+    - name: 📱 Start Android Emulator (Phone)
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 30
+        target: google_apis
+        arch: x86_64
+        profile: Nexus 6
+        script: |
+          adb shell input keyevent 82
+          adb shell input keyevent 82
+          sleep 5
+
+    - name: 📲 Install APK on Phone Emulator
+      run: |
+        export PATH="$PATH":"$HOME/.maestro/bin"
+        adb install releases/debug/*.apk
+        adb shell pm list packages | grep financialsuccess
+        sleep 3
+
+    - name: 📸 Run Maestro Screenshots (Phone)
+      run: |
+        export PATH="$PATH":"$HOME/.maestro/bin"
+        mkdir -p screenshots/phone
+        
+        # Пробуем стабильную конфигурацию
+        if [ -f "maestro/screenshots-stable.yaml" ]; then
+          echo "Using stable screenshots configuration"
+          maestro test maestro/screenshots-stable.yaml --format junit --output screenshots/phone/
+        else
+          echo "Using default screenshots configuration"
+          maestro test maestro/screenshots.yaml --format junit --output screenshots/phone/
+        fi
+        
+        echo "📱 Phone screenshots completed!"
+
+    - name: 📤 Upload Phone Screenshots
+      uses: actions/upload-artifact@v4
+      with:
+        name: phone-screenshots-v${{ needs.build-and-test.outputs.version }}
+        path: screenshots/phone/
+        retention-days: 30
+
+  # Параллельная генерация скриншотов для планшета
+  screenshots-tablet:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: needs.build-and-test.outputs.should_release == 'true'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 📥 Download APK
+      uses: actions/download-artifact@v4
+      with:
+        name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}
+
+    - name: 🎭 Install Maestro
+      run: |
+        curl -Ls "https://get.maestro.mobile.dev" | bash
+        export PATH="$PATH":"$HOME/.maestro/bin"
+        maestro --version
+
+    - name: 📱 Start Android Emulator (Tablet)
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 30
+        target: google_apis
+        arch: x86_64
+        profile: Nexus 10
+        script: |
+          adb shell input keyevent 82
+          adb shell input keyevent 82
+          sleep 5
+
+    - name: 📲 Install APK on Tablet Emulator
+      run: |
+        export PATH="$PATH":"$HOME/.maestro/bin"
+        adb install releases/debug/*.apk
+        adb shell pm list packages | grep financialsuccess
+        sleep 3
+
+    - name: 📸 Run Maestro Screenshots (Tablet)
+      run: |
+        export PATH="$PATH":"$HOME/.maestro/bin"
+        mkdir -p screenshots/tablet
+        
+        # Пробуем планшетную конфигурацию
+        if [ -f "maestro/screenshots-tablet.yaml" ]; then
+          echo "Using tablet screenshots configuration"
+          maestro test maestro/screenshots-tablet.yaml --format junit --output screenshots/tablet/
+        else
+          echo "Using default screenshots configuration for tablet"
+          maestro test maestro/screenshots.yaml --format junit --output screenshots/tablet/
+        fi
+        
+        echo "📱 Tablet screenshots completed!"
+
+    - name: 📤 Upload Tablet Screenshots
+      uses: actions/upload-artifact@v4
+      with:
+        name: tablet-screenshots-v${{ needs.build-and-test.outputs.version }}
+        path: screenshots/tablet/
+        retention-days: 30
+
+  # Финальная сборка релиза
+  create-release:
+    runs-on: ubuntu-latest
+    needs: [build-and-test, screenshots-phone, screenshots-tablet]
+    if: needs.build-and-test.outputs.should_release == 'true'
+    permissions:
+      contents: write
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 📥 Download APK
+      uses: actions/download-artifact@v4
+      with:
+        name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}
+
+    - name: 📥 Download Phone Screenshots
+      uses: actions/download-artifact@v4
+      with:
+        name: phone-screenshots-v${{ needs.build-and-test.outputs.version }}
+
+    - name: 📥 Download Tablet Screenshots
+      uses: actions/download-artifact@v4
+      with:
+        name: tablet-screenshots-v${{ needs.build-and-test.outputs.version }}
+
+    - name: 📸 Prepare screenshots for repository
+      run: |
+        mkdir -p screenshots/phone screenshots/tablet
+        
+        # Копируем скриншоты в правильные папки
+        if [ -d "screenshots/phone" ]; then
+          cp -r screenshots/phone/* screenshots/phone/ 2>/dev/null || true
+        fi
+        if [ -d "screenshots/tablet" ]; then
+          cp -r screenshots/tablet/* screenshots/tablet/ 2>/dev/null || true
+        fi
+        
+        echo "📱 Phone screenshots:"
+        ls -la screenshots/phone/ 2>/dev/null || echo "No phone screenshots"
+        echo ""
+        echo "📱 Tablet screenshots:"
+        ls -la screenshots/tablet/ 2>/dev/null || echo "No tablet screenshots"
+
+    - name: 📝 Commit Screenshots to Repository
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add screenshots/
+        if git diff --staged --quiet; then
+          echo "No screenshots to commit"
+        else
+          git commit -m "📸 Auto-generated screenshots v${{ needs.build-and-test.outputs.version }} - ${{ needs.build-and-test.outputs.date }}
+          
+          📱 Screenshots:
+          - Phone: $(ls screenshots/phone/*.png 2>/dev/null | wc -l) files
+          - Tablet: $(ls screenshots/tablet/*.png 2>/dev/null | wc -l) files
+          - Total: $(find screenshots/ -name "*.png" 2>/dev/null | wc -l) files"
+          git push
+        fi
+
+    - name: 🏷️ Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}
+        name: "🎮 Financial Success v${{ needs.build-and-test.outputs.version }}"
+        body_path: RELEASE_NOTES.md
+        files: |
+          releases/debug/*.apk
+          screenshots/phone/*.png
+          screenshots/tablet/*.png
+        draft: false
+        prerelease: false
+        generate_release_notes: false
+
+    - name: 📊 Build Summary
+      run: |
+        echo "🎉 Release completed successfully!"
+        echo "📱 Version: ${{ needs.build-and-test.outputs.version }}"
+        echo "🔢 Version Code: ${{ needs.build-and-test.outputs.version_code }}"
+        echo "📅 Date: ${{ needs.build-and-test.outputs.date }}"
+        echo "📸 Screenshots generated for phone and tablet"
+        echo "📦 APK available in releases/"
