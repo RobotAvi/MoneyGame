@@ -21,7 +21,7 @@ jobs:
       version_code: ${{ steps.version.outputs.version_code }}
       date: ${{ steps.date.outputs.date }}
       apk_path: ${{ steps.apk_path.outputs.path }}
-      should_release: ${{ steps.should_release.outputs.value }}
+    # should_release больше не нужен
 
     steps:
     - name: 📥 Checkout code
@@ -187,7 +187,7 @@ jobs:
   screenshots-phone:
     runs-on: ubuntu-latest
     needs: build-and-test
-    if: needs.build-and-test.outputs.should_release == 'true'
+    # Убрано условие should_release
     
     steps:
     - name: 📥 Checkout code
@@ -250,7 +250,7 @@ jobs:
   screenshots-tablet:
     runs-on: ubuntu-latest
     needs: build-and-test
-    if: needs.build-and-test.outputs.should_release == 'true'
+    # Убрано условие should_release
     
     steps:
     - name: 📥 Checkout code
@@ -313,7 +313,7 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     needs: [build-and-test, screenshots-phone, screenshots-tablet]
-    if: needs.build-and-test.outputs.should_release == 'true'
+    # Убрано условие should_release
     permissions:
       contents: write
 
