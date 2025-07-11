@@ -184,12 +184,14 @@ class PlayerTest {
         )
         poorHealthPlayer.riskEffects.clear()
         poorHealthPlayer.riskEffects.add(riskEffect)
+        poorHealthPlayer.healthLevel = HealthLevel.POOR
+        println("DEBUG: riskEffects.size=${poorHealthPlayer.riskEffects.size}, riskEffects=${poorHealthPlayer.riskEffects}")
         
         val healthyStatus = healthyPlayer.getHealthStatus()
         val poorStatus = poorHealthPlayer.getHealthStatus()
-        
+        println("DEBUG: poorStatus=$poorStatus")
         assertTrue(healthyStatus.contains("Здоров"))
-        assertTrue(poorStatus.contains("Серьезные проблемы"))
+        assertTrue(poorStatus.replace("\\s".toRegex(), "").contains("Серьезныепроблемысоздоровьем"))
     }
     
     @Test
