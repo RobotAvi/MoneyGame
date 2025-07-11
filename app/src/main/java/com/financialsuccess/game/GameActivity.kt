@@ -167,7 +167,7 @@ class GameActivity : AppCompatActivity() {
     
     private fun handleFastTrackDice(diceValue: Int) {
         val player = currentGameState?.player ?: return
-        val dreamNumber = player.dream?.fastTrackNumber ?: return
+        val dreamNumber = player.dream.fastTrackNumber
         
         binding.tvDiceValue.text = "Результат: $diceValue (Нужно: ${dreamNumber})"
         
@@ -227,7 +227,7 @@ class GameActivity : AppCompatActivity() {
         
         AlertDialog.Builder(this)
             .setTitle("🎉 ПОБЕДА!")
-            .setMessage("Поздравляем! Вы достигли своей мечты: ${player.dream?.name ?: "неизвестная мечта"}!\n\nВы успешно вышли из крысиных бегов и осуществили финансовую мечту!\n\nИтоговый капитал: ${currencyFormat.format(player.cash)}\nПассивный доход: ${currencyFormat.format(player.passiveIncome)}")
+            .setMessage("Поздравляем! Вы достигли своей мечты: ${player.dream.name}!\n\nВы успешно вышли из крысиных бегов и осуществили финансовую мечту!\n\nИтоговый капитал: ${currencyFormat.format(player.cash)}\nПассивный доход: ${currencyFormat.format(player.passiveIncome)}")
             .setPositiveButton("🎊 Новая игра") { _, _ ->
                 // Перезапуск игры
                 finish()
@@ -245,7 +245,7 @@ class GameActivity : AppCompatActivity() {
         val message = """
             🏆 ФИНАЛЬНАЯ СТАТИСТИКА
             
-            🎯 Мечта: ${player.dream?.name ?: "неизвестная мечта"}
+            🎯 Мечта: ${player.dream.name}
             💰 Итоговый капитал: ${currencyFormat.format(player.cash)}
             📊 Пассивный доход: ${currencyFormat.format(player.passiveIncome)}
             🏠 Активов: ${player.assets.size}
@@ -781,7 +781,7 @@ class GameActivity : AppCompatActivity() {
         
         AlertDialog.Builder(this)
             .setTitle("🎉 Поздравляем!")
-            .setMessage("Ваш пассивный доход превысил расходы!\n\nВы можете выйти из крысиных бегов на скоростную дорожку!\n\n🎯 На скоростной дорожке:\n• Ваша цель: ${player.dream?.name ?: "неизвестная мечта"}\n• Нужно выбросить: ${player.dream?.fastTrackNumber ?: 6}\n• Стоимость мечты: ${currencyFormat.format(player.dream?.cost ?: 0)}\n• Вы получаете денежный поток каждый ход")
+            .setMessage("Ваш пассивный доход превысил расходы!\n\nВы можете выйти из крысиных бегов на скоростную дорожку!\n\n🎯 На скоростной дорожке:\n• Ваша цель: ${player.dream.name}\n• Нужно выбросить: ${player.dream.fastTrackNumber}\n• Стоимость мечты: ${currencyFormat.format(player.dream.cost)}\n• Вы получаете денежный поток каждый ход")
             .setPositiveButton("🚀 Перейти") { _, _ ->
                 currentGameState?.player?.isInFastTrack = true
                 updateUI()
@@ -796,7 +796,7 @@ class GameActivity : AppCompatActivity() {
         
         AlertDialog.Builder(this)
             .setTitle("🎯 Скоростная дорожка!")
-            .setMessage("Добро пожаловать на скоростную дорожку!\n\n🎲 Как играть:\n• Бросайте кубик каждый ход\n• Нужно выбросить ${player.dream?.fastTrackNumber ?: 6} для вашей мечты\n• При попадании вы можете купить мечту если хватает денег\n• Каждый ход вы получаете денежный поток\n• При 1 или 6 возможны бонусы!\n\n💰 Ваши деньги: ${currencyFormat.format(player.cash)}\n🎯 Нужно для мечты: ${currencyFormat.format(player.dream?.cost ?: 0)}")
+            .setMessage("Добро пожаловать на скоростную дорожку!\n\n🎲 Как играть:\n• Бросайте кубик каждый ход\n• Нужно выбросить ${player.dream.fastTrackNumber} для вашей мечты\n• При попадании вы можете купить мечту если хватает денег\n• Каждый ход вы получаете денежный поток\n• При 1 или 6 возможны бонусы!\n\n💰 Ваши деньги: ${currencyFormat.format(player.cash)}\n🎯 Нужно для мечты: ${currencyFormat.format(player.dream.cost)}")
             .setPositiveButton("🎮 Играть!", null)
             .show()
     }
@@ -1071,7 +1071,7 @@ class GameActivity : AppCompatActivity() {
         
         // Позиционируем игрока на треке (процент от 0 до 100)
         val progress = if (player.isInFastTrack) {
-            val dreamCost = player.dream?.cost ?: 1
+            val dreamCost = player.dream.cost
             ((player.cash.toFloat() / dreamCost.toFloat()) * 100).coerceAtMost(100f)
         } else {
             // Теперь используем день месяца (1..30)
@@ -1115,7 +1115,7 @@ class GameActivity : AppCompatActivity() {
         
         // Обновляем финиш/мечту
         binding.tvFinishGoal.text = if (player.isInFastTrack) {
-            "🎯\n${player.dream?.name ?: "Мечта"}"
+            "🎯\n${player.dream.name}"
         } else {
             "🔄\nКруг"
         }

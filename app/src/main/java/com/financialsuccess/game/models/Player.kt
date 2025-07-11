@@ -23,8 +23,8 @@ data class Player(
     var childrenExpenses: Int = 0,
     var taxes: Int = 0,
     var otherExpenses: Int = 0,
-    val profession: Profession? = null,
-    val dream: Dream? = null,
+    val profession: Profession,
+    val dream: Dream,
     val assets: MutableList<Asset> = mutableListOf(),
     val liabilities: MutableList<Liability> = mutableListOf(),
     val investments: MutableList<Investment> = mutableListOf(),
@@ -93,8 +93,8 @@ data class Player(
     
     fun updateTotalExpenses() {
         // Базовые расходы из профессии
-        val professionExpenses = profession?.expenses ?: 0
-        val professionTaxes = profession?.taxes ?: 0
+        val professionExpenses = profession.expenses
+        val professionTaxes = profession.taxes
         
         // Распределяем базовые расходы по категориям
         foodExpenses = (professionExpenses * 0.4).toInt()
@@ -326,7 +326,7 @@ data class Player(
      
      // Проверить профессиональные риски (вызывается каждый ход)
      fun checkProfessionalRisks() {
-         val profession = this.profession ?: return
+         val profession = this.profession
          val availableRisks = ProfessionalRisks.getRisksForProfession(profession.name)
          
          for (risk in availableRisks) {
@@ -473,7 +473,7 @@ data class Player(
      
      // Обновить зарплату с учетом всех бонусов
      fun updateSalaryWithBonuses() {
-         val baseSalary = profession?.salary ?: 0
+         val baseSalary = profession.salary
          val educationBonus = calculateEducationBonus()
          val skillsBonus = calculateSkillsBonus()
          
