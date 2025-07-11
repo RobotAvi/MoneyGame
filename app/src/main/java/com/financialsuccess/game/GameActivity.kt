@@ -506,6 +506,11 @@ class GameActivity : AppCompatActivity() {
     }
     
     private fun showAssets() {
+        val player = currentGameState?.player
+        if (player == null || player.assets.isEmpty()) {
+            Toast.makeText(this, "У вас пока нет активов. Купите первый актив на рынке!", Toast.LENGTH_SHORT).show()
+            return
+        }
         // Показываем список активов игрока
         binding.recyclerViewAssets.visibility = 
             if (binding.recyclerViewAssets.visibility == View.VISIBLE) View.GONE else View.VISIBLE

@@ -425,14 +425,16 @@ class CharacterCreationActivity : AppCompatActivity() {
         updateGoalsVisibility()
         
         // Показываем обратную связь пользователю
-        binding.btnAddGoal.text = "Цель добавлена! ✅"
-        binding.btnAddGoal.isEnabled = false
-        
-        // Через 2 секунды возвращаем кнопку в исходное состояние
-        binding.btnAddGoal.postDelayed({
-            binding.btnAddGoal.text = "Добавить цель"
-            binding.btnAddGoal.isEnabled = true
-        }, 2000)
+        com.google.android.material.snackbar.Snackbar.make(
+            binding.root,
+            "Цель добавлена!",
+            com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
+        ).show()
+        // Прокручиваем к списку целей, чтобы пользователь увидел результат
+        binding.recyclerViewGoals.post {
+            binding.recyclerViewGoals.smoothScrollToPosition(selectedFinancialGoals.size - 1)
+        }
+        binding.btnAddGoal.text = "Добавить цель"
     }
     
     private fun updateGoalsVisibility() {
