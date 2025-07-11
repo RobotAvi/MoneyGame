@@ -178,6 +178,31 @@ class CharacterCreationActivityTest {
     }
 
     @Test
+    fun testAddGoalButtonWorks() {
+        ActivityScenario.launch(CharacterCreationActivity::class.java)
+        
+        // Проверяем, что RecyclerView целей изначально скрыт
+        onView(withId(R.id.recyclerViewGoals))
+            .check(matches(not(isDisplayed())))
+        
+        // Нажимаем кнопку добавления цели
+        onView(withId(R.id.btnAddGoal))
+            .perform(click())
+        
+        // Проверяем, что кнопка показывает обратную связь
+        onView(withText("Цель добавлена! ✅"))
+            .check(matches(isDisplayed()))
+        
+        // Проверяем, что RecyclerView целей стал видимым
+        onView(withId(R.id.recyclerViewGoals))
+            .check(matches(isDisplayed()))
+        
+        // Проверяем, что цель отображается в списке
+        onView(withText("Пассивный доход 100000₽"))
+            .check(matches(isDisplayed()))
+    }
+
+    @Test
     fun testDatePickerFieldIsDisplayed() {
         ActivityScenario.launch(CharacterCreationActivity::class.java)
         
