@@ -111,8 +111,9 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewProfessions"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginBottom="24dp" />
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:nestedScrollingEnabled="false" />
 
         <!-- Навыки -->
         <TextView
@@ -376,8 +377,9 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewDreams"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginBottom="24dp" />
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:nestedScrollingEnabled="false" />
 
         <!-- Дата начала -->
         <TextView
