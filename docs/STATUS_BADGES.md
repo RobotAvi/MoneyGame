@@ -65,7 +65,6 @@
 ```markdown
 ![Financial](https://img.shields.io/badge/Topic-Financial%20Literacy-gold)
 ![Currency](https://img.shields.io/badge/Currency-₽%20Rubles-green)
-![Inspired by](https://img.shields.io/badge/Inspired%20by-Cashflow%20by%20Kiyosaki-purple)
 ```
 
 ## 🛠️ Полный пример README заголовка:
@@ -114,3 +113,4 @@
 
 # ⚡️ Важно
 > CI/CD полностью автоматизирован для всех основных веток (main/master). Сборка, релизы и релиз-ноты происходят без ручного вмешательства.
+```

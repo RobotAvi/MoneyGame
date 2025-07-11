@@ -2,6 +2,7 @@ package com.financialsuccess.game.models
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import java.util.Calendar
 
 @Parcelize
 data class Player(
@@ -196,9 +197,16 @@ data class Player(
     ) {
         val months = arrayOf("Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
                             "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь")
-        val startYear = 2024
-        val currentMonth = monthsPlayed % 12
-        val currentYear = startYear + monthsPlayed / 12
+        val calendar = Calendar.getInstance()
+        if (startDateMillis != null) {
+            calendar.timeInMillis = startDateMillis!!
+            calendar.add(Calendar.MONTH, monthsPlayed)
+        } else {
+            calendar.set(2024, Calendar.JANUARY, 1)
+            calendar.add(Calendar.MONTH, monthsPlayed)
+        }
+        val currentYear = calendar.get(Calendar.YEAR)
+        val currentMonth = calendar.get(Calendar.MONTH)
         val realDate = "$currentDayOfMonth ${months[currentMonth]} $currentYear"
         val entry = FinancialEntry(
             type = type,
