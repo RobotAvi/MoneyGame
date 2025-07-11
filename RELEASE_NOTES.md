@@ -1,8 +1,8 @@
-## Changelog for v1.24
+## Changelog for v1.25
 
 ### Последние коммиты:
-- 🔖 Bump version to 1.24 (25) [auto] (GitHub Action)
-- Improve error handling and add risk effect type in GameManager and PlayerTest (#18) (Avenir Voronov)
+- 🔖 Bump version to 1.25 (26) [auto] (GitHub Action)
+- Refactor Player model: adjust expense and income calculations (#19) (Avenir Voronov)
 ### Изменения из CHANGELOG.md:
 # Changelog
 
