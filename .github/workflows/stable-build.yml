@@ -224,7 +224,20 @@ jobs:
           adb shell input keyevent 82
           sleep 5
 
-    - name: 📲 Install APK on Phone Emulator
+    - name: � Debug: Check environment after phone emulator start
+      run: |
+        echo "=== Current directory ==="
+        pwd
+        echo "=== Directory contents ==="
+        ls -la
+        echo "=== ADB devices ==="
+        adb devices
+        echo "=== Environment variables ==="
+        env | grep -E "(ANDROID|PATH|HOME)" | head -10
+        echo "=== APK files ==="
+        ls -la releases/debug/ 2>/dev/null || echo "No releases/debug directory"
+
+    - name: � Install APK on Phone Emulator
       run: |
         export PATH="$PATH":"$HOME/.maestro/bin"
         adb install releases/debug/*.apk
@@ -307,6 +320,19 @@ jobs:
           adb shell input keyevent 82
           adb shell input keyevent 82
           sleep 5
+
+    - name: 🔍 Debug: Check environment after tablet emulator start
+      run: |
+        echo "=== Current directory ==="
+        pwd
+        echo "=== Directory contents ==="
+        ls -la
+        echo "=== ADB devices ==="
+        adb devices
+        echo "=== Environment variables ==="
+        env | grep -E "(ANDROID|PATH|HOME)" | head -10
+        echo "=== APK files ==="
+        ls -la releases/debug/ 2>/dev/null || echo "No releases/debug directory"
 
     - name: 📲 Install APK on Tablet Emulator
       run: |
