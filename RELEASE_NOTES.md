@@ -1,18 +1,18 @@
-## 🎮 Financial Success v1.40
+## 🎮 Financial Success v1.41
 
-### 📅 Дата релиза: 2025-07-12 13:49 UTC
+### 📅 Дата релиза: 2025-07-12 16:37 UTC
 
 ### 🔄 Последние изменения:
+be8b568 🔖 Bump version to 1.41 (42) [auto]
+a42bf35 Merge pull request #43 from RobotAvi/cursor/readme-md-1382
+c38f307 Refactor README: Simplify structure, update content, and improve readability
+ed9a9ac Update Android SDK path configuration for GitHub Actions workflow
+28926b2 Add ADB installation debugging steps to GitHub workflow
+f9118c8 Install Android emulator and system images for CI testing
+fc49d8f Configure Android SDK and ADB for CI workflow
+59e6c0b 📱 Auto-commit APK v1.40 - 2025-07-12_13-50
+92b630f 📝 Update release notes [auto]
 0b9245c 🔖 Bump version to 1.40 (41) [auto]
-490bb1d Add automatic screenshots
-df69107 Add assertion for main screen text in Maestro screenshot scenario
-0bb234c Добавлена подробная статья о настройке Maestro для автоматического снятия скриншотов
-0bbad4f Checkpoint before follow-up message
-4258baa Скриншот приложения с эмулятора (ручной adb screencap)
-a2ffa40 Remove assertion from minimal screenshot flow
-9134e5c Fix Maestro installation and update screenshot test in workflow
-f2b4994 Checkpoint before follow-up message
-7c2200f Add wait timeout before taking screenshot in Maestro test
 
 ### 📋 Изменения из CHANGELOG.md:
 # Changelog
