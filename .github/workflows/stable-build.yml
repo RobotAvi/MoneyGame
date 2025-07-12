@@ -202,7 +202,7 @@ jobs:
       run: |
         curl -Ls "https://get.maestro.mobile.dev" | bash
         export PATH="$PATH":"$HOME/.maestro/bin"
-        maestro --version
+        echo "n" | maestro --version
 
     - name: 📱 Start Android Emulator (Phone)
       uses: reactivecircus/android-emulator-runner@v2
@@ -265,7 +265,7 @@ jobs:
       run: |
         curl -Ls "https://get.maestro.mobile.dev" | bash
         export PATH="$PATH":"$HOME/.maestro/bin"
-        maestro --version
+        echo "n" | maestro --version
 
     - name: 📱 Start Android Emulator (Tablet)
       uses: reactivecircus/android-emulator-runner@v2
