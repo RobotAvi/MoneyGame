@@ -1,4 +1,4 @@
-appId: com.financialsuccess.game
+THIS SHOULD BE A LINTER ERRORappId: com.financialsuccess.game.debug
 name: Financial Success Screenshots
 outputDir: screenshots/phone
 
