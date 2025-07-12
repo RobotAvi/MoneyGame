@@ -1,5 +1,6 @@
-THIS SHOULD BE A LINTER ERRORappId: com.financialsuccess.game.debug
+appId: com.financialsuccess.game.debug
 name: Financial Success Screenshots (Minimal)
 ---
 - launchApp
+- waitForTimeout: 3000
 - takeScreenshot: "01_main_screen_minimal"
