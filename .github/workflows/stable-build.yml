@@ -269,12 +269,6 @@ jobs:
       with:
         name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}
 
-    - name: 🎭 Install Maestro
-      run: |
-        curl -Ls "https://get.maestro.mobile.dev" | bash
-        export PATH="$PATH":"$HOME/.maestro/bin"
-        echo "n" | maestro --version
-
     - name: 🔧 Install Android SDK and start ADB server
       run: |
         # Устанавливаем Android SDK
@@ -293,6 +287,12 @@ jobs:
         export PATH=$PATH:$HOME/android-sdk/platform-tools
         adb start-server
         adb devices
+
+    - name: 🎭 Install Maestro
+      run: |
+        curl -Ls "https://get.maestro.mobile.dev" | bash
+        export PATH="$PATH":"$HOME/.maestro/bin"
+        echo "n" | maestro --version
 
     - name: 📱 Start Android Emulator (Tablet)
       uses: reactivecircus/android-emulator-runner@v2
