@@ -214,6 +214,20 @@ jobs:
         export PATH=$PATH:$HOME/android-sdk/platform-tools
         adb start-server
         adb devices
+    - name: 🔍 Check ADB and SDK installation (phone)
+      run: |
+        echo "PATH: $PATH"
+        which adb || true
+        if ! command -v adb; then
+          echo "adb not found! Listing platform-tools directory:"
+          ls -l $HOME/android-sdk/platform-tools || true
+          echo "Listing cmdline-tools directory:"
+          ls -l $HOME/android-sdk/cmdline-tools/latest/bin || true
+          echo "Listing all files in android-sdk recursively:"
+          find $HOME/android-sdk
+          exit 1
+        fi
+        adb version
 
     - name: 🎭 Install Maestro
       run: |
@@ -303,6 +317,20 @@ jobs:
         export PATH=$PATH:$HOME/android-sdk/platform-tools
         adb start-server
         adb devices
+    - name: 🔍 Check ADB and SDK installation (tablet)
+      run: |
+        echo "PATH: $PATH"
+        which adb || true
+        if ! command -v adb; then
+          echo "adb not found! Listing platform-tools directory:"
+          ls -l $HOME/android-sdk/platform-tools || true
+          echo "Listing cmdline-tools directory:"
+          ls -l $HOME/android-sdk/cmdline-tools/latest/bin || true
+          echo "Listing all files in android-sdk recursively:"
+          find $HOME/android-sdk
+          exit 1
+        fi
+        adb version
 
     - name: 🎭 Install Maestro
       run: |
