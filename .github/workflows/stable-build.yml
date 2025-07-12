@@ -199,18 +199,48 @@ jobs:
       with:
         name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}
 
+    - name: 🔧 Install Android SDK and start ADB server
+      run: |
+        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+        unzip cmdline-tools.zip -d $HOME
+        mkdir -p $HOME/android-sdk/cmdline-tools
+        mv $HOME/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+
+        export ANDROID_SDK_ROOT=$HOME/android-sdk
+        export PATH=$PATH:$HOME/android-sdk/cmdline-tools/latest/bin
+        yes | sdkmanager --licenses
+        sdkmanager "platform-tools" "emulator" "system-images;android-30;default;x86_64"
+
+        echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
+        adb start-server
+        adb devices
+    - name: 🔍 Check ADB and SDK installation (phone)
+      run: |
+        echo "PATH: $PATH"
+        which adb || true
+        if ! command -v adb; then
+          echo "adb not found! Listing platform-tools directory:"
+          ls -l $HOME/android-sdk/platform-tools || true
+          echo "Listing cmdline-tools directory:"
+          ls -l $HOME/android-sdk/cmdline-tools/latest/bin || true
+          echo "Listing all files in android-sdk recursively:"
+          find $HOME/android-sdk
+          exit 1
+        fi
+        adb version
+
     - name: 🎭 Install Maestro
       run: |
         curl -Ls "https://get.maestro.mobile.dev" | bash
         export PATH="$PATH":"$HOME/.maestro/bin"
         echo "n" | maestro --version
 
-    - name: � Start ADB server manually
+    - name: Start ADB server manually
       run: |
         adb start-server
         adb devices
 
-    - name: � Start Android Emulator (Phone)
+    - name: Start Android Emulator (Phone)
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: 30
@@ -281,12 +311,26 @@ jobs:
         export ANDROID_SDK_ROOT=$HOME/android-sdk
         export PATH=$PATH:$HOME/android-sdk/cmdline-tools/latest/bin
         yes | sdkmanager --licenses
-        sdkmanager "platform-tools"
+        sdkmanager "platform-tools" "emulator" "system-images;android-30;default;x86_64"
         
         # Запускаем ADB
-        export PATH=$PATH:$HOME/android-sdk/platform-tools
+        echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
         adb start-server
         adb devices
+    - name: 🔍 Check ADB and SDK installation (tablet)
+      run: |
+        echo "PATH: $PATH"
+        which adb || true
+        if ! command -v adb; then
+          echo "adb not found! Listing platform-tools directory:"
+          ls -l $HOME/android-sdk/platform-tools || true
+          echo "Listing cmdline-tools directory:"
+          ls -l $HOME/android-sdk/cmdline-tools/latest/bin || true
+          echo "Listing all files in android-sdk recursively:"
+          find $HOME/android-sdk
+          exit 1
+        fi
+        adb version
 
     - name: 🎭 Install Maestro
       run: |

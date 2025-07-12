@@ -88,7 +88,10 @@ sdkmanager "emulator"
 sdkmanager "system-images;android-30;default;x86_64"
 
 # Обновляем PATH
-export PATH=$PATH:$HOME/android-sdk/platform-tools:$HOME/android-sdk/emulator
+# Для CI/CD (например, GitHub Actions) используйте:
+echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
+# Это гарантирует, что adb будет доступен во всех шагах workflow.
+export PATH=$PATH:$HOME/android-sdk/emulator
 ```
 
 ---
