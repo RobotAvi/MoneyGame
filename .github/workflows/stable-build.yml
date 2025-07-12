@@ -220,13 +220,11 @@ jobs:
         which adb
         adb version
 
-    - name: 🎭 Install Maestro
+    - name: Install Maestro
       run: |
         curl -Ls "https://get.maestro.mobile.dev" | bash
         export PATH="$PATH":"$HOME/.maestro/bin"
         echo "n" | maestro --version
-
-
 
     - name: Start Android Emulator (Phone)
       uses: reactivecircus/android-emulator-runner@v2
@@ -262,7 +260,7 @@ jobs:
         adb shell pm list packages | grep financialsuccess
         sleep 3
 
-    - name: 📸 Run Maestro Screenshots (Phone)
+    - name: Run Maestro Screenshots (Phone)
       run: |
         export PATH="$PATH":"$HOME/.maestro/bin"
         mkdir -p screenshots/phone
@@ -278,7 +276,7 @@ jobs:
         
         echo "📱 Phone screenshots completed!"
 
-    - name: 📤 Upload Phone Screenshots
+    - name: Upload Phone Screenshots
       uses: actions/upload-artifact@v4
       with:
         name: phone-screenshots-v${{ needs.build-and-test.outputs.version }}
@@ -321,7 +319,7 @@ jobs:
         which adb
         adb version
 
-    - name: 🎭 Install Maestro
+    - name: Install Maestro
       run: |
         curl -Ls "https://get.maestro.mobile.dev" | bash
         export PATH="$PATH":"$HOME/.maestro/bin"
@@ -343,7 +341,7 @@ jobs:
           adb shell input keyevent 82
           sleep 5
 
-    - name: 🔍 Debug: Check environment after tablet emulator start
+    - name: Debug: Check environment after tablet emulator start
       run: |
         echo "=== Current directory ==="
         pwd
@@ -356,14 +354,14 @@ jobs:
         echo "=== APK files ==="
         ls -la releases/debug/ 2>/dev/null || echo "No releases/debug directory"
 
-    - name: 📲 Install APK on Tablet Emulator
+    - name: Install APK on Tablet Emulator
       run: |
         export PATH="$PATH":"$HOME/.maestro/bin"
         adb install releases/debug/*.apk
         adb shell pm list packages | grep financialsuccess
         sleep 3
 
-    - name: 📸 Run Maestro Screenshots (Tablet)
+    - name: Run Maestro Screenshots (Tablet)
       run: |
         export PATH="$PATH":"$HOME/.maestro/bin"
         mkdir -p screenshots/tablet
@@ -379,7 +377,7 @@ jobs:
         
         echo "📱 Tablet screenshots completed!"
 
-    - name: 📤 Upload Tablet Screenshots
+    - name: Upload Tablet Screenshots
       uses: actions/upload-artifact@v4
       with:
         name: tablet-screenshots-v${{ needs.build-and-test.outputs.version }}
