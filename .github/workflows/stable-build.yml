@@ -9,6 +9,7 @@ on:
 
 env:
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true
+  MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: "true"
 
 jobs:
   # Основная сборка и тестирование
