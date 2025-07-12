@@ -1,6 +1,6 @@
 appId: com.financialsuccess.game
 name: Financial Success Screenshots (Minimal)
 
-# Минимальный тест - только запуск приложения и базовый скриншот
-- launchApp
-- takeScreenshot: "01_main_screen_minimal"
+flows:
+  - launchApp
+  - takeScreenshot: "01_main_screen_minimal"
