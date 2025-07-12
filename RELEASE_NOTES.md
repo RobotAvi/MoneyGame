@@ -1,18 +1,18 @@
-## 🎮 Financial Success v1.41
+## 🎮 Financial Success v1.42
 
-### 📅 Дата релиза: 2025-07-12 16:37 UTC
+### 📅 Дата релиза: 2025-07-12 16:38 UTC
 
 ### 🔄 Последние изменения:
+4c78f10 🔖 Bump version to 1.42 (43) [auto]
+843bfb7 Merge pull request #41 from RobotAvi/cursor/unplanned-actions-review-fa1a
+2e3834b 📝 Update release notes [auto]
 be8b568 🔖 Bump version to 1.41 (42) [auto]
 a42bf35 Merge pull request #43 from RobotAvi/cursor/readme-md-1382
+8ecdc18 Fix Android SDK setup and adb installation in GitHub workflow
 c38f307 Refactor README: Simplify structure, update content, and improve readability
+b949b96 Fix Android SDK installation issues (#42)
 ed9a9ac Update Android SDK path configuration for GitHub Actions workflow
 28926b2 Add ADB installation debugging steps to GitHub workflow
-f9118c8 Install Android emulator and system images for CI testing
-fc49d8f Configure Android SDK and ADB for CI workflow
-59e6c0b 📱 Auto-commit APK v1.40 - 2025-07-12_13-50
-92b630f 📝 Update release notes [auto]
-0b9245c 🔖 Bump version to 1.40 (41) [auto]
 
 ### 📋 Изменения из CHANGELOG.md:
 # Changelog
