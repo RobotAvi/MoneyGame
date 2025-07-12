@@ -205,14 +205,20 @@ jobs:
         export PATH="$PATH":"$HOME/.maestro/bin"
         echo "n" | maestro --version
 
-    - name: 📱 Start Android Emulator (Phone)
+    - name: � Start ADB server manually
+      run: |
+        adb start-server
+        adb devices
+
+    - name: � Start Android Emulator (Phone)
       uses: reactivecircus/android-emulator-runner@v2
       with:
-        api-level: 28
-        target: default
-        arch: x86
+        api-level: 30
+        target: google_apis
+        arch: x86_64
         profile: Nexus 6
-        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-audio -no-boot-anim
+        disable-animations: true
+        emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics
         script: |
           adb shell input keyevent 82
           adb shell input keyevent 82
@@ -269,14 +275,20 @@ jobs:
         export PATH="$PATH":"$HOME/.maestro/bin"
         echo "n" | maestro --version
 
+    - name: 🔧 Start ADB server manually
+      run: |
+        adb start-server
+        adb devices
+
     - name: 📱 Start Android Emulator (Tablet)
       uses: reactivecircus/android-emulator-runner@v2
       with:
-        api-level: 28
-        target: default
-        arch: x86
+        api-level: 30
+        target: google_apis
+        arch: x86_64
         profile: Nexus 10
-        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-audio -no-boot-anim
+        disable-animations: true
+        emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics
         script: |
           adb shell input keyevent 82
           adb shell input keyevent 82
