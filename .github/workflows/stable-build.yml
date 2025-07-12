@@ -10,6 +10,7 @@ on:
 env:
   ACTIONS_RUNNER_DEBUG: true
   RUNNER_DEBUG: 1
+  MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: "true"
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true
 
 jobs:
