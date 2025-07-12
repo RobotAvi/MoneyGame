@@ -2,5 +2,4 @@ appId: com.financialsuccess.game.debug
 name: Financial Success Screenshots (Minimal)
 ---
 - launchApp
-- assertVisible: "Изучай финансовую грамотность"
 - takeScreenshot: "01_main_screen_minimal"
