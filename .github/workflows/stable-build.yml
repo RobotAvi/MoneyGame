@@ -9,6 +9,7 @@ on:
 
 env:
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true
+  MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: "true"
 
 jobs:
   # Основная сборка и тестирование
@@ -202,15 +203,22 @@ jobs:
       run: |
         curl -Ls "https://get.maestro.mobile.dev" | bash
         export PATH="$PATH":"$HOME/.maestro/bin"
-        maestro --version
+        echo "n" | maestro --version
 
-    - name: 📱 Start Android Emulator (Phone)
+    - name: � Start ADB server manually
+      run: |
+        adb start-server
+        adb devices
+
+    - name: � Start Android Emulator (Phone)
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: 30
         target: google_apis
         arch: x86_64
         profile: Nexus 6
+        disable-animations: true
+        emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics
         script: |
           adb shell input keyevent 82
           adb shell input keyevent 82
@@ -261,11 +269,30 @@ jobs:
       with:
         name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}
 
+    - name: 🔧 Install Android SDK and start ADB server
+      run: |
+        # Устанавливаем Android SDK
+        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+        unzip cmdline-tools.zip -d $HOME
+        mkdir -p $HOME/android-sdk/cmdline-tools
+        mv $HOME/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+        
+        # Устанавливаем platform-tools
+        export ANDROID_SDK_ROOT=$HOME/android-sdk
+        export PATH=$PATH:$HOME/android-sdk/cmdline-tools/latest/bin
+        yes | sdkmanager --licenses
+        sdkmanager "platform-tools"
+        
+        # Запускаем ADB
+        export PATH=$PATH:$HOME/android-sdk/platform-tools
+        adb start-server
+        adb devices
+
     - name: 🎭 Install Maestro
       run: |
         curl -Ls "https://get.maestro.mobile.dev" | bash
         export PATH="$PATH":"$HOME/.maestro/bin"
-        maestro --version
+        echo "n" | maestro --version
 
     - name: 📱 Start Android Emulator (Tablet)
       uses: reactivecircus/android-emulator-runner@v2
@@ -274,6 +301,8 @@ jobs:
         target: google_apis
         arch: x86_64
         profile: Nexus 10
+        disable-animations: true
+        emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics
         script: |
           adb shell input keyevent 82
           adb shell input keyevent 82
