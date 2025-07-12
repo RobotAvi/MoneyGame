@@ -211,7 +211,7 @@ jobs:
         yes | sdkmanager --licenses
         sdkmanager "platform-tools" "emulator" "system-images;android-30;default;x86_64"
 
-        export PATH=$PATH:$HOME/android-sdk/platform-tools
+        echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
         adb start-server
         adb devices
     - name: 🔍 Check ADB and SDK installation (phone)
@@ -314,7 +314,7 @@ jobs:
         sdkmanager "platform-tools" "emulator" "system-images;android-30;default;x86_64"
         
         # Запускаем ADB
-        export PATH=$PATH:$HOME/android-sdk/platform-tools
+        echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
         adb start-server
         adb devices
     - name: 🔍 Check ADB and SDK installation (tablet)
