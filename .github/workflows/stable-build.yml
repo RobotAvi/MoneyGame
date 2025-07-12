@@ -208,10 +208,11 @@ jobs:
     - name: 📱 Start Android Emulator (Phone)
       uses: reactivecircus/android-emulator-runner@v2
       with:
-        api-level: 30
-        target: google_apis
-        arch: x86_64
+        api-level: 28
+        target: default
+        arch: x86
         profile: Nexus 6
+        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-audio -no-boot-anim
         script: |
           adb shell input keyevent 82
           adb shell input keyevent 82
@@ -271,10 +272,11 @@ jobs:
     - name: 📱 Start Android Emulator (Tablet)
       uses: reactivecircus/android-emulator-runner@v2
       with:
-        api-level: 30
-        target: google_apis
-        arch: x86_64
+        api-level: 28
+        target: default
+        arch: x86
         profile: Nexus 10
+        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-audio -no-boot-anim
         script: |
           adb shell input keyevent 82
           adb shell input keyevent 82
