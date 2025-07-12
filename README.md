@@ -83,9 +83,3 @@ MIT License - см. [LICENSE](LICENSE)
 ## � Поддержка
 
 - 🐛 [Issues](https://github.com/your-username/financial-success-game/issues)
-- 📧 Email: support@financial-success-game.com
-- 💬 Discord: [ссылка на сервер]
-
----
-
-**Версия**: 2.0.0 | **Последнее обновление**: Декабрь 2024
