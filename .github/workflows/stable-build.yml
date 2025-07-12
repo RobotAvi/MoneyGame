@@ -326,6 +326,13 @@ jobs:
     - name: 🐞 Debug ADB Devices (after screenshots tablet)
       run: adb devices && adb logcat -d | tail -n 100
 
+    - name: 📤 Upload Tablet Screenshots
+      uses: actions/upload-artifact@v4
+      with:
+        name: tablet-screenshots-v${{ needs.build-and-test.outputs.version }}
+        path: screenshots/tablet/
+        retention-days: 30
+
   # Финальная сборка релиза
   create-release:
     runs-on: ubuntu-latest
