@@ -1,18 +1,18 @@
-## 🎮 Financial Success v1.39
+## 🎮 Financial Success v1.40
 
-### 📅 Дата релиза: 2025-07-11 20:38 UTC
+### 📅 Дата релиза: 2025-07-12 13:49 UTC
 
 ### 🔄 Последние изменения:
-41ef121 🔖 Bump version to 1.39 (40) [auto]
-34d8a1d Improve UX: add goal feedback, asset empty state, and fix date initialization
-f327266 Remove copyright references and fix date calculation in game
-48325c0 Fix asset button and perform copyright audit in res folder
-568c3f8 Update task progress tracking in BUGFIX_REPORT.md
-97fab29 📱 Auto-commit APK v1.38 - 2025-07-11_20-01
-e302aeb 📝 Update release notes [auto]
-dbe499e 🔖 Bump version to 1.38 (39) [auto]
-c17e323 Merge pull request #37 from RobotAvi/cursor/investigate-screenshot-job-skips-in-workflow-bcb5
-2d2173d Remove should_release condition from GitHub Actions workflow
+0b9245c 🔖 Bump version to 1.40 (41) [auto]
+490bb1d Add automatic screenshots
+df69107 Add assertion for main screen text in Maestro screenshot scenario
+0bb234c Добавлена подробная статья о настройке Maestro для автоматического снятия скриншотов
+0bbad4f Checkpoint before follow-up message
+4258baa Скриншот приложения с эмулятора (ручной adb screencap)
+a2ffa40 Remove assertion from minimal screenshot flow
+9134e5c Fix Maestro installation and update screenshot test in workflow
+f2b4994 Checkpoint before follow-up message
+7c2200f Add wait timeout before taking screenshot in Maestro test
 
 ### 📋 Изменения из CHANGELOG.md:
 # Changelog
