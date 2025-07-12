@@ -242,7 +242,7 @@ jobs:
           adb shell input keyevent 82
           sleep 5
 
-    - name: � Debug: Check environment after phone emulator start
+    - name: Debug: Check environment after phone emulator start
       run: |
         echo "=== Current directory ==="
         pwd
@@ -255,7 +255,7 @@ jobs:
         echo "=== APK files ==="
         ls -la releases/debug/ 2>/dev/null || echo "No releases/debug directory"
 
-    - name: � Install APK on Phone Emulator
+    - name: Install APK on Phone Emulator
       run: |
         export PATH="$PATH":"$HOME/.maestro/bin"
         adb install releases/debug/*.apk
