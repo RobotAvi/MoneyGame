@@ -1,9 +1,10 @@
-THIS SHOULD BE A LINTER ERRORappId: com.financialsuccess.game.debug
+appId: com.financialsuccess.game.debug
 name: Financial Success Screenshots
 outputDir: screenshots/phone
 
 # Главный экран
 - launchApp
+- assertVisible: "Изучай финансовую грамотность"
 - takeScreenshot: "01_main_screen"
 
 # Экран выбора профессии
