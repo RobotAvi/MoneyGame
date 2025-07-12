@@ -209,7 +209,7 @@ jobs:
         export ANDROID_SDK_ROOT=$HOME/android-sdk
         export PATH=$PATH:$HOME/android-sdk/cmdline-tools/latest/bin
         yes | sdkmanager --licenses
-        sdkmanager "platform-tools"
+        sdkmanager "platform-tools" "emulator" "system-images;android-30;default;x86_64"
 
         export PATH=$PATH:$HOME/android-sdk/platform-tools
         adb start-server
@@ -297,7 +297,7 @@ jobs:
         export ANDROID_SDK_ROOT=$HOME/android-sdk
         export PATH=$PATH:$HOME/android-sdk/cmdline-tools/latest/bin
         yes | sdkmanager --licenses
-        sdkmanager "platform-tools"
+        sdkmanager "platform-tools" "emulator" "system-images;android-30;default;x86_64"
         
         # Запускаем ADB
         export PATH=$PATH:$HOME/android-sdk/platform-tools
