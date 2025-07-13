@@ -100,6 +100,25 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
 
+    - name: 🔍 Check dependencies
+      run: |
+        echo "🔍 Checking dependencies..."
+        
+        # Проверка Java
+        java_version=$(java -version 2>&1 | head -n 1 | cut -d'"' -f2 | cut -d'.' -f1)
+        echo "☕ Java version: $java_version"
+        if [ "$java_version" != "21" ]; then
+          echo "⚠️ Warning: Recommended Java 21, found: $java_version"
+        fi
+        
+        # Проверка gradlew
+        if [ ! -f "gradlew" ]; then
+          echo "❌ Error: gradlew not found"
+          exit 1
+        fi
+        
+        echo "✅ Dependencies checked"
+
     - name: 🤖 Setup Android SDK
       uses: android-actions/setup-android@v3
 
@@ -117,11 +136,38 @@ jobs:
     - name: 🔧 Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: 🧪 Run Unit Tests
-      run: ./gradlew test --no-daemon
+    - name: � Clean project
+      run: |
+        echo "🧹 Cleaning project..."
+        ./gradlew clean --no-daemon
+        if [ $? -eq 0 ]; then
+          echo "✅ Project cleaned successfully"
+        else
+          echo "❌ Project clean failed"
+          exit 1
+        fi
+
+    - name: �� Run Unit Tests
+      run: |
+        echo "🧪 Running unit tests..."
+        ./gradlew test --no-daemon
+        if [ $? -eq 0 ]; then
+          echo "✅ Unit tests passed"
+        else
+          echo "❌ Unit tests failed"
+          exit 1
+        fi
 
     - name: 🔨 Build Debug APK
-      run: ./gradlew assembleDebug --no-daemon
+      run: |
+        echo "🔨 Building debug APK..."
+        ./gradlew assembleDebug --no-daemon
+        if [ $? -eq 0 ]; then
+          echo "✅ Debug APK built successfully"
+        else
+          echo "❌ Debug APK build failed"
+          exit 1
+        fi
 
     - name: 📊 Get version info
       id: version
@@ -139,6 +185,15 @@ jobs:
     - name: 📱 Prepare APK for distribution
       id: apk_path
       run: |
+        echo "📱 Preparing APK for distribution..."
+        
+        # Проверяем, что APK существует
+        if [ ! -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
+          echo "❌ Error: Debug APK not found"
+          ls -la app/build/outputs/apk/debug/ || echo "Debug directory not found"
+          exit 1
+        fi
+        
         mkdir -p releases/debug
         cp app/build/outputs/apk/debug/app-debug.apk releases/debug/
         cd releases/debug
@@ -152,9 +207,10 @@ jobs:
         ln -sf "$newname" "latest-debug.apk"
         
         # Очищаем старые APK (оставляем только 5 последних)
-        ls -tp FinancialSuccess-v*-debug.apk | grep -v '/$' | tail -n +6 | xargs -r rm --
+        ls -tp FinancialSuccess-v*-debug.apk | grep -v '/$' | tail -n +6 | xargs -r rm -- 2>/dev/null || true
         
-        echo "📱 APK prepared: $newname"
+        echo "✅ APK prepared: $newname"
+        echo "📊 APK files:"
         ls -la
 
     - name: 📤 Upload APK Artifact
@@ -245,8 +301,26 @@ jobs:
     - name: 📲 Install APK on Phone Emulator
       run: |
         export PATH="$PATH":"$HOME/.maestro/bin"
+        echo "📱 Installing APK on phone emulator..."
+        
+        # Проверяем, что APK существует
+        if [ ! -f "releases/debug/*.apk" ]; then
+          echo "❌ Error: APK file not found in releases/debug/"
+          ls -la releases/debug/
+          exit 1
+        fi
+        
+        # Устанавливаем APK
         adb install releases/debug/*.apk
-        adb shell pm list packages | grep financialsuccess
+        
+        # Проверяем установку
+        if adb shell pm list packages | grep -q financialsuccess; then
+          echo "✅ APK successfully installed on phone emulator"
+        else
+          echo "❌ Error: APK installation failed on phone emulator"
+          exit 1
+        fi
+        
         sleep 3
 
     - name: 📸 Run Maestro Screenshots (Phone)
@@ -254,16 +328,20 @@ jobs:
         export PATH="$PATH":"$HOME/.maestro/bin"
         mkdir -p screenshots/phone
         
-        # Пробуем стабильную конфигурацию
-        if [ -f "maestro/screenshots-stable.yaml" ]; then
-          echo "Using stable screenshots configuration"
-          maestro test maestro/screenshots-stable.yaml --format junit --output screenshots/phone/
-        else
-          echo "Using default screenshots configuration"
-          maestro test maestro/screenshots.yaml --format junit --output screenshots/phone/
+        # Пробуем специфичную конфигурацию для телефона
+        local config_file="maestro/screenshots-stable.yaml"
+        if [ ! -f "$config_file" ]; then
+          config_file="maestro/screenshots.yaml"
         fi
         
-        echo "📱 Phone screenshots completed!"
+        if [ -f "$config_file" ]; then
+          echo "Using phone screenshots configuration: $config_file"
+          maestro test "$config_file" --format junit --output screenshots/phone/
+          echo "📱 Phone screenshots completed!"
+        else
+          echo "⚠️ Warning: Maestro configuration file not found: $config_file"
+          echo "📱 Phone screenshots skipped!"
+        fi
 
     - name: 📤 Upload Phone Screenshots
       uses: actions/upload-artifact@v4
@@ -333,8 +411,26 @@ jobs:
     - name: 📲 Install APK on Tablet Emulator
       run: |
         export PATH="$PATH":"$HOME/.maestro/bin"
+        echo "📱 Installing APK on tablet emulator..."
+        
+        # Проверяем, что APK существует
+        if [ ! -f "releases/debug/*.apk" ]; then
+          echo "❌ Error: APK file not found in releases/debug/"
+          ls -la releases/debug/
+          exit 1
+        fi
+        
+        # Устанавливаем APK
         adb install releases/debug/*.apk
-        adb shell pm list packages | grep financialsuccess
+        
+        # Проверяем установку
+        if adb shell pm list packages | grep -q financialsuccess; then
+          echo "✅ APK successfully installed on tablet emulator"
+        else
+          echo "❌ Error: APK installation failed on tablet emulator"
+          exit 1
+        fi
+        
         sleep 3
 
     - name: 📸 Run Maestro Screenshots (Tablet)
@@ -342,16 +438,20 @@ jobs:
         export PATH="$PATH":"$HOME/.maestro/bin"
         mkdir -p screenshots/tablet
         
-        # Пробуем планшетную конфигурацию
-        if [ -f "maestro/screenshots-tablet.yaml" ]; then
-          echo "Using tablet screenshots configuration"
-          maestro test maestro/screenshots-tablet.yaml --format junit --output screenshots/tablet/
-        else
-          echo "Using default screenshots configuration for tablet"
-          maestro test maestro/screenshots.yaml --format junit --output screenshots/tablet/
+        # Пробуем специфичную конфигурацию для планшета
+        local config_file="maestro/screenshots-tablet.yaml"
+        if [ ! -f "$config_file" ]; then
+          config_file="maestro/screenshots.yaml"
         fi
         
-        echo "📱 Tablet screenshots completed!"
+        if [ -f "$config_file" ]; then
+          echo "Using tablet screenshots configuration: $config_file"
+          maestro test "$config_file" --format junit --output screenshots/tablet/
+          echo "📱 Tablet screenshots completed!"
+        else
+          echo "⚠️ Warning: Maestro configuration file not found: $config_file"
+          echo "📱 Tablet screenshots skipped!"
+        fi
 
     - name: 📤 Upload Tablet Screenshots
       uses: actions/upload-artifact@v4
@@ -439,8 +539,20 @@ jobs:
     - name: 📊 Build Summary
       run: |
         echo "🎉 Release completed successfully!"
-        echo "📱 Version: ${{ needs.build-and-test.outputs.version }}"
+        echo ""
+        echo "� Results:"
+        echo "�� Version: ${{ needs.build-and-test.outputs.version }}"
         echo "🔢 Version Code: ${{ needs.build-and-test.outputs.version_code }}"
         echo "📅 Date: ${{ needs.build-and-test.outputs.date }}"
-        echo "📸 Screenshots generated for phone and tablet"
-        echo "📦 APK available in releases/"
+        echo "� APK: releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk"
+        echo "📸 Phone screenshots: screenshots/phone/"
+        echo "📸 Tablet screenshots: screenshots/tablet/"
+        echo ""
+        echo "� Files:"
+        ls -la releases/debug/ || echo "No APK files found"
+        echo ""
+        echo "📸 Phone screenshots:"
+        ls -la screenshots/phone/ 2>/dev/null || echo "No phone screenshots"
+        echo ""
+        echo "📸 Tablet screenshots:"
+        ls -la screenshots/tablet/ 2>/dev/null || echo "No tablet screenshots"
