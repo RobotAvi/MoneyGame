@@ -17,6 +17,7 @@ TABLET_IMAGE="system-images;android-14;default;armeabi-v7a"
 TABLET_PROFILE="Nexus 10"
 
 export ANDROID_SDK_ROOT="$HOME/android-sdk"
+export ANDROID_HOME="$ANDROID_SDK_ROOT"
 export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
 
 trap 'log_warning "Получен сигнал прерывания. Очистка..."; stop_emulator; exit 1' INT TERM
@@ -26,6 +27,14 @@ check_dependencies() {
     command -v java &>/dev/null || { log_error "Java не установлен"; exit 1; }
     [ -x "./gradlew" ] || { log_error "gradlew не найден"; exit 1; }
     chmod +x ./gradlew
+    
+    # Проверяем и создаем local.properties если SDK уже установлен
+    if [ -d "$ANDROID_SDK_ROOT" ] && [ ! -f "local.properties" ]; then
+        log_info "Создаем local.properties для существующего SDK..."
+        echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+        echo "android.sdk.path=$ANDROID_SDK_ROOT" >> local.properties
+    fi
+    
     log_success "Зависимости проверены"
 }
 
@@ -38,8 +47,14 @@ install_android_sdk() {
     rm -rf "$ANDROID_SDK_ROOT/cmdline-tools/latest"
     mv "$HOME/cmdline-tools" "$ANDROID_SDK_ROOT/cmdline-tools/latest"
     export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
+    export ANDROID_HOME="$ANDROID_SDK_ROOT"
     yes | sdkmanager --licenses
     yes | sdkmanager "platform-tools" "emulator" "$PHONE_IMAGE" "$TABLET_IMAGE"
+    
+    # Создаем local.properties для Gradle
+    echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+    echo "android.sdk.path=$ANDROID_SDK_ROOT" >> local.properties
+    
     log_success "Android SDK установлен"
 }
 
@@ -52,6 +67,13 @@ get_version_info() {
 
 build_project() {
     log_info "Сборка проекта..."
+    
+    # Проверяем, что SDK установлен и local.properties создан
+    if [ ! -f "local.properties" ]; then
+        log_error "local.properties не найден. SDK не установлен правильно."
+        exit 1
+    fi
+    
     ./gradlew clean --no-daemon
     ./gradlew test --no-daemon
     ./gradlew assembleDebug --no-daemon
@@ -153,6 +175,7 @@ main() {
     log_info "🚀 Начинаем воспроизведение сборки stable..."
     [ -f "app/build.gradle" ] || { log_error "Скрипт должен запускаться из корня проекта"; exit 1; }
     check_dependencies
+    install_android_sdk
     get_version_info
     build_project
     prepare_apk
