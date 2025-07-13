@@ -1,4 +1,4 @@
-THIS SHOULD BE A LINTER ERRORname: 🚀 Stable Build & Release
+name: 🚀 Stable Build & Release
 
 on:
   push:
@@ -245,8 +245,8 @@ jobs:
     - name: 📲 Install APK on Phone Emulator
       run: |
         export PATH="$PATH":"$HOME/.maestro/bin"
-        adb install releases/debug/*.apk
-        adb shell pm list packages | grep financialsuccess
+        sudo adb install releases/debug/*.apk
+        sudo adb shell pm list packages | grep financialsuccess
         sleep 3
 
     - name: 📸 Run Maestro Screenshots (Phone)
