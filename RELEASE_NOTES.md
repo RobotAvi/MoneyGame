@@ -1,18 +1,18 @@
-## 🎮 Financial Success v1.50
+## 🎮 Financial Success v1.51
 
-### 📅 Дата релиза: 2025-07-13 15:25 UTC
+### 📅 Дата релиза: 2025-07-13 15:39 UTC
 
 ### 🔄 Последние изменения:
+d1ecc82 🔖 Bump version to 1.51 (52) [auto]
+d360565 Merge pull request #54 from RobotAvi/cursor/compare-and-update-stable-release-workflow-e115
+401d4f2 Enhance CI/CD workflow with improved error handling and logging
+7d314cd 📱 Auto-commit APK v1.50 - 2025-07-13_15-26
+44d57d5 📝 Update release notes [auto]
 b64a514 🔖 Bump version to 1.50 (51) [auto]
 72c0a53 Merge pull request #52 from RobotAvi/cursor/verify-improvements-in-stable-build-script-3ea0
 70e5976 Merge branch 'main' into cursor/verify-improvements-in-stable-build-script-3ea0
 41bc3f1 Improve emulator and build script reliability with timeouts and error handling
 26f4854 📱 Auto-commit APK v1.49 - 2025-07-13_13-46
-3ece3a1 📝 Update release notes [auto]
-fc5e388 🔖 Bump version to 1.49 (50) [auto]
-6151864 Remove dice generation script and emulator log file
-a825d64 📱 Auto-commit APK v1.48 - 2025-07-13_13-34
-b55f49d 📝 Update release notes [auto]
 
 ### 📋 Изменения из CHANGELOG.md:
 ### 🔮 Планы на будущее
