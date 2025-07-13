@@ -1,18 +1,18 @@
-## 🎮 Financial Success v1.51
+## 🎮 Financial Success v1.52
 
-### 📅 Дата релиза: 2025-07-13 15:39 UTC
+### 📅 Дата релиза: 2025-07-13 15:40 UTC
 
 ### 🔄 Последние изменения:
+c3ef747 🔖 Bump version to 1.52 (53) [auto]
+2a67173 Merge pull request #53 from RobotAvi/cursor/fix-run-with-timeout-command-execution-9b57
+41fee48 📝 Update release notes [auto]
 d1ecc82 🔖 Bump version to 1.51 (52) [auto]
 d360565 Merge pull request #54 from RobotAvi/cursor/compare-and-update-stable-release-workflow-e115
 401d4f2 Enhance CI/CD workflow with improved error handling and logging
+16e38a7 Improve emulator and build script reliability with timeouts and error handling
+b929c29 Add run_with_timeout function for safe command execution with timeout
 7d314cd 📱 Auto-commit APK v1.50 - 2025-07-13_15-26
 44d57d5 📝 Update release notes [auto]
-b64a514 🔖 Bump version to 1.50 (51) [auto]
-72c0a53 Merge pull request #52 from RobotAvi/cursor/verify-improvements-in-stable-build-script-3ea0
-70e5976 Merge branch 'main' into cursor/verify-improvements-in-stable-build-script-3ea0
-41bc3f1 Improve emulator and build script reliability with timeouts and error handling
-26f4854 📱 Auto-commit APK v1.49 - 2025-07-13_13-46
 
 ### 📋 Изменения из CHANGELOG.md:
 ### 🔮 Планы на будущее
