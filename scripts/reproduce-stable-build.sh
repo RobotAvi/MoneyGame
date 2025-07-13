@@ -168,9 +168,11 @@ install_maestro() {
         export PATH="$PATH:$HOME/.maestro/bin"
     fi
     
-    # Отключаем аналитику для всех вызовов Maestro
+    # Отключаем уведомления об аналитике
     export MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED="true"
-    maestro --version
+    
+    # Автоматически отвечаем "n" на вопросы об аналитике
+    echo "n" | maestro --version
     log_success "Maestro установлен"
 }
 
@@ -298,7 +300,7 @@ generate_screenshots() {
     fi
     
     if [ -f "$config_file" ]; then
-        # Отключаем аналитику для Maestro
+        # Убеждаемся, что аналитика отключена для всех вызовов Maestro
         export MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED="true"
         maestro test "$config_file" --format junit --output "screenshots/$device_type/"
         log_success "Скриншоты для $device_type сгенерированы"
