@@ -39,6 +39,12 @@ check_dependencies() {
 }
 
 install_android_sdk() {
+    # Проверяем, установлен ли уже SDK
+    if [ -d "$ANDROID_SDK_ROOT/cmdline-tools/latest" ] && [ -f "local.properties" ]; then
+        log_info "Android SDK уже установлен, пропускаем установку"
+        return 0
+    fi
+    
     log_info "Установка Android SDK..."
     mkdir -p "$ANDROID_SDK_ROOT"
     [ -f "cmdline-tools.zip" ] || wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
@@ -98,7 +104,8 @@ install_maestro() {
         timeout 300 bash -c 'echo "n" | curl -Ls "https://get.maestro.mobile.dev" | bash'
         export PATH="$PATH:$HOME/.maestro/bin"
     }
-    maestro --version
+    # Автоматически отвечаем "n" на вопрос о сборе данных
+    echo "n" | maestro --version 2>/dev/null || true
     log_success "Maestro установлен"
 }
 
@@ -175,7 +182,14 @@ main() {
     log_info "🚀 Начинаем воспроизведение сборки stable..."
     [ -f "app/build.gradle" ] || { log_error "Скрипт должен запускаться из корня проекта"; exit 1; }
     check_dependencies
-    install_android_sdk
+    
+    # Устанавливаем SDK только если его нет
+    if [ ! -d "$ANDROID_SDK_ROOT/platform-tools" ]; then
+        install_android_sdk
+    else
+        log_info "Android SDK уже установлен, пропускаем установку"
+    fi
+    
     get_version_info
     build_project
     prepare_apk
