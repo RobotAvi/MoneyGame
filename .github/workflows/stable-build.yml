@@ -1,4 +1,4 @@
-name: 🚀 Stable Build & Release
+THIS SHOULD BE A LINTER ERRORname: 🚀 Stable Build & Release
 
 on:
   push:
@@ -238,8 +238,8 @@ jobs:
         disable-animations: true
         emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics
         script: |
-          adb shell input keyevent 82
-          adb shell input keyevent 82
+          sudo adb shell input keyevent 82
+          sudo adb shell input keyevent 82
           sleep 5
 
     - name: 📲 Install APK on Phone Emulator
