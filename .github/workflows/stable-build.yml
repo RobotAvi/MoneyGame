@@ -287,10 +287,10 @@ jobs:
     - name: Start Android Emulator (Phone)
       uses: reactivecircus/android-emulator-runner@v2
       with:
-        api-level: 30
-        target: google_apis
-        arch: x86_64
-        profile: Nexus 6
+        profile: Nexus 5
+        api-level: 10
+        target: default
+        arch: x86
         disable-animations: true
         emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics
         script: |
@@ -395,10 +395,10 @@ jobs:
     - name: 📱 Start Android Emulator (Tablet)
       uses: reactivecircus/android-emulator-runner@v2
       with:
-        api-level: 30
-        target: google_apis
-        arch: x86_64
-        profile: Nexus 10
+        profile: Nexus 5
+        api-level: 10
+        target: default
+        arch: x86
         disable-animations: true
         emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics
         script: |

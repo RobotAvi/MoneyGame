@@ -38,10 +38,6 @@ log_error() {
 }
 
 # Функция для выполнения команд с таймаутом
-<<<<<<< HEAD
-# Исправляет проблемы с bash -c "$cmd":
-# 1. Правильно обрабатывает аргументы с пробелами и специальными символами
-# 2. Выполняется в том же контексте shell, что и родительский скрипт
 run_with_timeout() {
     local timeout_seconds=$1
     shift
@@ -59,27 +55,7 @@ run_with_timeout() {
     fi
     
     return $exit_code
-=======
-run_with_timeout() {
-    local timeout_seconds=900
-    local cmd="$@"
-    
-    log_info "Выполнение команды с таймаутом ${timeout_seconds}с: $cmd"
-    
-    timeout $timeout_seconds bash -c "$cmd"
-    local exit_code=$?
-    
-    if [ $exit_code -eq 124 ]; then
-        log_error "Команда превысила таймаут ${timeout_seconds} секунд"
-        return 1
-    elif [ $exit_code -ne 0 ]; then
-        log_error "Команда завершилась с ошибкой (код: $exit_code)"
-        return $exit_code
-    fi
-    
-    log_success "Команда выполнена успешно"
-    return 0
->>>>>>> origin/main
+
 }
 
 # Проверка зависимостей
@@ -102,6 +78,9 @@ check_dependencies() {
         log_warning "ANDROID_SDK_ROOT не установлен"
         log_info "Установка Android SDK..."
         install_android_sdk
+        log_info "SDK установлен, продолжаем..."
+        export ANDROID_SDK_ROOT="$HOME/android-sdk"
+        export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
     fi
     
     # Проверка gradlew
@@ -130,21 +109,21 @@ install_android_sdk() {
     # Распаковываем
     unzip -o cmdline-tools.zip -d "$HOME"
     mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
-    mv "$HOME/cmdline-tools" "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+    rm -rf "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+    mv "$HOME/cmdline-tools" "$ANDROID_SDK_ROOT/cmdline-tools/latest" || {
+        log_error "Не удалось переместить cmdline-tools. Проверьте права и структуру каталогов."
+        exit 1
+    }
+    # Экспортируем переменные глобально
+    export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
 
-
-    # Добавляем полные пути в PATH
-    export PATH="$PATH:$ANDROID_SDK_ROOT/emulator"
-    export PATH="$PATH:$ANDROID_SDK_ROOT/platform-tools"
-    export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
-
-    
     # Принимаем лицензии и устанавливаем компоненты
     yes | sdkmanager --licenses
-    sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64"
+    yes | sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64"
     
     log_success "Android SDK установлен"
 }
+
 
 # Получение информации о версии
 get_version_info() {
@@ -395,10 +374,6 @@ stop_emulator() {
 main() {
     log_info "🚀 Начинаем воспроизведение сборки stable..."
     
-    # Устанавливаем пути к Android SDK
-    export ANDROID_HOME="$HOME/android-sdk"
-    export ANDROID_SDK_ROOT="$HOME/android-sdk"
-    export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools"
     
     # Проверяем, что мы в корне проекта
     if [ ! -f "app/build.gradle" ]; then
@@ -423,7 +398,7 @@ main() {
     
     # Генерируем скриншоты для телефона
     log_info "=== Генерация скриншотов для телефона ==="
-    start_emulator "phone" "Nexus 6"
+    start_emulator "phone" "Nexus 5"
     install_apk_on_emulator "phone"
     generate_screenshots "phone"
     stop_emulator
@@ -501,6 +476,10 @@ run_with_timeout() {
         fi
     fi
 }
+
+# Экспортируем переменные окружения для Android SDK глобально
+export ANDROID_SDK_ROOT="$HOME/android-sdk"
+export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
 
 # Запуск основной функции с таймаутом
 run_with_timeout "main \"$@\""
