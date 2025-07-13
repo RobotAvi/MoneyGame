@@ -38,6 +38,28 @@ log_error() {
 }
 
 # Функция для выполнения команд с таймаутом
+<<<<<<< HEAD
+# Исправляет проблемы с bash -c "$cmd":
+# 1. Правильно обрабатывает аргументы с пробелами и специальными символами
+# 2. Выполняется в том же контексте shell, что и родительский скрипт
+run_with_timeout() {
+    local timeout_seconds=$1
+    shift
+    
+    # Используем timeout команду напрямую с переданными аргументами
+    # Это сохраняет правильную обработку аргументов и контекст shell
+    timeout "$timeout_seconds" "$@"
+    
+    local exit_code=$?
+    
+    # timeout возвращает 124 если команда была прервана по таймауту
+    if [ $exit_code -eq 124 ]; then
+        log_error "Команда была прервана по таймауту ($timeout_seconds секунд): $*"
+        return 124
+    fi
+    
+    return $exit_code
+=======
 run_with_timeout() {
     local timeout_seconds=900
     local cmd="$@"
@@ -57,6 +79,7 @@ run_with_timeout() {
     
     log_success "Команда выполнена успешно"
     return 0
+>>>>>>> origin/main
 }
 
 # Проверка зависимостей
