@@ -17,6 +17,9 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# Отключение интерактивных режимов
+export MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED="true"
+
 # Функции для логирования
 log_info() {
     echo -e "${BLUE}ℹ️  $1${NC}"
@@ -32,6 +35,28 @@ log_warning() {
 
 log_error() {
     echo -e "${RED}❌ $1${NC}"
+}
+
+# Функция для выполнения команд с таймаутом
+run_with_timeout() {
+    local timeout_seconds=900
+    local cmd="$@"
+    
+    log_info "Выполнение команды с таймаутом ${timeout_seconds}с: $cmd"
+    
+    timeout $timeout_seconds bash -c "$cmd"
+    local exit_code=$?
+    
+    if [ $exit_code -eq 124 ]; then
+        log_error "Команда превысила таймаут ${timeout_seconds} секунд"
+        return 1
+    elif [ $exit_code -ne 0 ]; then
+        log_error "Команда завершилась с ошибкой (код: $exit_code)"
+        return $exit_code
+    fi
+    
+    log_success "Команда выполнена успешно"
+    return 0
 }
 
 # Проверка зависимостей
@@ -83,13 +108,17 @@ install_android_sdk() {
     unzip -o cmdline-tools.zip -d "$HOME"
     mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
     mv "$HOME/cmdline-tools" "$ANDROID_SDK_ROOT/cmdline-tools/latest"
-    
-    # Добавляем в PATH
-    export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools"
+
+
+    # Добавляем полные пути в PATH
+    export PATH="$PATH:$ANDROID_SDK_ROOT/emulator"
+    export PATH="$PATH:$ANDROID_SDK_ROOT/platform-tools"
+    export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
+
     
     # Принимаем лицензии и устанавливаем компоненты
     yes | sdkmanager --licenses
-    sdkmanager "platform-tools" "emulator" "system-images;android-30;default;x86_64"
+    sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64"
     
     log_success "Android SDK установлен"
 }
@@ -157,6 +186,7 @@ install_maestro() {
     log_info "Установка Maestro..."
     
     if ! command -v maestro &> /dev/null; then
+
         # Отключаем интерактивный режим для Maestro
         export MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED="true"
         log_info "Установка Maestro (таймаут 5 минут)..."
@@ -181,10 +211,12 @@ start_emulator() {
     
     log_info "Запуск эмулятора для $device_type ($profile)..."
     
+
     # Создаем AVD если не существует
     # Заменяем пробелы на подчеркивания в названии профиля
     local safe_profile=$(echo "$profile" | tr ' ' '_')
     avd_name="test_${device_type}_${safe_profile}"
+    
     if ! avdmanager list avd | grep -q "$avd_name"; then
         log_info "Создание AVD: $avd_name"
         # Проверяем доступные системные образы
@@ -215,14 +247,24 @@ start_emulator() {
     EMULATOR_PID=$!
     
     # Ждем загрузки эмулятора с таймаутом
-    log_info "Ожидание загрузки эмулятора (таймаут 2 минуты)..."
-    local emulator_timeout=120
-    local emulator_elapsed=0
+ 
+    log_info "Ожидание загрузки эмулятора (таймаут: 120с)..."
+    emulator_timeout=120
+    boot_timeout=180
     
-    while [ $emulator_elapsed -lt $emulator_timeout ]; do
+    sleep 30
+    
+    # Проверяем, что эмулятор запустился с таймаутом
+    for i in {1..60}; do
+
         if adb devices | grep -q "emulator"; then
             log_success "Эмулятор $device_type запущен"
             break
+        fi
+        if [ $i -eq 60 ]; then
+            log_error "Не удалось запустить эмулятор $device_type за $emulator_timeout секунд"
+            kill $EMULATOR_PID 2>/dev/null || true
+            exit 1
         fi
         sleep 2
         emulator_elapsed=$((emulator_elapsed + 2))
@@ -233,11 +275,18 @@ start_emulator() {
         fi
     done
     
-    if ! adb devices | grep -q "emulator"; then
-        log_error "Не удалось запустить эмулятор $device_type"
-        kill $EMULATOR_PID 2>/dev/null || true
-        exit 1
-    fi
+    # Ждем полной загрузки Android с таймаутом
+    log_info "Ожидание загрузки Android (таймаут: ${boot_timeout}с)..."
+    for i in {1..90}; do
+        if adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; then
+            log_success "Android загружен на эмуляторе $device_type"
+            break
+        fi
+        if [ $i -eq 90 ]; then
+            log_warning "Android не загрузился за $boot_timeout секунд, продолжаем..."
+        fi
+        sleep 2
+    done
     
     # Ждем полной загрузки системы Android
     log_info "Ожидание полной загрузки Android системы..."
@@ -340,8 +389,8 @@ main() {
     # Получаем информацию о версии
     get_version_info
     
-    # Основная сборка
-    build_project
+    # Основная сборка с таймаутом
+    run_with_timeout build_project
     
     # Подготавливаем APK
     prepare_apk
