@@ -217,14 +217,7 @@ class CharacterCreationActivity : AppCompatActivity() {
         
         // Навыки
         val skills = getAvailableSkills()
-        val skillAdapter = SkillAdapter(skills) { skill ->
-            if (selectedSkills.contains(skill)) {
-                selectedSkills.remove(skill)
-            } else {
-                if (selectedSkills.size < 3) { // Максимум 3 навыка
-                    selectedSkills.add(skill)
-                }
-            }
+        val skillAdapter = SkillAdapter(skills, selectedSkills) { skill ->
             // Уведомляем адаптер об изменениях
             (binding.recyclerViewSkills.adapter as? SkillAdapter)?.notifyDataSetChanged()
         }
