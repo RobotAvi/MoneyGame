@@ -87,10 +87,10 @@ class CharacterCreationActivity : AppCompatActivity() {
         // Образование
         val educationAdapter = ArrayAdapter(
             this,
-            android.R.layout.simple_spinner_item,
+            R.layout.spinner_item,
             EducationLevel.values().map { it.displayName }
         )
-        educationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        educationAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         binding.spinnerEducation.adapter = educationAdapter
         binding.spinnerEducation.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -102,10 +102,10 @@ class CharacterCreationActivity : AppCompatActivity() {
         // Семейное положение
         val maritalAdapter = ArrayAdapter(
             this,
-            android.R.layout.simple_spinner_item,
+            R.layout.spinner_item,
             MaritalStatus.values().map { it.displayName }
         )
-        maritalAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        maritalAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         binding.spinnerMaritalStatus.adapter = maritalAdapter
         binding.spinnerMaritalStatus.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -117,10 +117,10 @@ class CharacterCreationActivity : AppCompatActivity() {
         // Толерантность к риску
         val riskAdapter = ArrayAdapter(
             this,
-            android.R.layout.simple_spinner_item,
+            R.layout.spinner_item,
             RiskTolerance.values().map { it.displayName }
         )
-        riskAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        riskAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         binding.spinnerRiskTolerance.adapter = riskAdapter
         binding.spinnerRiskTolerance.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -132,10 +132,10 @@ class CharacterCreationActivity : AppCompatActivity() {
         // Стратегия инвестиций
         val investmentAdapter = ArrayAdapter(
             this,
-            android.R.layout.simple_spinner_item,
+            R.layout.spinner_item,
             InvestmentStrategy.values().map { it.displayName }
         )
-        investmentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        investmentAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         binding.spinnerInvestmentStrategy.adapter = investmentAdapter
         binding.spinnerInvestmentStrategy.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -147,10 +147,10 @@ class CharacterCreationActivity : AppCompatActivity() {
         // Уровень здоровья
         val healthAdapter = ArrayAdapter(
             this,
-            android.R.layout.simple_spinner_item,
+            R.layout.spinner_item,
             HealthLevel.values().map { it.displayName }
         )
-        healthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        healthAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         binding.spinnerHealthLevel.adapter = healthAdapter
         binding.spinnerHealthLevel.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -162,10 +162,10 @@ class CharacterCreationActivity : AppCompatActivity() {
         // Уровень стресса
         val stressAdapter = ArrayAdapter(
             this,
-            android.R.layout.simple_spinner_item,
+            R.layout.spinner_item,
             StressLevel.values().map { it.displayName }
         )
-        stressAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        stressAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         binding.spinnerStressLevel.adapter = stressAdapter
         binding.spinnerStressLevel.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -177,10 +177,10 @@ class CharacterCreationActivity : AppCompatActivity() {
         // Баланс работы и жизни
         val balanceAdapter = ArrayAdapter(
             this,
-            android.R.layout.simple_spinner_item,
+            R.layout.spinner_item,
             WorkLifeBalance.values().map { it.displayName }
         )
-        balanceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        balanceAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         binding.spinnerWorkLifeBalance.adapter = balanceAdapter
         binding.spinnerWorkLifeBalance.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
