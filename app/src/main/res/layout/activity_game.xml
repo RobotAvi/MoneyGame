@@ -62,7 +62,7 @@
                             android:id="@+id/tv_current_date"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="1 января 2024"
+                            android:text="Дата"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             android:textColor="@android:color/black" />

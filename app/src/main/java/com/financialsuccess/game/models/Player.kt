@@ -564,6 +564,23 @@ data class Player(
              "lifePercentage" to getLifePercentage()
          )
      }
+
+    // Получить текущую игровую дату в виде строки (например, "1 января 2024")
+    fun getCurrentDateString(): String {
+        val months = arrayOf("Января", "Февраля", "Марта", "Апреля", "Мая", "Июня",
+            "Июля", "Августа", "Сентября", "Октября", "Ноября", "Декабря")
+        val calendar = Calendar.getInstance()
+        if (startDateMillis != null) {
+            calendar.timeInMillis = startDateMillis!!
+            calendar.add(Calendar.MONTH, monthsPlayed)
+        } else {
+            calendar.set(2024, Calendar.JANUARY, 1)
+            calendar.add(Calendar.MONTH, monthsPlayed)
+        }
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        return "$currentDayOfMonth ${months[month]} $year"
+    }
 }
 
 // === НОВЫЕ ENUM КЛАССЫ И DATA КЛАССЫ ===

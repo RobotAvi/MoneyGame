@@ -1041,13 +1041,7 @@ class GameActivity : AppCompatActivity() {
     // === НОВЫЕ МЕТОДЫ ДЛЯ УЛУЧШЕННОГО ИНТЕРФЕЙСА ===
     
     private fun updateCurrentDate(player: Player) {
-        val months = arrayOf("Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-                            "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь")
-        val startYear = 2024
-        val currentMonth = player.monthsPlayed % 12
-        val currentYear = startYear + player.monthsPlayed / 12
-        val currentDay = player.currentDayOfMonth
-        binding.tvCurrentDate.text = "$currentDay ${months[currentMonth].lowercase()} $currentYear"
+        binding.tvCurrentDate.text = player.getCurrentDateString()
     }
     
     private fun updateGameStatus(player: Player) {
