@@ -2,6 +2,7 @@ import com.financialsuccess.game.models.Player
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import java.util.Calendar
 
 class PlayerDateLogicTest {
     private lateinit var player: Player
@@ -73,5 +74,33 @@ class PlayerDateLogicTest {
         val player = Player(name = name, startDateMillis = startDate, profession = profession, dream = dream)
         assertEquals(name, player.name)
         assertEquals(startDate, player.startDateMillis)
+    }
+    
+    @Test
+    fun testStartDateConsistency() {
+        // Создаем календарь для 15 мая 2025 года
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.MAY, 15)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val startDate = calendar.timeInMillis
+        
+        val player = Player(startDateMillis = startDate, profession = profession, dream = dream)
+        
+        // Проверяем, что дата сохранилась
+        assertEquals(startDate, player.startDateMillis)
+        
+        // Проверяем, что первая запись в журнале использует правильную дату
+        player.logIncome(com.financialsuccess.game.models.FinancialCategory.GAME_START, 5000, "Тест")
+        val firstEntry = player.financialJournal.first()
+        assertEquals("1 Май 2025", firstEntry.realDate)
+        
+        // Проверяем, что после нескольких месяцев дата правильно рассчитывается
+        player.passMonth()
+        player.logIncome(com.financialsuccess.game.models.FinancialCategory.SALARY, 1000, "Тест")
+        val secondEntry = player.financialJournal.last()
+        assertEquals("1 Июнь 2025", secondEntry.realDate)
     }
 }

@@ -37,9 +37,18 @@ class ProfessionSelectionActivity : AppCompatActivity() {
         val etStartDate = binding.etStartDate
         etStartDate.setOnClickListener {
             val calendar = Calendar.getInstance()
+            // Устанавливаем разумную дату по умолчанию (текущий год, май, 15-е число)
+            val currentYear = calendar.get(Calendar.YEAR)
+            calendar.set(currentYear, Calendar.MAY, 15)
+            
             val datePicker = DatePickerDialog(this,
                 { _, year, month, dayOfMonth ->
                     calendar.set(year, month, dayOfMonth)
+                    // Устанавливаем время на 00:00:00 для избежания проблем с часовыми поясами
+                    calendar.set(Calendar.HOUR_OF_DAY, 0)
+                    calendar.set(Calendar.MINUTE, 0)
+                    calendar.set(Calendar.SECOND, 0)
+                    calendar.set(Calendar.MILLISECOND, 0)
                     selectedStartDate = calendar.timeInMillis
                     etStartDate.setText("%02d.%02d.%d".format(dayOfMonth, month + 1, year))
                 },
