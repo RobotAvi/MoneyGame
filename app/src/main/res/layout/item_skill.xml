@@ -6,10 +6,9 @@
     android:layout_margin="8dp"
     app:cardCornerRadius="12dp"
     app:cardElevation="4dp"
-    app:strokeWidth="2dp"
-    app:strokeColor="@color/primary_color"
-    android:checkable="true"
-    android:checked="false">
+    android:background="@drawable/skill_item_selector"
+    android:clickable="true"
+    android:focusable="true">
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -8,10 +8,9 @@ import com.financialsuccess.game.models.Skill
 
 class SkillAdapter(
     private val skills: List<Skill>,
+    private val selectedSkills: MutableList<Skill>,
     private val onSkillClick: (Skill) -> Unit
 ) : RecyclerView.Adapter<SkillAdapter.SkillViewHolder>() {
-
-    private val selectedSkills = mutableSetOf<Skill>()
 
     inner class SkillViewHolder(private val binding: ItemSkillBinding) : RecyclerView.ViewHolder(binding.root) {
         
@@ -49,6 +48,4 @@ class SkillAdapter(
     }
 
     override fun getItemCount(): Int = skills.size
-    
-    fun getSelectedSkills(): List<Skill> = selectedSkills.toList()
 }
