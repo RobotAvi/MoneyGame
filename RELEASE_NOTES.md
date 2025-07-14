@@ -1,18 +1,18 @@
-## 🎮 Financial Success v1.55
+## 🎮 Financial Success v1.56
 
-### 📅 Дата релиза: 2025-07-14 21:16 UTC
+### 📅 Дата релиза: 2025-07-14 21:54 UTC
 
 ### 🔄 Последние изменения:
+2c4c2e6 🔖 Bump version to 1.56 (57) [auto]
+d4b4b77 Merge pull request #57 from RobotAvi/cursor/fix-skill-selection-not-working-9a63
+a447b31 Refactor skill selection with improved state management and UI
+691a6ac 📱 Auto-commit APK v1.55 - 2025-07-14_21-18
+8628a55 📝 Update release notes [auto]
 3e36a13 🔖 Bump version to 1.55 (56) [auto]
 a4596e6 Merge pull request #56 from RobotAvi/cursor/fix-ignored-game-start-date-98f5
 1a81f94 Refactor date display logic in Player and GameActivity
 3448657 📱 Auto-commit APK v1.54 - 2025-07-13_21-21
 ec0bf21 📝 Update release notes [auto]
-66d42d7 🔖 Bump version to 1.54 (55) [auto]
-65c746f Create reproduce_stable_script_ver2.sh
-a7f7036 📱 Auto-commit APK v1.53 - 2025-07-13_16-48
-e83aab4 📝 Update release notes [auto]
-090e67e 🔖 Bump version to 1.53 (54) [auto]
 
 ### 📋 Изменения из CHANGELOG.md:
 ### 🔮 Планы на будущее
