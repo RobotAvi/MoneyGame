@@ -304,14 +304,14 @@ jobs:
         echo "📱 Installing APK on phone emulator..."
         
         # Проверяем, что APK существует
-        if [ ! -f "releases/debug/*.apk" ]; then
-          echo "❌ Error: APK file not found in releases/debug/"
+        if [ ! -f "releases/debug/latest-debug.apk" ]; then
+          echo "❌ Error: latest-debug.apk not found in releases/debug/"
           ls -la releases/debug/
           exit 1
         fi
         
         # Устанавливаем APK
-        adb install releases/debug/*.apk
+        adb install releases/debug/latest-debug.apk
         
         # Проверяем установку
         if adb shell pm list packages | grep -q financialsuccess; then
@@ -414,14 +414,14 @@ jobs:
         echo "📱 Installing APK on tablet emulator..."
         
         # Проверяем, что APK существует
-        if [ ! -f "releases/debug/*.apk" ]; then
-          echo "❌ Error: APK file not found in releases/debug/"
+        if [ ! -f "releases/debug/latest-debug.apk" ]; then
+          echo "❌ Error: latest-debug.apk not found in releases/debug/"
           ls -la releases/debug/
           exit 1
         fi
         
         # Устанавливаем APK
-        adb install releases/debug/*.apk
+        adb install releases/debug/latest-debug.apk
         
         # Проверяем установку
         if adb shell pm list packages | grep -q financialsuccess; then
