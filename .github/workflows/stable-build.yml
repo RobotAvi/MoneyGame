@@ -256,6 +256,10 @@ jobs:
         name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}
 
     - name: 🔧 Install Android SDK and platform-tools
+      env:
+        ANDROID_SDK_ROOT: ${{ runner.home }}/android-sdk
+        ANDROID_HOME: ${{ runner.home }}/android-sdk
+        PATH: ${{ runner.home }}/android-sdk/emulator:${{ runner.home }}/android-sdk/platform-tools:${{ runner.home }}/android-sdk/cmdline-tools/latest/bin:${{ env.PATH }}
       run: |
         wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
         unzip cmdline-tools.zip -d $HOME
@@ -263,9 +267,13 @@ jobs:
         mv $HOME/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
 
         export ANDROID_SDK_ROOT=$HOME/android-sdk
-        export PATH=$PATH:$HOME/android-sdk/cmdline-tools/latest/bin
+        export ANDROID_HOME=$HOME/android-sdk
+        export PATH=$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin
         yes | sdkmanager --licenses
         sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64"
+
+        # Проверяем, что system-image реально скачан
+        ls -la $ANDROID_SDK_ROOT/system-images/android-34/default/x86_64/
 
         # Добавляем platform-tools в PATH для всех следующих шагов
         echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
@@ -284,10 +292,16 @@ jobs:
 
     - name: 📱 Start Android Emulator and Install APK (Phone)
       shell: bash
+      env:
+        ANDROID_SDK_ROOT: ${{ runner.home }}/android-sdk
+        ANDROID_HOME: ${{ runner.home }}/android-sdk
+        PATH: ${{ runner.home }}/android-sdk/emulator:${{ runner.home }}/android-sdk/platform-tools:${{ runner.home }}/android-sdk/cmdline-tools/latest/bin:${{ env.PATH }}
       run: |
         set -e
-        export ANDROID_SDK_ROOT="$HOME/android-sdk"
-        export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
+        echo "SDK root: $ANDROID_SDK_ROOT"
+        echo "PATH: $PATH"
+        ls -la $ANDROID_SDK_ROOT/system-images/android-34/default/x86_64/
+        rm -rf ~/.android/avd/*
 
         # Создание AVD, если не существует
         if ! avdmanager list avd | grep -q "ci_nexus5"; then
@@ -411,6 +425,10 @@ jobs:
         name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}
 
     - name: 🔧 Install Android SDK and platform-tools
+      env:
+        ANDROID_SDK_ROOT: ${{ runner.home }}/android-sdk
+        ANDROID_HOME: ${{ runner.home }}/android-sdk
+        PATH: ${{ runner.home }}/android-sdk/emulator:${{ runner.home }}/android-sdk/platform-tools:${{ runner.home }}/android-sdk/cmdline-tools/latest/bin:${{ env.PATH }}
       run: |
         wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
         unzip cmdline-tools.zip -d $HOME
@@ -418,9 +436,13 @@ jobs:
         mv $HOME/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
 
         export ANDROID_SDK_ROOT=$HOME/android-sdk
-        export PATH=$PATH:$HOME/android-sdk/cmdline-tools/latest/bin
+        export ANDROID_HOME=$HOME/android-sdk
+        export PATH=$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin
         yes | sdkmanager --licenses
         sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64"
+
+        # Проверяем, что system-image реально скачан
+        ls -la $ANDROID_SDK_ROOT/system-images/android-34/default/x86_64/
 
         # Добавляем platform-tools в PATH для всех следующих шагов
         echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
@@ -439,10 +461,16 @@ jobs:
 
     - name: 📱 Start Android Emulator and Install APK (Tablet)
       shell: bash
+      env:
+        ANDROID_SDK_ROOT: ${{ runner.home }}/android-sdk
+        ANDROID_HOME: ${{ runner.home }}/android-sdk
+        PATH: ${{ runner.home }}/android-sdk/emulator:${{ runner.home }}/android-sdk/platform-tools:${{ runner.home }}/android-sdk/cmdline-tools/latest/bin:${{ env.PATH }}
       run: |
         set -e
-        export ANDROID_SDK_ROOT="$HOME/android-sdk"
-        export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
+        echo "SDK root: $ANDROID_SDK_ROOT"
+        echo "PATH: $PATH"
+        ls -la $ANDROID_SDK_ROOT/system-images/android-34/default/x86_64/
+        rm -rf ~/.android/avd/*
 
         # Создание AVD, если не существует
         if ! avdmanager list avd | grep -q "ci_nexus10"; then
