@@ -265,7 +265,7 @@ jobs:
         export ANDROID_SDK_ROOT=$HOME/android-sdk
         export PATH=$PATH:$HOME/android-sdk/cmdline-tools/latest/bin
         yes | sdkmanager --licenses
-        sdkmanager "platform-tools" "emulator" "system-images;android-30;default;x86_64"
+        sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64"
 
         # Добавляем platform-tools в PATH для всех следующих шагов
         echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
@@ -298,22 +298,47 @@ jobs:
         emulator -avd "ci_nexus5" -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics &
         EMULATOR_PID=$!
 
-        # Ожидание появления устройства в adb (таймаут 60с)
-        for i in {1..30}; do
+        # Пауза после запуска эмулятора (важно для CI)
+        sleep 30
+
+        # Ожидание появления устройства в adb (таймаут 120с)
+        emulator_timeout=120
+        emulator_elapsed=0
+        for i in {1..60}; do
           if adb devices | grep -q "emulator"; then
             echo "✅ Эмулятор появился в adb"
             break
           fi
+          if [ $i -eq 60 ]; then
+            echo "❌ Не удалось запустить эмулятор за $emulator_timeout секунд"
+            kill $EMULATOR_PID 2>/dev/null || true
+            exit 1
+          fi
           sleep 2
+          emulator_elapsed=$((emulator_elapsed + 2))
+          if [ $((emulator_elapsed % 30)) -eq 0 ]; then
+            echo "⏳ Ожидание эмулятора: $emulator_elapsed секунд из $emulator_timeout..."
+          fi
         done
 
-        # Ожидание полной загрузки Android (sys.boot_completed)
+        # Ожидание загрузки Android (sys.boot_completed, таймаут 180с)
+        boot_timeout=180
+        boot_elapsed=0
         for i in {1..90}; do
           if adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; then
             echo "✅ Android полностью загружен"
             break
           fi
+          if [ $i -eq 90 ]; then
+            echo "❌ Android не загрузился за $boot_timeout секунд"
+            kill $EMULATOR_PID 2>/dev/null || true
+            exit 1
+          fi
           sleep 2
+          boot_elapsed=$((boot_elapsed + 2))
+          if [ $((boot_elapsed % 30)) -eq 0 ]; then
+            echo "⏳ Ожидание загрузки Android: $boot_elapsed секунд из $boot_timeout..."
+          fi
         done
 
         # Разблокировка экрана
@@ -395,7 +420,7 @@ jobs:
         export ANDROID_SDK_ROOT=$HOME/android-sdk
         export PATH=$PATH:$HOME/android-sdk/cmdline-tools/latest/bin
         yes | sdkmanager --licenses
-        sdkmanager "platform-tools" "emulator" "system-images;android-30;default;x86_64"
+        sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64"
 
         # Добавляем platform-tools в PATH для всех следующих шагов
         echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
@@ -428,22 +453,47 @@ jobs:
         emulator -avd "ci_nexus10" -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics &
         EMULATOR_PID=$!
 
-        # Ожидание появления устройства в adb (таймаут 60с)
-        for i in {1..30}; do
+        # Пауза после запуска эмулятора (важно для CI)
+        sleep 30
+
+        # Ожидание появления устройства в adb (таймаут 120с)
+        emulator_timeout=120
+        emulator_elapsed=0
+        for i in {1..60}; do
           if adb devices | grep -q "emulator"; then
             echo "✅ Эмулятор появился в adb"
             break
           fi
+          if [ $i -eq 60 ]; then
+            echo "❌ Не удалось запустить эмулятор за $emulator_timeout секунд"
+            kill $EMULATOR_PID 2>/dev/null || true
+            exit 1
+          fi
           sleep 2
+          emulator_elapsed=$((emulator_elapsed + 2))
+          if [ $((emulator_elapsed % 30)) -eq 0 ]; then
+            echo "⏳ Ожидание эмулятора: $emulator_elapsed секунд из $emulator_timeout..."
+          fi
         done
 
-        # Ожидание полной загрузки Android (sys.boot_completed)
+        # Ожидание загрузки Android (sys.boot_completed, таймаут 180с)
+        boot_timeout=180
+        boot_elapsed=0
         for i in {1..90}; do
           if adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; then
             echo "✅ Android полностью загружен"
             break
           fi
+          if [ $i -eq 90 ]; then
+            echo "❌ Android не загрузился за $boot_timeout секунд"
+            kill $EMULATOR_PID 2>/dev/null || true
+            exit 1
+          fi
           sleep 2
+          boot_elapsed=$((boot_elapsed + 2))
+          if [ $((boot_elapsed % 30)) -eq 0 ]; then
+            echo "⏳ Ожидание загрузки Android: $boot_elapsed секунд из $boot_timeout..."
+          fi
         done
 
         # Разблокировка экрана
