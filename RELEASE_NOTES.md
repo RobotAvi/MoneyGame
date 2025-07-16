@@ -1,18 +1,18 @@
-## 🎮 Financial Success v1.66
+## 🎮 Financial Success v1.67
 
-### 📅 Дата релиза: 2025-07-16 10:20 UTC
+### 📅 Дата релиза: 2025-07-16 11:06 UTC
 
 ### 🔄 Последние изменения:
+271af7f 🔖 Bump version to 1.67 (68) [auto]
+a9a9189 Merge branch 'main' of https://github.com/RobotAvi/MoneyGame
+93f866d 🔧 Update CI workflow to install wget and ensure package lists are up-to-date for Android SDK setup.
+d6d8d3b 📱 Auto-commit APK v1.66 - 2025-07-16_10-21
+f7c3f7a 📝 Update release notes [auto]
 72ef757 🔖 Bump version to 1.66 (67) [auto]
 ddc491c Merge branch 'main' of https://github.com/RobotAvi/MoneyGame
 cd54dba 🔧 Refactor Android SDK setup in CI workflow to standardize environment variables and improve emulator readiness checks, including verification of downloaded system images.
 2d895e3 📱 Auto-commit APK v1.65 - 2025-07-16_09-57
 de05b44 📝 Update release notes [auto]
-3ca007d 🔖 Bump version to 1.65 (66) [auto]
-b87a9ed Merge branch 'main' of https://github.com/RobotAvi/MoneyGame
-f49fa58 📱 Update Android SDK version in CI configuration to 34 and enhance emulator readiness checks with improved timeout handling and logging.
-ed38934 📱 Auto-commit APK v1.64 - 2025-07-16_09-29
-6f39168 📝 Update release notes [auto]
 
 ### 📋 Изменения из CHANGELOG.md:
 ### 🔮 Планы на будущее
