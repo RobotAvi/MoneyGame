@@ -282,41 +282,66 @@ jobs:
         export PATH="$PATH":"$HOME/.maestro/bin"
         echo "n" | maestro --version
 
+    - name: 📱 Start Android Emulator and Install APK (Phone)
+      shell: bash
+      run: |
+        set -e
+        export ANDROID_SDK_ROOT="$HOME/android-sdk"
+        export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
 
+        # Создание AVD, если не существует
+        if ! avdmanager list avd | grep -q "ci_nexus5"; then
+          echo "no" | avdmanager create avd --name "ci_nexus5" --package "system-images;android-34;default;x86_64" --device "Nexus 5"
+        fi
 
-    - name: Start Android Emulator (Phone)
-      uses: reactivecircus/android-emulator-runner@v2
-      with:
-        profile: Nexus 5
-        api-level: 34
-        target: default
-        arch: x86_64
-        disable-animations: true
-        emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics
-        script: |
-          # Ждём, пока эмулятор не станет доступен (таймаут 1 минута)
-          for i in {1..30}; do
-            if adb get-state | grep -q "device"; then break; fi
-            sleep 2
-          done
-          echo "📱 Installing APK on phone emulator..."
-          if [ ! -f "releases/debug/latest-debug.apk" ]; then
-            echo "❌ Error: latest-debug.apk not found in releases/debug/"
-            ls -la releases/debug/
-            exit 1
+        # Запуск эмулятора в фоне
+        emulator -avd "ci_nexus5" -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics &
+        EMULATOR_PID=$!
+
+        # Ожидание появления устройства в adb (таймаут 60с)
+        for i in {1..30}; do
+          if adb devices | grep -q "emulator"; then
+            echo "✅ Эмулятор появился в adb"
+            break
           fi
-          adb install releases/debug/latest-debug.apk
-          if adb shell pm list packages | grep -q financialsuccess; then
-            echo "✅ APK successfully installed on phone emulator"
-          else
-            echo "❌ Error: APK installation failed on phone emulator"
-            exit 1
-          fi
-          sleep 3
-          # Разблокировка экрана
-          adb shell input keyevent 82
-          adb shell input keyevent 82
           sleep 2
+        done
+
+        # Ожидание полной загрузки Android (sys.boot_completed)
+        for i in {1..90}; do
+          if adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; then
+            echo "✅ Android полностью загружен"
+            break
+          fi
+          sleep 2
+        done
+
+        # Разблокировка экрана
+        adb shell input keyevent 82
+        adb shell input keyevent 82
+        sleep 2
+
+        # Установка APK
+        if [ ! -f "releases/debug/latest-debug.apk" ]; then
+          echo "❌ Error: latest-debug.apk not found in releases/debug/"
+          ls -la releases/debug/
+          kill $EMULATOR_PID 2>/dev/null || true
+          exit 1
+        fi
+        adb install releases/debug/latest-debug.apk
+        if adb shell pm list packages | grep -q financialsuccess; then
+          echo "✅ APK успешно установлен"
+        else
+          echo "❌ Error: APK installation failed"
+          kill $EMULATOR_PID 2>/dev/null || true
+          exit 1
+        fi
+
+        # ... скриншоты будут сниматься следующим шагом ...
+
+        # Остановка эмулятора
+        kill $EMULATOR_PID 2>/dev/null || true
+        pkill -f emulator 2>/dev/null || true
 
     - name: 📸 Run Maestro Screenshots (Phone)
       run: |
@@ -387,38 +412,66 @@ jobs:
         export PATH="$PATH":"$HOME/.maestro/bin"
         echo "n" | maestro --version
 
-    - name: 📱 Start Android Emulator (Tablet)
-      uses: reactivecircus/android-emulator-runner@v2
-      with:
-        profile: Nexus 10
-        api-level: 34
-        target: default
-        arch: x86_64
-        disable-animations: true
-        emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics
-        script: |
-          # Ждём, пока эмулятор не станет доступен (таймаут 1 минута)
-          for i in {1..30}; do
-            if adb get-state | grep -q "device"; then break; fi
-            sleep 2
-          done
-          echo "📱 Installing APK on tablet emulator..."
-          if [ ! -f "releases/debug/latest-debug.apk" ]; then
-            echo "❌ Error: latest-debug.apk not found in releases/debug/"
-            ls -la releases/debug/
-            exit 1
+    - name: 📱 Start Android Emulator and Install APK (Tablet)
+      shell: bash
+      run: |
+        set -e
+        export ANDROID_SDK_ROOT="$HOME/android-sdk"
+        export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
+
+        # Создание AVD, если не существует
+        if ! avdmanager list avd | grep -q "ci_nexus10"; then
+          echo "no" | avdmanager create avd --name "ci_nexus10" --package "system-images;android-34;default;x86_64" --device "Nexus 10"
+        fi
+
+        # Запуск эмулятора в фоне
+        emulator -avd "ci_nexus10" -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics &
+        EMULATOR_PID=$!
+
+        # Ожидание появления устройства в adb (таймаут 60с)
+        for i in {1..30}; do
+          if adb devices | grep -q "emulator"; then
+            echo "✅ Эмулятор появился в adb"
+            break
           fi
-          adb install releases/debug/latest-debug.apk
-          if adb shell pm list packages | grep -q financialsuccess; then
-            echo "✅ APK successfully installed on tablet emulator"
-          else
-            echo "❌ Error: APK installation failed on tablet emulator"
-            exit 1
-          fi
-          sleep 3
-          adb shell input keyevent 82
-          adb shell input keyevent 82
           sleep 2
+        done
+
+        # Ожидание полной загрузки Android (sys.boot_completed)
+        for i in {1..90}; do
+          if adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; then
+            echo "✅ Android полностью загружен"
+            break
+          fi
+          sleep 2
+        done
+
+        # Разблокировка экрана
+        adb shell input keyevent 82
+        adb shell input keyevent 82
+        sleep 2
+
+        # Установка APK
+        if [ ! -f "releases/debug/latest-debug.apk" ]; then
+          echo "❌ Error: latest-debug.apk not found in releases/debug/"
+          ls -la releases/debug/
+          kill $EMULATOR_PID 2>/dev/null || true
+          exit 1
+        fi
+        adb install releases/debug/latest-debug.apk
+        if adb shell pm list packages | grep -q financialsuccess; then
+          echo "✅ APK успешно установлен"
+        else
+          echo "❌ Error: APK installation failed"
+          kill $EMULATOR_PID 2>/dev/null || true
+          exit 1
+        fi
+
+        # ... скриншоты будут сниматься следующим шагом ...
+
+        # Остановка эмулятора
+        kill $EMULATOR_PID 2>/dev/null || true
+        pkill -f emulator 2>/dev/null || true
 
     - name: 📸 Run Maestro Screenshots (Tablet)
       run: |
