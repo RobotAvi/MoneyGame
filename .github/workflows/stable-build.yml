@@ -294,8 +294,8 @@ jobs:
         disable-animations: true
         emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics
         script: |
-          # Ждём, пока эмулятор не станет доступен
-          for i in {1..60}; do
+          # Ждём, пока эмулятор не станет доступен (таймаут 1 минута)
+          for i in {1..30}; do
             if adb get-state | grep -q "device"; then break; fi
             sleep 2
           done
@@ -397,7 +397,8 @@ jobs:
         disable-animations: true
         emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics
         script: |
-          for i in {1..60}; do
+          # Ждём, пока эмулятор не станет доступен (таймаут 1 минута)
+          for i in {1..30}; do
             if adb get-state | grep -q "device"; then break; fi
             sleep 2
           done
