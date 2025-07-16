@@ -288,40 +288,35 @@ jobs:
       uses: reactivecircus/android-emulator-runner@v2
       with:
         profile: Nexus 5
-        api-level: 10
+        api-level: 34
         target: default
-        arch: x86
+        arch: x86_64
         disable-animations: true
         emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics
         script: |
+          # Ждём, пока эмулятор не станет доступен
+          for i in {1..60}; do
+            if adb get-state | grep -q "device"; then break; fi
+            sleep 2
+          done
+          echo "📱 Installing APK on phone emulator..."
+          if [ ! -f "releases/debug/latest-debug.apk" ]; then
+            echo "❌ Error: latest-debug.apk not found in releases/debug/"
+            ls -la releases/debug/
+            exit 1
+          fi
+          adb install releases/debug/latest-debug.apk
+          if adb shell pm list packages | grep -q financialsuccess; then
+            echo "✅ APK successfully installed on phone emulator"
+          else
+            echo "❌ Error: APK installation failed on phone emulator"
+            exit 1
+          fi
+          sleep 3
+          # Разблокировка экрана
           adb shell input keyevent 82
           adb shell input keyevent 82
-          sleep 5
-
-    - name: 📲 Install APK on Phone Emulator
-      run: |
-        export PATH="$PATH":"$HOME/.maestro/bin"
-        echo "📱 Installing APK on phone emulator..."
-        
-        # Проверяем, что APK существует
-        if [ ! -f "releases/debug/latest-debug.apk" ]; then
-          echo "❌ Error: latest-debug.apk not found in releases/debug/"
-          ls -la releases/debug/
-          exit 1
-        fi
-        
-        # Устанавливаем APK
-        adb install releases/debug/latest-debug.apk
-        
-        # Проверяем установку
-        if adb shell pm list packages | grep -q financialsuccess; then
-          echo "✅ APK successfully installed on phone emulator"
-        else
-          echo "❌ Error: APK installation failed on phone emulator"
-          exit 1
-        fi
-        
-        sleep 3
+          sleep 2
 
     - name: 📸 Run Maestro Screenshots (Phone)
       run: |
@@ -395,43 +390,34 @@ jobs:
     - name: 📱 Start Android Emulator (Tablet)
       uses: reactivecircus/android-emulator-runner@v2
       with:
-        profile: Nexus 5
-        api-level: 10
+        profile: Nexus 10
+        api-level: 34
         target: default
-        arch: x86
+        arch: x86_64
         disable-animations: true
         emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics
         script: |
-          pwd
-          ls -al $HOME/android-sdk/platform-tools
+          for i in {1..60}; do
+            if adb get-state | grep -q "device"; then break; fi
+            sleep 2
+          done
+          echo "📱 Installing APK on tablet emulator..."
+          if [ ! -f "releases/debug/latest-debug.apk" ]; then
+            echo "❌ Error: latest-debug.apk not found in releases/debug/"
+            ls -la releases/debug/
+            exit 1
+          fi
+          adb install releases/debug/latest-debug.apk
+          if adb shell pm list packages | grep -q financialsuccess; then
+            echo "✅ APK successfully installed on tablet emulator"
+          else
+            echo "❌ Error: APK installation failed on tablet emulator"
+            exit 1
+          fi
+          sleep 3
           adb shell input keyevent 82
           adb shell input keyevent 82
-          sleep 5
-
-    - name: 📲 Install APK on Tablet Emulator
-      run: |
-        export PATH="$PATH":"$HOME/.maestro/bin"
-        echo "📱 Installing APK on tablet emulator..."
-        
-        # Проверяем, что APK существует
-        if [ ! -f "releases/debug/latest-debug.apk" ]; then
-          echo "❌ Error: latest-debug.apk not found in releases/debug/"
-          ls -la releases/debug/
-          exit 1
-        fi
-        
-        # Устанавливаем APK
-        adb install releases/debug/latest-debug.apk
-        
-        # Проверяем установку
-        if adb shell pm list packages | grep -q financialsuccess; then
-          echo "✅ APK successfully installed on tablet emulator"
-        else
-          echo "❌ Error: APK installation failed on tablet emulator"
-          exit 1
-        fi
-        
-        sleep 3
+          sleep 2
 
     - name: 📸 Run Maestro Screenshots (Tablet)
       run: |
