@@ -259,8 +259,8 @@ jobs:
       env:
         ANDROID_SDK_ROOT: ${{ runner.home }}/android-sdk
         ANDROID_HOME: ${{ runner.home }}/android-sdk
-        PATH: ${{ runner.home }}/android-sdk/emulator:${{ runner.home }}/android-sdk/platform-tools:${{ runner.home }}/android-sdk/cmdline-tools/latest/bin:${{ env.PATH }}
       run: |
+        export PATH="$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin"
         apt-get update
         apt-get install -y wget
         wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
@@ -270,7 +270,7 @@ jobs:
 
         export ANDROID_SDK_ROOT=$HOME/android-sdk
         export ANDROID_HOME=$HOME/android-sdk
-        export PATH=$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin
+        export PATH="$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin"
         yes | sdkmanager --licenses
         sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64"
 
@@ -282,6 +282,7 @@ jobs:
 
     - name: 🔍 Проверка наличия adb в PATH (phone)
       run: |
+        export PATH="$PATH:$HOME/android-sdk/platform-tools"
         echo "PATH: $PATH"
         which adb
         adb version
@@ -289,7 +290,7 @@ jobs:
     - name: 🎭 Install Maestro
       run: |
         curl -Ls "https://get.maestro.mobile.dev" | bash
-        export PATH="$PATH":"$HOME/.maestro/bin"
+        export PATH="$PATH:$HOME/.maestro/bin"
         echo "n" | maestro --version
 
     - name: 📱 Start Android Emulator and Install APK (Phone)
@@ -297,8 +298,8 @@ jobs:
       env:
         ANDROID_SDK_ROOT: ${{ runner.home }}/android-sdk
         ANDROID_HOME: ${{ runner.home }}/android-sdk
-        PATH: ${{ runner.home }}/android-sdk/emulator:${{ runner.home }}/android-sdk/platform-tools:${{ runner.home }}/android-sdk/cmdline-tools/latest/bin:${{ env.PATH }}
       run: |
+        export PATH="$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin"
         set -e
         echo "SDK root: $ANDROID_SDK_ROOT"
         echo "PATH: $PATH"
@@ -386,7 +387,7 @@ jobs:
 
     - name: 📸 Run Maestro Screenshots (Phone)
       run: |
-        export PATH="$PATH":"$HOME/.maestro/bin"
+        export PATH="$PATH:$HOME/.maestro/bin"
         mkdir -p screenshots/phone
         
         # Пробуем специфичную конфигурацию для телефона
@@ -430,8 +431,8 @@ jobs:
       env:
         ANDROID_SDK_ROOT: ${{ runner.home }}/android-sdk
         ANDROID_HOME: ${{ runner.home }}/android-sdk
-        PATH: ${{ runner.home }}/android-sdk/emulator:${{ runner.home }}/android-sdk/platform-tools:${{ runner.home }}/android-sdk/cmdline-tools/latest/bin:${{ env.PATH }}
       run: |
+        export PATH="$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin"
         apt-get update
         apt-get install -y wget
         wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
@@ -441,7 +442,7 @@ jobs:
 
         export ANDROID_SDK_ROOT=$HOME/android-sdk
         export ANDROID_HOME=$HOME/android-sdk
-        export PATH=$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin
+        export PATH="$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin"
         yes | sdkmanager --licenses
         sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64"
 
@@ -453,6 +454,7 @@ jobs:
 
     - name: 🔍 Проверка наличия adb в PATH (tablet)
       run: |
+        export PATH="$PATH:$HOME/android-sdk/platform-tools"
         echo "PATH: $PATH"
         which adb
         adb version
@@ -460,7 +462,7 @@ jobs:
     - name: 🎭 Install Maestro
       run: |
         curl -Ls "https://get.maestro.mobile.dev" | bash
-        export PATH="$PATH":"$HOME/.maestro/bin"
+        export PATH="$PATH:$HOME/.maestro/bin"
         echo "n" | maestro --version
 
     - name: 📱 Start Android Emulator and Install APK (Tablet)
@@ -468,8 +470,8 @@ jobs:
       env:
         ANDROID_SDK_ROOT: ${{ runner.home }}/android-sdk
         ANDROID_HOME: ${{ runner.home }}/android-sdk
-        PATH: ${{ runner.home }}/android-sdk/emulator:${{ runner.home }}/android-sdk/platform-tools:${{ runner.home }}/android-sdk/cmdline-tools/latest/bin:${{ env.PATH }}
       run: |
+        export PATH="$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin"
         set -e
         echo "SDK root: $ANDROID_SDK_ROOT"
         echo "PATH: $PATH"
@@ -557,7 +559,7 @@ jobs:
 
     - name: 📸 Run Maestro Screenshots (Tablet)
       run: |
-        export PATH="$PATH":"$HOME/.maestro/bin"
+        export PATH="$PATH:$HOME/.maestro/bin"
         mkdir -p screenshots/tablet
         
         # Пробуем специфичную конфигурацию для планшета
