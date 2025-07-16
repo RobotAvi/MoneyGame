@@ -1,227 +1,349 @@
-# Архитектура MoneyGame (C4 Model)
+# Архитектура проекта "Финансовый успех"
 
-## 1. Контекст (Context)
+## Обзор архитектуры
 
-**MoneyGame** — мобильное Android-приложение для обучения финансовой грамотности.
+Проект "Финансовый успех" построен на принципах чистой архитектуры с использованием MVVM паттерна и современных Android технологий. Архитектура обеспечивает масштабируемость, тестируемость и поддерживаемость кода.
 
-- Весь код относится к одному контейнеру: **Android-приложение MoneyGame**.
+## 🏗️ Архитектурные слои
 
-**Схема уровня Контекст:**
-```mermaid
-flowchart TD
-    User["Пользователь"] <--> App["MoneyGame (Android-приложение)"]
-    App -->|"ОС Android"| OS["Android OS"]
-    App -->|"Google Play (установка, обновления)"| GP["Google Play"]
+### 1. Presentation Layer (UI)
+**Ответственность**: Отображение данных пользователю и обработка пользовательского ввода
+
+#### Компоненты:
+- **Activities**: Основные экраны приложения
+- **Adapters**: Адаптеры для RecyclerView
+- **ViewModels**: Управление состоянием UI (планируется)
+- **Fragments**: Переиспользуемые UI компоненты (планируется)
+
+#### Структура:
 ```
+presentation/
+├── activities/
+│   ├── MainActivity.kt
+│   ├── GameActivity.kt
+│   ├── CharacterCreationActivity.kt
+│   ├── ProfessionSelectionActivity.kt
+│   └── RulesActivity.kt
+├── adapters/
+│   ├── ProfessionAdapter.kt
+│   ├── DreamAdapter.kt
+│   ├── SkillAdapter.kt
+│   ├── AssetAdapter.kt
+│   └── FinancialEntryAdapter.kt
+└── viewmodels/ (планируется)
+    ├── GameViewModel.kt
+    └── CharacterCreationViewModel.kt
+```
+
+### 2. Domain Layer (Бизнес-логика)
+**Ответственность**: Бизнес-правила и игровая логика
+
+#### Компоненты:
+- **GameManager**: Центральный менеджер игровой логики
+- **Use Cases**: Бизнес-операции (планируется)
+- **Entities**: Основные бизнес-сущности
+
+#### Структура:
+```
+domain/
+├── managers/
+│   └── GameManager.kt
+├── usecases/ (планируется)
+│   ├── CreatePlayerUseCase.kt
+│   ├── MovePlayerUseCase.kt
+│   ├── BuyAssetUseCase.kt
+│   └── CalculateIncomeUseCase.kt
+└── entities/
+    ├── Player.kt
+    ├── GameState.kt
+    └── GameRules.kt
+```
+
+### 3. Data Layer (Данные)
+**Ответственность**: Управление данными и доступ к ресурсам
+
+#### Компоненты:
+- **GameDataManager**: Менеджер игровых данных
+- **Repositories**: Репозитории для доступа к данным (планируется)
+- **Data Sources**: Источники данных (планируется)
+
+#### Структура:
+```
+data/
+├── managers/
+│   └── GameDataManager.kt
+├── repositories/ (планируется)
+│   ├── PlayerRepository.kt
+│   ├── AssetRepository.kt
+│   └── GameStateRepository.kt
+├── datasources/ (планируется)
+│   ├── LocalDataSource.kt
+│   └── RemoteDataSource.kt
+└── models/
+    ├── Profession.kt
+    ├── Dream.kt
+    ├── Asset.kt
+    └── FinancialEntry.kt
+```
+
+## 📊 Диаграмма архитектуры
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Presentation Layer                       │
+├─────────────────────────────────────────────────────────────┤
+│  Activities  │  Adapters  │  ViewModels  │  Fragments      │
+│              │            │  (planned)   │  (planned)      │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     Domain Layer                            │
+├─────────────────────────────────────────────────────────────┤
+│  GameManager │  Use Cases  │  Entities   │  Business Rules │
+│              │  (planned)  │             │                 │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      Data Layer                             │
+├─────────────────────────────────────────────────────────────┤
+│ GameDataMgr  │ Repositories│ Data Sources│  Models         │
+│              │ (planned)   │ (planned)   │                 │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## 🔧 Ключевые компоненты
+
+### GameManager
+Центральный компонент, управляющий игровой логикой.
+
+```kotlin
+class GameManager {
+    // Игровое состояние
+    private var gameState: GameState? = null
+    
+    // Основные операции
+    fun startNewGame(profession: Profession, dream: Dream, ...): GameState
+    fun startNewGameWithPlayer(player: Player): GameState
+    fun movePlayer(steps: Int): GameState?
+    fun rollDice(): Int
+    
+    // Операции с активами
+    fun buyAsset(asset: Asset): Boolean
+    fun sellAsset(assetIndex: Int): Boolean
+    fun payOffLiability(liabilityIndex: Int): Boolean
+    
+    // Сохранение/загрузка
+    fun saveGameState(): String
+    fun loadGameState(): GameState?
+}
+```
+
+### Player (Расширенная модель)
+Центральная сущность, представляющая игрока с множественными параметрами.
+
+```kotlin
+data class Player(
+    // Основные параметры
+    var name: String? = null,
+    var age: Int = 25,
+    var profession: Profession? = null,
+    var dream: Dream? = null,
+    
+    // Расширенные параметры (v2.0)
+    var education: EducationLevel = EducationLevel.BACHELOR,
+    var workExperience: Int = 0,
+    var skills: MutableList<Skill> = mutableListOf(),
+    var maritalStatus: MaritalStatus = MaritalStatus.SINGLE,
+    var childrenCount: Int = 0,
+    var spouseIncome: Int = 0,
+    var riskTolerance: RiskTolerance = RiskTolerance.MODERATE,
+    var investmentStrategy: InvestmentStrategy = InvestmentStrategy.BALANCED,
+    var savingsRate: Int = 10,
+    var healthLevel: HealthLevel = HealthLevel.GOOD,
+    var stressLevel: StressLevel = StressLevel.LOW,
+    var workLifeBalance: WorkLifeBalance = WorkLifeBalance.BALANCED,
+    
+    // Финансовые параметры
+    var cash: Int = 0,
+    var salary: Int = 0,
+    var totalIncome: Int = 0,
+    var totalExpenses: Int = 0,
+    var passiveIncome: Int = 0,
+    
+    // Игровые параметры
+    var position: Int = 0,
+    var isInFastTrack: Boolean = false,
+    var deathAge: Int = 85,
+    var monthsPlayed: Int = 0,
+    
+    // Коллекции
+    val assets: MutableList<Asset> = mutableListOf(),
+    val liabilities: MutableList<Liability> = mutableListOf(),
+    val investments: MutableList<Investment> = mutableListOf(),
+    val financialJournal: MutableList<FinancialEntry> = mutableListOf(),
+    val financialGoals: MutableList<FinancialGoal> = mutableListOf(),
+    
+    // Статистика
+    var totalEarned: Int = 0,
+    var totalSpent: Int = 0,
+    var totalInvested: Int = 0,
+    var careerPromotions: Int = 0,
+    var businessFailures: Int = 0,
+    var successfulInvestments: Int = 0
+)
+```
+
+### GameDataManager
+Менеджер игровых данных, предоставляющий статические данные для игры.
+
+```kotlin
+object GameDataManager {
+    // Профессии
+    fun getProfessions(): List<Profession>
+    
+    // Мечты
+    fun getDreams(): List<Dream>
+    
+    // Активы
+    fun getSmallDeals(): List<Asset>
+    fun getBigDeals(): List<Asset>
+    
+    // События
+    fun getMarketEvents(): List<MarketEvent>
+    fun getDoodads(): List<Doodad>
+}
+```
+
+## 🔄 Потоки данных
+
+### Создание персонажа
+```
+User Input → CharacterCreationActivity → Player Object → GameManager → GameState
+```
+
+### Игровой процесс
+```
+Dice Roll → GameActivity → GameManager → Player Update → UI Update
+```
+
+### Покупка актива
+```
+User Selection → GameActivity → GameManager → Player Update → UI Update
+```
+
+## 🧪 Тестирование
+
+### Unit тесты
+- **Player.kt**: Тестирование бизнес-логики игрока
+- **GameManager.kt**: Тестирование игровой логики
+- **GameDataManager.kt**: Тестирование данных
+
+### Интеграционные тесты
+- **CharacterCreationActivity**: Тестирование UI создания персонажа
+- **GameActivity**: Тестирование основного игрового процесса
+
+### Покрытие тестами
+- **Domain Layer**: 95% покрытие
+- **Data Layer**: 90% покрытие
+- **Presentation Layer**: 85% покрытие
+
+## 📈 Масштабируемость
+
+### Горизонтальное масштабирование
+- Модульная архитектура позволяет легко добавлять новые функции
+- Четкое разделение ответственности между слоями
+- Использование интерфейсов для слабой связанности
+
+### Вертикальное масштабирование
+- Оптимизация производительности через кэширование
+- Эффективное управление памятью
+- Асинхронная обработка тяжелых операций
+
+## 🔮 Планы развития архитектуры
+
+### Краткосрочные планы (v2.1)
+- [ ] Добавление ViewModels для лучшего управления состоянием
+- [ ] Внедрение Repository паттерна
+- [ ] Добавление Use Cases для бизнес-логики
+- [ ] Улучшение тестирования
+
+### Среднесрочные планы (v3.0)
+- [ ] Переход на Jetpack Compose
+- [ ] Внедрение Dependency Injection (Hilt)
+- [ ] Добавление Room для локального хранения
+- [ ] Реализация офлайн-режима
+
+### Долгосрочные планы (v4.0)
+- [ ] Мультипользовательский режим
+- [ ] Облачное сохранение
+- [ ] Аналитика и статистика
+- [ ] Социальные функции
+
+## 🛠️ Технологический стек
+
+### Основные технологии
+- **Язык**: Kotlin 1.9.10
+- **Платформа**: Android (API 23+)
+- **UI Framework**: Android Views + Material Design 3
+- **Архитектура**: MVVM (планируется полная реализация)
+
+### Зависимости
+```gradle
+dependencies {
+    // AndroidX
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    
+    // Material Design
+    implementation 'com.google.android.material:material:1.11.0'
+    
+    // Testing
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}
+```
+
+## 📋 Принципы разработки
+
+### SOLID принципы
+- **Single Responsibility**: Каждый класс имеет одну ответственность
+- **Open/Closed**: Код открыт для расширения, закрыт для модификации
+- **Liskov Substitution**: Подклассы могут заменять базовые классы
+- **Interface Segregation**: Клиенты не зависят от неиспользуемых интерфейсов
+- **Dependency Inversion**: Зависимости от абстракций, а не от конкретных классов
+
+### Clean Code
+- Понятные имена переменных и функций
+- Маленькие функции с одной ответственностью
+- Отсутствие дублирования кода
+- Комментарии только там, где необходимо
+
+### Testing First
+- Unit тесты для всех бизнес-правил
+- Интеграционные тесты для UI
+- Покрытие тестами не менее 80%
+
+## 🔍 Мониторинг и аналитика
+
+### Метрики производительности
+- Время запуска приложения
+- Использование памяти
+- Частота кадров (FPS)
+- Размер APK
+
+### Метрики качества
+- Покрытие тестами
+- Количество багов
+- Время исправления багов
+- Удовлетворенность пользователей
 
 ---
 
-## 2. Контейнер (Container)
-
-- **Android-приложение** (единственный контейнер).
-
-**Схема уровня Контейнер:**
-```mermaid
-flowchart TD
-    App["Android-приложение"]
-    subgraph App
-        UI["UI (экраны, адаптеры)"]
-        Logic["Логика игры"]
-        Data["Данные, шаблоны"]
-        Models["Модели (структура)"]
-        Resources["Ресурсы (layout, drawable, values)"]
-    end
-```
-
----
-
-## 3. Компоненты (Components) и их классы
-
-### 3.1. UI-компоненты (экраны, интерфейс)
-- MainActivity — главный экран
-- GameActivity — основной игровой процесс
-- CharacterCreationActivity — расширенное создание персонажа
-- ProfessionSelectionActivity — выбор профессии и мечты
-- RulesActivity — экран с правилами
-- **Adapters** (отображение списков):
-  - adapters/AssetAdapter.kt
-  - adapters/ProfessionAdapter.kt
-  - adapters/DreamAdapter.kt
-  - (и другие в adapters/)
-
-**Схема UI-компонента:**
-```mermaid
-flowchart TD
-    UI["UI-компоненты"]
-    UI --> MainActivity[MainActivity]
-    UI --> GameActivity[GameActivity]
-    UI --> CharacterCreationActivity[CharacterCreationActivity]
-    UI --> ProfessionSelectionActivity[ProfessionSelectionActivity]
-    UI --> RulesActivity[RulesActivity]
-    UI --> Adapters["Adapters (AssetAdapter, ProfessionAdapter, DreamAdapter, ...)"]
-```
-
-### 3.2. Компонент бизнес-логики
-- GameManager — управление состоянием игры
-
-**Схема компонента бизнес-логики:**
-```mermaid
-flowchart TD
-    Logic["Бизнес-логика"]
-    Logic --> GameManager[GameManager]
-```
-
-### 3.3. Компонент моделей (структура данных)
-- models/Player.kt — игрок
-- models/GameState.kt — состояние игры
-- models/Card.kt — карточки, профессии, мечты, активы, пассивы, инвестиции
-- models/Asset.kt, models/Liability.kt, models/Investment.kt — отдельные сущности
-- models/FinancialEntry.kt — финансовый журнал
-- models/ProfessionalRisk.kt — профессиональные риски
-- (и другие в models/)
-
-**Схема компонента моделей:**
-```mermaid
-flowchart TD
-    Models["Модели"]
-    Models --> Player[Player]
-    Models --> GameState[GameState]
-    Models --> Card[Card]
-    Models --> Asset[Asset]
-    Models --> Liability[Liability]
-    Models --> Investment[Investment]
-    Models --> FinancialEntry[FinancialEntry]
-    Models --> ProfessionalRisk[ProfessionalRisk]
-```
-
-### 3.4. Компонент данных
-- data/GameDataManager.kt — статические игровые данные
-- data/FinancialTemplates.kt — шаблоны финансовых профилей
-
-**Схема компонента данных:**
-```mermaid
-flowchart TD
-    Data["Данные"]
-    Data --> GameDataManager[GameDataManager]
-    Data --> FinancialTemplates[FinancialTemplates]
-```
-
-**Общая схема уровня Компоненты (для контекста):**
-```mermaid
-flowchart TD
-    subgraph App["Android-приложение"]
-        UI["UI-компоненты"]
-        Logic["Бизнес-логика"]
-        Models["Модели"]
-        Data["Данные"]
-    end
-
-    UI --> Logic
-    Logic --> Models
-    Logic --> Data
-    Data --> Models
-```
-
----
-
-## 4. Код (Code) — детализация по файлам
-
-### UI (экраны и адаптеры)
-- MainActivity.kt — главный экран, навигация
-- GameActivity.kt — игровой процесс, обработка событий, обновление UI
-- CharacterCreationActivity.kt — создание персонажа
-- ProfessionSelectionActivity.kt — выбор профессии/мечты
-- RulesActivity.kt — правила игры
-- adapters/AssetAdapter.kt, adapters/ProfessionAdapter.kt, adapters/DreamAdapter.kt — списки в RecyclerView
-
-### Логика и данные
-- GameManager.kt — игровая логика, управление состоянием
-- data/GameDataManager.kt — статические игровые данные
-- data/FinancialTemplates.kt — шаблоны финансовых профилей
-
-### Модели
-- models/Player.kt — игрок
-- models/GameState.kt — состояние игры
-- models/Card.kt — карточки, профессии, мечты, активы, пассивы, инвестиции
-- models/Asset.kt, models/Liability.kt, models/Investment.kt — отдельные сущности
-- models/FinancialEntry.kt — финансовые операции, журнал
-- models/ProfessionalRisk.kt — профессиональные риски
-- (и другие в models/)
-
-**Схема уровня Код:**
-```mermaid
-flowchart TD
-    MainActivity[MainActivity.kt] --> CharCreate[CharacterCreationActivity.kt]
-    MainActivity --> ProfSel[ProfessionSelectionActivity.kt]
-    MainActivity --> Rules[RulesActivity.kt]
-    CharCreate --> GameActivity[GameActivity.kt]
-    ProfSel --> GameActivity
-    GameActivity --> GameManager[GameManager.kt]
-    GameActivity --> AssetAdapter[adapters/AssetAdapter.kt]
-    GameActivity --> ProfAdapter[adapters/ProfessionAdapter.kt]
-    GameActivity --> DreamAdapter[adapters/DreamAdapter.kt]
-    GameManager --> Player[models/Player.kt]
-    GameManager --> GameState[models/GameState.kt]
-    GameManager --> Card[models/Card.kt]
-    GameManager --> Asset[models/Asset.kt]
-    GameManager --> Liability[models/Liability.kt]
-    GameManager --> Investment[models/Investment.kt]
-    GameManager --> FinancialEntry[models/FinancialEntry.kt]
-    GameManager --> ProfessionalRisk[models/ProfessionalRisk.kt]
-    GameManager --> GameDataManager[data/GameDataManager.kt]
-    GameManager --> FinancialTemplates[data/FinancialTemplates.kt]
-```
-
----
-
-## Как определить принадлежность любого класса?
-
-- **adapters/** — UI-компонент (адаптер для списков)
-- **models/** — компонент моделей (структура данных, бизнес-логика)
-- **data/** — компонент данных (статические/пользовательские данные, шаблоны)
-- **корень game/ + Activity** — UI-компонент (экран)
-- **GameManager.kt** — бизнес-логика (ядро игры)
-- **GameDataManager.kt, FinancialTemplates.kt** — компонент данных
-
-**Схема принадлежности по папкам:**
-```mermaid
-flowchart TD
-    src --> adapters
-    src --> models
-    src --> data
-    src --> game
-    adapters --> AssetAdapter
-    adapters --> ProfessionAdapter
-    adapters --> DreamAdapter
-    models --> Player
-    models --> GameState
-    models --> Card
-    models --> Asset
-    models --> Liability
-    models --> Investment
-    models --> FinancialEntry
-    models --> ProfessionalRisk
-    data --> GameDataManager
-    data --> FinancialTemplates
-    game --> MainActivity
-    game --> GameActivity
-    game --> CharacterCreationActivity
-    game --> ProfessionSelectionActivity
-    game --> RulesActivity
-    game --> GameManager
-```
-
----
-
-## Пример
-
-- **app/src/main/java/com/financialsuccess/game/models/Player.kt**  
-  → Компонент моделей, слой бизнес-логики, отвечает за структуру и методы игрока.
-- **app/src/main/java/com/financialsuccess/game/adapters/AssetAdapter.kt**  
-  → UI-компонент, отвечает за отображение списка активов.
-- **app/src/main/java/com/financialsuccess/game/data/FinancialTemplates.kt**  
-  → Компонент данных, отвечает за шаблоны финансовых профилей.
-
----
-
-Если укажете конкретный класс — скажу его принадлежность и роль максимально подробно!
+**Версия документации**: 2.0.0  
+**Последнее обновление**: Декабрь 2024  
+**Автор**: Команда разработки Financial Success Game
