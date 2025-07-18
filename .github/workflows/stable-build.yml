@@ -191,6 +191,21 @@ jobs:
         echo "==== ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT ===="
         find $ANDROID_SDK_ROOT/
 
+    - name: 🏗️ Log build directories before assemble
+      run: |
+        echo "==== BEFORE BUILD: app/build/outputs ===="
+        find app/build/outputs || echo "No outputs dir yet"
+
+    - name: 🏗️ Assemble Debug APK
+      run: |
+        echo "==== RUN ./gradlew assembleDebug ===="
+        ./gradlew assembleDebug --stacktrace --info
+
+    - name: 🏗️ Log build directories after assemble
+      run: |
+        echo "==== AFTER BUILD: app/build/outputs ===="
+        find app/build/outputs || echo "No outputs dir"
+
     - name: 📱 Prepare APK for distribution
       id: apk_path
       run: |
