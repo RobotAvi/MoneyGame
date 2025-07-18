@@ -261,8 +261,8 @@ jobs:
         ANDROID_HOME: ${{ runner.home }}/android-sdk
       run: |
         export PATH="$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin"
-        apt-get update
-        apt-get install -y wget
+        sudo apt-get update
+        sudo apt-get install -y wget
         wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
         unzip cmdline-tools.zip -d $HOME
         mkdir -p $HOME/android-sdk/cmdline-tools
@@ -433,8 +433,8 @@ jobs:
         ANDROID_HOME: ${{ runner.home }}/android-sdk
       run: |
         export PATH="$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin"
-        apt-get update
-        apt-get install -y wget
+        sudo apt-get update
+        sudo apt-get install -y wget
         wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
         unzip cmdline-tools.zip -d $HOME
         mkdir -p $HOME/android-sdk/cmdline-tools
