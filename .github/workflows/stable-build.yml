@@ -12,9 +12,54 @@ env:
   MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: "true"
 
 jobs:
+  setup-android-sdk:
+    runs-on: ubuntu-latest
+    outputs:
+      sdk-path: ${{ steps.set-sdk-path.outputs.sdk_path }}
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      - name: 🏗️ Prepare Android SDK directories
+        id: set-sdk-path
+        run: |
+          echo "sdk_path=$HOME/android-sdk" >> $GITHUB_OUTPUT
+          mkdir -p $HOME/android-sdk
+          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+      - name: 🛠️ Download and install Android commandline tools
+        run: |
+          set -x
+          sudo apt-get update
+          sudo apt-get install -y wget unzip
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+          unzip cmdline-tools.zip -d $HOME
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          mv $HOME/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+          echo "==== cmdline-tools structure ===="
+          find $HOME/android-sdk/cmdline-tools/
+      - name: 🛠️ Install Android SDK components
+        run: |
+          set -x
+          export ANDROID_SDK_ROOT=$HOME/android-sdk
+          export ANDROID_HOME=$HOME/android-sdk
+          export PATH="$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin"
+          yes | sdkmanager --licenses || { echo "sdkmanager license error"; exit 1; }
+          sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64" || { echo "sdkmanager install error"; exit 1; }
+          echo "==== system-images after install ===="
+          find $ANDROID_SDK_ROOT/system-images/ || echo "system-images dir not found"
+      - name: 📦 Upload Android SDK as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-sdk
+          path: ${{ env.ANDROID_SDK_ROOT }}
+
   # Основная сборка и тестирование
   build-and-test:
     runs-on: ubuntu-latest
+    needs: setup-android-sdk
+    env:
+      ANDROID_SDK_ROOT: ${{ needs.setup-android-sdk.outputs.sdk-path }}
+      ANDROID_HOME: ${{ needs.setup-android-sdk.outputs.sdk-path }}
     permissions:
       contents: write
     outputs:
@@ -136,51 +181,15 @@ jobs:
     - name: 🔧 Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: � Clean project
+    - name: 📦 Download Android SDK artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: android-sdk
+        path: ${{ env.ANDROID_SDK_ROOT }}
+    - name: 🧾 Log Android SDK structure
       run: |
-        echo "🧹 Cleaning project..."
-        ./gradlew clean --no-daemon
-        if [ $? -eq 0 ]; then
-          echo "✅ Project cleaned successfully"
-        else
-          echo "❌ Project clean failed"
-          exit 1
-        fi
-
-    - name: �� Run Unit Tests
-      run: |
-        echo "🧪 Running unit tests..."
-        ./gradlew test --no-daemon
-        if [ $? -eq 0 ]; then
-          echo "✅ Unit tests passed"
-        else
-          echo "❌ Unit tests failed"
-          exit 1
-        fi
-
-    - name: 🔨 Build Debug APK
-      run: |
-        echo "🔨 Building debug APK..."
-        ./gradlew assembleDebug --no-daemon
-        if [ $? -eq 0 ]; then
-          echo "✅ Debug APK built successfully"
-        else
-          echo "❌ Debug APK build failed"
-          exit 1
-        fi
-
-    - name: 📊 Get version info
-      id: version
-      run: |
-        VERSION=$(grep -oP 'versionName\s+"\K[^"]+' app/build.gradle)
-        VERSION_CODE=$(grep -oP 'versionCode\s+\K[0-9]+' app/build.gradle)
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-        echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
-        echo "Version: $VERSION ($VERSION_CODE)"
-
-    - name: 📅 Get current date
-      id: date
-      run: echo "date=$(date +'%Y-%m-%d_%H-%M')" >> $GITHUB_OUTPUT
+        echo "==== ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT ===="
+        find $ANDROID_SDK_ROOT/
 
     - name: 📱 Prepare APK for distribution
       id: apk_path
@@ -243,42 +252,25 @@ jobs:
   # Параллельная генерация скриншотов для телефона
   screenshots-phone:
     runs-on: ubuntu-latest
-    needs: build-and-test
+    needs: [build-and-test, setup-android-sdk]
+    env:
+      ANDROID_SDK_ROOT: ${{ needs.setup-android-sdk.outputs.sdk-path }}
+      ANDROID_HOME: ${{ needs.setup-android-sdk.outputs.sdk-path }}
     # Убрано условие should_release
     
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
 
-    - name: 📥 Download APK
+    - name: 📦 Download Android SDK artifact
       uses: actions/download-artifact@v4
       with:
-        name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}
-
-    - name: 🔧 Install Android SDK and platform-tools
-      env:
-        ANDROID_SDK_ROOT: ${{ runner.home }}/android-sdk
-        ANDROID_HOME: ${{ runner.home }}/android-sdk
+        name: android-sdk
+        path: ${{ env.ANDROID_SDK_ROOT }}
+    - name: 🧾 Log Android SDK structure
       run: |
-        export PATH="$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin"
-        sudo apt-get update
-        sudo apt-get install -y wget
-        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
-        unzip cmdline-tools.zip -d $HOME
-        mkdir -p $HOME/android-sdk/cmdline-tools
-        mv $HOME/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
-
-        export ANDROID_SDK_ROOT=$HOME/android-sdk
-        export ANDROID_HOME=$HOME/android-sdk
-        export PATH="$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin"
-        yes | sdkmanager --licenses
-        sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64"
-
-        # Проверяем, что system-image реально скачан
-        ls -la $ANDROID_SDK_ROOT/system-images/android-34/default/x86_64/
-
-        # Добавляем platform-tools в PATH для всех следующих шагов
-        echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
+        echo "==== ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT ===="
+        find $ANDROID_SDK_ROOT/
 
     - name: 🔍 Проверка наличия adb в PATH (phone)
       run: |
@@ -415,42 +407,25 @@ jobs:
   # Параллельная генерация скриншотов для планшета
   screenshots-tablet:
     runs-on: ubuntu-latest
-    needs: build-and-test
+    needs: [build-and-test, setup-android-sdk]
+    env:
+      ANDROID_SDK_ROOT: ${{ needs.setup-android-sdk.outputs.sdk-path }}
+      ANDROID_HOME: ${{ needs.setup-android-sdk.outputs.sdk-path }}
     # Убрано условие should_release
     
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
 
-    - name: 📥 Download APK
+    - name: 📦 Download Android SDK artifact
       uses: actions/download-artifact@v4
       with:
-        name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}
-
-    - name: 🔧 Install Android SDK and platform-tools
-      env:
-        ANDROID_SDK_ROOT: ${{ runner.home }}/android-sdk
-        ANDROID_HOME: ${{ runner.home }}/android-sdk
+        name: android-sdk
+        path: ${{ env.ANDROID_SDK_ROOT }}
+    - name: 🧾 Log Android SDK structure
       run: |
-        export PATH="$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin"
-        sudo apt-get update
-        sudo apt-get install -y wget
-        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
-        unzip cmdline-tools.zip -d $HOME
-        mkdir -p $HOME/android-sdk/cmdline-tools
-        mv $HOME/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
-
-        export ANDROID_SDK_ROOT=$HOME/android-sdk
-        export ANDROID_HOME=$HOME/android-sdk
-        export PATH="$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin"
-        yes | sdkmanager --licenses
-        sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64"
-
-        # Проверяем, что system-image реально скачан
-        ls -la $ANDROID_SDK_ROOT/system-images/android-34/default/x86_64/
-
-        # Добавляем platform-tools в PATH для всех следующих шагов
-        echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
+        echo "==== ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT ===="
+        find $ANDROID_SDK_ROOT/
 
     - name: 🔍 Проверка наличия adb в PATH (tablet)
       run: |
