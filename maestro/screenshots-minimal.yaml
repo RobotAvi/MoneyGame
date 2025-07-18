@@ -1,9 +1,12 @@
 appId: com.financialsuccess.game.debug
-name: Financial Success Minimal Screenshots
-outputDir: screenshots/minimal
+name: Financial Success Minimal Screenshots - New Design
+outputDir: screenshots/phone
 
-# Минимальный тест для нового дизайна
+# Минимальный набор тестов для нового дизайна
 - launchApp
 - takeScreenshot: "01_main_screen_minimal"
 - tapOn: "Начать игру"
-- takeScreenshot: "02_game_screen_minimal"
+- takeScreenshot: "02_profession_selection_minimal"
+- tapOn: "Программист"
+- tapOn: "Начать"
+- takeScreenshot: "03_game_screen_minimal"

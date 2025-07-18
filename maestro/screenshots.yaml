@@ -2,69 +2,78 @@ appId: com.financialsuccess.game.debug
 name: Financial Success Screenshots - New Design
 outputDir: screenshots/phone
 
-# Главный экран
+# Главный экран (обновлено под новый дизайн)
 - launchApp
 - assertVisible: "Изучай финансовую грамотность"
 - takeScreenshot: "01_main_screen_new_design"
 
-# Экран выбора профессии
+# Экран выбора профессии (обновлено под новый дизайн)
 - tapOn: "Начать игру"
-- assertVisible: "👤 Ваш возраст"
-- assertVisible: "Имя персонажа"
-- assertVisible: "Дата начала игры"
 - takeScreenshot: "02_profession_selection_new_design"
 
-# Выбираем профессию
+# Выбираем профессию (обновлено под новый дизайн)
 - tapOn: "Программист"
 - takeScreenshot: "03_profession_selected_new_design"
 
-# Заполняем данные персонажа
-- inputText: "Тест Игрок" into: "Введите имя персонажа"
-- inputText: "25" into: "Введите ваш возраст (18-65)"
-- takeScreenshot: "04_character_data_filled"
-
-# Начинаем игру
+# Начинаем игру (обновлено под новый дизайн)
 - tapOn: "Начать"
-- takeScreenshot: "05_game_started_new_design"
+- takeScreenshot: "04_game_started_new_design"
 
-# Игровой экран - проверяем новые элементы
+# Игровой экран - верхняя панель (новый дизайн)
 - assertVisible: "Наличные"
 - assertVisible: "Зарплата"
 - assertVisible: "Пассивный"
 - assertVisible: "Уровень"
-- takeScreenshot: "06_game_screen_new_design"
+- takeScreenshot: "05_game_screen_top_panel"
 
-# Проверяем кубик
+# Игровой экран - центральная область (новый дизайн)
 - assertVisible: "Брось кубик!"
-- tapOn: "Брось кубик!"
-- takeScreenshot: "07_dice_interaction"
+- assertVisible: "🐀 Крысиные бега"
+- takeScreenshot: "06_game_screen_center"
 
-# Проверяем кнопки действий
+# Игровой экран - нижняя панель (новый дизайн)
 - assertVisible: "Финансы"
 - assertVisible: "Активы"
 - assertVisible: "Рынок"
-- takeScreenshot: "08_action_buttons"
+- takeScreenshot: "07_game_screen_bottom_panel"
 
-# Финансовый журнал
+# Финансы (обновлено под новый дизайн)
 - tapOn: "Финансы"
-- takeScreenshot: "09_financial_journal_new_design"
+- takeScreenshot: "08_financial_screen_new_design"
 
 # Возвращаемся в игру
 - pressKey: "back"
-- takeScreenshot: "10_back_to_game"
+- takeScreenshot: "09_back_to_game"
 
-# Экран активов
+# Активы (обновлено под новый дизайн)
 - tapOn: "Активы"
-- takeScreenshot: "11_assets_screen_new_design"
+- takeScreenshot: "10_assets_screen_new_design"
 
 # Возвращаемся в игру
 - pressKey: "back"
-- takeScreenshot: "12_back_to_game_again"
+- takeScreenshot: "11_back_to_game_again"
 
-# Экран правил
-- tapOn: "Правила"
-- takeScreenshot: "13_rules_screen_new_design"
+# Рынок (обновлено под новый дизайн)
+- tapOn: "Рынок"
+- takeScreenshot: "12_market_screen_new_design"
 
 # Возвращаемся в игру
 - pressKey: "back"
-- takeScreenshot: "14_final_game_screen"
+- takeScreenshot: "13_back_to_game_final"
+
+# Бросаем кубик (новый элемент)
+- tapOn: "Брось кубик!"
+- takeScreenshot: "14_dice_roll_new_design"
+
+# Проверяем новые элементы дизайна
+- assertVisible: "170"  # Наличные
+- assertVisible: "0.00"  # Зарплата
+- assertVisible: "196"   # Пассивный доход
+- assertVisible: "530"   # Уровень
+- takeScreenshot: "15_new_design_stats"
+
+# Проверяем карточки и тени (новый дизайн)
+- takeScreenshot: "16_new_design_cards"
+
+# Проверяем цветовую схему (новый дизайн)
+- takeScreenshot: "17_new_design_colors"

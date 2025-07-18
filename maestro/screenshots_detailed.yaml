@@ -1,9 +1,9 @@
 appId: com.financialsuccess.game
-name: Financial Success Detailed Screenshots
+name: Financial Success Detailed Screenshots - New Design
 
-# Главный экран
+# Главный экран - новый дизайн
 - launchApp
-- takeScreenshot: "01_main_screen"
+- takeScreenshot: "01_main_screen_new_design"
 
 # Пробуем разные способы найти кнопку "Начать игру"
 - runFlow:
@@ -11,21 +11,35 @@ name: Financial Success Detailed Screenshots
       visible: "Начать игру"
     commands:
       - tapOn: "Начать игру"
-      - takeScreenshot: "02_profession_selection"
+      - assertVisible: "Выберите профессию"
+      - assertVisible: "Выберите мечту"
+      - takeScreenshot: "02_profession_selection_new_design"
     else:
       - tapOn: "Играть"
-      - takeScreenshot: "02_profession_selection_alt"
+      - assertVisible: "Выберите профессию"
+      - takeScreenshot: "02_profession_selection_alt_new_design"
 
-# Выбираем профессию (пробуем разные варианты)
+# Выбираем профессию (пробуем разные варианты) - новые карточки
 - runFlow:
     when:
       visible: "Программист"
     commands:
       - tapOn: "Программист"
-      - takeScreenshot: "03_profession_programmer"
+      - takeScreenshot: "03_profession_programmer_new_design"
     else:
       - tapOn: "Врач"
-      - takeScreenshot: "03_profession_doctor"
+      - takeScreenshot: "03_profession_doctor_new_design"
+
+# Выбираем мечту - новые карточки
+- runFlow:
+    when:
+      visible: "Коттедж"
+    commands:
+      - tapOn: "Коттедж"
+      - takeScreenshot: "04_dream_cottage_new_design"
+    else:
+      - tapOn: "Яхта"
+      - takeScreenshot: "04_dream_yacht_new_design"
 
 # Начинаем игру
 - runFlow:
@@ -33,67 +47,81 @@ name: Financial Success Detailed Screenshots
       visible: "Начать"
     commands:
       - tapOn: "Начать"
-      - takeScreenshot: "04_game_started"
+      - takeScreenshot: "05_game_started_new_design"
     else:
       - tapOn: "Старт"
-      - takeScreenshot: "04_game_started_alt"
+      - takeScreenshot: "05_game_started_alt_new_design"
 
-# Игровой экран (обновлено под новый дизайн)
-- takeScreenshot: "05_game_screen"
+# Игровой экран - новый дизайн с карточками статистики
+- assertVisible: "170" # Наличные
+- assertVisible: "0.00" # Зарплата
+- assertVisible: "196" # Пассивный доход
+- assertVisible: "530" # Уровень
+- assertVisible: "Брось кубик!"
+- takeScreenshot: "06_game_screen_new_design"
 
-# Финансы (обновлено под новый дизайн)
+# Проверяем кубик в центре
+- tapOn: "Брось кубик!"
+- takeScreenshot: "07_dice_interaction_new_design"
+
+# Финансы - новая кнопка
 - runFlow:
     when:
       visible: "Финансы"
     commands:
       - tapOn: "Финансы"
-      - takeScreenshot: "06_financial_screen"
+      - takeScreenshot: "08_finances_new_design"
     else:
       - tapOn: "📊"
-      - takeScreenshot: "06_financial_screen_alt"
+      - takeScreenshot: "08_finances_icon_new_design"
 
-# Активы (обновлено под новый дизайн)
+# Возвращаемся в игру
+- pressKey: "back"
+- takeScreenshot: "09_back_to_game_new_design"
+
+# Активы - новая кнопка
 - runFlow:
     when:
       visible: "Активы"
     commands:
       - tapOn: "Активы"
-      - takeScreenshot: "07_assets_screen"
+      - takeScreenshot: "10_assets_new_design"
     else:
       - tapOn: "🏠"
-      - takeScreenshot: "07_assets_screen_alt"
+      - takeScreenshot: "10_assets_icon_new_design"
 
-# Рынок (обновлено под новый дизайн)
+# Возвращаемся в игру
+- pressKey: "back"
+- takeScreenshot: "11_back_to_game_again_new_design"
+
+# Рынок - новая кнопка
 - runFlow:
     when:
       visible: "Рынок"
     commands:
       - tapOn: "Рынок"
-      - takeScreenshot: "08_market_screen"
+      - takeScreenshot: "12_market_new_design"
     else:
       - tapOn: "🌱"
-      - takeScreenshot: "08_market_screen_alt"
+      - takeScreenshot: "12_market_icon_new_design"
 
 # Возвращаемся в игру
 - pressKey: "back"
-- takeScreenshot: "09_back_to_game"
+- takeScreenshot: "13_back_to_game_final_new_design"
 
-# Бросаем кубик (новый элемент)
-- runFlow:
-    when:
-      visible: "Брось кубик!"
-    commands:
-      - tapOn: "Брось кубик!"
-      - takeScreenshot: "10_dice_roll"
-    else:
-      - tapOn: "Кубик"
-      - takeScreenshot: "10_dice_roll_alt"
+# Проверяем статус игры
+- assertVisible: "Крысиные бега"
+- takeScreenshot: "14_game_status_new_design"
 
-# Проверяем верхнюю панель (новые элементы)
-- takeScreenshot: "11_top_panel"
+# Проверяем верхнюю панель статистики
+- assertVisible: "Наличные"
+- assertVisible: "Зарплата"
+- assertVisible: "Пассивный"
+- assertVisible: "Уровень"
+- takeScreenshot: "15_top_panel_stats_new_design"
 
-# Проверяем нижнюю панель (новые элементы)
-- takeScreenshot: "12_bottom_panel"
-
-# Тестируем карточки показателей
-- takeScreenshot: "13_stats_cards"
+# Проверяем нижнюю панель действий
+- assertVisible: "Финансы"
+- assertVisible: "Активы"
+- assertVisible: "Рынок"
+- takeScreenshot: "16_bottom_panel_actions_new_design"

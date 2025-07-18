@@ -1,0 +1,81 @@
+appId: com.financialsuccess.game.debug
+name: Financial Success Adaptive Design Test
+outputDir: screenshots/adaptive
+
+# Тест адаптивности нового дизайна
+# Этот тест проверяет, как новый дизайн выглядит на разных устройствах
+
+# Главный экран - проверяем адаптивность
+- launchApp
+- takeScreenshot: "01_main_screen_adaptive"
+
+# Проверяем, что логотип и кнопки правильно масштабируются
+- assertVisible: "Изучай финансовую грамотность"
+- assertVisible: "Начать игру"
+- takeScreenshot: "02_main_screen_elements_adaptive"
+
+# Переход к созданию персонажа
+- tapOn: "Начать игру"
+- takeScreenshot: "03_profession_selection_adaptive"
+
+# Проверяем адаптивность формы
+- assertVisible: "👤 Ваш возраст"
+- assertVisible: "Имя персонажа"
+- assertVisible: "Дата начала игры"
+- takeScreenshot: "04_character_form_adaptive"
+
+# Проверяем адаптивность карточек профессий
+- assertVisible: "Программист"
+- assertVisible: "Врач"
+- assertVisible: "Учитель"
+- takeScreenshot: "05_professions_cards_adaptive"
+
+# Выбираем профессию и заполняем форму
+- tapOn: "Программист"
+- inputText: "Адаптивный Тест" into: "Введите имя персонажа"
+- inputText: "25" into: "Введите ваш возраст (18-65)"
+- takeScreenshot: "06_form_filled_adaptive"
+
+# Запускаем игру
+- tapOn: "Начать"
+- takeScreenshot: "07_game_started_adaptive"
+
+# Проверяем адаптивность игрового экрана
+- assertVisible: "Наличные"
+- assertVisible: "Зарплата"
+- assertVisible: "Пассивный"
+- assertVisible: "Уровень"
+- takeScreenshot: "08_game_screen_adaptive"
+
+# Проверяем адаптивность карточек статистики
+- takeScreenshot: "09_stats_cards_adaptive"
+
+# Проверяем адаптивность кубика
+- assertVisible: "Брось кубик!"
+- takeScreenshot: "10_dice_adaptive"
+
+# Проверяем адаптивность кнопок действий
+- assertVisible: "Финансы"
+- assertVisible: "Активы"
+- assertVisible: "Рынок"
+- takeScreenshot: "11_action_buttons_adaptive"
+
+# Проверяем адаптивность нижней панели
+- takeScreenshot: "12_bottom_panel_adaptive"
+
+# Тестируем взаимодействие с кубиком
+- tapOn: "Брось кубик!"
+- takeScreenshot: "13_dice_interaction_adaptive"
+
+# Проверяем адаптивность статуса игры
+- assertVisible: "🐀 Крысиные бега"
+- takeScreenshot: "14_game_status_adaptive"
+
+# Тестируем навигацию
+- tapOn: "Финансы"
+- takeScreenshot: "15_financial_screen_adaptive"
+- pressKey: "back"
+- takeScreenshot: "16_back_to_game_adaptive"
+
+# Финальная проверка адаптивности
+- takeScreenshot: "17_final_adaptive_check"

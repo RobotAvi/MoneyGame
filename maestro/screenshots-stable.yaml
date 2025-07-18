@@ -1,46 +1,42 @@
 appId: com.financialsuccess.game.debug
-name: Financial Success Stable Screenshots
-outputDir: screenshots/stable
+name: Financial Success Stable Screenshots - New Design
+outputDir: screenshots/phone
 
-# Главный экран
+# Стабильные тесты для нового дизайна
 - launchApp
 - assertVisible: "Изучай финансовую грамотность"
 - takeScreenshot: "01_main_screen_stable"
 
 # Экран выбора профессии
 - tapOn: "Начать игру"
+- assertVisible: "Выберите профессию"
 - takeScreenshot: "02_profession_selection_stable"
 
-# Выбираем профессию
+# Выбираем профессию и начинаем игру
 - tapOn: "Программист"
-- takeScreenshot: "03_profession_selected_stable"
-
-# Начинаем игру
 - tapOn: "Начать"
-- takeScreenshot: "04_game_started_stable"
+- takeScreenshot: "03_game_started_stable"
 
-# Игровой экран (обновлено под новый дизайн)
-- takeScreenshot: "05_game_screen_stable"
+# Проверяем основные элементы игрового экрана
+- assertVisible: "Наличные"
+- assertVisible: "Зарплата"
+- assertVisible: "Пассивный"
+- assertVisible: "Уровень"
+- assertVisible: "Брось кубик!"
+- assertVisible: "Финансы"
+- assertVisible: "Активы"
+- assertVisible: "Рынок"
+- takeScreenshot: "04_game_screen_stable"
 
-# Финансы (обновлено под новый дизайн)
-- tapOn: "Финансы"
-- takeScreenshot: "06_financial_screen_stable"
-
-# Активы (обновлено под новый дизайн)
-- tapOn: "Активы"
-- takeScreenshot: "07_assets_screen_stable"
-
-# Рынок (обновлено под новый дизайн)
-- tapOn: "Рынок"
-- takeScreenshot: "08_market_screen_stable"
-
-# Возвращаемся в игру
-- pressKey: "back"
-- takeScreenshot: "09_back_to_game_stable"
-
-# Бросаем кубик (новый элемент)
+# Проверяем взаимодействие с кубиком
 - tapOn: "Брось кубик!"
-- takeScreenshot: "10_dice_roll_stable"
+- takeScreenshot: "05_dice_interaction_stable"
 
-# Проверяем верхнюю панель (новые элементы)
-- takeScreenshot: "11_top_panel_stable"
+# Проверяем навигацию
+- tapOn: "Финансы"
+- pressKey: "back"
+- tapOn: "Активы"
+- pressKey: "back"
+- tapOn: "Рынок"
+- pressKey: "back"
+- takeScreenshot: "06_navigation_stable"

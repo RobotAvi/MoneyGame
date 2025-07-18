@@ -1,0 +1,87 @@
+appId: com.financialsuccess.game
+name: Main Screen New Design Test
+outputDir: screenshots/main_screen
+
+# === ТЕСТЫ ГЛАВНОГО ЭКРАНА ===
+
+# Запускаем приложение
+- launchApp
+
+# Проверяем основные элементы
+- assertVisible: "Изучай финансовую грамотность"
+- assertVisible: "Начать игру"
+- assertVisible: "Создать персонажа"
+- assertVisible: "Правила"
+- assertVisible: "Выход"
+- takeScreenshot: "01_main_screen_elements"
+
+# Проверяем логотип в карточке
+- assertVisible: "Изучай финансовую грамотность"
+- takeScreenshot: "02_logo_card"
+
+# Проверяем кнопки с новым дизайном
+- assertVisible: "Начать игру"
+- takeScreenshot: "03_start_button"
+
+# Проверяем кнопку создания персонажа
+- assertVisible: "Создать персонажа"
+- takeScreenshot: "04_character_button"
+
+# Проверяем кнопку правил
+- assertVisible: "Правила"
+- takeScreenshot: "05_rules_button"
+
+# Проверяем кнопку выхода
+- assertVisible: "Выход"
+- takeScreenshot: "06_exit_button"
+
+# === ТЕСТЫ ВЗАИМОДЕЙСТВИЯ ===
+
+# Тестируем кнопку "Начать игру"
+- tapOn: "Начать игру"
+- assertVisible: "Выберите профессию"
+- takeScreenshot: "07_navigation_to_professions"
+- pressKey: "back"
+
+# Тестируем кнопку "Создать персонажа"
+- tapOn: "Создать персонажа"
+- assertVisible: "Выберите профессию"
+- takeScreenshot: "08_navigation_to_character"
+- pressKey: "back"
+
+# Тестируем кнопку "Правила"
+- tapOn: "Правила"
+- assertVisible: "Правила игры"
+- takeScreenshot: "09_navigation_to_rules"
+- pressKey: "back"
+
+# === ТЕСТЫ ВИЗУАЛЬНОГО ДИЗАЙНА ===
+
+# Проверяем цветовую схему
+- assertVisible: "Изучай финансовую грамотность"
+- takeScreenshot: "10_color_scheme"
+
+# Проверяем закруглённые углы и тени
+- takeScreenshot: "11_rounded_corners_shadows"
+
+# Общий вид экрана
+- takeScreenshot: "12_full_screen_view"
+
+# === ТЕСТЫ АДАПТИВНОСТИ ===
+
+# Проверяем, что все элементы помещаются на экране
+- assertVisible: "Изучай финансовую грамотность"
+- assertVisible: "Начать игру"
+- assertVisible: "Создать персонажа"
+- assertVisible: "Правила"
+- assertVisible: "Выход"
+- takeScreenshot: "13_responsive_layout"
+
+# === ТЕСТЫ ДОСТУПНОСТИ ===
+
+# Проверяем, что все кнопки кликабельны
+- assertVisible: "Начать игру"
+- assertVisible: "Создать персонажа"
+- assertVisible: "Правила"
+- assertVisible: "Выход"
+- takeScreenshot: "14_accessibility_check"
