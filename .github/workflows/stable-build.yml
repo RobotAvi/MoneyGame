@@ -15,17 +15,17 @@ jobs:
   setup-android-sdk:
     runs-on: ubuntu-latest
     outputs:
-      sdk-path: ${{ steps.set-sdk-path.outputs.sdk_path }}
+      sdk-path: /home/runner/android-sdk
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
       - name: 🏗️ Prepare Android SDK directories
         id: set-sdk-path
         run: |
-          echo "sdk_path=$HOME/android-sdk" >> $GITHUB_OUTPUT
-          mkdir -p $HOME/android-sdk
-          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "sdk_path=/home/runner/android-sdk" >> $GITHUB_OUTPUT
+          mkdir -p /home/runner/android-sdk
+          echo "ANDROID_SDK_ROOT=/home/runner/android-sdk" >> $GITHUB_ENV
+          echo "ANDROID_HOME=/home/runner/android-sdk" >> $GITHUB_ENV
       - name: 🛠️ Download and install Android commandline tools
         run: |
           set -x
@@ -40,9 +40,9 @@ jobs:
       - name: 🛠️ Install Android SDK components
         run: |
           set -x
-          export ANDROID_SDK_ROOT=$HOME/android-sdk
-          export ANDROID_HOME=$HOME/android-sdk
-          export PATH="$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin"
+          export ANDROID_SDK_ROOT=/home/runner/android-sdk
+          export ANDROID_HOME=/home/runner/android-sdk
+          export PATH="$PATH:/home/runner/android-sdk/emulator:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
           yes | sdkmanager --licenses || { echo "sdkmanager license error"; exit 1; }
           sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64" || { echo "sdkmanager install error"; exit 1; }
           echo "==== system-images after install ===="
@@ -58,8 +58,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: setup-android-sdk
     env:
-      ANDROID_SDK_ROOT: ${{ needs.setup-android-sdk.outputs.sdk-path }}
-      ANDROID_HOME: ${{ needs.setup-android-sdk.outputs.sdk-path }}
+      ANDROID_SDK_ROOT: /home/runner/android-sdk
+      ANDROID_HOME: /home/runner/android-sdk
     permissions:
       contents: write
     outputs:
@@ -254,8 +254,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-and-test, setup-android-sdk]
     env:
-      ANDROID_SDK_ROOT: ${{ needs.setup-android-sdk.outputs.sdk-path }}
-      ANDROID_HOME: ${{ needs.setup-android-sdk.outputs.sdk-path }}
+      ANDROID_SDK_ROOT: /home/runner/android-sdk
+      ANDROID_HOME: /home/runner/android-sdk
     # Убрано условие should_release
     
     steps:
@@ -274,7 +274,7 @@ jobs:
 
     - name: 🔍 Проверка наличия adb в PATH (phone)
       run: |
-        export PATH="$PATH:$HOME/android-sdk/platform-tools"
+        export PATH="$PATH:/home/runner/android-sdk/platform-tools"
         echo "PATH: $PATH"
         which adb
         adb version
@@ -291,7 +291,7 @@ jobs:
         ANDROID_SDK_ROOT: ${{ runner.home }}/android-sdk
         ANDROID_HOME: ${{ runner.home }}/android-sdk
       run: |
-        export PATH="$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin"
+        export PATH="$PATH:/home/runner/android-sdk/emulator:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
         set -e
         echo "SDK root: $ANDROID_SDK_ROOT"
         echo "PATH: $PATH"
@@ -409,8 +409,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-and-test, setup-android-sdk]
     env:
-      ANDROID_SDK_ROOT: ${{ needs.setup-android-sdk.outputs.sdk-path }}
-      ANDROID_HOME: ${{ needs.setup-android-sdk.outputs.sdk-path }}
+      ANDROID_SDK_ROOT: /home/runner/android-sdk
+      ANDROID_HOME: /home/runner/android-sdk
     # Убрано условие should_release
     
     steps:
@@ -429,7 +429,7 @@ jobs:
 
     - name: 🔍 Проверка наличия adb в PATH (tablet)
       run: |
-        export PATH="$PATH:$HOME/android-sdk/platform-tools"
+        export PATH="$PATH:/home/runner/android-sdk/platform-tools"
         echo "PATH: $PATH"
         which adb
         adb version
@@ -446,7 +446,7 @@ jobs:
         ANDROID_SDK_ROOT: ${{ runner.home }}/android-sdk
         ANDROID_HOME: ${{ runner.home }}/android-sdk
       run: |
-        export PATH="$PATH:$HOME/android-sdk/emulator:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin"
+        export PATH="$PATH:/home/runner/android-sdk/emulator:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
         set -e
         echo "SDK root: $ANDROID_SDK_ROOT"
         echo "PATH: $PATH"
