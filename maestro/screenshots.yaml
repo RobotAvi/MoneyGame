@@ -1,47 +1,70 @@
 appId: com.financialsuccess.game.debug
-name: Financial Success Screenshots
+name: Financial Success Screenshots - New Design
 outputDir: screenshots/phone
 
 # Главный экран
 - launchApp
 - assertVisible: "Изучай финансовую грамотность"
-- takeScreenshot: "01_main_screen"
+- takeScreenshot: "01_main_screen_new_design"
 
 # Экран выбора профессии
 - tapOn: "Начать игру"
-- takeScreenshot: "02_profession_selection"
+- assertVisible: "👤 Ваш возраст"
+- assertVisible: "Имя персонажа"
+- assertVisible: "Дата начала игры"
+- takeScreenshot: "02_profession_selection_new_design"
 
 # Выбираем профессию
 - tapOn: "Программист"
-- takeScreenshot: "03_profession_selected"
+- takeScreenshot: "03_profession_selected_new_design"
+
+# Заполняем данные персонажа
+- inputText: "Тест Игрок" into: "Введите имя персонажа"
+- inputText: "25" into: "Введите ваш возраст (18-65)"
+- takeScreenshot: "04_character_data_filled"
 
 # Начинаем игру
 - tapOn: "Начать"
-- takeScreenshot: "04_game_started"
+- takeScreenshot: "05_game_started_new_design"
 
-# Игровой экран
-- takeScreenshot: "05_game_screen"
+# Игровой экран - проверяем новые элементы
+- assertVisible: "Наличные"
+- assertVisible: "Зарплата"
+- assertVisible: "Пассивный"
+- assertVisible: "Уровень"
+- takeScreenshot: "06_game_screen_new_design"
 
-# Карточка события
-- tapOn: "Карточка"
-- takeScreenshot: "06_event_card"
+# Проверяем кубик
+- assertVisible: "Брось кубик!"
+- tapOn: "Брось кубик!"
+- takeScreenshot: "07_dice_interaction"
+
+# Проверяем кнопки действий
+- assertVisible: "Финансы"
+- assertVisible: "Активы"
+- assertVisible: "Рынок"
+- takeScreenshot: "08_action_buttons"
 
 # Финансовый журнал
-- tapOn: "Журнал"
-- takeScreenshot: "07_financial_journal"
-
-# Экран правил
-- tapOn: "Правила"
-- takeScreenshot: "08_rules_screen"
+- tapOn: "Финансы"
+- takeScreenshot: "09_financial_journal_new_design"
 
 # Возвращаемся в игру
 - pressKey: "back"
-- takeScreenshot: "09_back_to_game"
-
-# Экран снов/целей
-- tapOn: "Мечты"
-- takeScreenshot: "10_dreams_screen"
+- takeScreenshot: "10_back_to_game"
 
 # Экран активов
 - tapOn: "Активы"
-- takeScreenshot: "11_assets_screen"
+- takeScreenshot: "11_assets_screen_new_design"
+
+# Возвращаемся в игру
+- pressKey: "back"
+- takeScreenshot: "12_back_to_game_again"
+
+# Экран правил
+- tapOn: "Правила"
+- takeScreenshot: "13_rules_screen_new_design"
+
+# Возвращаемся в игру
+- pressKey: "back"
+- takeScreenshot: "14_final_game_screen"

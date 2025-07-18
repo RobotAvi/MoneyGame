@@ -1,34 +1,46 @@
 appId: com.financialsuccess.game.debug
-name: Financial Success Screenshots (Stable)
-outputDir: screenshots/phone
+name: Financial Success Stable Screenshots
+outputDir: screenshots/stable
 
-# Простой тест с минимальными действиями и проверками стабильности
+# Главный экран
 - launchApp
 - assertVisible: "Изучай финансовую грамотность"
 - takeScreenshot: "01_main_screen_stable"
 
-# Ждем стабилизации UI перед следующими действиями
-- runFlow:
-    when:
-      visible: "Начать игру"
-    commands:
-      - tapOn: "Начать игру"
-      - takeScreenshot: "02_profession_selection_stable"
+# Экран выбора профессии
+- tapOn: "Начать игру"
+- takeScreenshot: "02_profession_selection_stable"
 
-# Дополнительные скриншоты с проверками видимости
-- runFlow:
-    when:
-      visible: "Программист"
-    commands:
-      - tapOn: "Программист"
-      - takeScreenshot: "03_profession_selected_stable"
+# Выбираем профессию
+- tapOn: "Программист"
+- takeScreenshot: "03_profession_selected_stable"
 
-- runFlow:
-    when:
-      visible: "Начать"
-    commands:
-      - tapOn: "Начать"
-      - takeScreenshot: "04_game_started_stable"
+# Начинаем игру
+- tapOn: "Начать"
+- takeScreenshot: "04_game_started_stable"
 
-# Финальный скриншот игрового экрана
-- takeScreenshot: "05_final_screen_stable"
+# Игровой экран (обновлено под новый дизайн)
+- takeScreenshot: "05_game_screen_stable"
+
+# Финансы (обновлено под новый дизайн)
+- tapOn: "Финансы"
+- takeScreenshot: "06_financial_screen_stable"
+
+# Активы (обновлено под новый дизайн)
+- tapOn: "Активы"
+- takeScreenshot: "07_assets_screen_stable"
+
+# Рынок (обновлено под новый дизайн)
+- tapOn: "Рынок"
+- takeScreenshot: "08_market_screen_stable"
+
+# Возвращаемся в игру
+- pressKey: "back"
+- takeScreenshot: "09_back_to_game_stable"
+
+# Бросаем кубик (новый элемент)
+- tapOn: "Брось кубик!"
+- takeScreenshot: "10_dice_roll_stable"
+
+# Проверяем верхнюю панель (новые элементы)
+- takeScreenshot: "11_top_panel_stable"

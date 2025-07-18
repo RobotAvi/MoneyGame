@@ -1,0 +1,72 @@
+appId: com.financialsuccess.game.debug
+name: Financial Success New Design Screenshots
+outputDir: screenshots/new_design
+
+# Тестирование нового дизайна
+
+# Главный экран с новым дизайном
+- launchApp
+- assertVisible: "Изучай финансовую грамотность"
+- takeScreenshot: "01_main_screen_new_design"
+
+# Экран выбора профессии с новыми карточками
+- tapOn: "Начать игру"
+- takeScreenshot: "02_profession_selection_new_design"
+
+# Выбираем профессию (проверяем новые карточки)
+- tapOn: "Программист"
+- takeScreenshot: "03_profession_selected_new_design"
+
+# Выбираем мечту (проверяем новые карточки)
+- tapOn: "Коттедж"
+- takeScreenshot: "04_dream_selected_new_design"
+
+# Начинаем игру
+- tapOn: "Начать"
+- takeScreenshot: "05_game_started_new_design"
+
+# Игровой экран - верхняя панель с показателями
+- takeScreenshot: "06_game_screen_top_panel"
+
+# Игровой экран - центральная область с кубиком
+- takeScreenshot: "07_game_screen_center_area"
+
+# Игровой экран - нижняя панель с кнопками
+- takeScreenshot: "08_game_screen_bottom_panel"
+
+# Бросаем кубик (новый элемент)
+- tapOn: "Брось кубик!"
+- takeScreenshot: "09_dice_roll_new_design"
+
+# Финансы (новая кнопка)
+- tapOn: "Финансы"
+- takeScreenshot: "10_financial_screen_new_design"
+
+# Возвращаемся в игру
+- pressKey: "back"
+- takeScreenshot: "11_back_to_game_new_design"
+
+# Активы (новая кнопка)
+- tapOn: "Активы"
+- takeScreenshot: "12_assets_screen_new_design"
+
+# Возвращаемся в игру
+- pressKey: "back"
+- takeScreenshot: "13_back_to_game_again"
+
+# Рынок (новая кнопка)
+- tapOn: "Рынок"
+- takeScreenshot: "14_market_screen_new_design"
+
+# Возвращаемся в игру
+- pressKey: "back"
+- takeScreenshot: "15_final_game_screen"
+
+# Тестируем карточки показателей в верхней панели
+- takeScreenshot: "16_stats_cards_detailed"
+
+# Тестируем малые иконки в нижней панели
+- takeScreenshot: "17_small_icons_detailed"
+
+# Тестируем большие кнопки действий
+- takeScreenshot: "18_action_buttons_detailed"

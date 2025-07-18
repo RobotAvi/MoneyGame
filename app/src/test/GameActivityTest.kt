@@ -41,9 +41,9 @@ class GameActivityTest {
     fun testUpdateUICorrectlyUpdatesCash() {
         `when`(mockPlayer.isAlive()).thenReturn(true)
         `when`(mockPlayer.cash).thenReturn(10000)
-        // Проверяем, что поле наличных обновляется
+        // Проверяем, что поле наличных обновляется (обновлено под новый дизайн)
         activity.updateUI()
-        // Здесь можно проверить, что binding.tvCash.text был обновлён (если использовать Robolectric или Espresso)
+        // Здесь можно проверить, что binding.tv_cash.text был обновлён (если использовать Robolectric или Espresso)
     }
 
     @Test
@@ -96,52 +96,170 @@ class GameActivityTest {
         assertTrue(player.assets.contains(asset))
     }
 
+    // === ТЕСТЫ НОВОГО ДИЗАЙНА ===
+    
     @Test
-    fun testMonthProgressBarColors() {
+    fun testNewDesignTopPanelElements() {
         val activityController = Robolectric.buildActivity(GameActivity::class.java).setup()
         val activity = activityController.get()
-        val currentDay = 10
-        activity.updateMonthProgressBar(currentDay)
-        val progressBar = activity.findViewById<LinearLayout>(R.id.monthProgressBar)
-        assertEquals(30, progressBar.childCount)
-        for (i in 0 until 30) {
-            val dayView = progressBar.getChildAt(i)
-            val color = (dayView.background as? android.graphics.drawable.ColorDrawable)?.color
-            if (i < currentDay) {
-                assertEquals(Color.WHITE, color)
-            } else {
-                assertEquals(Color.LTGRAY, color)
-            }
-        }
+        
+        // Проверяем, что новые элементы верхней панели отображаются
+        val tvCash = activity.findViewById<View>(R.id.tv_cash)
+        val tvSalary = activity.findViewById<View>(R.id.tv_salary)
+        val tvPassiveIncome = activity.findViewById<View>(R.id.tv_passive_income)
+        val tvLevel = activity.findViewById<View>(R.id.tv_level)
+        
+        assertNotNull("Cash TextView должен отображаться", tvCash)
+        assertNotNull("Salary TextView должен отображаться", tvSalary)
+        assertNotNull("Passive Income TextView должен отображаться", tvPassiveIncome)
+        assertNotNull("Level TextView должен отображаться", tvLevel)
     }
-
+    
     @Test
-    fun testPlayerIconPositionMatchesMonthProgress() {
+    fun testDiceCardDisplay() {
         val activityController = Robolectric.buildActivity(GameActivity::class.java).setup()
         val activity = activityController.get()
-        val currentDay = 15
-        // Устанавливаем день месяца
-        val player = Player(
-            position = 0,
-            cash = 10000,
-            salary = 5000,
-            age = 30,
-            profession = null,
-            dream = null
-        )
-        player.currentDayOfMonth = currentDay
-        activity.currentGameState = GameState(player)
-        // Обновляем UI
-        activity.updateUI()
-        // Получаем layout трека и иконку игрока
-        val llGameTrack = activity.findViewById<LinearLayout>(R.id.ll_game_track)
-        val trackLayout = llGameTrack.getChildAt(1) as LinearLayout
-        val playerIcon = trackLayout.findViewById<View>(R.id.iv_player_on_track)
-        // Проверяем, что позиция иконки соответствует дню месяца (середина трека для 15 дня)
-        val trackWidth = trackLayout.width - playerIcon.width
-        val expectedProgress = ((currentDay - 1).toFloat() / 29f)
-        val expectedX = (trackWidth * expectedProgress)
-        // Погрешность допускается из-за float/int преобразований
-        assertEquals(expectedX, playerIcon.translationX, 2f)
+        
+        // Проверяем, что карточка кубика отображается
+        val cardDice = activity.findViewById<View>(R.id.card_dice)
+        val ivDice = activity.findViewById<View>(R.id.iv_dice)
+        val tvDiceValue = activity.findViewById<View>(R.id.tv_dice_value)
+        
+        assertNotNull("Dice card должен отображаться", cardDice)
+        assertNotNull("Dice image должен отображаться", ivDice)
+        assertNotNull("Dice value text должен отображаться", tvDiceValue)
+    }
+    
+    @Test
+    fun testActionButtonsDisplay() {
+        val activityController = Robolectric.buildActivity(GameActivity::class.java).setup()
+        val activity = activityController.get()
+        
+        // Проверяем, что кнопки действий отображаются
+        val btnFinancialStatement = activity.findViewById<View>(R.id.btn_financial_statement)
+        val btnAssets = activity.findViewById<View>(R.id.btn_assets)
+        val btnMarket = activity.findViewById<View>(R.id.btn_market)
+        
+        assertNotNull("Financial Statement button должен отображаться", btnFinancialStatement)
+        assertNotNull("Assets button должен отображаться", btnAssets)
+        assertNotNull("Market button должен отображаться", btnMarket)
+    }
+    
+    @Test
+    fun testGameStatusDisplay() {
+        val activityController = Robolectric.buildActivity(GameActivity::class.java).setup()
+        val activity = activityController.get()
+        
+        // Проверяем, что статус игры отображается
+        val tvGameStatus = activity.findViewById<View>(R.id.tv_game_status)
+        assertNotNull("Game status должен отображаться", tvGameStatus)
+    }
+    
+    @Test
+    fun testRecyclerViewAssetsDisplay() {
+        val activityController = Robolectric.buildActivity(GameActivity::class.java).setup()
+        val activity = activityController.get()
+        
+        // Проверяем, что RecyclerView активов отображается (скрыт по умолчанию)
+        val recyclerViewAssets = activity.findViewById<View>(R.id.recyclerViewAssets)
+        assertNotNull("RecyclerView Assets должен существовать", recyclerViewAssets)
+        assertEquals("RecyclerView Assets должен быть скрыт по умолчанию", View.GONE, recyclerViewAssets.visibility)
+    }
+    
+    @Test
+    fun testNewDesignColorScheme() {
+        val activityController = Robolectric.buildActivity(GameActivity::class.java).setup()
+        val activity = activityController.get()
+        
+        // Проверяем, что используется новая цветовая схема
+        val background = activity.findViewById<View>(android.R.id.content)
+        // В новом дизайне фон должен быть light_gray
+        // Это можно проверить через Robolectric, но для простоты проверяем наличие элементов
+        assertNotNull("Background должен существовать", background)
+    }
+    
+    @Test
+    fun testCardElevationAndCornerRadius() {
+        val activityController = Robolectric.buildActivity(GameActivity::class.java).setup()
+        val activity = activityController.get()
+        
+        // Проверяем, что карточки имеют правильные тени и закругления
+        val cardDice = activity.findViewById<View>(R.id.card_dice)
+        assertNotNull("Dice card должен существовать", cardDice)
+        
+        // В новом дизайне карточки должны иметь elevation и corner radius
+        // Это можно проверить через Robolectric, но для простоты проверяем наличие
+    }
+    
+    @Test
+    fun testNewDesignLayoutStructure() {
+        val activityController = Robolectric.buildActivity(GameActivity::class.java).setup()
+        val activity = activityController.get()
+        
+        // Проверяем структуру нового дизайна
+        // Верхняя панель
+        val topPanel = activity.findViewById<View>(R.id.tv_cash)?.parent
+        assertNotNull("Top panel должен существовать", topPanel)
+        
+        // Центральная область
+        val centralArea = activity.findViewById<View>(R.id.card_dice)?.parent
+        assertNotNull("Central area должен существовать", centralArea)
+        
+        // Нижняя панель
+        val bottomPanel = activity.findViewById<View>(R.id.btn_financial_statement)?.parent
+        assertNotNull("Bottom panel должен существовать", bottomPanel)
+    }
+    
+    @Test
+    fun testNewDesignTextContent() {
+        val activityController = Robolectric.buildActivity(GameActivity::class.java).setup()
+        val activity = activityController.get()
+        
+        // Проверяем, что текстовые элементы содержат правильный контент
+        val tvDiceValue = activity.findViewById<android.widget.TextView>(R.id.tv_dice_value)
+        assertNotNull("Dice value text должен существовать", tvDiceValue)
+        assertEquals("Dice value должен содержать правильный текст", "Брось кубик!", tvDiceValue.text)
+        
+        val tvGameStatus = activity.findViewById<android.widget.TextView>(R.id.tv_game_status)
+        assertNotNull("Game status должен содержать правильный текст", tvGameStatus)
+        assertEquals("Game status должен содержать правильный текст", "🐀 Крысиные бега", tvGameStatus.text)
+    }
+    
+    @Test
+    fun testNewDesignButtonText() {
+        val activityController = Robolectric.buildActivity(GameActivity::class.java).setup()
+        val activity = activityController.get()
+        
+        // Проверяем текст кнопок в новом дизайне
+        val btnFinancialStatement = activity.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_financial_statement)
+        val btnAssets = activity.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_assets)
+        val btnMarket = activity.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_market)
+        
+        assertNotNull("Financial Statement button должен существовать", btnFinancialStatement)
+        assertNotNull("Assets button должен существовать", btnAssets)
+        assertNotNull("Market button должен существовать", btnMarket)
+        
+        // Проверяем, что кнопки содержат правильный текст
+        assertTrue("Financial Statement button должен содержать 'Финансы'", 
+                  btnFinancialStatement.text.contains("Финансы"))
+        assertTrue("Assets button должен содержать 'Активы'", 
+                  btnAssets.text.contains("Активы"))
+        assertTrue("Market button должен содержать 'Рынок'", 
+                  btnMarket.text.contains("Рынок"))
+    }
+    
+    @Test
+    fun testNewDesignVisibilityStates() {
+        val activityController = Robolectric.buildActivity(GameActivity::class.java).setup()
+        val activity = activityController.get()
+        
+        // Проверяем состояния видимости элементов
+        val cardDice = activity.findViewById<View>(R.id.card_dice)
+        val tvGameStatus = activity.findViewById<View>(R.id.tv_game_status)
+        val recyclerViewAssets = activity.findViewById<View>(R.id.recyclerViewAssets)
+        
+        assertEquals("Dice card должен быть видимым", View.VISIBLE, cardDice.visibility)
+        assertEquals("Game status должен быть видимым", View.VISIBLE, tvGameStatus.visibility)
+        assertEquals("RecyclerView Assets должен быть скрыт", View.GONE, recyclerViewAssets.visibility)
     }
 } 

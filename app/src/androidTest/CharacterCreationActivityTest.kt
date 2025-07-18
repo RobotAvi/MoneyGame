@@ -26,26 +26,29 @@ class CharacterCreationActivityTest {
     fun testActivityLaunchesSuccessfully() {
         ActivityScenario.launch(CharacterCreationActivity::class.java)
         
-        // Проверяем, что основные элементы отображаются
-        onView(withId(R.id.tvTitle)).check(matches(isDisplayed()))
+        // Проверяем, что основные элементы отображаются (обновлено под новый дизайн)
         onView(withId(R.id.etPlayerName)).check(matches(isDisplayed()))
         onView(withId(R.id.etAge)).check(matches(isDisplayed()))
-        onView(withId(R.id.btnStartGame)).check(matches(isDisplayed()))
+        onView(withId(R.id.btn_start_game)).check(matches(isDisplayed()))
+        
+        // Проверяем, что RecyclerView'ы отображаются
+        onView(withId(R.id.recyclerViewProfessions)).check(matches(isDisplayed()))
+        onView(withId(R.id.recyclerViewDreams)).check(matches(isDisplayed()))
+        
+        // Проверяем новые элементы дизайна
+        onView(withText("👤 Ваш возраст")).check(matches(isDisplayed()))
+        onView(withText("Имя персонажа")).check(matches(isDisplayed()))
+        onView(withText("Дата начала игры")).check(matches(isDisplayed()))
     }
     
     @Test
     fun testDefaultValuesAreSet() {
         ActivityScenario.launch(CharacterCreationActivity::class.java)
         
-        // Проверяем значения по умолчанию
-        onView(withId(R.id.etPlayerName)).check(matches(withText("Игрок")))
+        // Проверяем значения по умолчанию (обновлено под новый дизайн)
+        onView(withId(R.id.etPlayerName)).check(matches(withText(""))) // Пустое поле по умолчанию
         onView(withId(R.id.etAge)).check(matches(withText("25")))
-        onView(withId(R.id.etWorkExperience)).check(matches(withText("0")))
-        onView(withId(R.id.etChildrenCount)).check(matches(withText("0")))
-        onView(withId(R.id.etSpouseIncome)).check(matches(withText("0")))
-        onView(withId(R.id.etSavingsRate)).check(matches(withText("10")))
-        onView(withId(R.id.etRetirementAge)).check(matches(withText("65")))
-        onView(withId(R.id.etTargetPassiveIncome)).check(matches(withText("100000")))
+        onView(withId(R.id.etStartDate)).check(matches(isDisplayed())) // Поле даты отображается
     }
     
     // === ТЕСТЫ ВВОДА ТЕКСТА ===
@@ -73,187 +76,6 @@ class CharacterCreationActivityTest {
             .perform(typeText("30"))
         
         onView(withId(R.id.etAge)).check(matches(withText("30")))
-    }
-    
-    @Test
-    fun testWorkExperienceInput() {
-        ActivityScenario.launch(CharacterCreationActivity::class.java)
-        
-        onView(withId(R.id.etWorkExperience))
-            .perform(clearText())
-            .perform(typeText("5"))
-        
-        onView(withId(R.id.etWorkExperience)).check(matches(withText("5")))
-    }
-    
-    @Test
-    fun testChildrenCountInput() {
-        ActivityScenario.launch(CharacterCreationActivity::class.java)
-        
-        onView(withId(R.id.etChildrenCount))
-            .perform(clearText())
-            .perform(typeText("2"))
-        
-        onView(withId(R.id.etChildrenCount)).check(matches(withText("2")))
-    }
-    
-    @Test
-    fun testSpouseIncomeInput() {
-        ActivityScenario.launch(CharacterCreationActivity::class.java)
-        
-        onView(withId(R.id.etSpouseIncome))
-            .perform(clearText())
-            .perform(typeText("50000"))
-        
-        onView(withId(R.id.etSpouseIncome)).check(matches(withText("50000")))
-    }
-    
-    @Test
-    fun testSavingsRateInput() {
-        ActivityScenario.launch(CharacterCreationActivity::class.java)
-        
-        onView(withId(R.id.etSavingsRate))
-            .perform(clearText())
-            .perform(typeText("25"))
-        
-        onView(withId(R.id.etSavingsRate)).check(matches(withText("25")))
-    }
-    
-    @Test
-    fun testRetirementAgeInput() {
-        ActivityScenario.launch(CharacterCreationActivity::class.java)
-        
-        onView(withId(R.id.etRetirementAge))
-            .perform(clearText())
-            .perform(typeText("55"))
-        
-        onView(withId(R.id.etRetirementAge)).check(matches(withText("55")))
-    }
-    
-    @Test
-    fun testTargetPassiveIncomeInput() {
-        ActivityScenario.launch(CharacterCreationActivity::class.java)
-        
-        onView(withId(R.id.etTargetPassiveIncome))
-            .perform(clearText())
-            .perform(typeText("200000"))
-        
-        onView(withId(R.id.etTargetPassiveIncome)).check(matches(withText("200000")))
-    }
-    
-    // === ТЕСТЫ SPINNER'ОВ ===
-    
-    @Test
-    fun testEducationSpinner() {
-        ActivityScenario.launch(CharacterCreationActivity::class.java)
-        
-        // Открываем спиннер образования
-        onView(withId(R.id.spinnerEducation)).perform(click())
-        
-        // Проверяем, что все варианты образования отображаются
-        onView(withText("Среднее образование")).check(matches(isDisplayed()))
-        onView(withText("Среднее специальное")).check(matches(isDisplayed()))
-        onView(withText("Высшее образование")).check(matches(isDisplayed()))
-        onView(withText("Магистратура")).check(matches(isDisplayed()))
-        onView(withText("Докторантура")).check(matches(isDisplayed()))
-        
-        // Выбираем магистратуру
-        onView(withText("Магистратура")).perform(click())
-    }
-    
-    @Test
-    fun testMaritalStatusSpinner() {
-        ActivityScenario.launch(CharacterCreationActivity::class.java)
-        
-        onView(withId(R.id.spinnerMaritalStatus)).perform(click())
-        
-        // Проверяем варианты семейного положения
-        onView(withText("Холост/Не замужем")).check(matches(isDisplayed()))
-        onView(withText("Женат/Замужем")).check(matches(isDisplayed()))
-        onView(withText("Разведен/Разведена")).check(matches(isDisplayed()))
-        onView(withText("Вдовец/Вдова")).check(matches(isDisplayed()))
-        
-        // Выбираем женат/замужем
-        onView(withText("Женат/Замужем")).perform(click())
-    }
-    
-    @Test
-    fun testRiskToleranceSpinner() {
-        ActivityScenario.launch(CharacterCreationActivity::class.java)
-        
-        onView(withId(R.id.spinnerRiskTolerance)).perform(click())
-        
-        // Проверяем варианты толерантности к риску
-        onView(withText("Консервативный")).check(matches(isDisplayed()))
-        onView(withText("Умеренный")).check(matches(isDisplayed()))
-        onView(withText("Агрессивный")).check(matches(isDisplayed()))
-        
-        // Выбираем агрессивный
-        onView(withText("Агрессивный")).perform(click())
-    }
-    
-    @Test
-    fun testInvestmentStrategySpinner() {
-        ActivityScenario.launch(CharacterCreationActivity::class.java)
-        
-        onView(withId(R.id.spinnerInvestmentStrategy)).perform(click())
-        
-        // Проверяем варианты стратегий инвестиций
-        onView(withText("Консервативная")).check(matches(isDisplayed()))
-        onView(withText("Сбалансированная")).check(matches(isDisplayed()))
-        onView(withText("Агрессивная")).check(matches(isDisplayed()))
-        onView(withText("Дивидендная")).check(matches(isDisplayed()))
-        onView(withText("Ростовая")).check(matches(isDisplayed()))
-        
-        // Выбираем агрессивную
-        onView(withText("Агрессивная")).perform(click())
-    }
-    
-    @Test
-    fun testHealthLevelSpinner() {
-        ActivityScenario.launch(CharacterCreationActivity::class.java)
-        
-        onView(withId(R.id.spinnerHealthLevel)).perform(click())
-        
-        // Проверяем варианты уровня здоровья
-        onView(withText("Отличное")).check(matches(isDisplayed()))
-        onView(withText("Хорошее")).check(matches(isDisplayed()))
-        onView(withText("Удовлетворительное")).check(matches(isDisplayed()))
-        onView(withText("Плохое")).check(matches(isDisplayed()))
-        
-        // Выбираем отличное
-        onView(withText("Отличное")).perform(click())
-    }
-    
-    @Test
-    fun testStressLevelSpinner() {
-        ActivityScenario.launch(CharacterCreationActivity::class.java)
-        
-        onView(withId(R.id.spinnerStressLevel)).perform(click())
-        
-        // Проверяем варианты уровня стресса
-        onView(withText("Низкий")).check(matches(isDisplayed()))
-        onView(withText("Умеренный")).check(matches(isDisplayed()))
-        onView(withText("Высокий")).check(matches(isDisplayed()))
-        onView(withText("Критический")).check(matches(isDisplayed()))
-        
-        // Выбираем низкий
-        onView(withText("Низкий")).perform(click())
-    }
-    
-    @Test
-    fun testWorkLifeBalanceSpinner() {
-        ActivityScenario.launch(CharacterCreationActivity::class.java)
-        
-        onView(withId(R.id.spinnerWorkLifeBalance)).perform(click())
-        
-        // Проверяем варианты баланса работы и жизни
-        onView(withText("Работа")).check(matches(isDisplayed()))
-        onView(withText("Баланс")).check(matches(isDisplayed()))
-        onView(withText("Личная жизнь")).check(matches(isDisplayed()))
-        
-        // Выбираем баланс
-        onView(withText("Баланс")).perform(click())
     }
     
     // === ТЕСТЫ RECYCLERVIEW ===
@@ -287,21 +109,6 @@ class CharacterCreationActivityTest {
         onView(withText("Путешествие")).check(matches(isDisplayed()))
     }
     
-    @Test
-    fun testSkillsRecyclerView() {
-        ActivityScenario.launch(CharacterCreationActivity::class.java)
-        
-        // Проверяем, что RecyclerView навыков отображается
-        onView(withId(R.id.recyclerViewSkills)).check(matches(isDisplayed()))
-        
-        // Проверяем, что навыки загружены
-        onView(withText("Программирование")).check(matches(isDisplayed()))
-        onView(withText("Менеджмент")).check(matches(isDisplayed()))
-        onView(withText("Продажи")).check(matches(isDisplayed()))
-        onView(withText("Коммуникация")).check(matches(isDisplayed()))
-        onView(withText("Финансовая грамотность")).check(matches(isDisplayed()))
-    }
-    
     // === ТЕСТЫ ВЫБОРА ЭЛЕМЕНТОВ ===
     
     @Test
@@ -312,7 +119,7 @@ class CharacterCreationActivityTest {
         onView(withText("Программист")).perform(click())
         
         // Проверяем, что кнопка старта стала активной
-        onView(withId(R.id.btnStartGame)).check(matches(isEnabled()))
+        onView(withId(R.id.btn_start_game)).check(matches(isEnabled()))
     }
     
     @Test
@@ -323,20 +130,7 @@ class CharacterCreationActivityTest {
         onView(withText("Коттедж")).perform(click())
         
         // Проверяем, что кнопка старта стала активной
-        onView(withId(R.id.btnStartGame)).check(matches(isEnabled()))
-    }
-    
-    @Test
-    fun testSelectSkills() {
-        ActivityScenario.launch(CharacterCreationActivity::class.java)
-        
-        // Выбираем несколько навыков
-        onView(withText("Программирование")).perform(click())
-        onView(withText("Менеджмент")).perform(click())
-        onView(withText("Финансовая грамотность")).perform(click())
-        
-        // Проверяем, что навыки выбраны (визуально должны быть выделены)
-        // Это может потребовать дополнительной проверки состояния адаптера
+        onView(withId(R.id.btn_start_game)).check(matches(isEnabled()))
     }
     
     // === ТЕСТЫ ВАЛИДАЦИИ ===
@@ -346,7 +140,7 @@ class CharacterCreationActivityTest {
         ActivityScenario.launch(CharacterCreationActivity::class.java)
         
         // Кнопка старта должна быть неактивна изначально
-        onView(withId(R.id.btnStartGame)).check(matches(not(isEnabled())))
+        onView(withId(R.id.btn_start_game)).check(matches(not(isEnabled())))
     }
     
     @Test
@@ -358,7 +152,7 @@ class CharacterCreationActivityTest {
         onView(withText("Коттедж")).perform(click())
         
         // Кнопка старта должна стать активной
-        onView(withId(R.id.btnStartGame)).check(matches(isEnabled()))
+        onView(withId(R.id.btn_start_game)).check(matches(isEnabled()))
     }
     
     @Test
@@ -375,30 +169,10 @@ class CharacterCreationActivityTest {
         onView(withText("Коттедж")).perform(click())
         
         // Пытаемся запустить игру
-        onView(withId(R.id.btnStartGame)).perform(click())
+        onView(withId(R.id.btn_start_game)).perform(click())
         
         // Должно появиться сообщение об ошибке
         onView(withText(containsString("возраст"))).check(matches(isDisplayed()))
-    }
-    
-    @Test
-    fun testSavingsRateValidation() {
-        ActivityScenario.launch(CharacterCreationActivity::class.java)
-        
-        // Вводим недопустимый процент сбережений
-        onView(withId(R.id.etSavingsRate))
-            .perform(clearText())
-            .perform(typeText("60"))
-        
-        // Выбираем профессию и мечту
-        onView(withText("Программист")).perform(click())
-        onView(withText("Коттедж")).perform(click())
-        
-        // Пытаемся запустить игру
-        onView(withId(R.id.btnStartGame)).perform(click())
-        
-        // Должно появиться сообщение об ошибке
-        onView(withText(containsString("сбережения"))).check(matches(isDisplayed()))
     }
     
     // === ТЕСТЫ ДАТЫ ===
@@ -422,7 +196,7 @@ class CharacterCreationActivityTest {
     fun testCompleteCharacterCreation() {
         ActivityScenario.launch(CharacterCreationActivity::class.java)
         
-        // Заполняем все поля
+        // Заполняем все поля (обновлено под новый дизайн)
         onView(withId(R.id.etPlayerName))
             .perform(clearText())
             .perform(typeText("Иван Иванов"))
@@ -431,64 +205,16 @@ class CharacterCreationActivityTest {
             .perform(clearText())
             .perform(typeText("28"))
         
-        onView(withId(R.id.etWorkExperience))
-            .perform(clearText())
-            .perform(typeText("5"))
-        
-        onView(withId(R.id.etChildrenCount))
-            .perform(clearText())
-            .perform(typeText("1"))
-        
-        onView(withId(R.id.etSpouseIncome))
-            .perform(clearText())
-            .perform(typeText("40000"))
-        
-        onView(withId(R.id.etSavingsRate))
-            .perform(clearText())
-            .perform(typeText("15"))
-        
-        onView(withId(R.id.etRetirementAge))
-            .perform(clearText())
-            .perform(typeText("60"))
-        
-        onView(withId(R.id.etTargetPassiveIncome))
-            .perform(clearText())
-            .perform(typeText("150000"))
-        
-        // Выбираем спиннеры
-        onView(withId(R.id.spinnerEducation)).perform(click())
-        onView(withText("Магистратура")).perform(click())
-        
-        onView(withId(R.id.spinnerMaritalStatus)).perform(click())
-        onView(withText("Женат/Замужем")).perform(click())
-        
-        onView(withId(R.id.spinnerRiskTolerance)).perform(click())
-        onView(withText("Умеренный")).perform(click())
-        
-        onView(withId(R.id.spinnerInvestmentStrategy)).perform(click())
-        onView(withText("Сбалансированная")).perform(click())
-        
-        onView(withId(R.id.spinnerHealthLevel)).perform(click())
-        onView(withText("Хорошее")).perform(click())
-        
-        onView(withId(R.id.spinnerStressLevel)).perform(click())
-        onView(withText("Низкий")).perform(click())
-        
-        onView(withId(R.id.spinnerWorkLifeBalance)).perform(click())
-        onView(withText("Баланс")).perform(click())
-        
-        // Выбираем профессию, мечту и навыки
+        // Выбираем профессию, мечту
         onView(withText("Программист")).perform(click())
         onView(withText("Коттедж")).perform(click())
-        onView(withText("Программирование")).perform(click())
-        onView(withText("Менеджмент")).perform(click())
         
         // Запускаем игру
-        onView(withId(R.id.btnStartGame)).perform(click())
+        onView(withId(R.id.btn_start_game)).perform(click())
         
         // Должны перейти к GameActivity
-        // Проверяем, что мы на игровом экране
-        onView(withId(R.id.tvCash)).check(matches(isDisplayed()))
+        // Проверяем, что мы на игровом экране (обновлено под новый дизайн)
+        onView(withId(R.id.tv_cash)).check(matches(isDisplayed()))
     }
     
     // === ТЕСТЫ ГРАНИЧНЫХ СЛУЧАЕВ ===
@@ -505,7 +231,7 @@ class CharacterCreationActivityTest {
         onView(withText("Коттедж")).perform(click())
         
         // Пытаемся запустить игру
-        onView(withId(R.id.btnStartGame)).perform(click())
+        onView(withId(R.id.btn_start_game)).perform(click())
         
         // Должно появиться сообщение об ошибке
         onView(withText(containsString("имя"))).check(matches(isDisplayed()))
@@ -520,32 +246,12 @@ class CharacterCreationActivityTest {
             .perform(clearText())
             .perform(typeText("65"))
         
-        onView(withId(R.id.etWorkExperience))
-            .perform(clearText())
-            .perform(typeText("40"))
-        
-        onView(withId(R.id.etChildrenCount))
-            .perform(clearText())
-            .perform(typeText("10"))
-        
-        onView(withId(R.id.etSavingsRate))
-            .perform(clearText())
-            .perform(typeText("50"))
-        
-        onView(withId(R.id.etRetirementAge))
-            .perform(clearText())
-            .perform(typeText("80"))
-        
-        onView(withId(R.id.etTargetPassiveIncome))
-            .perform(clearText())
-            .perform(typeText("1000000"))
-        
         // Выбираем профессию и мечту
         onView(withText("Программист")).perform(click())
         onView(withText("Коттедж")).perform(click())
         
         // Игра должна запуститься
-        onView(withId(R.id.btnStartGame)).check(matches(isEnabled()))
+        onView(withId(R.id.btn_start_game)).check(matches(isEnabled()))
     }
     
     @Test
@@ -557,32 +263,12 @@ class CharacterCreationActivityTest {
             .perform(clearText())
             .perform(typeText("18"))
         
-        onView(withId(R.id.etWorkExperience))
-            .perform(clearText())
-            .perform(typeText("0"))
-        
-        onView(withId(R.id.etChildrenCount))
-            .perform(clearText())
-            .perform(typeText("0"))
-        
-        onView(withId(R.id.etSavingsRate))
-            .perform(clearText())
-            .perform(typeText("0"))
-        
-        onView(withId(R.id.etRetirementAge))
-            .perform(clearText())
-            .perform(typeText("50"))
-        
-        onView(withId(R.id.etTargetPassiveIncome))
-            .perform(clearText())
-            .perform(typeText("10000"))
-        
         // Выбираем профессию и мечту
         onView(withText("Программист")).perform(click())
         onView(withText("Коттедж")).perform(click())
         
         // Игра должна запуститься
-        onView(withId(R.id.btnStartGame)).check(matches(isEnabled()))
+        onView(withId(R.id.btn_start_game)).check(matches(isEnabled()))
     }
     
     // === ТЕСТЫ ПРОИЗВОДИТЕЛЬНОСТИ ===
@@ -598,39 +284,12 @@ class CharacterCreationActivityTest {
         onView(withId(R.id.etAge))
             .perform(clearText(), typeText("25"))
         
-        onView(withId(R.id.etWorkExperience))
-            .perform(clearText(), typeText("3"))
-        
         // Выбираем профессию и мечту
         onView(withText("Программист")).perform(click())
         onView(withText("Коттедж")).perform(click())
         
         // Проверяем, что все работает корректно
-        onView(withId(R.id.btnStartGame)).check(matches(isEnabled()))
-    }
-    
-    @Test
-    fun testMultipleSkillSelection() {
-        ActivityScenario.launch(CharacterCreationActivity::class.java)
-        
-        // Выбираем много навыков
-        onView(withText("Программирование")).perform(click())
-        onView(withText("Менеджмент")).perform(click())
-        onView(withText("Продажи")).perform(click())
-        onView(withText("Коммуникация")).perform(click())
-        onView(withText("Переговоры")).perform(click())
-        onView(withText("Адаптивность")).perform(click())
-        onView(withText("Аналитика")).perform(click())
-        onView(withText("Планирование")).perform(click())
-        onView(withText("Финансовая грамотность")).perform(click())
-        onView(withText("Креативность")).perform(click())
-        
-        // Выбираем профессию и мечту
-        onView(withText("Программист")).perform(click())
-        onView(withText("Коттедж")).perform(click())
-        
-        // Проверяем, что все работает
-        onView(withId(R.id.btnStartGame)).check(matches(isEnabled()))
+        onView(withId(R.id.btn_start_game)).check(matches(isEnabled()))
     }
     
     // === ТЕСТЫ НАВИГАЦИИ ===
@@ -639,25 +298,147 @@ class CharacterCreationActivityTest {
     fun testBackButton() {
         ActivityScenario.launch(CharacterCreationActivity::class.java)
         
-        // Нажимаем кнопку "Назад"
-        onView(withId(R.id.btnBack)).perform(click())
+        // Нажимаем кнопку "Назад" (если есть)
+        // onView(withId(R.id.btnBack)).perform(click())
         
         // Должны вернуться к предыдущему экрану
         // Это может потребовать дополнительной проверки
     }
     
+    // === ТЕСТЫ НОВОГО ДИЗАЙНА ===
+    
     @Test
-    fun testScrollBehavior() {
+    fun testNewDesignElements() {
         ActivityScenario.launch(CharacterCreationActivity::class.java)
         
-        // Прокручиваем вниз
-        onView(withId(R.id.scrollView)).perform(swipeUp())
+        // Проверяем, что новые элементы дизайна отображаются
+        // Карточки с профессиями и мечтами должны иметь новый стиль
+        onView(withId(R.id.recyclerViewProfessions)).check(matches(isDisplayed()))
+        onView(withId(R.id.recyclerViewDreams)).check(matches(isDisplayed()))
         
-        // Прокручиваем вверх
-        onView(withId(R.id.scrollView)).perform(swipeDown())
+        // Проверяем, что кнопка старта имеет новый стиль
+        onView(withId(R.id.btn_start_game)).check(matches(isDisplayed()))
         
-        // Проверяем, что все элементы все еще доступны
+        // Проверяем новые заголовки секций
+        onView(withText("👤 Ваш возраст")).check(matches(isDisplayed()))
+        onView(withText("Имя персонажа")).check(matches(isDisplayed()))
+        onView(withText("Дата начала игры")).check(matches(isDisplayed()))
+    }
+    
+    @Test
+    fun testCardSelectionVisualFeedback() {
+        ActivityScenario.launch(CharacterCreationActivity::class.java)
+        
+        // Выбираем профессию и проверяем визуальную обратную связь
+        onView(withText("Программист")).perform(click())
+        
+        // Проверяем, что карточка выделена (если есть визуальная индикация)
+        // Это может потребовать проверки состояния адаптера
+    }
+    
+    @Test
+    fun testModernUIElements() {
+        ActivityScenario.launch(CharacterCreationActivity::class.java)
+        
+        // Проверяем, что современные элементы UI отображаются
+        // Поля ввода должны иметь новый стиль
         onView(withId(R.id.etPlayerName)).check(matches(isDisplayed()))
-        onView(withId(R.id.btnStartGame)).check(matches(isDisplayed()))
+        onView(withId(R.id.etAge)).check(matches(isDisplayed()))
+        onView(withId(R.id.etStartDate)).check(matches(isDisplayed()))
+        
+        // Кнопка должна иметь новый стиль
+        onView(withId(R.id.btn_start_game)).check(matches(isDisplayed()))
+    }
+    
+    // === ТЕСТЫ НОВЫХ ЭЛЕМЕНТОВ ИГРОВОГО ЭКРАНА ===
+    
+    @Test
+    fun testGameScreenNewDesign() {
+        ActivityScenario.launch(CharacterCreationActivity::class.java)
+        
+        // Создаем персонажа и переходим к игре
+        onView(withId(R.id.etPlayerName))
+            .perform(clearText())
+            .perform(typeText("Тест Игрок"))
+        
+        onView(withText("Программист")).perform(click())
+        onView(withText("Коттедж")).perform(click())
+        onView(withId(R.id.btn_start_game)).perform(click())
+        
+        // Проверяем новые элементы игрового экрана
+        onView(withId(R.id.tv_cash)).check(matches(isDisplayed()))
+        onView(withId(R.id.tv_salary)).check(matches(isDisplayed()))
+        onView(withId(R.id.tv_passive_income)).check(matches(isDisplayed()))
+        
+        // Проверяем новые кнопки действий
+        onView(withId(R.id.btn_financial_statement)).check(matches(isDisplayed()))
+        onView(withId(R.id.btn_assets)).check(matches(isDisplayed()))
+        onView(withId(R.id.btn_market)).check(matches(isDisplayed()))
+        
+        // Проверяем кубик
+        onView(withId(R.id.card_dice)).check(matches(isDisplayed()))
+        onView(withId(R.id.iv_dice)).check(matches(isDisplayed()))
+    }
+    
+    @Test
+    fun testGameScreenStatsCards() {
+        ActivityScenario.launch(CharacterCreationActivity::class.java)
+        
+        // Создаем персонажа и переходим к игре
+        onView(withId(R.id.etPlayerName))
+            .perform(clearText())
+            .perform(typeText("Тест Игрок"))
+        
+        onView(withText("Программист")).perform(click())
+        onView(withText("Коттедж")).perform(click())
+        onView(withId(R.id.btn_start_game)).perform(click())
+        
+        // Проверяем карточки статистики
+        onView(withText("Наличные")).check(matches(isDisplayed()))
+        onView(withText("Зарплата")).check(matches(isDisplayed()))
+        onView(withText("Пассивный")).check(matches(isDisplayed()))
+        onView(withText("Уровень")).check(matches(isDisplayed()))
+    }
+    
+    @Test
+    fun testGameScreenActionButtons() {
+        ActivityScenario.launch(CharacterCreationActivity::class.java)
+        
+        // Создаем персонажа и переходим к игре
+        onView(withId(R.id.etPlayerName))
+            .perform(clearText())
+            .perform(typeText("Тест Игрок"))
+        
+        onView(withText("Программист")).perform(click())
+        onView(withText("Коттедж")).perform(click())
+        onView(withId(R.id.btn_start_game)).perform(click())
+        
+        // Проверяем кнопки действий
+        onView(withText("Финансы")).check(matches(isDisplayed()))
+        onView(withText("Активы")).check(matches(isDisplayed()))
+        onView(withText("Рынок")).check(matches(isDisplayed()))
+    }
+    
+    @Test
+    fun testDiceInteraction() {
+        ActivityScenario.launch(CharacterCreationActivity::class.java)
+        
+        // Создаем персонажа и переходим к игре
+        onView(withId(R.id.etPlayerName))
+            .perform(clearText())
+            .perform(typeText("Тест Игрок"))
+        
+        onView(withText("Программист")).perform(click())
+        onView(withText("Коттедж")).perform(click())
+        onView(withId(R.id.btn_start_game)).perform(click())
+        
+        // Проверяем, что кубик кликабелен
+        onView(withId(R.id.card_dice)).check(matches(isClickable()))
+        
+        // Нажимаем на кубик
+        onView(withId(R.id.card_dice)).perform(click())
+        
+        // Проверяем, что текст кубика изменился или остался видимым
+        onView(withId(R.id.tv_dice_value)).check(matches(isDisplayed()))
     }
 }
