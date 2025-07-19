@@ -290,6 +290,7 @@ jobs:
     - name: 🔍 Проверка наличия adb в PATH (phone)
       run: |
         echo "🔍 Установка зависимостей для adb..."
+        sudo dpkg --add-architecture i386
         sudo apt-get update
         sudo apt-get install -y libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 lib32ncurses5 lib32stdc++6
         
@@ -458,6 +459,7 @@ jobs:
     - name: 🔍 Проверка наличия adb в PATH (tablet)
       run: |
         echo "🔍 Установка зависимостей для adb..."
+        sudo dpkg --add-architecture i386
         sudo apt-get update
         sudo apt-get install -y libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 lib32ncurses5 lib32stdc++6
         
