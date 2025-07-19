@@ -132,6 +132,7 @@ jobs:
           echo "🔧 Установка прав на выполнение для SDK файлов..."
           chmod +x $ANDROID_SDK_ROOT/platform-tools/* || echo "⚠️ Не удалось установить права для platform-tools"
           chmod +x $ANDROID_SDK_ROOT/emulator/* || echo "⚠️ Не удалось установить права для emulator"
+          chmod +x $ANDROID_SDK_ROOT/emulator/qemu/linux-x86_64/* || echo "⚠️ Не удалось установить права для qemu"
           chmod +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/* || echo "⚠️ Не удалось установить права для cmdline-tools"
           
           echo "🔧 ==== ПРОВЕРКА ПРАВ НА ВЫПОЛНЕНИЕ ===="
@@ -216,6 +217,7 @@ jobs:
         
         chmod +x $ANDROID_SDK_ROOT/platform-tools/* || echo "⚠️ Не удалось установить права для platform-tools"
         chmod +x $ANDROID_SDK_ROOT/emulator/* || echo "⚠️ Не удалось установить права для emulator"
+        chmod +x $ANDROID_SDK_ROOT/emulator/qemu/linux-x86_64/* || echo "⚠️ Не удалось установить права для qemu"
         chmod +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/* || echo "⚠️ Не удалось установить права для cmdline-tools"
         
         echo "🔧 ==== ПРОВЕРКА ПРАВ ПОСЛЕ ВОССТАНОВЛЕНИЯ ===="
@@ -448,6 +450,7 @@ jobs:
         
         chmod +x $ANDROID_SDK_ROOT/platform-tools/* || echo "⚠️ Не удалось установить права для platform-tools"
         chmod +x $ANDROID_SDK_ROOT/emulator/* || echo "⚠️ Не удалось установить права для emulator"
+        chmod +x $ANDROID_SDK_ROOT/emulator/qemu/linux-x86_64/* || echo "⚠️ Не удалось установить права для qemu"
         chmod +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/* || echo "⚠️ Не удалось установить права для cmdline-tools"
         
         echo "🔧 ==== ПРОВЕРКА ПРАВ ПОСЛЕ ВОССТАНОВЛЕНИЯ ===="
