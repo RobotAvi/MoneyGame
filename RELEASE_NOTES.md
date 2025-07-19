@@ -1,18 +1,18 @@
-## 🎮 Financial Success v1.70
+## 🎮 Financial Success v1.71
 
-### 📅 Дата релиза: 2025-07-18 09:45 UTC
+### 📅 Дата релиза: 2025-07-19 01:25 UTC
 
 ### 🔄 Последние изменения:
-f061c37 🔖 Bump version to 1.70 (71) [auto]
-bab5d6e 🔧 Update CI workflow to use 'sudo' for apt-get commands, ensuring proper permissions for package installation.
-d7d2201 📱 Auto-commit APK v1.69 - 2025-07-16_16-22
-84e0905 📝 Update release notes [auto]
-b43a864 🔖 Bump version to 1.69 (70) [auto]
-d5b85af Merge branch 'main' of https://github.com/RobotAvi/MoneyGame
-4ab596c 🔧 Standardize PATH export syntax in CI workflow for Android SDK setup to ensure consistency across jobs.
-65a107a 📝 Revise architecture documentation for "Финансовый успех", enhancing clarity on project structure, layers, and key components, while updating terminology and expanding on future development plans.
-1bcfcb7 📝 Revise architecture documentation for MoneyGame, updating context, container, and component sections to reflect the C4 model and improve clarity on application structure and responsibilities.
-36c19c3 📱 Auto-commit APK v1.68 - 2025-07-16_13-54
+f08b186 🔖 Bump version to 1.71 (72) [auto]
+4468767 fix: исправлены все пути к ANDROID_SDK_ROOT на единый /home/runner/android-sdk
+01f132e fix: исправлены пути к ANDROID_SDK_ROOT в job screenshots-phone
+b0e1dbc fix: исправлены пути к ANDROID_SDK_ROOT в job screenshots-tablet
+5452b5b fix: добавлена поддержка 32-битной архитектуры для установки зависимостей adb
+f8857b8 fix: добавлена установка системных зависимостей для adb и подробное логирование ошибок
+277f867 debug: добавлен явный gradlew assembleDebug и подробное логирование build-выходов
+9a9ad7a fix: корректный путь к ANDROID_SDK_ROOT и ANDROID_HOME для runner, чтобы эмулятор видел system-images
+9af94b2 Refactor GitHub workflow to centralize Android SDK setup and artifact management
+241e789 Add GitHub workflow management scripts for stable-build automation
 
 ### 📋 Изменения из CHANGELOG.md:
 ### 🔮 Планы на будущее
