@@ -299,11 +299,17 @@ jobs:
         echo "PATH: $PATH"
         
         echo "🔍 Проверка наличия adb..."
-        which adb
-        ls -la /home/runner/android-sdk/platform-tools/adb
+        echo "🔍 Проверяем существование файла adb..."
+        ls -la /home/runner/android-sdk/platform-tools/adb || echo "❌ Файл adb не найден"
         
-        echo "🔍 Попытка запуска adb version..."
-        adb version || echo "❌ adb version failed"
+        echo "🔍 Проверяем права на выполнение..."
+        file /home/runner/android-sdk/platform-tools/adb || echo "❌ Не удалось определить тип файла"
+        
+        echo "🔍 Попытка запуска adb по полному пути..."
+        /home/runner/android-sdk/platform-tools/adb version || echo "❌ adb version failed"
+        
+        echo "🔍 Попытка запуска adb через which..."
+        which adb || echo "❌ which adb failed"
         
         echo "🔍 Проверка библиотек adb..."
         ldd /home/runner/android-sdk/platform-tools/adb || echo "❌ ldd failed"
@@ -468,11 +474,17 @@ jobs:
         echo "PATH: $PATH"
         
         echo "🔍 Проверка наличия adb..."
-        which adb
-        ls -la /home/runner/android-sdk/platform-tools/adb
+        echo "🔍 Проверяем существование файла adb..."
+        ls -la /home/runner/android-sdk/platform-tools/adb || echo "❌ Файл adb не найден"
         
-        echo "🔍 Попытка запуска adb version..."
-        adb version || echo "❌ adb version failed"
+        echo "🔍 Проверяем права на выполнение..."
+        file /home/runner/android-sdk/platform-tools/adb || echo "❌ Не удалось определить тип файла"
+        
+        echo "🔍 Попытка запуска adb по полному пути..."
+        /home/runner/android-sdk/platform-tools/adb version || echo "❌ adb version failed"
+        
+        echo "🔍 Попытка запуска adb через which..."
+        which adb || echo "❌ which adb failed"
         
         echo "🔍 Проверка библиотек adb..."
         ldd /home/runner/android-sdk/platform-tools/adb || echo "❌ ldd failed"
