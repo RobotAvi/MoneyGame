@@ -178,8 +178,65 @@ jobs:
         path: ${{ env.ANDROID_SDK_ROOT }}
     - name: 🧾 Log Android SDK structure
       run: |
-        echo "==== ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT ===="
-        find $ANDROID_SDK_ROOT/
+        echo "🔍 ==== ПРОВЕРКА ЗАГРУЖЕННОГО ANDROID SDK (PHONE) ===="
+        echo "🔍 ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+        echo "🔍 Проверяем существование директории:"
+        ls -la $ANDROID_SDK_ROOT/ || echo "❌ ANDROID_SDK_ROOT не существует"
+        
+        echo "🔍 ==== СТРУКТУРА SDK ===="
+        find $ANDROID_SDK_ROOT/ -type d | head -20
+        
+        echo "🔍 ==== ПРОВЕРКА КРИТИЧЕСКИХ ФАЙЛОВ ===="
+        echo "🔍 Проверка adb:"
+        ls -la $ANDROID_SDK_ROOT/platform-tools/adb || echo "❌ adb не найден"
+        
+        echo "🔍 Проверка emulator:"
+        ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
+        
+        echo "🔍 Проверка avdmanager:"
+        ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager || echo "❌ avdmanager не найден"
+        
+        echo "🔍 Проверка system-images:"
+        find $ANDROID_SDK_ROOT/system-images/ -name "*.img" | head -5 || echo "❌ system-images не найдены"
+        
+        echo "🔍 ==== ПРОВЕРКА ПРАВ НА ВЫПОЛНЕНИЕ ===="
+        echo "🔍 Права на adb:"
+        ls -la $ANDROID_SDK_ROOT/platform-tools/adb | grep -E "^-r.x" || echo "❌ adb не имеет прав на выполнение"
+        
+        echo "🔍 Права на emulator:"
+        ls -la $ANDROID_SDK_ROOT/emulator/emulator | grep -E "^-r.x" || echo "❌ emulator не имеет прав на выполнение"
+        
+        echo "🔍 Права на avdmanager:"
+        ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager | grep -E "^-r.x" || echo "❌ avdmanager не имеет прав на выполнение"
+    
+    - name: 🔧 Восстановление прав на выполнение (Phone)
+      run: |
+        echo "🔧 ==== ВОССТАНОВЛЕНИЕ ПРАВ НА ВЫПОЛНЕНИЕ ===="
+        echo "🔧 Устанавливаем права на выполнение для всех SDK файлов..."
+        
+        chmod +x $ANDROID_SDK_ROOT/platform-tools/* || echo "⚠️ Не удалось установить права для platform-tools"
+        chmod +x $ANDROID_SDK_ROOT/emulator/* || echo "⚠️ Не удалось установить права для emulator"
+        chmod +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/* || echo "⚠️ Не удалось установить права для cmdline-tools"
+        
+        echo "🔧 ==== ПРОВЕРКА ПРАВ ПОСЛЕ ВОССТАНОВЛЕНИЯ ===="
+        echo "🔧 Права на adb:"
+        ls -la $ANDROID_SDK_ROOT/platform-tools/adb | grep -E "^-r.x" || echo "❌ adb не имеет прав на выполнение"
+        
+        echo "🔧 Права на emulator:"
+        ls -la $ANDROID_SDK_ROOT/emulator/emulator | grep -E "^-r.x" || echo "❌ emulator не имеет прав на выполнение"
+        
+        echo "🔧 Права на avdmanager:"
+        ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager | grep -E "^-r.x" || echo "❌ avdmanager не имеет прав на выполнение"
+        
+        echo "🔧 ==== ТЕСТИРОВАНИЕ КОМАНД ===="
+        echo "🔧 Тест adb:"
+        $ANDROID_SDK_ROOT/platform-tools/adb version || echo "❌ adb version failed"
+        
+        echo "🔧 Тест emulator:"
+        $ANDROID_SDK_ROOT/emulator/emulator -version || echo "❌ emulator version failed"
+        
+        echo "🔧 Тест avdmanager:"
+        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager list avd || echo "❌ avdmanager failed"
 
     - name: 🔍 Проверка наличия adb в PATH (phone)
       run: |
@@ -353,8 +410,65 @@ jobs:
         path: ${{ env.ANDROID_SDK_ROOT }}
     - name: 🧾 Log Android SDK structure
       run: |
-        echo "==== ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT ===="
-        find $ANDROID_SDK_ROOT/
+        echo "🔍 ==== ПРОВЕРКА ЗАГРУЖЕННОГО ANDROID SDK (TABLET) ===="
+        echo "🔍 ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+        echo "🔍 Проверяем существование директории:"
+        ls -la $ANDROID_SDK_ROOT/ || echo "❌ ANDROID_SDK_ROOT не существует"
+        
+        echo "🔍 ==== СТРУКТУРА SDK ===="
+        find $ANDROID_SDK_ROOT/ -type d | head -20
+        
+        echo "🔍 ==== ПРОВЕРКА КРИТИЧЕСКИХ ФАЙЛОВ ===="
+        echo "🔍 Проверка adb:"
+        ls -la $ANDROID_SDK_ROOT/platform-tools/adb || echo "❌ adb не найден"
+        
+        echo "🔍 Проверка emulator:"
+        ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
+        
+        echo "🔍 Проверка avdmanager:"
+        ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager || echo "❌ avdmanager не найден"
+        
+        echo "🔍 Проверка system-images:"
+        find $ANDROID_SDK_ROOT/system-images/ -name "*.img" | head -5 || echo "❌ system-images не найдены"
+        
+        echo "🔍 ==== ПРОВЕРКА ПРАВ НА ВЫПОЛНЕНИЕ ===="
+        echo "🔍 Права на adb:"
+        ls -la $ANDROID_SDK_ROOT/platform-tools/adb | grep -E "^-r.x" || echo "❌ adb не имеет прав на выполнение"
+        
+        echo "🔍 Права на emulator:"
+        ls -la $ANDROID_SDK_ROOT/emulator/emulator | grep -E "^-r.x" || echo "❌ emulator не имеет прав на выполнение"
+        
+        echo "🔍 Права на avdmanager:"
+        ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager | grep -E "^-r.x" || echo "❌ avdmanager не имеет прав на выполнение"
+    
+    - name: 🔧 Восстановление прав на выполнение (Tablet)
+      run: |
+        echo "🔧 ==== ВОССТАНОВЛЕНИЕ ПРАВ НА ВЫПОЛНЕНИЕ ===="
+        echo "🔧 Устанавливаем права на выполнение для всех SDK файлов..."
+        
+        chmod +x $ANDROID_SDK_ROOT/platform-tools/* || echo "⚠️ Не удалось установить права для platform-tools"
+        chmod +x $ANDROID_SDK_ROOT/emulator/* || echo "⚠️ Не удалось установить права для emulator"
+        chmod +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/* || echo "⚠️ Не удалось установить права для cmdline-tools"
+        
+        echo "🔧 ==== ПРОВЕРКА ПРАВ ПОСЛЕ ВОССТАНОВЛЕНИЯ ===="
+        echo "🔧 Права на adb:"
+        ls -la $ANDROID_SDK_ROOT/platform-tools/adb | grep -E "^-r.x" || echo "❌ adb не имеет прав на выполнение"
+        
+        echo "🔧 Права на emulator:"
+        ls -la $ANDROID_SDK_ROOT/emulator/emulator | grep -E "^-r.x" || echo "❌ emulator не имеет прав на выполнение"
+        
+        echo "🔧 Права на avdmanager:"
+        ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager | grep -E "^-r.x" || echo "❌ avdmanager не имеет прав на выполнение"
+        
+        echo "🔧 ==== ТЕСТИРОВАНИЕ КОМАНД ===="
+        echo "🔧 Тест adb:"
+        $ANDROID_SDK_ROOT/platform-tools/adb version || echo "❌ adb version failed"
+        
+        echo "🔧 Тест emulator:"
+        $ANDROID_SDK_ROOT/emulator/emulator -version || echo "❌ emulator version failed"
+        
+        echo "🔧 Тест avdmanager:"
+        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager list avd || echo "❌ avdmanager failed"
 
     - name: 🔍 Проверка наличия adb в PATH (tablet)
       run: |
