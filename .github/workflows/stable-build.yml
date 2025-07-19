@@ -317,8 +317,8 @@ jobs:
     - name: 📱 Start Android Emulator and Install APK (Phone)
       shell: bash
       env:
-        ANDROID_SDK_ROOT: ${{ runner.home }}/android-sdk
-        ANDROID_HOME: ${{ runner.home }}/android-sdk
+        ANDROID_SDK_ROOT: /home/runner/android-sdk
+        ANDROID_HOME: /home/runner/android-sdk
       run: |
         export PATH="$PATH:/home/runner/android-sdk/emulator:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
         set -e
@@ -486,8 +486,8 @@ jobs:
     - name: 📱 Start Android Emulator and Install APK (Tablet)
       shell: bash
       env:
-        ANDROID_SDK_ROOT: ${{ runner.home }}/android-sdk
-        ANDROID_HOME: ${{ runner.home }}/android-sdk
+        ANDROID_SDK_ROOT: /home/runner/android-sdk
+        ANDROID_HOME: /home/runner/android-sdk
       run: |
         export PATH="$PATH:/home/runner/android-sdk/emulator:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
         set -e
