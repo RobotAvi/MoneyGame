@@ -289,10 +289,23 @@ jobs:
 
     - name: 🔍 Проверка наличия adb в PATH (phone)
       run: |
+        echo "🔍 Установка зависимостей для adb..."
+        sudo apt-get update
+        sudo apt-get install -y libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 lib32ncurses5 lib32stdc++6
+        
+        echo "🔍 Настройка PATH для adb..."
         export PATH="$PATH:/home/runner/android-sdk/platform-tools"
         echo "PATH: $PATH"
+        
+        echo "🔍 Проверка наличия adb..."
         which adb
-        adb version
+        ls -la /home/runner/android-sdk/platform-tools/adb
+        
+        echo "🔍 Попытка запуска adb version..."
+        adb version || echo "❌ adb version failed"
+        
+        echo "🔍 Проверка библиотек adb..."
+        ldd /home/runner/android-sdk/platform-tools/adb || echo "❌ ldd failed"
 
     - name: 🎭 Install Maestro
       run: |
@@ -444,10 +457,23 @@ jobs:
 
     - name: 🔍 Проверка наличия adb в PATH (tablet)
       run: |
+        echo "🔍 Установка зависимостей для adb..."
+        sudo apt-get update
+        sudo apt-get install -y libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 lib32ncurses5 lib32stdc++6
+        
+        echo "🔍 Настройка PATH для adb..."
         export PATH="$PATH:/home/runner/android-sdk/platform-tools"
         echo "PATH: $PATH"
+        
+        echo "🔍 Проверка наличия adb..."
         which adb
-        adb version
+        ls -la /home/runner/android-sdk/platform-tools/adb
+        
+        echo "🔍 Попытка запуска adb version..."
+        adb version || echo "❌ adb version failed"
+        
+        echo "🔍 Проверка библиотек adb..."
+        ldd /home/runner/android-sdk/platform-tools/adb || echo "❌ ldd failed"
 
     - name: 🎭 Install Maestro
       run: |
