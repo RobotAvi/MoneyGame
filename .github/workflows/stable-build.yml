@@ -436,7 +436,7 @@ jobs:
   # Параллельная генерация скриншотов для планшета
   screenshots-tablet:
     runs-on: ubuntu-latest
-    needs: [build-and-test, setup-android-sdk]
+    needs: setup-android-sdk
     env:
       ANDROID_SDK_ROOT: /home/runner/android-sdk
       ANDROID_HOME: /home/runner/android-sdk
