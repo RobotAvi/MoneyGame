@@ -45,6 +45,18 @@ jobs:
           export PATH="$PATH:/home/runner/android-sdk/emulator:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
           yes | sdkmanager --licenses || { echo "sdkmanager license error"; exit 1; }
           sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64" || { echo "sdkmanager install error"; exit 1; }
+          
+          # Установка прав на выполнение для всех исполняемых файлов
+          echo "🔧 Установка прав на выполнение для SDK файлов..."
+          chmod +x $ANDROID_SDK_ROOT/platform-tools/*
+          chmod +x $ANDROID_SDK_ROOT/emulator/*
+          chmod +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/*
+          
+          echo "🔧 Проверка прав на выполнение..."
+          ls -la $ANDROID_SDK_ROOT/platform-tools/adb
+          ls -la $ANDROID_SDK_ROOT/emulator/emulator
+          ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager
+          
           echo "==== system-images after install ===="
           find $ANDROID_SDK_ROOT/system-images/ || echo "system-images dir not found"
       - name: 📦 Upload Android SDK as artifact
