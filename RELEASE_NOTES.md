@@ -1,18 +1,18 @@
-## 🎮 Financial Success v1.73
+## 🎮 Financial Success v1.74
 
-### 📅 Дата релиза: 2025-07-19 01:37 UTC
+### 📅 Дата релиза: 2025-07-19 01:43 UTC
 
 ### 🔄 Последние изменения:
+dac23fc 🔖 Bump version to 1.74 (75) [auto]
+ca160cd fix: добавлена установка прав на выполнение для Android SDK файлов
+fb945d2 📱 Auto-commit APK v -
+6ed3d4f 📝 Update release notes [auto]
 f639ed6 🔖 Bump version to 1.73 (74) [auto]
 8a4477c debug: добавлено подробное логирование для диагностики проблемы с adb
 f3e4399 📱 Auto-commit APK v -
 fe621ba 📝 Update release notes [auto]
 1564f9a 🔖 Bump version to 1.72 (73) [auto]
 f32876d fix: убраны проблемные 32-битные пакеты libncurses5 для Ubuntu 24.04
-23443d1 📱 Auto-commit APK v -
-ad6df96 📝 Update release notes [auto]
-f08b186 🔖 Bump version to 1.71 (72) [auto]
-4468767 fix: исправлены все пути к ANDROID_SDK_ROOT на единый /home/runner/android-sdk
 
 ### 📋 Изменения из CHANGELOG.md:
 ### 🔮 Планы на будущее
