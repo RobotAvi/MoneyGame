@@ -785,25 +785,48 @@ jobs:
         echo "📱 ==== ОЖИДАНИЕ ЗАГРУЗКИ ANDROID ===="
         boot_timeout=360
         boot_elapsed=0
+        logcat_dumped=0
         for i in {1..90}; do
           echo "📱 Попытка $i/90: проверка sys.boot_completed..."
           adb shell getprop sys.boot_completed 2>/dev/null || echo "❌ adb shell getprop failed"
-          
+
+          # Диагностика при первой неудачной попытке
+          if [ $i -eq 1 ]; then
+            echo "📋 === LOGCAT (первые 100 строк) ==="
+            adb logcat -d | head -100 || echo "logcat failed"
+            echo "📋 === EMULATOR STATUS ==="
+            adb -s emulator-5554 emu avd status || echo "emu avd status failed"
+            echo "📋 === EMULATOR PROCESSES ==="
+            ps aux | grep emulator | grep -v grep || echo "❌ Процесс эмулятора не найден"
+          fi
+
+          # Диагностика каждые 30 секунд
+          if [ $((boot_elapsed % 30)) -eq 0 ] && [ $boot_elapsed -ne 0 ]; then
+            echo "📋 === LOGCAT (последние 100 строк) ==="
+            adb logcat -d | tail -100 || echo "logcat failed"
+            echo "📋 === EMULATOR STATUS ==="
+            adb -s emulator-5554 emu avd status || echo "emu avd status failed"
+          fi
+
           if adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; then
             echo "✅ Android полностью загружен"
             echo "📱 Дополнительные свойства загрузки:"
             adb shell getprop | grep -E "(sys.boot_completed|init.svc.bootanim|init.svc.zygote)" || echo "❌ Не удалось получить свойства"
             break
           fi
-          
+
           if [ $i -eq 90 ]; then
             echo "❌ Android не загрузился за $boot_timeout секунд"
             echo "📱 Последние свойства загрузки:"
             adb shell getprop | grep -E "(sys.boot_completed|init.svc.bootanim|init.svc.zygote)" || echo "❌ Не удалось получить свойства"
+            echo "📋 === LOGCAT (последние 200 строк) ==="
+            adb logcat -d | tail -200 || echo "logcat failed"
+            echo "📋 === EMULATOR STATUS ==="
+            adb -s emulator-5554 emu avd status || echo "emu avd status failed"
             kill $EMULATOR_PID 2>/dev/null || true
             exit 1
           fi
-          
+
           sleep 2
           boot_elapsed=$((boot_elapsed + 2))
           if [ $((boot_elapsed % 30)) -eq 0 ]; then
