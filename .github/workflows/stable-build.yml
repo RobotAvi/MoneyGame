@@ -471,7 +471,7 @@ jobs:
         done
 
         echo "📱 ==== ОЖИДАНИЕ ЗАГРУЗКИ ANDROID ===="
-        boot_timeout=180
+        boot_timeout=360
         boot_elapsed=0
         for i in {1..90}; do
           echo "📱 Попытка $i/90: проверка sys.boot_completed..."
@@ -488,6 +488,10 @@ jobs:
             echo "❌ Android не загрузился за $boot_timeout секунд"
             echo "📱 Последние свойства загрузки:"
             adb shell getprop | grep -E "(sys.boot_completed|init.svc.bootanim|init.svc.zygote)" || echo "❌ Не удалось получить свойства"
+            echo "📋 === LOGCAT (последние 200 строк) ==="
+            adb logcat -d | tail -200 || echo "logcat failed"
+            echo "📋 === EMULATOR STATUS ==="
+            adb -s emulator-5554 emu avd status || echo "emu avd status failed"
             kill $EMULATOR_PID 2>/dev/null || true
             exit 1
           fi
@@ -553,13 +557,11 @@ jobs:
       run: |
         export PATH="$PATH:$HOME/.maestro/bin"
         mkdir -p screenshots/phone
-        
         # Пробуем специфичную конфигурацию для телефона
-        local config_file="maestro/screenshots-stable.yaml"
+        config_file="maestro/screenshots-stable.yaml"
         if [ ! -f "$config_file" ]; then
           config_file="maestro/screenshots.yaml"
         fi
-        
         if [ -f "$config_file" ]; then
           echo "Using phone screenshots configuration: $config_file"
           maestro test "$config_file" --format junit --output screenshots/phone/
@@ -568,6 +570,14 @@ jobs:
           echo "⚠️ Warning: Maestro configuration file not found: $config_file"
           echo "📱 Phone screenshots skipped!"
         fi
+    - name: 📱 Stop Android Emulator (Phone)
+      run: |
+        echo "📱 Остановка эмулятора..."
+        kill $EMULATOR_PID 2>/dev/null || true
+        pkill -f emulator 2>/dev/null || true
+        echo "📱 Проверка остановки эмулятора..."
+        sleep 5
+        ps aux | grep emulator | grep -v grep || echo "✅ Эмулятор остановлен"
 
     - name: 📤 Upload Phone Screenshots
       uses: actions/upload-artifact@v4
@@ -888,13 +898,11 @@ jobs:
       run: |
         export PATH="$PATH:$HOME/.maestro/bin"
         mkdir -p screenshots/tablet
-        
         # Пробуем специфичную конфигурацию для планшета
-        local config_file="maestro/screenshots-tablet.yaml"
+        config_file="maestro/screenshots-tablet.yaml"
         if [ ! -f "$config_file" ]; then
           config_file="maestro/screenshots.yaml"
         fi
-        
         if [ -f "$config_file" ]; then
           echo "Using tablet screenshots configuration: $config_file"
           maestro test "$config_file" --format junit --output screenshots/tablet/
@@ -903,6 +911,14 @@ jobs:
           echo "⚠️ Warning: Maestro configuration file not found: $config_file"
           echo "📱 Tablet screenshots skipped!"
         fi
+    - name: 📱 Stop Android Emulator (Tablet)
+      run: |
+        echo "📱 Остановка эмулятора..."
+        kill $EMULATOR_PID 2>/dev/null || true
+        pkill -f emulator 2>/dev/null || true
+        echo "📱 Проверка остановки эмулятора..."
+        sleep 5
+        ps aux | grep emulator | grep -v grep || echo "✅ Эмулятор остановлен"
 
     - name: 📤 Upload Tablet Screenshots
       uses: actions/upload-artifact@v4
