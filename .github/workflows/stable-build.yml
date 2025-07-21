@@ -783,7 +783,7 @@ jobs:
         done
 
         echo "📱 ==== ОЖИДАНИЕ ЗАГРУЗКИ ANDROID ===="
-        boot_timeout=180
+        boot_timeout=360
         boot_elapsed=0
         for i in {1..90}; do
           echo "📱 Попытка $i/90: проверка sys.boot_completed..."
