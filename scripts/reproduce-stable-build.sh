@@ -84,6 +84,11 @@ check_dependencies() {
         log_success "Android SDK установлен в $ANDROID_SDK_ROOT"
     else
         log_info "Android SDK уже установлен в $ANDROID_SDK_ROOT"
+        if [ ! -d "$ANDROID_SDK_ROOT" ]; then
+            log_warning "Каталог $ANDROID_SDK_ROOT не существует! Принудительно устанавливаю SDK..."
+            install_android_sdk
+            log_success "Android SDK установлен в $ANDROID_SDK_ROOT (после восстановления)"
+        fi
     fi
     
     # Проверка gradlew
