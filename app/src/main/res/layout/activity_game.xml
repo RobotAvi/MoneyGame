@@ -251,6 +251,56 @@
         </LinearLayout>
     </ScrollView>
 
+    <!-- Кнопка состояния здоровья (заглушка) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnHealthStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Здоровье"
+        android:visibility="gone" />
+
+    <!-- RecyclerView для активов (заглушка) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewAssets"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone" />
+
+    <!-- Текстовое поле для статуса здоровья (заглушка) -->
+    <TextView
+        android:id="@+id/tvHealthStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Статус здоровья"
+        android:visibility="gone" />
+
+    <!-- Текстовое поле для информации о треке (заглушка) -->
+    <TextView
+        android:id="@+id/tvTrackInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Информация о треке"
+        android:visibility="gone" />
+
+    <!-- Прогресс-бар месяца (заглушка) -->
+    <ProgressBar
+        android:id="@+id/monthProgressBar"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:progress="0"
+        android:max="100"
+        android:visibility="gone" />
+
+    <!-- Текстовое поле для финальной цели (заглушка) -->
+    <TextView
+        android:id="@+id/tvFinishGoal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Финальная цель"
+        android:visibility="gone" />
+
     <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
