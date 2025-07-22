@@ -172,6 +172,9 @@ jobs:
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
+
+      - name: Remove default GitHub Actions credentials
+        run: git config --local --remove-section http."https://github.com/" || true
         
       - name: 🔧 Setup Java
         uses: actions/setup-java@v4
