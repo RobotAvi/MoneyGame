@@ -3,6 +3,8 @@ name: 🚀 Stable Build & Release
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'releases/debug/**'
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -264,6 +266,16 @@ jobs:
           name: FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}
           path: releases/debug/latest-debug.apk
 
+      - name: Commit APK to repository
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add releases/debug/*.apk
+          git commit -m "Update APK [skip ci]" || echo "No changes to commit"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   # Параллельная генерация скриншотов для телефона
   screenshots-phone:
     runs-on: ubuntu-latest
@@ -471,10 +483,10 @@ jobs:
         done
 
         echo "📱 ==== ОЖИДАНИЕ ЗАГРУЗКИ ANDROID ===="
-        boot_timeout=360
+        boot_timeout=600
         boot_elapsed=0
-        for i in {1..90}; do
-          echo "📱 Попытка $i/90: проверка sys.boot_completed..."
+        for i in {1..150}; do
+          echo "📱 Попытка $i/150: проверка sys.boot_completed..."
           adb shell getprop sys.boot_completed 2>/dev/null || echo "❌ adb shell getprop failed"
           
           if adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; then
@@ -484,7 +496,7 @@ jobs:
             break
           fi
           
-          if [ $i -eq 90 ]; then
+          if [ $i -eq 150 ]; then
             echo "❌ Android не загрузился за $boot_timeout секунд"
             echo "📱 Последние свойства загрузки:"
             adb shell getprop | grep -E "(sys.boot_completed|init.svc.bootanim|init.svc.zygote)" || echo "❌ Не удалось получить свойства"
@@ -793,11 +805,11 @@ jobs:
         done
 
         echo "📱 ==== ОЖИДАНИЕ ЗАГРУЗКИ ANDROID ===="
-        boot_timeout=360
+        boot_timeout=600
         boot_elapsed=0
         logcat_dumped=0
-        for i in {1..90}; do
-          echo "📱 Попытка $i/90: проверка sys.boot_completed..."
+        for i in {1..150}; do
+          echo "📱 Попытка $i/150: проверка sys.boot_completed..."
           adb shell getprop sys.boot_completed 2>/dev/null || echo "❌ adb shell getprop failed"
 
           # Диагностика при первой неудачной попытке
@@ -825,7 +837,7 @@ jobs:
             break
           fi
 
-          if [ $i -eq 90 ]; then
+          if [ $i -eq 150 ]; then
             echo "❌ Android не загрузился за $boot_timeout секунд"
             echo "📱 Последние свойства загрузки:"
             adb shell getprop | grep -E "(sys.boot_completed|init.svc.bootanim|init.svc.zygote)" || echo "❌ Не удалось получить свойства"

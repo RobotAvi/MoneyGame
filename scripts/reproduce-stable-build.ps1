@@ -7,10 +7,11 @@
     (опционально) запускает эмулятор, устанавливает APK, делает скриншоты через Maestro.
 #>
 
-function Log-Info    { Write-Host "ℹ️  $($args -join ' ')" -ForegroundColor Cyan }
-function Log-Success { Write-Host "✅ $($args -join ' ')" -ForegroundColor Green }
-function Log-Warn    { Write-Host "⚠️  $($args -join ' ')" -ForegroundColor Yellow }
-function Log-Error   { Write-Host "❌ $($args -join ' ')" -ForegroundColor Red }
+# Функции для логирования без эмодзи
+function Log-Info    { Write-Host "INFO: $($args -join ' ')" -ForegroundColor Cyan }
+function Log-Success { Write-Host "SUCCESS: $($args -join ' ')" -ForegroundColor Green }
+function Log-Warn    { Write-Host "WARN: $($args -join ' ')" -ForegroundColor Yellow }
+function Log-Error   { Write-Host "ERROR: $($args -join ' ')" -ForegroundColor Red }
 
 # Проверка зависимостей
 Log-Info "Проверка зависимостей..."
@@ -179,20 +180,20 @@ if (Test-Path $tabletMaestroConfig) {
 Stop-Emulator
 
 # Финальный отчет
-Log-Success "🎉 Воспроизведение сборки stable завершено!"
+Log-Success "SUCCESS: Воспроизведение сборки stable завершено!"
 Write-Host ""
-Write-Host "📱 Version: $version"
-Write-Host "🔢 Version Code: $versionCode"
-Write-Host "📅 Date: $date"
-Write-Host "📦 APK: $destApk"
-Write-Host "📸 Phone screenshots: $phoneScreenshots"
-Write-Host "📸 Tablet screenshots: $tabletScreenshots"
+Write-Host "Version: $version"
+Write-Host "Version Code: $versionCode"
+Write-Host "Date: $date"
+Write-Host "APK: $destApk"
+Write-Host "Phone screenshots: $phoneScreenshots"
+Write-Host "Tablet screenshots: $tabletScreenshots"
 Write-Host ""
-Write-Host "📁 APK-файлы:"
+Write-Host "APK files:"
 Get-ChildItem $destDir
 Write-Host ""
-Write-Host "📸 Скриншоты телефона:"
+Write-Host "Phone screenshots:"
 Get-ChildItem $phoneScreenshots
 Write-Host ""
-Write-Host "📸 Скриншоты планшета:"
+Write-Host "Tablet screenshots:"
 Get-ChildItem $tabletScreenshots
