@@ -8,15 +8,15 @@ outputDir: screenshots/phone
 - assertVisible: "Изучай финансовую грамотность"
 - takeScreenshot: "01_main_screen_stable"
 
-- waitUntilVisible: "Начать игру"
+- assertVisible: "Начать игру"
 - tapOn: "Начать игру"
 - takeScreenshot: "02_profession_selection_stable"
 
-- waitUntilVisible: "Программист"
+- assertVisible: "Программист"
 - tapOn: "Программист"
 - takeScreenshot: "03_profession_selected_stable"
 
-- waitUntilVisible: "Начать"
+- assertVisible: "Начать"
 - tapOn: "Начать"
 - takeScreenshot: "04_game_started_stable"
 
