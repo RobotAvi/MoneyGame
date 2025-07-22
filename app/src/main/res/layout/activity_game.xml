@@ -203,13 +203,24 @@
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
                         android:padding="8dp">
-                        <!-- Игровая дорожка и позиция игрока -->
-                        <ImageView
-                            android:id="@+id/iv_player_on_track"
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:src="@drawable/ic_runner"
-                            android:contentDescription="Игрок на дорожке" />
+
+                        <!-- Трек (фон, линия и т.д.) -->
+                        <LinearLayout
+                            android:id="@+id/ll_track_line"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="horizontal"
+                            android:background="@drawable/track_line"
+                            android:gravity="center_vertical">
+
+                            <ImageView
+                                android:id="@+id/iv_player_on_track"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_runner"
+                                android:contentDescription="Игрок на дорожке" />
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
