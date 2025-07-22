@@ -14,6 +14,7 @@ import com.financialsuccess.game.models.*
 import java.text.NumberFormat
 import java.util.*
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 
 class GameActivity : AppCompatActivity() {
     
@@ -769,14 +770,18 @@ class GameActivity : AppCompatActivity() {
         val progressBar = binding.monthProgressBar
         progressBar.removeAllViews()
         val daysInMonth = 30
+        val filledColor = ContextCompat.getColor(this, R.color.primary_color)
+        val emptyColor = ContextCompat.getColor(this, R.color.primary_color_light)
+        val chipMargin = 2
         for (i in 1..daysInMonth) {
             val dayView = View(this)
             val params = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
-            params.marginEnd = 2
+            params.marginEnd = chipMargin
             dayView.layoutParams = params
-            dayView.setBackgroundColor(
-                if (i <= currentDay) android.graphics.Color.WHITE else android.graphics.Color.LTGRAY
-            )
+            dayView.setBackgroundResource(R.drawable.bg_day_chip)
+            // Анимация заполнения
+            val color = if (i <= currentDay) filledColor else emptyColor
+            dayView.background.setTint(color)
             progressBar.addView(dayView)
         }
     }

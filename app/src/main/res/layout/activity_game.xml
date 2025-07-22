@@ -283,15 +283,17 @@
         android:text="Информация о треке"
         android:visibility="gone" />
 
-    <!-- Прогресс-бар месяца (заглушка) -->
-    <ProgressBar
+    <!-- Прогресс-бар месяца (кастомный) -->
+    <LinearLayout
         android:id="@+id/monthProgressBar"
-        style="@android:style/Widget.ProgressBar.Horizontal"
         android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:progress="0"
-        android:max="100"
-        android:visibility="gone" />
+        android:layout_height="16dp"
+        android:orientation="horizontal"
+        android:background="@color/primary_color_light"
+        android:gravity="center_vertical"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:padding="2dp" />
 
     <!-- Текстовое поле для финальной цели (заглушка) -->
     <TextView
