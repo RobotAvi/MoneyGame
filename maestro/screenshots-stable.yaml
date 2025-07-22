@@ -2,34 +2,22 @@ appId: com.financialsuccess.game.debug
 name: Financial Success Screenshots (Stable)
 outputDir: screenshots/phone
 
-flows:
-  # Простой тест с минимальными действиями и проверками стабильности
-  - launchApp
-  - assertVisible: "Изучай финансовую грамотность"
-  - takeScreenshot: "01_main_screen_stable"
+---
 
-  # Ждем стабилизации UI перед следующими действиями
-  - runFlow:
-      when:
-        visible: "Начать игру"
-      commands:
-        - tapOn: "Начать игру"
-        - takeScreenshot: "02_profession_selection_stable"
+- launchApp
+- assertVisible: "Изучай финансовую грамотность"
+- takeScreenshot: "01_main_screen_stable"
 
-  # Дополнительные скриншоты с проверками видимости
-  - runFlow:
-      when:
-        visible: "Программист"
-      commands:
-        - tapOn: "Программист"
-        - takeScreenshot: "03_profession_selected_stable"
+- waitUntilVisible: "Начать игру"
+- tapOn: "Начать игру"
+- takeScreenshot: "02_profession_selection_stable"
 
-  - runFlow:
-      when:
-        visible: "Начать"
-      commands:
-        - tapOn: "Начать"
-        - takeScreenshot: "04_game_started_stable"
+- waitUntilVisible: "Программист"
+- tapOn: "Программист"
+- takeScreenshot: "03_profession_selected_stable"
 
-  # Финальный скриншот игрового экрана
-  - takeScreenshot: "05_final_screen_stable"
+- waitUntilVisible: "Начать"
+- tapOn: "Начать"
+- takeScreenshot: "04_game_started_stable"
+
+- takeScreenshot: "05_final_screen_stable"
