@@ -81,6 +81,14 @@ check_dependencies() {
         log_info "SDK установлен, продолжаем..."
         export ANDROID_SDK_ROOT="$HOME/android-sdk"
         export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
+        log_success "Android SDK установлен в $ANDROID_SDK_ROOT"
+    else
+        log_info "Android SDK уже установлен в $ANDROID_SDK_ROOT"
+        if [ ! -d "$ANDROID_SDK_ROOT" ]; then
+            log_warning "Каталог $ANDROID_SDK_ROOT не существует! Принудительно устанавливаю SDK..."
+            install_android_sdk
+            log_success "Android SDK установлен в $ANDROID_SDK_ROOT (после восстановления)"
+        fi
     fi
     
     # Проверка gradlew
@@ -122,6 +130,7 @@ install_android_sdk() {
     yes | sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64"
     
     log_success "Android SDK установлен"
+    log_success "Android SDK установлен в $ANDROID_SDK_ROOT"
 }
 
 
