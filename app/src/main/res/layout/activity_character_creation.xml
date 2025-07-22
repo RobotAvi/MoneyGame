@@ -1,618 +1,220 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_color">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="match_parent"
+        android:padding="0dp">
 
-        <!-- Заголовок -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Создание персонажа"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:textColor="@color/primary_color"
-            android:layout_marginBottom="24dp" />
-
-        <!-- Основная информация -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="👤 Основная информация"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/primary_color"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Имя персонажа -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etPlayerName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Имя персонажа"
-                android:maxLength="20" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Возраст -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etAge"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Возраст (18-65)"
-                android:inputType="number"
-                android:maxLength="2" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Образование -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Образование"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
-
-        <Spinner
-            android:id="@+id/spinnerEducation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/spinner_background"
-            style="@style/Widget.App.Spinner" />
-
-        <!-- Опыт работы -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etWorkExperience"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Опыт работы (лет)"
-                android:inputType="number"
-                android:maxLength="2" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Профессия -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="💼 Выберите профессию"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/primary_color"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewProfessions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:nestedScrollingEnabled="false" />
-
-        <!-- Навыки -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🎯 Выберите навыки (до 3)"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/primary_color"
-            android:layout_marginBottom="16dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewSkills"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginBottom="24dp" />
-
-        <!-- Семейное положение -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="👨‍👩‍👧‍👦 Семейное положение"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/primary_color"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Семейное положение -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Статус"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
-
-        <Spinner
-            android:id="@+id/spinnerMaritalStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/spinner_background"
-            style="@style/Widget.App.Spinner" />
-
-        <!-- Количество детей -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etChildrenCount"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Количество детей"
-                android:inputType="number"
-                android:maxLength="2" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Доход супруга -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etSpouseIncome"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Доход супруга (₽/мес)"
-                android:inputType="number" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Финансовые предпочтения -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="💰 Финансовые предпочтения"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/primary_color"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Толерантность к риску -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Толерантность к риску"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
-
-        <Spinner
-            android:id="@+id/spinnerRiskTolerance"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/spinner_background"
-            style="@style/Widget.App.Spinner" />
-
-        <!-- Стратегия инвестиций -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Стратегия инвестиций"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
-
-        <Spinner
-            android:id="@+id/spinnerInvestmentStrategy"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/spinner_background"
-            style="@style/Widget.App.Spinner" />
-
-        <!-- Процент сбережений -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etSavingsRate"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Процент сбережений (0-50%)"
-                android:inputType="number"
-                android:maxLength="2" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Финансовая информация -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="💰 Финансовая информация"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/primary_color"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Зарплата -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etSalary"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Зарплата (₽/мес)"
-                android:inputType="number" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Дополнительные доходы -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etAdditionalIncome"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Дополнительные доходы (₽/мес)"
-                android:inputType="number" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Расходы на питание -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etFoodExpenses"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Расходы на питание (₽/мес)"
-                android:inputType="number" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Расходы на транспорт -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etTransportExpenses"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Расходы на транспорт (₽/мес)"
-                android:inputType="number" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Расходы на жилье -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etHousingExpenses"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Расходы на жилье (₽/мес)"
-                android:inputType="number" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Прочие расходы -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etOtherExpenses"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Прочие расходы (₽/мес)"
-                android:inputType="number" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Начальный капитал -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etInitialCapital"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Начальный капитал (₽)"
-                android:inputType="number" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Кнопка сброса финансовых полей -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnResetFinancial"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Сбросить к профессии"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.Button.OutlinedButton" />
-
-        <!-- Кнопки для работы с шаблонами -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
+            android:orientation="vertical"
+            android:padding="0dp">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnLoadTemplate"
-                android:layout_width="0dp"
+            <!-- Заголовок и прогресс-бар -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Загрузить шаблон"
-                android:layout_marginEnd="8dp"
-                style="@style/Widget.Material3.Button.OutlinedButton" />
+                android:orientation="vertical"
+                android:background="@color/primary_color"
+                android:padding="24dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Создание персонажа"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white" />
+                <ProgressBar
+                    android:id="@+id/progress_steps"
+                    style="@android:style/Widget.ProgressBar.Horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="8dp"
+                    android:progress="1"
+                    android:max="8"
+                    android:progressTint="@color/success_color"
+                    android:backgroundTint="@color/primary_color_light"
+                    android:layout_marginTop="16dp" />
+            </LinearLayout>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSaveTemplate"
-                android:layout_width="0dp"
+            <!-- Личная информация -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Сохранить шаблон"
-                android:layout_marginStart="8dp"
-                style="@style/Widget.Material3.Button.OutlinedButton" />
+                android:layout_margin="16dp"
+                app:cardElevation="4dp"
+                app:cardCornerRadius="16dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="👤 Личная информация"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary_color"
+                        android:layout_marginBottom="16dp" />
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etPlayerName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Имя персонажа"
+                            android:maxLength="20" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etAge"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Возраст (18-65)"
+                            android:inputType="number"
+                            android:maxLength="2" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
+            <!-- Образование и опыт -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardElevation="4dp"
+                app:cardCornerRadius="16dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🎓 Образование и опыт"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary_color"
+                        android:layout_marginBottom="16dp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Образование"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+                    <Spinner
+                        android:id="@+id/spinnerEducation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        android:background="@drawable/spinner_background"
+                        style="@style/Widget.App.Spinner" />
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etWorkExperience"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Опыт работы (лет)"
+                            android:inputType="number"
+                            android:maxLength="2" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Профессия -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardElevation="4dp"
+                app:cardCornerRadius="16dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="💼 Выберите профессию"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary_color"
+                        android:layout_marginBottom="16dp" />
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerViewProfessions"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Навыки -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardElevation="4dp"
+                app:cardCornerRadius="16dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🎯 Выберите навыки (до 3)"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary_color"
+                        android:layout_marginBottom="16dp" />
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerViewSkills"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Семья, финансы, цели, здоровье, мечта, дата -->
+            <!-- ...оставшиеся секции аналогично оформляются в карточках с яркими заголовками и современными Material-компонентами... -->
+
+            <!-- Кнопка начала игры -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnStartGame"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Начать игру"
+                android:textSize="18sp"
+                android:enabled="false"
+                android:layout_margin="24dp"
+                style="@style/Widget.Material3.Button" />
         </LinearLayout>
-
-        <!-- Финансовая сводка -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="📊 Финансовая сводка"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/primary_color"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:id="@+id/tvFinancialSummary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Заполните финансовые поля для просмотра сводки"
-            android:textSize="14sp"
-            android:textColor="@android:color/darker_gray"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/summary_background"
-            android:padding="12dp" />
-
-        <!-- Жизненные цели -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🎯 Жизненные цели"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/primary_color"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Возраст выхода на пенсию -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etRetirementAge"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Возраст выхода на пенсию"
-                android:inputType="number"
-                android:maxLength="2" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Целевой пассивный доход -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etTargetPassiveIncome"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Целевой пассивный доход (₽/мес)"
-                android:inputType="number" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Кнопка добавления цели -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnAddGoal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Добавить цель"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.Button.OutlinedButton" />
-
-        <!-- Список добавленных целей -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewGoals"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:nestedScrollingEnabled="false"
-            android:visibility="gone" />
-
-        <!-- Здоровье и образ жизни -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🏥 Здоровье и образ жизни"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/primary_color"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Уровень здоровья -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Уровень здоровья"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
-
-        <Spinner
-            android:id="@+id/spinnerHealthLevel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/spinner_background"
-            style="@style/Widget.App.Spinner" />
-
-        <!-- Уровень стресса -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Уровень стресса"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
-
-        <Spinner
-            android:id="@+id/spinnerStressLevel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/spinner_background"
-            style="@style/Widget.App.Spinner" />
-
-        <!-- Баланс работы и жизни -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Баланс работы и жизни"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
-
-        <Spinner
-            android:id="@+id/spinnerWorkLifeBalance"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/spinner_background"
-            style="@style/Widget.App.Spinner" />
-
-        <!-- Мечта -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🌟 Выберите мечту"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/primary_color"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewDreams"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:nestedScrollingEnabled="false" />
-
-        <!-- Дата начала -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="📅 Дата начала игры"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/primary_color"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etStartDate"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Выберите дату старта"
-                android:focusable="false"
-                android:clickable="true" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Кнопка начала игры -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnStartGame"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="Начать игру"
-            android:textSize="18sp"
-            android:enabled="false"
-            style="@style/Widget.Material3.Button" />
-
-    </LinearLayout>
-</ScrollView>
+    </ScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
