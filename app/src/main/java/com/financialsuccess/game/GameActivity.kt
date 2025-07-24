@@ -1069,8 +1069,8 @@ class GameActivity : AppCompatActivity() {
     
     private fun updateGameTrackVisualization(player: Player) {
         // Обновляем позицию игрока на треке
-        // Fix: Added proper imports for LinearLayout and ImageView
-        val trackLayout = binding.llGameTrack.getChildAt(1) as LinearLayout
+        // Fix: Используем binding.llTrackLine вместо getChildAt(1)
+        val trackLayout = binding.llTrackLine
         val playerIcon = trackLayout.findViewById<ImageView>(R.id.iv_player_on_track)
         
         // Позиционируем игрока на треке (процент от 0 до 100)
