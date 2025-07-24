@@ -269,12 +269,29 @@ jobs:
           name: FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}
           path: releases/debug/latest-debug.apk
 
-      - name: Commit APK to repository
+      - name: Bump version in build.gradle
+        run: |
+          VERSION_LINE=$(grep -n 'versionName' app/build.gradle | cut -d: -f1)
+          CODE_LINE=$(grep -n 'versionCode' app/build.gradle | cut -d: -f1)
+          CURR_VERSION=$(grep -oP 'versionName\s+"\K[^"]+' app/build.gradle)
+          CURR_CODE=$(grep -oP 'versionCode\s+\K[0-9]+' app/build.gradle)
+          NEW_CODE=$((CURR_CODE+1))
+          # Увеличиваем минорную версию
+          MAJOR=$(echo $CURR_VERSION | cut -d. -f1)
+          MINOR=$(echo $CURR_VERSION | cut -d. -f2)
+          if [ -z "$MINOR" ]; then MINOR=0; fi
+          NEW_MINOR=$((MINOR+1))
+          NEW_VERSION="$MAJOR.$NEW_MINOR"
+          sed -i "${CODE_LINE}s/versionCode.*/versionCode $NEW_CODE/" app/build.gradle
+          sed -i "${VERSION_LINE}s/versionName.*/versionName \"$NEW_VERSION\"/" app/build.gradle
+          echo "Bumped version to $NEW_VERSION ($NEW_CODE)"
+
+      - name: Commit APK and version bump to repository
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add releases/debug/*.apk
-          git commit -m "Update APK [skip ci]" || echo "No changes to commit"
+          git add releases/debug/*.apk app/build.gradle
+          git commit -m "Update APK and bump version [skip ci]"
           git push https://x-access-token:${GH_PAT}@github.com/RobotAvi/MoneyGame.git HEAD:main
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
