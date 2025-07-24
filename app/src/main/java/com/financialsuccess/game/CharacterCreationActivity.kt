@@ -34,6 +34,13 @@ class CharacterCreationActivity : AppCompatActivity() {
     private var selectedProfession: Profession? = null
     private var selectedDream: Dream? = null
 
+    // Карусель профессий
+    private val professions = GameDataManager.getProfessions()
+    private var professionIndex = 0
+    // Карусель мечт
+    private val dreams = GameDataManager.getDreams()
+    private var dreamIndex = 0
+
     private lateinit var stepContainer: FrameLayout
     private var currentStep = 1
     private val totalSteps = 5
@@ -61,13 +68,58 @@ class CharacterCreationActivity : AppCompatActivity() {
         val view = LayoutInflater.from(this).inflate(R.layout.step_profession, stepContainer, false)
         val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
         stepTitle.text = "ШАГ 1/5"
+        val ivPhoto = view.findViewById<ImageView>(R.id.ivProfessionPhoto)
+        val tvName = view.findViewById<TextView>(R.id.tvProfessionName)
+        val tvParams = view.findViewById<TextView>(R.id.tvProfessionParams)
+        val btnLeft = view.findViewById<Button>(R.id.btnSwipeLeft)
+        val btnRight = view.findViewById<Button>(R.id.btnSwipeRight)
         val btnChoose = view.findViewById<Button>(R.id.btnChooseProfession)
+
+        fun updateProfessionUI() {
+            val prof = professions[professionIndex]
+            // Картинка: ищем png по id профессии
+            val resId = resources.getIdentifier(
+                "profession_${prof.id}", "drawable", packageName
+            )
+            if (resId != 0) ivPhoto.setImageResource(resId)
+            else ivPhoto.setImageResource(R.drawable.ic_profession_placeholder)
+            tvName.text = prof.name
+            tvParams.text = "${prof.description}\nЗарплата: ${prof.salary}₽\nРасходы: ${prof.expenses}₽\nНалоги: ${prof.taxes}₽\nОбразование: ${prof.education}"
+        }
+        updateProfessionUI()
+        btnLeft.setOnClickListener {
+            professionIndex = (professionIndex - 1 + professions.size) % professions.size
+            updateProfessionUI()
+        }
+        btnRight.setOnClickListener {
+            professionIndex = (professionIndex + 1) % professions.size
+            updateProfessionUI()
+        }
+        // Свайпы
+        view.setOnTouchListener(object : View.OnTouchListener {
+            private var x1 = 0f
+            private var x2 = 0f
+            override fun onTouch(v: View?, event: android.view.MotionEvent?): Boolean {
+                when (event?.action) {
+                    android.view.MotionEvent.ACTION_DOWN -> x1 = event.x
+                    android.view.MotionEvent.ACTION_UP -> {
+                        x2 = event.x
+                        val deltaX = x2 - x1
+                        if (deltaX > 100) btnLeft.performClick()
+                        if (deltaX < -100) btnRight.performClick()
+                    }
+                }
+                return true
+            }
+        })
         btnChoose.setOnClickListener {
-            // TODO: получить выбранную профессию из UI
-            // selectedProfession = ...
+            selectedProfession = professions[professionIndex]
             currentStep++
             showStep(currentStep)
         }
+        // Исправляю ширину кнопки
+        btnChoose.textSize = 16f
+        btnChoose.minWidth = 220
         stepContainer.addView(view)
     }
 
@@ -75,13 +127,56 @@ class CharacterCreationActivity : AppCompatActivity() {
         val view = LayoutInflater.from(this).inflate(R.layout.step_dream, stepContainer, false)
         val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
         stepTitle.text = "ШАГ 2/5"
+        val ivPhoto = view.findViewById<ImageView>(R.id.ivDreamPhoto)
+        val tvName = view.findViewById<TextView>(R.id.tvDreamName)
+        val tvParams = view.findViewById<TextView>(R.id.tvDreamParams)
+        val btnLeft = view.findViewById<Button>(R.id.btnSwipeLeft)
+        val btnRight = view.findViewById<Button>(R.id.btnSwipeRight)
         val btnChoose = view.findViewById<Button>(R.id.btnChooseDream)
+
+        fun updateDreamUI() {
+            val dream = dreams[dreamIndex]
+            val resId = resources.getIdentifier(
+                "dream_${dream.id}", "drawable", packageName
+            )
+            if (resId != 0) ivPhoto.setImageResource(resId)
+            else ivPhoto.setImageResource(R.drawable.ic_dream_placeholder)
+            tvName.text = dream.name
+            tvParams.text = "${dream.description}\nСтоимость: ${dream.cost}₽\nПассивный доход: ${dream.cashFlowRequired}₽\nЧисло на кубике: ${dream.fastTrackNumber}"
+        }
+        updateDreamUI()
+        btnLeft.setOnClickListener {
+            dreamIndex = (dreamIndex - 1 + dreams.size) % dreams.size
+            updateDreamUI()
+        }
+        btnRight.setOnClickListener {
+            dreamIndex = (dreamIndex + 1) % dreams.size
+            updateDreamUI()
+        }
+        // Свайпы
+        view.setOnTouchListener(object : View.OnTouchListener {
+            private var x1 = 0f
+            private var x2 = 0f
+            override fun onTouch(v: View?, event: android.view.MotionEvent?): Boolean {
+                when (event?.action) {
+                    android.view.MotionEvent.ACTION_DOWN -> x1 = event.x
+                    android.view.MotionEvent.ACTION_UP -> {
+                        x2 = event.x
+                        val deltaX = x2 - x1
+                        if (deltaX > 100) btnLeft.performClick()
+                        if (deltaX < -100) btnRight.performClick()
+                    }
+                }
+                return true
+            }
+        })
         btnChoose.setOnClickListener {
-            // TODO: получить выбранную мечту из UI
-            // selectedDream = ...
+            selectedDream = dreams[dreamIndex]
             currentStep++
             showStep(currentStep)
         }
+        btnChoose.textSize = 16f
+        btnChoose.minWidth = 220
         stepContainer.addView(view)
     }
 
@@ -93,6 +188,16 @@ class CharacterCreationActivity : AppCompatActivity() {
         numberPicker.minValue = 18
         numberPicker.maxValue = 65
         numberPicker.value = playerAge
+        // Цвет и размер
+        val textColor = resources.getColor(R.color.text_primary, null)
+        val count = numberPicker.childCount
+        for (i in 0 until count) {
+            val child = numberPicker.getChildAt(i)
+            if (child is TextView) {
+                child.setTextColor(textColor)
+                child.textSize = 28f
+            }
+        }
         val btnNext = view.findViewById<Button>(R.id.btnNextAge)
         btnNext.setOnClickListener {
             playerAge = numberPicker.value
@@ -108,6 +213,14 @@ class CharacterCreationActivity : AppCompatActivity() {
         stepTitle.text = "ШАГ 4/5"
         val etName = view.findViewById<android.widget.EditText>(R.id.etPlayerName)
         etName.setText(playerName)
+        etName.setTextColor(resources.getColor(R.color.text_primary, null))
+        etName.setHintTextColor(resources.getColor(R.color.text_secondary, null))
+        val btnVoice = view.findViewById<Button>(R.id.btnVoiceInput)
+        btnVoice.setOnClickListener {
+            // Можно скрыть или реализовать голосовой ввод
+            // Пока скрываю
+            btnVoice.visibility = View.GONE
+        }
         val btnNext = view.findViewById<Button>(R.id.btnNextName)
         btnNext.setOnClickListener {
             playerName = etName.text.toString().trim()
@@ -157,6 +270,11 @@ class CharacterCreationActivity : AppCompatActivity() {
     private fun showStartScreen() {
         val view = LayoutInflater.from(this).inflate(R.layout.step_start, stepContainer, false)
         stepContainer.addView(view)
-        // TODO: анимация и переход к игре
+        // Переход к игре через 1.5 секунды
+        view.postDelayed({
+            val intent = Intent(this, GameActivity::class.java)
+            startActivity(intent)
+            finish()
+        }, 1500)
     }
 }
