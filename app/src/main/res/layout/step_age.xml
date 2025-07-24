@@ -20,8 +20,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:minValue="18"
-        android:maxValue="65"
+        android:min="18"
+        android:max="65"
         android:value="25" />
 
     <Button
