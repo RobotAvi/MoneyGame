@@ -13,6 +13,9 @@ import android.widget.TextView
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import androidx.test.espresso.intent.Intents
+import androidx.test.espresso.intent.matcher.IntentMatchers
+import org.hamcrest.Matchers.allOf
 
 @RunWith(AndroidJUnit4::class)
 class CharacterCreationStepTest {
@@ -114,5 +117,20 @@ class CharacterCreationStepTest {
                 }
             }
         }
+    }
+
+    @Test
+    fun testStartGame_OpensGameActivityWithPlayer() {
+        Intents.init()
+        ActivityScenario.launch(CharacterCreationActivity::class.java)
+        // Пройти все шаги
+        onView(withId(R.id.btnChooseProfession)).perform(click())
+        onView(withId(R.id.btnChooseDream)).perform(click())
+        onView(withId(R.id.btnNextAge)).perform(click())
+        onView(withId(R.id.btnNextName)).perform(click())
+        onView(withId(R.id.btnNextDate)).perform(click())
+        // Проверяем, что GameActivity стартует
+        Intents.intended(allOf(IntentMatchers.hasComponent(GameActivity::class.java.name)))
+        Intents.release()
     }
 }

@@ -273,6 +273,15 @@ class CharacterCreationActivity : AppCompatActivity() {
         // Переход к игре через 1.5 секунды
         view.postDelayed({
             val intent = Intent(this, GameActivity::class.java)
+            // Передаём игрока
+            val player = Player(
+                name = playerName,
+                age = playerAge,
+                profession = selectedProfession!!,
+                dream = selectedDream!!,
+                startDateMillis = selectedStartDate
+            )
+            intent.putExtra("player", player)
             startActivity(intent)
             finish()
         }, 1500)
