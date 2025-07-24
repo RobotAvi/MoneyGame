@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.financialsuccess.game.adapters.AssetAdapter
 import com.financialsuccess.game.data.GameDataManager
+import com.financialsuccess.game.data.GameSaveManager
 import com.financialsuccess.game.databinding.ActivityGameBinding
 import com.financialsuccess.game.models.*
 import java.text.NumberFormat
@@ -33,6 +34,15 @@ class GameActivity : AppCompatActivity() {
         
         initGame()
         setupUI()
+
+        binding.btnSaveGame.setOnClickListener {
+            currentGameState?.let { GameSaveManager.saveGameState(this, it) }
+            currentGameState?.player?.let { GameSaveManager.savePlayer(this, it) }
+            Toast.makeText(this, "Игра сохранена!", Toast.LENGTH_SHORT).show()
+        }
+        binding.btnExit.setOnClickListener {
+            finish()
+        }
     }
     
     private fun initGame() {
