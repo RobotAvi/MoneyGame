@@ -2,6 +2,11 @@ package com.financialsuccess.game.data
 
 import com.financialsuccess.game.models.*
 import com.financialsuccess.game.R
+import android.content.Context
+import com.financialsuccess.game.models.Player
+import com.financialsuccess.game.models.GameState
+import com.google.gson.Gson
+import java.io.File
 
 object GameDataManager {
     
@@ -267,5 +272,46 @@ object GameDataManager {
             "Новые инвестиционные возможности! Выберите дополнительную карточку актива."
         )
         return events.random()
+    }
+}
+
+object GameSaveManager {
+    private const val PLAYER_FILE = "player.json"
+    private const val GAME_FILE = "game_state.json"
+    private val gson = Gson()
+
+    fun savePlayer(context: Context, player: Player) {
+        val file = File(context.filesDir, PLAYER_FILE)
+        file.writeText(gson.toJson(player))
+    }
+
+    fun loadPlayer(context: Context): Player? {
+        val file = File(context.filesDir, PLAYER_FILE)
+        if (!file.exists()) return null
+        return try {
+            gson.fromJson(file.readText(), Player::class.java)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun saveGameState(context: Context, gameState: GameState) {
+        val file = File(context.filesDir, GAME_FILE)
+        file.writeText(gson.toJson(gameState))
+    }
+
+    fun loadGameState(context: Context): GameState? {
+        val file = File(context.filesDir, GAME_FILE)
+        if (!file.exists()) return null
+        return try {
+            gson.fromJson(file.readText(), GameState::class.java)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun deleteSaves(context: Context) {
+        File(context.filesDir, PLAYER_FILE).delete()
+        File(context.filesDir, GAME_FILE).delete()
     }
 }
