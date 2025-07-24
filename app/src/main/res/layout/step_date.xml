@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_color">
+
+    <TextView
+        android:id="@+id/tvStepTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ШАГ 5/5"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_color"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="48dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_gravity="center">
+        <TextView
+            android:id="@+id/tvSelectedDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Дата не выбрана"
+            android:textSize="22sp"
+            android:layout_marginBottom="24dp" />
+        <Button
+            android:id="@+id/btnPickDate"
+            android:layout_width="200dp"
+            android:layout_height="60dp"
+            android:text="Выбрать дату"
+            android:textSize="18sp"
+            android:background="@drawable/btn_secondary_bg" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnNextDate"
+        android:layout_width="200dp"
+        android:layout_height="60dp"
+        android:text="Далее"
+        android:textSize="20sp"
+        android:background="@drawable/btn_primary_bg"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="64dp" />
+</FrameLayout>

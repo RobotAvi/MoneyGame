@@ -17,6 +17,14 @@ import com.financialsuccess.game.databinding.ActivityCharacterCreationBinding
 import com.financialsuccess.game.models.*
 import android.app.DatePickerDialog
 import java.util.Calendar
+import android.widget.FrameLayout
+import android.view.LayoutInflater
+import android.widget.TextView
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.NumberPicker
+import android.speech.RecognizerIntent
+import android.content.ActivityNotFoundException
 
 class CharacterCreationActivity : AppCompatActivity() {
     
@@ -54,15 +62,79 @@ class CharacterCreationActivity : AppCompatActivity() {
     private var otherExpenses: Int = 0
     private var initialCapital: Int = 5000
     
+    private lateinit var stepContainer: FrameLayout
+    private var currentStep = 1
+    private val totalSteps = 5
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityCharacterCreationBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        
-        setupUI()
-        setupSpinners()
-        setupRecyclerViews()
-        setupListeners()
+        setContentView(R.layout.activity_character_creation)
+        stepContainer = findViewById(R.id.stepContainer)
+        showStep(currentStep)
+    }
+
+    private fun showStep(step: Int) {
+        stepContainer.removeAllViews()
+        when (step) {
+            1 -> showProfessionStep()
+            2 -> showDreamStep()
+            3 -> showAgeStep()
+            4 -> showNameStep()
+            5 -> showDateStep()
+            6 -> showStartScreen()
+        }
+    }
+
+    private fun showProfessionStep() {
+        val view = LayoutInflater.from(this).inflate(R.layout.step_profession, stepContainer, false)
+        val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
+        stepTitle.text = "ШАГ 1/5"
+        // TODO: реализовать карусель профессий (Tinder-style)
+        // После выбора профессии: currentStep++; showStep(currentStep)
+        stepContainer.addView(view)
+    }
+
+    private fun showDreamStep() {
+        val view = LayoutInflater.from(this).inflate(R.layout.step_dream, stepContainer, false)
+        val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
+        stepTitle.text = "ШАГ 2/5"
+        // TODO: реализовать карусель мечты (Tinder-style)
+        // После выбора мечты: currentStep++; showStep(currentStep)
+        stepContainer.addView(view)
+    }
+
+    private fun showAgeStep() {
+        val view = LayoutInflater.from(this).inflate(R.layout.step_age, stepContainer, false)
+        val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
+        stepTitle.text = "ШАГ 3/5"
+        // TODO: реализовать NumberPicker для возраста
+        // После выбора возраста: currentStep++; showStep(currentStep)
+        stepContainer.addView(view)
+    }
+
+    private fun showNameStep() {
+        val view = LayoutInflater.from(this).inflate(R.layout.step_name, stepContainer, false)
+        val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
+        stepTitle.text = "ШАГ 4/5"
+        // TODO: поле для имени + кнопка голосового ввода
+        // После ввода имени: currentStep++; showStep(currentStep)
+        stepContainer.addView(view)
+    }
+
+    private fun showDateStep() {
+        val view = LayoutInflater.from(this).inflate(R.layout.step_date, stepContainer, false)
+        val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
+        stepTitle.text = "ШАГ 5/5"
+        // TODO: календарь для выбора даты
+        // После выбора даты: currentStep++; showStep(currentStep)
+        stepContainer.addView(view)
+    }
+
+    private fun showStartScreen() {
+        val view = LayoutInflater.from(this).inflate(R.layout.step_start, stepContainer, false)
+        // TODO: анимация "Начинаем!" и переход к игре
+        stepContainer.addView(view)
+        // После анимации: startGame()
     }
     
     private fun setupUI() {
