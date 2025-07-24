@@ -9,6 +9,7 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 import androidx.test.platform.app.InstrumentationRegistry
+import com.google.gson.Gson
 
 @RunWith(RobolectricTestRunner::class)
 class PlayerTest {
@@ -732,5 +733,74 @@ class PlayerTest {
         assertTrue(packageName == "com.financialsuccess.game.debug" || packageName == "com.financialsuccess.game")
         // Проверяем, что используется debug-ключ (по умолчанию)
         // (В реальном проекте можно проверить сертификат через PackageManager, но здесь достаточно проверить отсутствие custom signingConfig)
+    }
+
+    @Test
+    fun `test player serialization and deserialization to json`() {
+        val gson = Gson()
+        val profession = Profession(
+            id = "engineer",
+            name = "Инженер",
+            description = "Строительство",
+            salary = 60000,
+            expenses = 30000,
+            taxes = 10000,
+            education = "Высшее техническое"
+        )
+        val dream = Dream(
+            id = "space_trip",
+            name = "Космический туризм",
+            description = "Полёт в космос",
+            cost = 3000000,
+            cashFlowRequired = 75000,
+            fastTrackNumber = 6
+        )
+        val player = Player(
+            profession = profession,
+            dream = dream,
+            age = 30,
+            name = "Сериализуемый Игрок"
+        )
+        val json = gson.toJson(player)
+        val restored = gson.fromJson(json, Player::class.java)
+        assertEquals(player.name, restored.name)
+        assertEquals(player.age, restored.age)
+        assertEquals(player.profession.id, restored.profession.id)
+        assertEquals(player.dream.id, restored.dream.id)
+    }
+
+    @Test
+    fun `test gameState serialization and deserialization to json`() {
+        val gson = Gson()
+        val profession = Profession(
+            id = "manager",
+            name = "Менеджер",
+            description = "Управление проектами",
+            salary = 90000,
+            expenses = 45000,
+            taxes = 15000,
+            education = "MBA"
+        )
+        val dream = Dream(
+            id = "business_empire",
+            name = "Бизнес-империя",
+            description = "Создать сеть компаний",
+            cost = 10000000,
+            cashFlowRequired = 200000,
+            fastTrackNumber = 6
+        )
+        val player = Player(
+            profession = profession,
+            dream = dream,
+            age = 40,
+            name = "Игрок для GameState"
+        )
+        val gameState = GameState(player = player, currentTurn = 5, diceValue = 3)
+        val json = gson.toJson(gameState)
+        val restored = gson.fromJson(json, GameState::class.java)
+        assertEquals(gameState.player.name, restored.player.name)
+        assertEquals(gameState.currentTurn, restored.currentTurn)
+        assertEquals(gameState.diceValue, restored.diceValue)
+        assertEquals(gameState.player.dream.id, restored.player.dream.id)
     }
 }
