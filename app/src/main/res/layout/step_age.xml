@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_color">
+
+    <TextView
+        android:id="@+id/tvStepTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ШАГ 3/5"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_color"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="48dp" />
+
+    <NumberPicker
+        android:id="@+id/numberPickerAge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:minValue="18"
+        android:maxValue="65"
+        android:value="25" />
+
+    <Button
+        android:id="@+id/btnNextAge"
+        android:layout_width="200dp"
+        android:layout_height="60dp"
+        android:text="Далее"
+        android:textSize="20sp"
+        android:background="@drawable/btn_primary_bg"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="64dp" />
+</FrameLayout>
