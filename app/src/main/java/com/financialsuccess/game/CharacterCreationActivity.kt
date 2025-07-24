@@ -52,8 +52,11 @@ class CharacterCreationActivity : AppCompatActivity() {
             setupCustomUI()
         } else {
             setContentView(R.layout.activity_character_creation)
-            stepContainer = findViewById(R.id.stepContainer)
-            showStep(currentStep)
+            val containerId = resources.getIdentifier("stepContainer", "id", packageName)
+            if (containerId != 0) {
+                stepContainer = findViewById(containerId)
+                showStep(currentStep)
+            }
         }
     }
 
