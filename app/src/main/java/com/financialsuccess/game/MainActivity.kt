@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
     
     private fun setupUI() {
         binding.btnNewGame.setOnClickListener {
-            val intent = Intent(this, ProfessionSelectionActivity::class.java)
+            val intent = Intent(this, CharacterCreationActivity::class.java)
             startActivity(intent)
         }
         
