@@ -47,9 +47,17 @@ class CharacterCreationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_character_creation)
-        stepContainer = findViewById(R.id.stepContainer)
-        showStep(currentStep)
+        if (intent.getBooleanExtra("custom", false)) {
+            setContentView(R.layout.activity_character_creation)
+            setupCustomUI()
+        } else {
+            setContentView(R.layout.activity_character_creation)
+            val containerId = resources.getIdentifier("stepContainer", "id", packageName)
+            if (containerId != 0) {
+                stepContainer = findViewById(containerId)
+                showStep(currentStep)
+            }
+        }
     }
 
     private fun showStep(step: Int) {
@@ -273,8 +281,95 @@ class CharacterCreationActivity : AppCompatActivity() {
         // Переход к игре через 1.5 секунды
         view.postDelayed({
             val intent = Intent(this, GameActivity::class.java)
+            // Передаём игрока
+            val player = Player(
+                name = playerName,
+                age = playerAge,
+                profession = selectedProfession!!,
+                dream = selectedDream!!,
+                startDateMillis = selectedStartDate
+            )
+            intent.putExtra("player", player)
             startActivity(intent)
             finish()
         }, 1500)
+    }
+
+    private fun setupCustomUI() {
+        val professions = GameDataManager.getProfessions()
+        val dreams = GameDataManager.getDreams()
+        val educationLevels = EducationLevel.values().map { it.displayName }
+        val maritalStatuses = MaritalStatus.values().map { it.displayName }
+        val riskTolerances = RiskTolerance.values().map { it.displayName }
+        val investmentStrategies = InvestmentStrategy.values().map { it.displayName }
+        val healthLevels = HealthLevel.values().map { it.displayName }
+        val stressLevels = StressLevel.values().map { it.displayName }
+        val workLifeBalances = WorkLifeBalance.values().map { it.displayName }
+
+        val spinnerProfession = findViewById<android.widget.Spinner>(R.id.spinnerProfession)
+        val spinnerDream = findViewById<android.widget.Spinner>(R.id.spinnerDream)
+        val spinnerEducation = findViewById<android.widget.Spinner>(R.id.spinnerEducation)
+        val spinnerMaritalStatus = findViewById<android.widget.Spinner>(R.id.spinnerMaritalStatus)
+        val spinnerRiskTolerance = findViewById<android.widget.Spinner>(R.id.spinnerRiskTolerance)
+        val spinnerInvestmentStrategy = findViewById<android.widget.Spinner>(R.id.spinnerInvestmentStrategy)
+        val spinnerHealthLevel = findViewById<android.widget.Spinner>(R.id.spinnerHealthLevel)
+        val spinnerStressLevel = findViewById<android.widget.Spinner>(R.id.spinnerStressLevel)
+        val spinnerWorkLifeBalance = findViewById<android.widget.Spinner>(R.id.spinnerWorkLifeBalance)
+
+        spinnerProfession.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, professions.map { it.name })
+        spinnerDream.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, dreams.map { it.name })
+        spinnerEducation.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, educationLevels)
+        spinnerMaritalStatus.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, maritalStatuses)
+        spinnerRiskTolerance.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, riskTolerances)
+        spinnerInvestmentStrategy.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, investmentStrategies)
+        spinnerHealthLevel.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, healthLevels)
+        spinnerStressLevel.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, stressLevels)
+        spinnerWorkLifeBalance.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, workLifeBalances)
+
+        findViewById<Button>(R.id.btnCreateCustomPlayer).setOnClickListener {
+            val name = findViewById<android.widget.EditText>(R.id.etName).text.toString().trim()
+            val age = findViewById<android.widget.EditText>(R.id.etAge).text.toString().toIntOrNull() ?: 25
+            val profession = professions[spinnerProfession.selectedItemPosition]
+            val dream = dreams[spinnerDream.selectedItemPosition]
+            val education = EducationLevel.values()[spinnerEducation.selectedItemPosition]
+            val experience = findViewById<android.widget.EditText>(R.id.etExperience).text.toString().toIntOrNull() ?: 0
+            val skillsRaw = findViewById<android.widget.EditText>(R.id.etSkills).text.toString()
+            val skills = if (skillsRaw.isNotBlank()) skillsRaw.split(",").map { Skill(it.trim(), "", 0, SkillCategory.TECHNICAL) }.toMutableList() else mutableListOf()
+            val maritalStatus = MaritalStatus.values()[spinnerMaritalStatus.selectedItemPosition]
+            val children = findViewById<android.widget.EditText>(R.id.etChildren).text.toString().toIntOrNull() ?: 0
+            val spouseIncome = findViewById<android.widget.EditText>(R.id.etSpouseIncome).text.toString().toIntOrNull() ?: 0
+            val riskTolerance = RiskTolerance.values()[spinnerRiskTolerance.selectedItemPosition]
+            val investmentStrategy = InvestmentStrategy.values()[spinnerInvestmentStrategy.selectedItemPosition]
+            val savingsRate = findViewById<android.widget.EditText>(R.id.etSavingsRate).text.toString().toIntOrNull() ?: 10
+            val healthLevel = HealthLevel.values()[spinnerHealthLevel.selectedItemPosition]
+            val stressLevel = StressLevel.values()[spinnerStressLevel.selectedItemPosition]
+            val workLifeBalance = WorkLifeBalance.values()[spinnerWorkLifeBalance.selectedItemPosition]
+            val goalsRaw = findViewById<android.widget.EditText>(R.id.etGoals).text.toString()
+            val goals = if (goalsRaw.isNotBlank()) goalsRaw.split(",").map { FinancialGoal(it.trim(), "", GoalType.PASSIVE_INCOME, 0, 12) }.toMutableList() else mutableListOf()
+
+            val player = Player(
+                name = name,
+                age = age,
+                profession = profession,
+                dream = dream,
+                education = education,
+                workExperience = experience,
+                skills = skills,
+                maritalStatus = maritalStatus,
+                childrenCount = children,
+                spouseIncome = spouseIncome,
+                riskTolerance = riskTolerance,
+                investmentStrategy = investmentStrategy,
+                savingsRate = savingsRate,
+                healthLevel = healthLevel,
+                stressLevel = stressLevel,
+                workLifeBalance = workLifeBalance,
+                financialGoals = goals
+            )
+            val intent = Intent(this, GameActivity::class.java)
+            intent.putExtra("player", player)
+            startActivity(intent)
+            finish()
+        }
     }
 }

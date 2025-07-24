@@ -1,15 +1,138 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_color">
 
-    <!-- Контейнер для шагов -->
-    <FrameLayout
-        android:id="@+id/stepContainer"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        <TextView android:text="Создание кастомного персонажа"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp"/>
+
+        <EditText android:id="@+id/etName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Имя персонажа"/>
+
+        <EditText android:id="@+id/etAge"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Возраст (18-65)"
+            android:inputType="number"/>
+
+        <Spinner android:id="@+id/spinnerProfession"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"/>
+
+        <Spinner android:id="@+id/spinnerDream"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"/>
+
+        <Spinner android:id="@+id/spinnerEducation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:prompt="@string/prompt_education"/>
+
+        <EditText android:id="@+id/etExperience"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Опыт работы (лет)"
+            android:inputType="number"
+            android:layout_marginTop="8dp"/>
+
+        <TextView android:text="Навыки (через запятую)"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"/>
+        <EditText android:id="@+id/etSkills"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Пример: Программирование, Лидерство"/>
+
+        <Spinner android:id="@+id/spinnerMaritalStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:prompt="@string/prompt_marital_status"/>
+
+        <EditText android:id="@+id/etChildren"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Детей (число)"
+            android:inputType="number"
+            android:layout_marginTop="8dp"/>
+
+        <EditText android:id="@+id/etSpouseIncome"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Доход супруга/супруги (₽)"
+            android:inputType="number"
+            android:layout_marginTop="8dp"/>
+
+        <Spinner android:id="@+id/spinnerRiskTolerance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:prompt="@string/prompt_risk_tolerance"/>
+
+        <Spinner android:id="@+id/spinnerInvestmentStrategy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:prompt="@string/prompt_investment_strategy"/>
+
+        <EditText android:id="@+id/etSavingsRate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Сбережения (% от дохода)"
+            android:inputType="number"
+            android:layout_marginTop="8dp"/>
+
+        <Spinner android:id="@+id/spinnerHealthLevel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:prompt="@string/prompt_health_level"/>
+
+        <Spinner android:id="@+id/spinnerStressLevel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:prompt="@string/prompt_stress_level"/>
+
+        <Spinner android:id="@+id/spinnerWorkLifeBalance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:prompt="@string/prompt_work_life_balance"/>
+
+        <TextView android:text="Финансовые цели (через запятую)"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"/>
+        <EditText android:id="@+id/etGoals"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Пример: Пассивный доход 100000, Капитал 1 млн"/>
+
+        <Button
+            android:id="@+id/btnCreateCustomPlayer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Создать персонажа"
+            android:layout_marginTop="24dp"
+            android:textSize="18sp"/>
+    </LinearLayout>
+</ScrollView>

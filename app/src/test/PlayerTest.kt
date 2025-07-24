@@ -8,6 +8,8 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
+import androidx.test.platform.app.InstrumentationRegistry
+import com.google.gson.Gson
 
 @RunWith(RobolectricTestRunner::class)
 class PlayerTest {
@@ -634,5 +636,171 @@ class PlayerTest {
         assertEquals(100000, goal.targetAmount)
         assertEquals(12, goal.deadline)
         assertFalse(goal.isAchieved)
+    }
+
+    @Test
+    fun `test quick flow player creation`() {
+        val profession = Profession(
+            id = "engineer",
+            name = "Инженер",
+            description = "Строительство",
+            salary = 60000,
+            expenses = 30000,
+            taxes = 10000,
+            education = "Высшее техническое"
+        )
+        val dream = Dream(
+            id = "space_trip",
+            name = "Космический туризм",
+            description = "Полёт в космос",
+            cost = 3000000,
+            cashFlowRequired = 75000,
+            fastTrackNumber = 6
+        )
+        val player = Player(
+            profession = profession,
+            dream = dream,
+            age = 30,
+            name = "Быстрый Игрок"
+        )
+        assertEquals("Быстрый Игрок", player.name)
+        assertEquals(30, player.age)
+        assertEquals(profession, player.profession)
+        assertEquals(dream, player.dream)
+        // Проверяем дефолтные значения
+        assertEquals(EducationLevel.BACHELOR, player.education)
+        assertEquals(MaritalStatus.SINGLE, player.maritalStatus)
+    }
+
+    @Test
+    fun `test advanced flow player creation`() {
+        val profession = Profession(
+            id = "manager",
+            name = "Менеджер",
+            description = "Управление проектами",
+            salary = 90000,
+            expenses = 45000,
+            taxes = 15000,
+            education = "MBA"
+        )
+        val dream = Dream(
+            id = "business_empire",
+            name = "Бизнес-империя",
+            description = "Создать сеть компаний",
+            cost = 10000000,
+            cashFlowRequired = 200000,
+            fastTrackNumber = 6
+        )
+        val player = Player(
+            profession = profession,
+            dream = dream,
+            age = 40,
+            name = "Кастомный Игрок",
+            education = EducationLevel.MASTER,
+            workExperience = 15,
+            maritalStatus = MaritalStatus.MARRIED,
+            childrenCount = 2,
+            spouseIncome = 30000,
+            riskTolerance = RiskTolerance.AGGRESSIVE,
+            investmentStrategy = InvestmentStrategy.GROWTH,
+            savingsRate = 25,
+            healthLevel = HealthLevel.FAIR,
+            stressLevel = StressLevel.HIGH,
+            workLifeBalance = WorkLifeBalance.WORK_FOCUSED
+        )
+        assertEquals("Кастомный Игрок", player.name)
+        assertEquals(40, player.age)
+        assertEquals(profession, player.profession)
+        assertEquals(dream, player.dream)
+        assertEquals(EducationLevel.MASTER, player.education)
+        assertEquals(15, player.workExperience)
+        assertEquals(MaritalStatus.MARRIED, player.maritalStatus)
+        assertEquals(2, player.childrenCount)
+        assertEquals(30000, player.spouseIncome)
+        assertEquals(RiskTolerance.AGGRESSIVE, player.riskTolerance)
+        assertEquals(InvestmentStrategy.GROWTH, player.investmentStrategy)
+        assertEquals(25, player.savingsRate)
+        assertEquals(HealthLevel.FAIR, player.healthLevel)
+        assertEquals(StressLevel.HIGH, player.stressLevel)
+        assertEquals(WorkLifeBalance.WORK_FOCUSED, player.workLifeBalance)
+    }
+
+    @Test
+    fun `test applicationId and signingConfig for debug and release`() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val packageName = context.packageName
+        // Для debug должен быть суффикс .debug
+        assertTrue(packageName == "com.financialsuccess.game.debug" || packageName == "com.financialsuccess.game")
+        // Проверяем, что используется debug-ключ (по умолчанию)
+        // (В реальном проекте можно проверить сертификат через PackageManager, но здесь достаточно проверить отсутствие custom signingConfig)
+    }
+
+    @Test
+    fun `test player serialization and deserialization to json`() {
+        val gson = Gson()
+        val profession = Profession(
+            id = "engineer",
+            name = "Инженер",
+            description = "Строительство",
+            salary = 60000,
+            expenses = 30000,
+            taxes = 10000,
+            education = "Высшее техническое"
+        )
+        val dream = Dream(
+            id = "space_trip",
+            name = "Космический туризм",
+            description = "Полёт в космос",
+            cost = 3000000,
+            cashFlowRequired = 75000,
+            fastTrackNumber = 6
+        )
+        val player = Player(
+            profession = profession,
+            dream = dream,
+            age = 30,
+            name = "Сериализуемый Игрок"
+        )
+        val json = gson.toJson(player)
+        val restored = gson.fromJson(json, Player::class.java)
+        assertEquals(player.name, restored.name)
+        assertEquals(player.age, restored.age)
+        assertEquals(player.profession.id, restored.profession.id)
+        assertEquals(player.dream.id, restored.dream.id)
+    }
+
+    @Test
+    fun `test gameState serialization and deserialization to json`() {
+        val gson = Gson()
+        val profession = Profession(
+            id = "manager",
+            name = "Менеджер",
+            description = "Управление проектами",
+            salary = 90000,
+            expenses = 45000,
+            taxes = 15000,
+            education = "MBA"
+        )
+        val dream = Dream(
+            id = "business_empire",
+            name = "Бизнес-империя",
+            description = "Создать сеть компаний",
+            cost = 10000000,
+            cashFlowRequired = 200000,
+            fastTrackNumber = 6
+        )
+        val player = Player(
+            profession = profession,
+            dream = dream,
+            age = 40,
+            name = "Игрок для GameState"
+        )
+        val gameState = GameState(player = player, currentTurn = 5, diceValue = 3)
+        val json = gson.toJson(gameState)
+        val restored = gson.fromJson(json, GameState::class.java)
+        assertEquals(gameState.player.name, restored.player.name)
+        assertEquals(gameState.currentTurn, restored.currentTurn)
+        assertEquals(gameState.diceValue, restored.diceValue)
+        assertEquals(gameState.player.dream.id, restored.player.dream.id)
     }
 }

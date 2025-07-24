@@ -10,6 +10,12 @@ import org.junit.Test
 import org.mockito.Mockito.*
 import org.mockito.ArgumentCaptor
 import org.mockito.MockitoAnnotations
+import com.financialsuccess.game.data.GameDataManager
+import com.financialsuccess.game.models.Dream
+import com.financialsuccess.game.R
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import org.junit.Assert.assertNotEquals
 
 class ProfessionAdapterTest {
     private lateinit var adapter: ProfessionAdapter
@@ -69,5 +75,30 @@ class ProfessionAdapterTest {
         )
         val adapter = ProfessionAdapter(allProfessions, mockCallback)
         assertEquals(6, adapter.itemCount)
+    }
+
+    @Test
+    fun testAllDreamsHaveValidDrawable() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val dreams = GameDataManager.getDreams()
+        for (dream in dreams) {
+            val resId = when (dream.id) {
+                "yacht" -> R.drawable.dream_yacht
+                "restaurant" -> R.drawable.dream_restaurant
+                "charity" -> R.drawable.dream_charity
+                "island" -> R.drawable.dream_island
+                "space_trip" -> R.drawable.dream_space
+                "business_empire" -> R.drawable.dream_business
+                else -> R.drawable.ic_dream_placeholder
+            }
+            val exists = try {
+                context.resources.getDrawable(resId, null)
+                true
+            } catch (e: Exception) {
+                false
+            }
+            assertNotEquals("Drawable for dream ${dream.id} not found!", R.drawable.ic_dream_placeholder, resId)
+            assert(exists) { "Drawable resource for dream ${dream.id} does not exist!" }
+        }
     }
 } 
