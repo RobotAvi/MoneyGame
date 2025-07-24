@@ -89,8 +89,13 @@ class CharacterCreationActivity : AppCompatActivity() {
         val view = LayoutInflater.from(this).inflate(R.layout.step_profession, stepContainer, false)
         val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
         stepTitle.text = "ШАГ 1/5"
-        // TODO: реализовать карусель профессий (Tinder-style)
-        // После выбора профессии: currentStep++; showStep(currentStep)
+        val btnChoose = view.findViewById<Button>(R.id.btnChooseProfession)
+        btnChoose.setOnClickListener {
+            // TODO: получить выбранную профессию из UI
+            // selectedProfession = ...
+            currentStep++
+            showStep(currentStep)
+        }
         stepContainer.addView(view)
     }
 
@@ -98,8 +103,13 @@ class CharacterCreationActivity : AppCompatActivity() {
         val view = LayoutInflater.from(this).inflate(R.layout.step_dream, stepContainer, false)
         val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
         stepTitle.text = "ШАГ 2/5"
-        // TODO: реализовать карусель мечты (Tinder-style)
-        // После выбора мечты: currentStep++; showStep(currentStep)
+        val btnChoose = view.findViewById<Button>(R.id.btnChooseDream)
+        btnChoose.setOnClickListener {
+            // TODO: получить выбранную мечту из UI
+            // selectedDream = ...
+            currentStep++
+            showStep(currentStep)
+        }
         stepContainer.addView(view)
     }
 
@@ -107,8 +117,16 @@ class CharacterCreationActivity : AppCompatActivity() {
         val view = LayoutInflater.from(this).inflate(R.layout.step_age, stepContainer, false)
         val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
         stepTitle.text = "ШАГ 3/5"
-        // TODO: реализовать NumberPicker для возраста
-        // После выбора возраста: currentStep++; showStep(currentStep)
+        val numberPicker = view.findViewById<NumberPicker>(R.id.numberPickerAge)
+        numberPicker.minValue = 18
+        numberPicker.maxValue = 65
+        numberPicker.value = playerAge
+        val btnNext = view.findViewById<Button>(R.id.btnNextAge)
+        btnNext.setOnClickListener {
+            playerAge = numberPicker.value
+            currentStep++
+            showStep(currentStep)
+        }
         stepContainer.addView(view)
     }
 
@@ -116,8 +134,18 @@ class CharacterCreationActivity : AppCompatActivity() {
         val view = LayoutInflater.from(this).inflate(R.layout.step_name, stepContainer, false)
         val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
         stepTitle.text = "ШАГ 4/5"
-        // TODO: поле для имени + кнопка голосового ввода
-        // После ввода имени: currentStep++; showStep(currentStep)
+        val etName = view.findViewById<android.widget.EditText>(R.id.etPlayerName)
+        etName.setText(playerName)
+        val btnNext = view.findViewById<Button>(R.id.btnNextName)
+        btnNext.setOnClickListener {
+            playerName = etName.text.toString().trim()
+            if (playerName.isEmpty()) {
+                etName.error = "Введите имя персонажа"
+            } else {
+                currentStep++
+                showStep(currentStep)
+            }
+        }
         stepContainer.addView(view)
     }
 
@@ -125,16 +153,39 @@ class CharacterCreationActivity : AppCompatActivity() {
         val view = LayoutInflater.from(this).inflate(R.layout.step_date, stepContainer, false)
         val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
         stepTitle.text = "ШАГ 5/5"
-        // TODO: календарь для выбора даты
-        // После выбора даты: currentStep++; showStep(currentStep)
+        val tvSelectedDate = view.findViewById<TextView>(R.id.tvSelectedDate)
+        val btnPickDate = view.findViewById<Button>(R.id.btnPickDate)
+        val btnNext = view.findViewById<Button>(R.id.btnNextDate)
+        btnPickDate.setOnClickListener {
+            val calendar = Calendar.getInstance()
+            val datePicker = DatePickerDialog(this,
+                { _, year, month, dayOfMonth ->
+                    calendar.set(year, month, dayOfMonth, 0, 0, 0)
+                    calendar.set(Calendar.MILLISECOND, 0)
+                    selectedStartDate = calendar.timeInMillis
+                    tvSelectedDate.text = "%02d.%02d.%d".format(dayOfMonth, month + 1, year)
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            )
+            datePicker.show()
+        }
+        btnNext.setOnClickListener {
+            if (selectedStartDate == null) {
+                tvSelectedDate.error = "Выберите дату старта"
+            } else {
+                currentStep++
+                showStep(currentStep)
+            }
+        }
         stepContainer.addView(view)
     }
 
     private fun showStartScreen() {
         val view = LayoutInflater.from(this).inflate(R.layout.step_start, stepContainer, false)
-        // TODO: анимация "Начинаем!" и переход к игре
         stepContainer.addView(view)
-        // После анимации: startGame()
+        // TODO: анимация и переход к игре
     }
     
     private fun setupUI() {
