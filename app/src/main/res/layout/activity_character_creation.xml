@@ -43,7 +43,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:prompt="Образование"/>
+            android:prompt="@string/prompt_education"/>
 
         <EditText android:id="@+id/etExperience"
             android:layout_width="match_parent"
@@ -65,7 +65,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:prompt="Семейное положение"/>
+            android:prompt="@string/prompt_marital_status"/>
 
         <EditText android:id="@+id/etChildren"
             android:layout_width="match_parent"
@@ -85,13 +85,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:prompt="Риск-профиль"/>
+            android:prompt="@string/prompt_risk_tolerance"/>
 
         <Spinner android:id="@+id/spinnerInvestmentStrategy"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:prompt="Стратегия инвестиций"/>
+            android:prompt="@string/prompt_investment_strategy"/>
 
         <EditText android:id="@+id/etSavingsRate"
             android:layout_width="match_parent"
@@ -104,19 +104,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:prompt="Здоровье"/>
+            android:prompt="@string/prompt_health_level"/>
 
         <Spinner android:id="@+id/spinnerStressLevel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:prompt="Стресс"/>
+            android:prompt="@string/prompt_stress_level"/>
 
         <Spinner android:id="@+id/spinnerWorkLifeBalance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:prompt="Work-Life баланс"/>
+            android:prompt="@string/prompt_work_life_balance"/>
 
         <TextView android:text="Финансовые цели (через запятую)"
             android:layout_width="wrap_content"

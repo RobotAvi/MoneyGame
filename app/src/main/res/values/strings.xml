@@ -75,4 +75,11 @@
     <!-- Confirmations -->
     <string name="confirm_sell_asset">Вы уверены, что хотите продать этот актив?</string>
     <string name="confirm_buy_asset">Купить этот актив?</string>
+    <string name="prompt_education">Образование</string>
+    <string name="prompt_marital_status">Семейное положение</string>
+    <string name="prompt_risk_tolerance">Риск-профиль</string>
+    <string name="prompt_investment_strategy">Стратегия инвестиций</string>
+    <string name="prompt_health_level">Здоровье</string>
+    <string name="prompt_stress_level">Стресс</string>
+    <string name="prompt_work_life_balance">Work-Life баланс</string>
 </resources>
