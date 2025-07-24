@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity() {
         
         binding.btnAdvancedCharacter.setOnClickListener {
             val intent = Intent(this, CharacterCreationActivity::class.java)
+            intent.putExtra("custom", true)
             startActivity(intent)
         }
         
