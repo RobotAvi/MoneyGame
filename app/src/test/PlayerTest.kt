@@ -635,4 +635,91 @@ class PlayerTest {
         assertEquals(12, goal.deadline)
         assertFalse(goal.isAchieved)
     }
+
+    @Test
+    fun `test quick flow player creation`() {
+        val profession = Profession(
+            id = "engineer",
+            name = "Инженер",
+            description = "Строительство",
+            salary = 60000,
+            expenses = 30000,
+            taxes = 10000,
+            education = "Высшее техническое"
+        )
+        val dream = Dream(
+            id = "space_trip",
+            name = "Космический туризм",
+            description = "Полёт в космос",
+            cost = 3000000,
+            cashFlowRequired = 75000,
+            fastTrackNumber = 6
+        )
+        val player = Player(
+            profession = profession,
+            dream = dream,
+            age = 30,
+            name = "Быстрый Игрок"
+        )
+        assertEquals("Быстрый Игрок", player.name)
+        assertEquals(30, player.age)
+        assertEquals(profession, player.profession)
+        assertEquals(dream, player.dream)
+        // Проверяем дефолтные значения
+        assertEquals(EducationLevel.BACHELOR, player.education)
+        assertEquals(MaritalStatus.SINGLE, player.maritalStatus)
+    }
+
+    @Test
+    fun `test advanced flow player creation`() {
+        val profession = Profession(
+            id = "manager",
+            name = "Менеджер",
+            description = "Управление проектами",
+            salary = 90000,
+            expenses = 45000,
+            taxes = 15000,
+            education = "MBA"
+        )
+        val dream = Dream(
+            id = "business_empire",
+            name = "Бизнес-империя",
+            description = "Создать сеть компаний",
+            cost = 10000000,
+            cashFlowRequired = 200000,
+            fastTrackNumber = 6
+        )
+        val player = Player(
+            profession = profession,
+            dream = dream,
+            age = 40,
+            name = "Кастомный Игрок",
+            education = EducationLevel.MASTER,
+            workExperience = 15,
+            maritalStatus = MaritalStatus.MARRIED,
+            childrenCount = 2,
+            spouseIncome = 30000,
+            riskTolerance = RiskTolerance.AGGRESSIVE,
+            investmentStrategy = InvestmentStrategy.GROWTH,
+            savingsRate = 25,
+            healthLevel = HealthLevel.FAIR,
+            stressLevel = StressLevel.HIGH,
+            workLifeBalance = WorkLifeBalance.WORK_FOCUSED
+        )
+        assertEquals("Кастомный Игрок", player.name)
+        assertEquals(40, player.age)
+        assertEquals(profession, player.profession)
+        assertEquals(dream, player.dream)
+        assertEquals(EducationLevel.MASTER, player.education)
+        assertEquals(15, player.workExperience)
+        assertEquals(MaritalStatus.MARRIED, player.maritalStatus)
+        assertEquals(2, player.childrenCount)
+        assertEquals(30000, player.spouseIncome)
+        assertEquals(RiskTolerance.AGGRESSIVE, player.riskTolerance)
+        assertEquals(InvestmentStrategy.GROWTH, player.investmentStrategy)
+        assertEquals(25, player.savingsRate)
+        assertEquals(HealthLevel.FAIR, player.healthLevel)
+        assertEquals(StressLevel.HIGH, player.stressLevel)
+        assertEquals(WorkLifeBalance.WORK_FOCUSED, player.workLifeBalance)
+    }
 }
