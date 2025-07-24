@@ -27,7 +27,14 @@ import android.speech.RecognizerIntent
 import android.content.ActivityNotFoundException
 
 class CharacterCreationActivity : AppCompatActivity() {
-    
+    // Переменные для сбора данных персонажа
+    private var playerName: String = ""
+    private var playerAge: Int = 25
+    private var selectedStartDate: Long? = null
+    private var selectedProfession: Profession? = null
+    private var selectedDream: Dream? = null
+    // Если потребуется расширение — добавить остальные переменные (skills, goals и т.д.)
+
     private lateinit var stepContainer: FrameLayout
     private var currentStep = 1
     private val totalSteps = 5
