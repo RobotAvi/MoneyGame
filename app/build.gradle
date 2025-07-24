@@ -23,10 +23,12 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug  // Используем debug ключ для упрощения
+            manifestPlaceholders = [allowBackup: "true"]
         }
         debug {
             applicationIdSuffix ".debug"
             debuggable true
+            manifestPlaceholders = [allowBackup: "true"]
         }
     }
     

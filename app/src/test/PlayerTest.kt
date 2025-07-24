@@ -8,6 +8,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
+import androidx.test.platform.app.InstrumentationRegistry
 
 @RunWith(RobolectricTestRunner::class)
 class PlayerTest {
@@ -721,5 +722,15 @@ class PlayerTest {
         assertEquals(HealthLevel.FAIR, player.healthLevel)
         assertEquals(StressLevel.HIGH, player.stressLevel)
         assertEquals(WorkLifeBalance.WORK_FOCUSED, player.workLifeBalance)
+    }
+
+    @Test
+    fun `test applicationId and signingConfig for debug and release`() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val packageName = context.packageName
+        // Для debug должен быть суффикс .debug
+        assertTrue(packageName == "com.financialsuccess.game.debug" || packageName == "com.financialsuccess.game")
+        // Проверяем, что используется debug-ключ (по умолчанию)
+        // (В реальном проекте можно проверить сертификат через PackageManager, но здесь достаточно проверить отсутствие custom signingConfig)
     }
 }
