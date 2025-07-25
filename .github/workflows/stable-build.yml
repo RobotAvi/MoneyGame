@@ -263,11 +263,17 @@ jobs:
           echo "🏗️ Проверка APK через aapt..."
           /home/runner/android-sdk/build-tools/*/aapt dump badging releases/debug/latest-debug.apk | head -10 || echo "❌ aapt failed"
           
+      - name: 🏗️ Копировать apk с красивым именем
+        run: |
+          VERSION="${{ needs.setup-android-sdk.outputs.version }}"
+          DATE="${{ needs.setup-android-sdk.outputs.date }}"
+          cp app/build/outputs/apk/debug/app-debug.apk "releases/debug/FinancialSuccess-v${VERSION}-${DATE}.apk"
+
       - name: 📦 Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}.apk
-          path: releases/debug/latest-debug.apk
+          path: releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}.apk
 
       - name: Bump version in build.gradle
         run: |
