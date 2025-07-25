@@ -318,7 +318,7 @@ jobs:
     - name: 📦 Download APK artifact
       uses: actions/download-artifact@v4
       with:
-        name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}
+        name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}.apk
         path: releases/debug/
         
     - name: 🧾 Log Android SDK structure
