@@ -551,8 +551,8 @@ jobs:
 
         echo "📱 ==== УСТАНОВКА APK ===="
         echo "📱 Проверка наличия APK..."
-        if [ ! -f "releases/debug/latest-debug.apk" ]; then
-          echo "❌ Error: latest-debug.apk not found in releases/debug/"
+        if [ ! -f "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" ]; then
+          echo "❌ Error: FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk not found in releases/debug/"
           echo "📱 Содержимое releases/debug/:"
           ls -la releases/debug/ || echo "❌ releases/debug/ не существует"
           echo "📱 Поиск APK файлов в проекте:"
@@ -562,10 +562,10 @@ jobs:
         fi
         
         echo "📱 Размер APK:"
-        du -h releases/debug/latest-debug.apk || echo "❌ Не удалось получить размер APK"
+        du -h "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" || echo "❌ Не удалось получить размер APK"
         
         echo "📱 Установка APK..."
-        adb install releases/debug/latest-debug.apk || { echo "❌ ОШИБКА: adb install failed"; kill $EMULATOR_PID 2>/dev/null || true; exit 1; }
+        adb install "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" || { echo "❌ ОШИБКА: adb install failed"; kill $EMULATOR_PID 2>/dev/null || true; exit 1; }
         
         echo "📱 Проверка установки APK..."
         adb shell pm list packages | grep financialsuccess || echo "❌ Пакет financialsuccess не найден"
@@ -901,8 +901,8 @@ jobs:
 
         echo "📱 ==== УСТАНОВКА APK ===="
         echo "📱 Проверка наличия APK..."
-        if [ ! -f "releases/debug/latest-debug.apk" ]; then
-          echo "❌ Error: latest-debug.apk not found in releases/debug/"
+        if [ ! -f "releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk" ]; then
+          echo "❌ Error: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk not found in releases/debug/"
           echo "📱 Содержимое releases/debug/:"
           ls -la releases/debug/ || echo "❌ releases/debug/ не существует"
           echo "📱 Поиск APK файлов в проекте:"
@@ -912,10 +912,10 @@ jobs:
         fi
         
         echo "📱 Размер APK:"
-        du -h releases/debug/latest-debug.apk || echo "❌ Не удалось получить размер APK"
+        du -h "releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk" || echo "❌ Не удалось получить размер APK"
         
         echo "📱 Установка APK..."
-        adb install releases/debug/latest-debug.apk || { echo "❌ ОШИБКА: adb install failed"; kill $EMULATOR_PID 2>/dev/null || true; exit 1; }
+        adb install "releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk" || { echo "❌ ОШИБКА: adb install failed"; kill $EMULATOR_PID 2>/dev/null || true; exit 1; }
         
         echo "📱 Проверка установки APK..."
         adb shell pm list packages | grep financialsuccess || echo "❌ Пакет financialsuccess не найден"
