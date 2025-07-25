@@ -585,6 +585,15 @@ jobs:
         sleep 5
         ps aux | grep emulator | grep -v grep || echo "✅ Эмулятор остановлен"
 
+    - name: 📋 Log workspace structure after screenshots
+      run: |
+        echo "==== WORKSPACE STRUCTURE AFTER SCREENSHOTS ===="
+        ls -la
+        echo "==== FIND ALL APK FILES ===="
+        find . -name "*.apk" -type f
+        echo "==== ANDROID DEVICES ===="
+        adb devices || echo "adb not available"
+
     - name: 📸 Run Maestro Screenshots (Phone)
       run: |
         export PATH="$PATH:$HOME/.maestro/bin"
