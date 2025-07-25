@@ -266,7 +266,7 @@ jobs:
       - name: 📦 Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}
+          name: FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}.apk
           path: releases/debug/latest-debug.apk
 
       - name: Bump version in build.gradle
