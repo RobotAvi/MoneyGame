@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity() {
         btnLoad.visibility = if (GameSaveManager.loadPlayer(this) != null) View.VISIBLE else View.GONE
 
         btnNew.setOnClickListener {
+            // Запуск только стандартного флоу (без custom)
             startActivity(Intent(this, CharacterCreationActivity::class.java))
         }
         btnLoad.setOnClickListener {
