@@ -16,6 +16,17 @@
         android:contentDescription="@string/app_logo" />
 
     <TextView
+        android:id="@+id/tv_version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Версия 1.81"
+        android:textSize="16sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginBottom="8dp"
+        android:textStyle="bold"
+        android:gravity="center" />
+
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/app_name"
@@ -40,6 +51,7 @@
         android:text="@string/new_game"
         android:textSize="18sp"
         android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/money_green"
         style="@style/Widget.Material3.Button" />
 
     <com.google.android.material.button.MaterialButton

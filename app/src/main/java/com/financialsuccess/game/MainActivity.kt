@@ -9,6 +9,7 @@ import com.financialsuccess.game.data.GameSaveManager
 import com.financialsuccess.game.models.Player
 import android.view.View
 import com.financialsuccess.game.GameActivity
+import android.widget.TextView
 
 class MainActivity : AppCompatActivity() {
     
@@ -19,6 +20,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
+        // Отображаем версию приложения
+        val versionView = binding.root.findViewById<TextView>(R.id.tv_version)
+        versionView.text = "Версия ${BuildConfig.VERSION_NAME}"
         setupUI()
     }
     
