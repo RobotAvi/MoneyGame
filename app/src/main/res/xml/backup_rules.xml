@@ -2,7 +2,4 @@
 <full-backup-content>
     <!-- Include game save data -->
     <include domain="sharedpref" path="game_saves"/>
-    
-    <!-- Exclude sensitive data -->
-    <exclude domain="sharedpref" path="device_preferences"/>
 </full-backup-content>

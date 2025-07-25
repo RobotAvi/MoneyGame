@@ -47,7 +47,12 @@ class GameActivity : AppCompatActivity() {
     
     private fun initGame() {
         // Проверяем, передан ли готовый игрок
-        val player = intent.getParcelableExtra("player", Player::class.java)
+        val player = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra("player", Player::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getParcelableExtra("player")
+        }
         
         if (player != null) {
             // Используем готового игрока
@@ -56,8 +61,18 @@ class GameActivity : AppCompatActivity() {
             updateUI()
         } else {
             // Старый способ - создаем игрока из отдельных параметров
-            val profession = intent.getParcelableExtra("profession", Profession::class.java)
-            val dream = intent.getParcelableExtra("dream", Dream::class.java)
+            val profession = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra("profession", Profession::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra("profession")
+            }
+            val dream = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra("dream", Dream::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra("dream")
+            }
             val playerAge = intent.getIntExtra("playerAge", 25)
             val playerName = intent.getStringExtra("playerName")
             val startDateMillis = intent.getLongExtra("startDate", 0L).takeIf { it != 0L }
