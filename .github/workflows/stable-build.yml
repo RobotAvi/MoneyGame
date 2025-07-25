@@ -266,7 +266,7 @@ jobs:
       - name: 📦 Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}
+          name: FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}.apk
           path: releases/debug/latest-debug.apk
 
       - name: Bump version in build.gradle
@@ -584,6 +584,15 @@ jobs:
         echo "📱 Проверка остановки эмулятора..."
         sleep 5
         ps aux | grep emulator | grep -v grep || echo "✅ Эмулятор остановлен"
+
+    - name: 📋 Log workspace structure after screenshots
+      run: |
+        echo "==== WORKSPACE STRUCTURE AFTER SCREENSHOTS ===="
+        ls -la
+        echo "==== FIND ALL APK FILES ===="
+        find . -name "*.apk" -type f
+        echo "==== ANDROID DEVICES ===="
+        adb devices || echo "adb not available"
 
     - name: 📸 Run Maestro Screenshots (Phone)
       run: |
