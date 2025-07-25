@@ -40,7 +40,7 @@
             android:textSize="24sp"
             android:textStyle="bold"
             android:layout_marginTop="24dp"
-            android:textColor="@color/primary_color" />
+            android:textColor="@color/asset_blue" />
         <TextView
             android:id="@+id/tvProfessionParams"
             android:layout_width="wrap_content"
@@ -48,7 +48,7 @@
             android:text="Параметры профессии"
             android:textSize="18sp"
             android:layout_marginTop="12dp"
-            android:textColor="@color/primary_color_dark" />
+            android:textColor="@color/asset_blue" />
     </LinearLayout>
 
     <!-- Кнопки свайпа -->
