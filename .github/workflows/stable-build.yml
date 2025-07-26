@@ -296,6 +296,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git pull origin main
           git add releases/debug/*.apk app/build.gradle
           git commit -m "Update APK and bump version [skip ci]"
           git push https://x-access-token:${GH_PAT}@github.com/RobotAvi/MoneyGame.git HEAD:main
