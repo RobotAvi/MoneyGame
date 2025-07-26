@@ -113,8 +113,8 @@ jobs:
           yes | sdkmanager --licenses || { echo "❌ ОШИБКА: sdkmanager license error"; exit 1; }
           
           echo "🔧 Установка компонентов SDK..."
-          echo "🔧 Устанавливаем: platform-tools, emulator, system-images;android-34;default;x86_64"
-          sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: sdkmanager install error"; exit 1; }
+          echo "🔧 Устанавливаем: platform-tools, platforms;android-34, build-tools;34.0.0, emulator, system-images;android-34;default;x86_64"
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "emulator" "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: sdkmanager install error"; exit 1; }
           
           echo "🔧 ==== ПРОВЕРКА УСТАНОВЛЕННЫХ КОМПОНЕНТОВ ===="
           echo "🔧 Структура SDK после установки:"
