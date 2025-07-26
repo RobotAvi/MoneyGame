@@ -252,7 +252,7 @@ jobs:
           mkdir -p releases/debug
           
           echo "🏗️ Копирование APK..."
-          cp app/build/outputs/apk/debug/app.apk releases/debug/latest.apk || { echo "❌ ОШИБКА: Не удалось скопировать APK"; exit 1; }
+          cp app/build/outputs/apk/debug/app-debug.apk releases/debug/latest.apk || { echo "❌ ОШИБКА: Не удалось скопировать APK"; exit 1; }
           
           echo "🏗️ Проверка скопированного APK..."
           ls -la releases/debug/latest.apk || echo "❌ APK не найден в releases/debug/"
