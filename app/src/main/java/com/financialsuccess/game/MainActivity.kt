@@ -22,8 +22,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         
         // Отображаем версию приложения
-        val versionView = binding.root.findViewById<TextView>(R.id.tv_version)
-        versionView.text = "Версия ${BuildConfig.VERSION_NAME}"
+        binding.tvVersion.text = "Версия ${BuildConfig.VERSION_NAME}"
         setupUI()
     }
     
