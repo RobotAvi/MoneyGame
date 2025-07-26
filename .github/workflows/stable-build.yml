@@ -296,9 +296,18 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Получаем последние изменения с main
+          git fetch origin main
+          git checkout main
+          git pull origin main
+          
+          # Добавляем изменения
           git add releases/debug/*.apk app/build.gradle
           git commit -m "Update APK and bump version [skip ci]"
-          git push https://x-access-token:${GH_PAT}@github.com/RobotAvi/MoneyGame.git HEAD:main
+          
+          # Пушим изменения
+          git push https://x-access-token:${GH_PAT}@github.com/RobotAvi/MoneyGame.git main
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
 
@@ -1023,6 +1032,11 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
+        
+        # Получаем последние изменения
+        git fetch origin main
+        git pull origin main
+        
         git add screenshots/
         if git diff --staged --quiet; then
           echo "No screenshots to commit"
@@ -1033,7 +1047,7 @@ jobs:
           - Phone: $(ls screenshots/phone/*.png 2>/dev/null | wc -l) files
           - Tablet: $(ls screenshots/tablet/*.png 2>/dev/null | wc -l) files
           - Total: $(find screenshots/ -name "*.png" 2>/dev/null | wc -l) files"
-          git push
+          git push origin main
         fi
 
     - name: 🏷️ Create GitHub Release
