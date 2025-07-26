@@ -10,22 +10,24 @@ import com.financialsuccess.game.models.Player
 import android.view.View
 import com.financialsuccess.game.GameActivity
 import android.widget.TextView
+import com.financialsuccess.game.BuildConfig
 
 class MainActivity : AppCompatActivity() {
     
     private lateinit var binding: ActivityMainBinding
-    
-    companion object {
-        private const val APP_VERSION = "1.82"
-    }
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
-        // Отображаем версию приложения
-        binding.tvVersion.text = "Версия $APP_VERSION"
+        // Отображаем версию приложения с номером билда
+        val versionText = if (BuildConfig.BUILD_NUMBER != "local") {
+            "Версия ${BuildConfig.VERSION_NAME} (build ${BuildConfig.BUILD_NUMBER})"
+        } else {
+            "Версия ${BuildConfig.VERSION_NAME} (local build)"
+        }
+        binding.tvVersion.text = versionText
         setupUI()
     }
     

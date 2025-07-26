@@ -16,6 +16,10 @@ android {
         versionName "1.82"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        
+        // Добавляем номер билда в BuildConfig
+        buildConfigField "String", "BUILD_NUMBER", "\"${System.getenv('GITHUB_RUN_NUMBER') ?: 'local'}\""
+        buildConfigField "String", "BUILD_DATE", "\"${new Date().format('yyyy-MM-dd HH:mm')}\""
     }
 
     buildTypes {
@@ -43,6 +47,7 @@ android {
     
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 }
 
