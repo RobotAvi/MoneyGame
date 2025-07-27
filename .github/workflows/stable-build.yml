@@ -172,6 +172,8 @@ jobs:
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Remove default GitHub Actions credentials
         run: git config --local --remove-section http."https://github.com/" || true
@@ -299,10 +301,9 @@ jobs:
           
           # Получаем последние изменения с main
           git fetch origin main
-          git checkout main
-          git pull origin main
+          git pull origin main --rebase
           
-          # Добавляем изменения
+          # Добавляем все изменения
           git add releases/debug/*.apk app/build.gradle
           git commit -m "Update APK and bump version [skip ci]"
           
