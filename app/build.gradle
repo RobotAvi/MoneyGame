@@ -12,14 +12,10 @@ android {
         applicationId "com.financialsuccess.game"
         minSdk 24
         targetSdk 34
-        versionCode 83
-        versionName "1.82"
+        versionCode 84
+        versionName "1.83"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        
-        // Добавляем номер билда в BuildConfig
-        buildConfigField "String", "BUILD_NUMBER", "\"${System.getenv('GITHUB_RUN_NUMBER') ?: System.getenv('BUILD_NUMBER') ?: 'local'}\""
-        buildConfigField "String", "BUILD_DATE", "\"${new Date().format('yyyy-MM-dd HH:mm')}\""
     }
 
     buildTypes {
@@ -28,13 +24,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug  // Используем debug ключ для упрощения
             manifestPlaceholders = [allowBackup: "true"]
-            buildConfigField "boolean", "DEBUG", "false"
         }
         debug {
             applicationIdSuffix ".debug"
             debuggable true
             manifestPlaceholders = [allowBackup: "true"]
-            buildConfigField "boolean", "DEBUG", "true"
         }
     }
     
@@ -49,7 +43,6 @@ android {
     
     buildFeatures {
         viewBinding true
-        buildConfig true
     }
 }
 

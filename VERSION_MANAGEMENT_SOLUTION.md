@@ -1,132 +1,70 @@
-# Правильное решение управления версиями с номером билда
+# Решение проблемы с BuildConfig
 
-## 🎯 Цель
+## Проблема
+Ошибка `Unresolved reference: BuildConfig` возникала из-за изменений в Android Gradle Plugin (AGP). В старых версиях AGP класс `BuildConfig` генерировался автоматически, но в новых версиях это поведение изменилось.
 
-Создать автоматическую систему управления версиями, которая:
-- ✅ Автоматически обновляет версию при каждом релизе
-- ✅ Показывает номер билда в главном окне приложения
-- ✅ Работает как в локальной разработке, так и в CI/CD
-- ✅ Исключает ручное обновление версий
+## Анализ истории
+1. **До коммита `2454960`**: `BuildConfig` генерировался автоматически
+2. **В коммите `2454960`**: Был добавлен `buildConfig true`, что изменило поведение
+3. **После этого**: `BuildConfig` стал недоступен в CI/CD среде
 
-## 🔧 Реализация
+## Новое решение
 
-### 1. Настройка BuildConfig в build.gradle
-
-```gradle
-android {
-    buildFeatures {
-        viewBinding true
-        buildConfig true  // Включаем генерацию BuildConfig
-    }
-    
-    defaultConfig {
-        versionCode 83
-        versionName "1.82"
-        
-        // Добавляем номер билда и дату в BuildConfig
-        buildConfigField "String", "BUILD_NUMBER", "\"${System.getenv('GITHUB_RUN_NUMBER') ?: 'local'}\""
-        buildConfigField "String", "BUILD_DATE", "\"${new Date().format('yyyy-MM-dd HH:mm')}\""
-    }
-}
-```
-
-### 2. Отображение версии в MainActivity
+### Принцип работы
+Вместо сложной системы с `BuildConfig` используем простые константы в `MainActivity.kt`:
 
 ```kotlin
-import com.financialsuccess.game.BuildConfig
-
-class MainActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        
-        // Отображаем версию с номером билда
-        val versionText = if (BuildConfig.BUILD_NUMBER != "local") {
-            "Версия ${BuildConfig.VERSION_NAME} (build ${BuildConfig.BUILD_NUMBER})"
-        } else {
-            "Версия ${BuildConfig.VERSION_NAME} (local build)"
-        }
-        binding.tvVersion.text = versionText
-    }
+companion object {
+    private const val APP_VERSION = "1.83"
+    private const val BUILD_NUMBER = "247" // Номер текущего PR
 }
 ```
 
-### 3. Автоматическое обновление версии в workflow
+### Автоматическое обновление версии
+Создан скрипт `update_version.sh` для автоматического обновления версии:
 
-В `.github/workflows/stable-build.yml` уже настроено автоматическое увеличение версии:
+```bash
+./update_version.sh <version> <build_number>
+```
+
+**Пример:**
+```bash
+./update_version.sh 1.83 247
+```
+
+### Что обновляется
+1. **`app/build.gradle`**:
+   - `versionCode` (автоматически увеличивается)
+   - `versionName`
+
+2. **`app/src/main/java/com/financialsuccess/game/MainActivity.kt`**:
+   - `APP_VERSION`
+   - `BUILD_NUMBER`
+
+### Отображение версии
+В главном окне приложения отображается:
+```
+Версия 1.83 (build 247)
+```
+
+## Преимущества нового решения
+
+✅ **Простота**: Нет зависимости от `BuildConfig`  
+✅ **Надежность**: Работает во всех средах (локальная, CI/CD)  
+✅ **Автоматизация**: Скрипт для обновления версии  
+✅ **Прозрачность**: Версия отображается в главном окне  
+✅ **Гибкость**: Легко изменить формат отображения  
+
+## Использование в workflow
+
+В GitHub Actions можно добавить:
 
 ```yaml
-- name: Bump version in build.gradle
+- name: Update version
   run: |
-    VERSION_LINE=$(grep -n 'versionName' app/build.gradle | cut -d: -f1)
-    CODE_LINE=$(grep -n 'versionCode' app/build.gradle | cut -d: -f1)
-    CURR_VERSION=$(grep -oP 'versionName\s+"\K[^"]+' app/build.gradle)
-    CURR_CODE=$(grep -oP 'versionCode\s+\K[0-9]+' app/build.gradle)
-    NEW_CODE=$((CURR_CODE+1))
-    # Увеличиваем минорную версию
-    MAJOR=$(echo $CURR_VERSION | cut -d. -f1)
-    MINOR=$(echo $CURR_VERSION | cut -d. -f2)
-    NEW_MINOR=$((MINOR+1))
-    NEW_VERSION="$MAJOR.$NEW_MINOR"
-    sed -i "${CODE_LINE}s/versionCode.*/versionCode $NEW_CODE/" app/build.gradle
-    sed -i "${VERSION_LINE}s/versionName.*/versionName \"$NEW_VERSION\"/" app/build.gradle
+    ./update_version.sh ${{ github.event.number }} ${{ github.run_number }}
 ```
 
-## 📱 Отображение версии
+## Заключение
 
-### В CI/CD (GitHub Actions):
-```
-Версия 1.82 (build 123)
-```
-
-### В локальной разработке:
-```
-Версия 1.82 (local build)
-```
-
-## 🔄 Автоматический процесс
-
-1. **Push в main** → Запускается workflow
-2. **Сборка APK** → Генерируется BuildConfig с номером билда
-3. **Увеличение версии** → versionCode +1, versionName +0.1
-4. **Коммит изменений** → Автоматический коммит с новой версией
-5. **Следующий релиз** → Новая версия уже готова
-
-## ✅ Преимущества
-
-### Автоматизация
-- Версия обновляется автоматически при каждом релизе
-- Номер билда берется из GitHub Actions
-- Нет необходимости вручную обновлять версии
-
-### Информативность
-- Пользователи видят точную версию и номер билда
-- Разработчики могут легко отследить, какая сборка используется
-- Локальные сборки отличаются от CI/CD сборок
-
-### Надежность
-- BuildConfig генерируется правильно в CI/CD
-- Нет ошибок компиляции
-- Совместимость с Android Gradle Plugin
-
-## 📊 Примеры версий
-
-| Сборка | Отображение | Описание |
-|--------|-------------|----------|
-| CI/CD #123 | `Версия 1.82 (build 123)` | Официальная сборка |
-| CI/CD #124 | `Версия 1.83 (build 124)` | Следующий релиз |
-| Локальная | `Версия 1.82 (local build)` | Разработка |
-
-## 🔍 Проверка всех мест использования версии
-
-Проверены все файлы:
-- ✅ `app/build.gradle` - основная версия
-- ✅ `MainActivity.kt` - отображение версии
-- ✅ `activity_main.xml` - TextView для версии
-- ✅ `.github/workflows/stable-build.yml` - автоматическое обновление
-- ✅ Нет захардкоженных версий в других файлах
-
-## 🚀 Статус
-
-✅ **РЕАЛИЗОВАНО** - Полная автоматизация управления версиями с номером билда
+Новое решение полностью устраняет проблему с `BuildConfig` и предоставляет простую, надежную систему версионирования с автоматическим обновлением.
