@@ -77,50 +77,61 @@ jobs:
           echo "🔧 ==== УСТАНОВКА ANDROID SDK (если не в кэше) ===="
           set -x
           
-          echo "🔧 Очистка существующих файлов..."
-          rm -rf $HOME/cmdline-tools.zip $HOME/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
-          
-          echo "🔧 Обновление пакетов..."
-          sudo apt-get update
-          
-          echo "🔧 Установка wget и unzip..."
-          sudo apt-get install -y wget unzip
-          
-          echo "🔧 Загрузка commandline tools..."
-          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
-          
-          echo "🔧 Распаковка commandline tools..."
-          unzip cmdline-tools.zip -d $HOME
-          
-          echo "🔧 Создание структуры директорий..."
-          mkdir -p $HOME/android-sdk/cmdline-tools
-          
-          # Удаляем существующую директорию, если она есть
-          if [ -d "$HOME/android-sdk/cmdline-tools/latest" ]; then
-            echo "🔧 Удаление существующей директории latest..."
-            rm -rf $HOME/android-sdk/cmdline-tools/latest
+          # Проверяем, установлен ли уже SDK
+          if [ -d "$HOME/android-sdk/cmdline-tools/latest" ] && [ -f "$HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager" ]; then
+            echo "✅ Android SDK уже установлен, пропускаем установку"
+            echo "🔧 Настройка переменных окружения..."
+            export ANDROID_SDK_ROOT=/home/runner/android-sdk
+            export ANDROID_HOME=/home/runner/android-sdk
+            export PATH="$PATH:/home/runner/android-sdk/emulator:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
+          else
+            echo "🔧 Android SDK не найден, начинаем установку..."
+            
+            echo "🔧 Очистка существующих файлов..."
+            rm -rf $HOME/cmdline-tools.zip $HOME/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+            
+            echo "🔧 Обновление пакетов..."
+            sudo apt-get update
+            
+            echo "🔧 Установка wget и unzip..."
+            sudo apt-get install -y wget unzip
+            
+            echo "🔧 Загрузка commandline tools..."
+            wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+            
+            echo "🔧 Распаковка commandline tools..."
+            unzip cmdline-tools.zip -d $HOME
+            
+            echo "🔧 Создание структуры директорий..."
+            mkdir -p $HOME/android-sdk/cmdline-tools
+            
+            # Удаляем существующую директорию, если она есть
+            if [ -d "$HOME/android-sdk/cmdline-tools/latest" ]; then
+              echo "🔧 Удаление существующей директории latest..."
+              rm -rf $HOME/android-sdk/cmdline-tools/latest
+            fi
+            
+            mv $HOME/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+            
+            echo "🔧 Настройка переменных окружения..."
+            export ANDROID_SDK_ROOT=/home/runner/android-sdk
+            export ANDROID_HOME=/home/runner/android-sdk
+            export PATH="$PATH:/home/runner/android-sdk/emulator:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
+            
+            echo "🔧 Принятие лицензий..."
+            yes | sdkmanager --licenses || { echo "❌ ОШИБКА: sdkmanager license error"; exit 1; }
+            
+            echo "🔧 Установка компонентов SDK..."
+            sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: sdkmanager install error"; exit 1; }
+            
+            echo "🔧 Установка прав на выполнение..."
+            chmod +x $ANDROID_SDK_ROOT/platform-tools/* || echo "⚠️ Не удалось установить права для platform-tools"
+            chmod +x $ANDROID_SDK_ROOT/emulator/* || echo "⚠️ Не удалось установить права для emulator"
+            chmod +x $ANDROID_SDK_ROOT/emulator/qemu/linux-x86_64/* || echo "⚠️ Не удалось установить права для qemu"
+            chmod +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/* || echo "⚠️ Не удалось установить права для cmdline-tools"
+            
+            echo "✅ Android SDK установлен и готов к использованию"
           fi
-          
-          mv $HOME/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
-          
-          echo "🔧 Настройка переменных окружения..."
-          export ANDROID_SDK_ROOT=/home/runner/android-sdk
-          export ANDROID_HOME=/home/runner/android-sdk
-          export PATH="$PATH:/home/runner/android-sdk/emulator:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
-          
-          echo "🔧 Принятие лицензий..."
-          yes | sdkmanager --licenses || { echo "❌ ОШИБКА: sdkmanager license error"; exit 1; }
-          
-          echo "🔧 Установка компонентов SDK..."
-          sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: sdkmanager install error"; exit 1; }
-          
-          echo "🔧 Установка прав на выполнение..."
-          chmod +x $ANDROID_SDK_ROOT/platform-tools/* || echo "⚠️ Не удалось установить права для platform-tools"
-          chmod +x $ANDROID_SDK_ROOT/emulator/* || echo "⚠️ Не удалось установить права для emulator"
-          chmod +x $ANDROID_SDK_ROOT/emulator/qemu/linux-x86_64/* || echo "⚠️ Не удалось установить права для qemu"
-          chmod +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/* || echo "⚠️ Не удалось установить права для cmdline-tools"
-          
-          echo "✅ Android SDK установлен и готов к использованию"
 
       - name: 📦 Upload Android SDK as artifact
         uses: actions/upload-artifact@v4
@@ -154,16 +165,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: 🗄️ Cache Android SDK for build
-        id: cache-sdk
-        uses: actions/cache@v3
+      - name: 📥 Download Android SDK artifact
+        uses: actions/download-artifact@v4
         with:
-          path: |
-            ~/.android/cache
-            /home/runner/android-sdk
-          key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-android-sdk-
+          name: android-sdk
+          path: /home/runner/android-sdk
             
       - name: 🔧 Setup Java
         uses: actions/setup-java@v4
