@@ -112,8 +112,7 @@ jobs:
           
           echo "✅ Android SDK установлен и готов к использованию"
 
-      - name: 📦 Upload Android SDK as artifact (if not cached)
-        if: steps.cache-sdk-setup.outputs.cache-hit != 'true'
+      - name: 📦 Upload Android SDK as artifact
         uses: actions/upload-artifact@v4
         with:
           name: android-sdk
@@ -162,12 +161,14 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
           
-      - name: 📦 Download Android SDK artifact (if not cached)
-        if: steps.cache-sdk.outputs.cache-hit != 'true'
+      - name: 📦 Download Android SDK artifact
+        id: download-sdk
         uses: actions/download-artifact@v4
         with:
           name: android-sdk
           path: /home/runner/android-sdk
+          
+
           
       - name: 🔧 Восстановление прав на выполнение (Build)
         run: |
@@ -306,8 +307,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-android-sdk-
 
-    - name: 📦 Download Android SDK artifact (if not cached)
-      if: steps.cache-sdk-screenshots.outputs.cache-hit != 'true'
+    - name: 📦 Download Android SDK artifact
       uses: actions/download-artifact@v4
       with:
         name: android-sdk
