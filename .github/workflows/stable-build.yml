@@ -249,13 +249,13 @@ jobs:
         run: |
           VERSION="${{ needs.setup-android-sdk.outputs.version }}"
           DATE="${{ needs.setup-android-sdk.outputs.date }}"
-          cp app/build/outputs/apk/debug/app-debug.apk "releases/debug/FinancialSuccess-v${VERSION}-${DATE}.apk"
+          cp app/build/outputs/apk/debug/app-debug.apk "releases/debug/FinancialSuccess-v${VERSION}-${DATE}-debug.apk"
 
       - name: 📦 Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}.apk
-          path: releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}.apk
+          name: FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk
+          path: releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk
 
       - name: Bump version in build.gradle
         run: |
@@ -316,7 +316,7 @@ jobs:
     - name: 📦 Download APK artifact
       uses: actions/download-artifact@v4
       with:
-        name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}.apk
+        name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk
         path: releases/debug/
         
     - name: 🧾 Log Android SDK structure
@@ -647,7 +647,7 @@ jobs:
     - name: 📥 Download APK
       uses: actions/download-artifact@v4
       with:
-        name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}
+        name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk
 
     - name: 📥 Download Phone Screenshots
       uses: actions/download-artifact@v4
