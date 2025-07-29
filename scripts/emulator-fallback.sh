@@ -1,268 +1,118 @@
 #!/bin/bash
 
 # Fallback script for Android emulator setup
-# Used when the main workflow fails to start the emulator properly
+# This script is used when the main emulator setup fails
 
 set -e
 
 echo "🔄 ==== FALLBACK EMULATOR SETUP ===="
 
-# Configuration
-ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-/home/runner/android-sdk}"
-ANDROID_HOME="${ANDROID_HOME:-/home/runner/android-sdk}"
-AVD_NAME="ci_nexus5_fallback"
-EMULATOR_TIMEOUT=180
-BOOT_TIMEOUT=300
+# Check if APK file is provided
+if [ -z "$1" ]; then
+    echo "❌ Error: APK file path not provided"
+    exit 1
+fi
 
-# Setup environment
-export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
+APK_FILE="$1"
+echo "📱 APK file: $APK_FILE"
+
+# Check if APK exists
+if [ ! -f "$APK_FILE" ]; then
+    echo "❌ Error: APK file not found: $APK_FILE"
+    exit 1
+fi
+
+# Setup environment variables
+export ANDROID_SDK_ROOT=/home/runner/android-sdk
+export ANDROID_HOME=/home/runner/android-sdk
+export PATH="$PATH:/home/runner/android-sdk/emulator:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
 
 echo "🔧 Environment setup:"
-echo "  - ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
-echo "  - ANDROID_HOME: $ANDROID_HOME"
-echo "  - AVD_NAME: $AVD_NAME"
+echo "  ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+echo "  ANDROID_HOME: $ANDROID_HOME"
 
-# Function to check if emulator is responding
-check_emulator_ready() {
-    local max_attempts=30
-    local attempt=1
-    
-    echo "📱 Checking emulator availability..."
-    
-    while [ $attempt -le $max_attempts ]; do
-        if adb devices | grep -q "emulator.*device"; then
-            echo "✅ Emulator is connected and ready"
-            return 0
-        fi
-        
-        echo "⏳ Waiting for emulator... ($attempt/$max_attempts)"
-        sleep 2
-        attempt=$((attempt + 1))
-    done
-    
-    echo "❌ Emulator not ready after $max_attempts attempts"
-    return 1
-}
+# Kill any existing emulator processes
+echo "🔧 Killing existing emulator processes..."
+pkill -f emulator 2>/dev/null || true
+pkill -f qemu 2>/dev/null || true
+adb kill-server 2>/dev/null || true
+sleep 5
 
-# Function to check system boot with multiple indicators
-check_system_boot_robust() {
-    local max_attempts=60
-    local attempt=1
-    
-    echo "🔄 Checking system boot status..."
-    
-    while [ $attempt -le $max_attempts ]; do
-        echo "📱 Attempt $attempt/$max_attempts: checking system status..."
-        
-        # Check multiple boot indicators
-        local boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
-        local bootanim_status=$(adb shell getprop init.svc.bootanim 2>/dev/null | tr -d '\r')
-        local zygote_status=$(adb shell getprop init.svc.zygote 2>/dev/null | tr -d '\r')
-        
-        echo "  - sys.boot_completed: $boot_completed"
-        echo "  - init.svc.bootanim: $bootanim_status"
-        echo "  - init.svc.zygote: $zygote_status"
-        
-        # System is ready if boot_completed = 1 or bootanim = stopped
-        if [ "$boot_completed" = "1" ] || [ "$bootanim_status" = "stopped" ]; then
-            echo "✅ System is fully booted"
-            return 0
-        fi
-        
-        # Alternative check - if system responds to commands
-        if adb shell "echo 'test'" 2>/dev/null | grep -q "test"; then
-            echo "✅ System is responding to commands"
-            return 0
-        fi
-        
-        sleep 5
-        attempt=$((attempt + 1))
-    done
-    
-    echo "❌ System failed to boot within timeout"
-    return 1
-}
+# Verify Android SDK installation
+echo "🔧 Verifying Android SDK installation..."
+if [ ! -f "$ANDROID_SDK_ROOT/platform-tools/adb" ]; then
+    echo "❌ Error: adb not found in Android SDK"
+    exit 1
+fi
 
-# Function to unlock screen with multiple methods
-unlock_screen_robust() {
-    echo "🔓 Unlocking screen..."
-    
-    # Wait a bit after system boot
+if [ ! -f "$ANDROID_SDK_ROOT/emulator/emulator" ]; then
+    echo "❌ Error: emulator not found in Android SDK"
+    exit 1
+fi
+
+echo "✅ Android SDK verification passed"
+
+# Create AVD if it doesn't exist
+echo "🔧 Creating AVD if needed..."
+if ! avdmanager list avd | grep -q "ci_nexus5"; then
+    echo "🔧 Creating AVD ci_nexus5..."
+    echo "no" | avdmanager create avd --name "ci_nexus5" --package "system-images;android-34;default;x86_64" --device "Nexus 5" --force
+fi
+
+# Start emulator
+echo "🔧 Starting emulator..."
+emulator -avd "ci_nexus5" -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics -verbose -memory 2048 -cores 2 -skin 1080x1920 &
+EMULATOR_PID=$!
+echo "🔧 Emulator PID: $EMULATOR_PID"
+
+# Wait for emulator to start
+echo "🔧 Waiting for emulator to start..."
+sleep 30
+
+# Wait for device to appear in adb
+echo "🔧 Waiting for device in adb..."
+for i in {1..30}; do
+    if adb devices | grep -q "emulator"; then
+        echo "✅ Emulator detected in adb"
+        break
+    fi
+    sleep 2
+done
+
+# Wait for Android to boot
+echo "🔧 Waiting for Android to boot..."
+for i in {1..60}; do
+    if adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; then
+        echo "✅ Android boot completed"
+        break
+    fi
     sleep 5
-    
-    # Method 1: Key events
-    echo "📱 Method 1: Key events"
-    adb shell input keyevent 82 || echo "⚠️ Key event 82 failed"
-    sleep 2
-    adb shell input keyevent 82 || echo "⚠️ Key event 82 failed"
-    sleep 2
-    
-    # Method 2: Swipe gesture
-    echo "📱 Method 2: Swipe gesture"
-    adb shell input swipe 540 1500 540 500 || echo "⚠️ Swipe failed"
-    sleep 1
-    
-    # Method 3: Multiple key events
-    echo "📱 Method 3: Multiple key events"
-    adb shell input keyevent 26 || echo "⚠️ Power key failed"  # Power
-    sleep 1
-    adb shell input keyevent 82 || echo "⚠️ Menu key failed"   # Menu
-    sleep 1
-    
-    # Method 4: Alternative swipe
-    echo "📱 Method 4: Alternative swipe"
-    adb shell input swipe 540 1600 540 400 || echo "⚠️ Alternative swipe failed"
-    sleep 1
-    
-    echo "✅ Screen unlock attempts completed"
-}
+done
 
-# Function to install APK with retry logic
-install_apk_robust() {
-    local apk_path="$1"
-    local max_attempts=3
-    local attempt=1
-    
-    if [ -z "$apk_path" ]; then
-        echo "❌ APK path not provided"
-        return 1
-    fi
-    
-    if [ ! -f "$apk_path" ]; then
-        echo "❌ APK file not found: $apk_path"
-        return 1
-    fi
-    
-    echo "📦 Installing APK: $apk_path"
-    echo "📦 APK size: $(du -h "$apk_path" | cut -f1)"
-    
-    while [ $attempt -le $max_attempts ]; do
-        echo "📱 Installation attempt $attempt/$max_attempts..."
-        
-        # Check package service availability
-        echo "📱 Checking package service..."
-        adb shell "service list | grep package" || echo "⚠️ Package service not found"
-        
-        # Wait for system stabilization
-        echo "📱 Waiting for system stabilization..."
-        sleep 10
-        
-        # Try to install APK
-        if adb install -r "$apk_path"; then
-            echo "✅ APK installed successfully"
-            
-            # Verify installation
-            if adb shell pm list packages | grep -q "financialsuccess"; then
-                echo "✅ Package verified in system"
-                return 0
-            else
-                echo "⚠️ Package not found in system list"
-                if [ $attempt -eq $max_attempts ]; then
-                    return 1
-                fi
-            fi
-        else
-            echo "❌ Installation attempt $attempt failed"
-            if [ $attempt -eq $max_attempts ]; then
-                echo "📱 Getting error details..."
-                adb logcat -d | tail -50 || echo "logcat failed"
-                return 1
-            fi
-        fi
-        
-        attempt=$((attempt + 1))
-        sleep 5
-    done
-    
-    return 1
-}
+# Unlock screen
+echo "🔧 Unlocking screen..."
+adb shell input keyevent 82
+sleep 2
+adb shell input keyevent 82
+sleep 2
+adb shell input swipe 540 1500 540 500
 
-# Main function
-main() {
-    echo "🚀 Starting fallback emulator setup..."
-    
-    # Step 1: Create AVD if it doesn't exist
-    echo "📱 Creating AVD: $AVD_NAME"
-    if ! avdmanager list avd | grep -q "$AVD_NAME"; then
-        echo "no" | avdmanager create avd --name "$AVD_NAME" --package "system-images;android-34;default;x86_64" --device "Nexus 5" --force
-        echo "✅ AVD created"
-    else
-        echo "✅ AVD already exists"
-    fi
-    
-    # Step 2: Start emulator with alternative parameters
-    echo "📱 Starting emulator with fallback configuration..."
-    emulator -avd "$AVD_NAME" \
-        -no-window \
-        -gpu swiftshader_indirect \
-        -noaudio \
-        -no-boot-anim \
-        -accel off \
-        -no-snapshot \
-        -no-metrics \
-        -verbose \
-        -memory 2048 \
-        -cores 2 \
-        -skin 1080x1920 \
-        -qemu -enable-kvm &
-    
-    EMULATOR_PID=$!
-    echo "📱 Emulator PID: $EMULATOR_PID"
-    
-    # Step 3: Wait for emulator to be ready
-    if ! check_emulator_ready; then
-        echo "❌ Emulator failed to start"
-        kill $EMULATOR_PID 2>/dev/null || true
-        exit 1
-    fi
-    
-    # Step 4: Wait for system to boot
-    if ! check_system_boot_robust; then
-        echo "❌ System failed to boot"
-        kill $EMULATOR_PID 2>/dev/null || true
-        exit 1
-    fi
-    
-    # Step 5: Unlock screen
-    unlock_screen_robust
-    
-    # Step 6: Install APK if provided
-    if [ -n "$1" ]; then
-        if ! install_apk_robust "$1"; then
-            echo "❌ APK installation failed"
-            kill $EMULATOR_PID 2>/dev/null || true
-            exit 1
-        fi
-    else
-        echo "ℹ️ No APK provided for installation"
-    fi
-    
-    echo "🎉 Fallback emulator setup completed successfully!"
-    echo "📱 Emulator is ready for use"
-    
-    # Keep emulator running for further use
-    echo "📱 Keeping emulator running..."
-    wait $EMULATOR_PID
-}
+# Install APK
+echo "🔧 Installing APK..."
+adb install "$APK_FILE"
 
-# Handle command line arguments
-case "${1:-}" in
-    --help|-h)
-        echo "Usage: $0 [apk_path]"
-        echo ""
-        echo "Fallback Android emulator setup script"
-        echo "  - Creates AVD if needed"
-        echo "  - Starts emulator with robust configuration"
-        echo "  - Waits for system boot with multiple checks"
-        echo "  - Unlocks screen with multiple methods"
-        echo "  - Installs APK with retry logic (if provided)"
-        echo ""
-        echo "Examples:"
-        echo "  $0                                    # Basic setup"
-        echo "  $0 app-debug.apk                      # Setup with APK installation"
-        exit 0
-        ;;
-    *)
-        main "$@"
-        ;;
-esac
+# Verify installation
+echo "🔧 Verifying APK installation..."
+if adb shell pm list packages | grep -q financialsuccess; then
+    echo "✅ APK installed successfully"
+else
+    echo "❌ APK installation failed"
+    exit 1
+fi
+
+# Stop emulator
+echo "🔧 Stopping emulator..."
+kill $EMULATOR_PID 2>/dev/null || true
+pkill -f emulator 2>/dev/null || true
+
+echo "✅ Fallback emulator setup completed successfully"

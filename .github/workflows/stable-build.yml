@@ -67,8 +67,9 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
             /home/runner/android-sdk
-          key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-android-sdk-v2-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
+            ${{ runner.os }}-android-sdk-v2-
             ${{ runner.os }}-android-sdk-
 
       - name: 🛠️ Setup Android SDK (Cached)
@@ -76,6 +77,10 @@ jobs:
         run: |
           echo "🔧 ==== УСТАНОВКА ANDROID SDK (если не в кэше) ===="
           set -x
+          
+          echo "🔧 Очистка существующих Android SDK файлов..."
+          rm -rf $HOME/android-sdk
+          rm -rf $HOME/cmdline-tools
           
           echo "🔧 Обновление пакетов..."
           sudo apt-get update
@@ -89,8 +94,26 @@ jobs:
           echo "🔧 Распаковка commandline tools..."
           unzip cmdline-tools.zip -d $HOME
           
+          echo "🔧 Проверка распакованных файлов..."
+          ls -la $HOME/cmdline-tools || echo "❌ cmdline-tools не найден после распаковки"
+          
           echo "🔧 Создание структуры директорий..."
           mkdir -p $HOME/android-sdk/cmdline-tools
+          
+          # Проверяем, существует ли уже директория latest
+          if [ -d "$HOME/android-sdk/cmdline-tools/latest" ]; then
+            echo "🔧 Директория latest уже существует, удаляем старую..."
+            rm -rf $HOME/android-sdk/cmdline-tools/latest
+          fi
+          
+          # Проверяем, что исходная директория существует
+          if [ ! -d "$HOME/cmdline-tools" ]; then
+            echo "❌ ОШИБКА: $HOME/cmdline-tools не существует после распаковки"
+            echo "🔧 Содержимое $HOME:"
+            ls -la $HOME/ | grep cmdline || echo "❌ cmdline-tools не найден в $HOME"
+            exit 1
+          fi
+          
           mv $HOME/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
           
           echo "🔧 Настройка переменных окружения..."
@@ -110,6 +133,18 @@ jobs:
           chmod +x $ANDROID_SDK_ROOT/emulator/qemu/linux-x86_64/* || echo "⚠️ Не удалось установить права для qemu"
           chmod +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/* || echo "⚠️ Не удалось установить права для cmdline-tools"
           
+          echo "🔧 Проверка установки Android SDK..."
+          echo "🔧 Проверка структуры директорий:"
+          ls -la $ANDROID_SDK_ROOT/ || echo "❌ ANDROID_SDK_ROOT не существует"
+          ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/ || echo "❌ cmdline-tools не найдены"
+          ls -la $ANDROID_SDK_ROOT/platform-tools/ || echo "❌ platform-tools не найдены"
+          ls -la $ANDROID_SDK_ROOT/emulator/ || echo "❌ emulator не найден"
+          
+          echo "🔧 Проверка основных команд:"
+          $ANDROID_SDK_ROOT/platform-tools/adb version || echo "❌ adb не работает"
+          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --list | head -5 || echo "❌ sdkmanager не работает"
+          $ANDROID_SDK_ROOT/emulator/emulator -version || echo "❌ emulator не работает"
+          
           echo "✅ Android SDK установлен и готов к использованию"
 
       - name: 📦 Upload Android SDK as artifact
@@ -117,6 +152,51 @@ jobs:
         with:
           name: android-sdk
           path: /home/runner/android-sdk
+
+      - name: 🔧 Verify Android SDK Setup
+        run: |
+          echo "🔧 ==== ПРОВЕРКА УСТАНОВКИ ANDROID SDK ===="
+          
+          # Проверяем, что основные компоненты работают
+          if [ ! -f "/home/runner/android-sdk/platform-tools/adb" ]; then
+            echo "❌ ОШИБКА: adb не найден в кэшированном SDK"
+            echo "🔧 Принудительная переустановка Android SDK..."
+            
+            # Очищаем кэш и переустанавливаем
+            rm -rf /home/runner/android-sdk
+            rm -rf $HOME/cmdline-tools
+            
+            # Повторяем установку
+            wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+            unzip cmdline-tools.zip -d $HOME
+            mkdir -p $HOME/android-sdk/cmdline-tools
+            mv $HOME/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+            
+            export ANDROID_SDK_ROOT=/home/runner/android-sdk
+            export ANDROID_HOME=/home/runner/android-sdk
+            export PATH="$PATH:/home/runner/android-sdk/emulator:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
+            
+            yes | sdkmanager --licenses
+            sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64"
+            
+            chmod +x $ANDROID_SDK_ROOT/platform-tools/*
+            chmod +x $ANDROID_SDK_ROOT/emulator/*
+            chmod +x $ANDROID_SDK_ROOT/emulator/qemu/linux-x86_64/*
+            chmod +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/*
+            
+            echo "✅ Android SDK переустановлен"
+          else
+            echo "✅ Android SDK в кэше работает корректно"
+          fi
+          
+          # Run test script to verify setup
+          echo "🧪 Running Android SDK test..."
+          if [ -f "scripts/test-android-sdk.sh" ]; then
+            chmod +x scripts/test-android-sdk.sh
+            ./scripts/test-android-sdk.sh || { echo "❌ Android SDK test failed"; exit 1; }
+          else
+            echo "⚠️ Test script not found, skipping verification"
+          fi
 
   # Сборка и тестирование APK
   build-and-test:
@@ -151,8 +231,9 @@ jobs:
           path: |
             ~/.android/cache
             /home/runner/android-sdk
-          key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-android-sdk-v2-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
+            ${{ runner.os }}-android-sdk-v2-
             ${{ runner.os }}-android-sdk-
             
       - name: 🔧 Setup Java
@@ -303,8 +384,9 @@ jobs:
         path: |
           ~/.android/cache
           /home/runner/android-sdk
-        key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
+        key: ${{ runner.os }}-android-sdk-v2-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: |
+          ${{ runner.os }}-android-sdk-v2-
           ${{ runner.os }}-android-sdk-
 
     - name: 📦 Download Android SDK artifact
