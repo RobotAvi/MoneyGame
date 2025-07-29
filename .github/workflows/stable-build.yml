@@ -59,6 +59,7 @@ jobs:
           echo "✅ Версия успешно извлечена: $VERSION ($VERSION_CODE)"
 
       - name: 🗄️ Cache Android SDK
+        id: cache-sdk-setup
         uses: actions/cache@v3
         with:
           path: |
@@ -71,7 +72,7 @@ jobs:
             ${{ runner.os }}-android-sdk-
 
       - name: 🛠️ Setup Android SDK (Cached)
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.cache-sdk-setup.outputs.cache-hit != 'true'
         run: |
           echo "🔧 ==== УСТАНОВКА ANDROID SDK (если не в кэше) ===="
           set -x
@@ -112,11 +113,11 @@ jobs:
           echo "✅ Android SDK установлен и готов к использованию"
 
       - name: 📦 Upload Android SDK as artifact (if not cached)
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.cache-sdk-setup.outputs.cache-hit != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: android-sdk
-          path: ${{ env.ANDROID_SDK_ROOT }}
+          path: /home/runner/android-sdk
 
   # Сборка и тестирование APK
   build-and-test:
@@ -134,6 +135,7 @@ jobs:
         run: git config --local --remove-section http."https://github.com/" || true
         
       - name: 🗄️ Cache Gradle dependencies
+        id: cache-gradle
         uses: actions/cache@v3
         with:
           path: |
@@ -142,6 +144,17 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+
+      - name: 🗄️ Cache Android SDK for build
+        id: cache-sdk
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.android/cache
+            /home/runner/android-sdk
+          key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-android-sdk-
             
       - name: 🔧 Setup Java
         uses: actions/setup-java@v4
@@ -149,8 +162,8 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
           
-      - name: 📦 Download Android SDK artifact (if needed)
-        if: needs.setup-android-sdk.outputs.sdk-path != '/home/runner/android-sdk'
+      - name: 📦 Download Android SDK artifact (if not cached)
+        if: steps.cache-sdk.outputs.cache-hit != 'true'
         uses: actions/download-artifact@v4
         with:
           name: android-sdk
@@ -283,6 +296,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: 🗄️ Cache Android SDK for screenshots
+      id: cache-sdk-screenshots
       uses: actions/cache@v3
       with:
         path: |
@@ -293,7 +307,7 @@ jobs:
           ${{ runner.os }}-android-sdk-
 
     - name: 📦 Download Android SDK artifact (if not cached)
-      if: steps.cache.outputs.cache-hit != 'true'
+      if: steps.cache-sdk-screenshots.outputs.cache-hit != 'true'
       uses: actions/download-artifact@v4
       with:
         name: android-sdk
