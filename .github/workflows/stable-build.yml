@@ -445,7 +445,7 @@ jobs:
         echo "📱 Создание AVD ci_nexus5..."
         if ! avdmanager list avd | grep -q "ci_nexus5"; then
           echo "📱 AVD ci_nexus5 не существует, создаем..."
-          echo "no" | avdmanager create avd --name "ci_nexus5" --package "system-images;android-34;default;x86_64" --device "Nexus 5" || { echo "❌ ОШИБКА: Не удалось создать AVD"; exit 1; }
+          echo "no" | avdmanager create avd --name "ci_nexus5" --package "system-images;android-34;default;x86_64" --device "Nexus 5" --force || { echo "❌ ОШИБКА: Не удалось создать AVD"; exit 1; }
           echo "✅ AVD ci_nexus5 создан"
         else
           echo "✅ AVD ci_nexus5 уже существует"
