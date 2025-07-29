@@ -633,351 +633,10 @@ jobs:
         path: screenshots/phone/
         retention-days: 30
 
-  # Параллельная генерация скриншотов для планшета
-  screenshots-tablet:
-    runs-on: ubuntu-latest
-    needs: [setup-android-sdk, build-and-test]
-    env:
-      ANDROID_SDK_ROOT: /home/runner/android-sdk
-      ANDROID_HOME: /home/runner/android-sdk
-    # Убрано условие should_release
-    
-    steps:
-    - name: 📥 Checkout code
-      uses: actions/checkout@v4
-
-    - name: 📦 Download Android SDK artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: android-sdk
-        path: ${{ env.ANDROID_SDK_ROOT }}
-        
-    - name: 📦 Download APK artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}
-        path: releases/debug/
-        
-    - name: 🧾 Log Android SDK structure
-      run: |
-        echo "🔍 ==== ПРОВЕРКА ЗАГРУЖЕННОГО ANDROID SDK (TABLET) ===="
-        echo "🔍 ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
-        echo "🔍 Проверяем существование директории:"
-        ls -la $ANDROID_SDK_ROOT/ || echo "❌ ANDROID_SDK_ROOT не существует"
-        
-        echo "🔍 ==== СТРУКТУРА SDK ===="
-        find $ANDROID_SDK_ROOT/ -type d | head -20
-        
-        echo "🔍 ==== ПРОВЕРКА КРИТИЧЕСКИХ ФАЙЛОВ ===="
-        echo "🔍 Проверка adb:"
-        ls -la $ANDROID_SDK_ROOT/platform-tools/adb || echo "❌ adb не найден"
-        
-        echo "🔍 Проверка emulator:"
-        ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
-        
-        echo "🔍 Проверка avdmanager:"
-        ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager || echo "❌ avdmanager не найден"
-        
-        echo "🔍 Проверка system-images:"
-        find $ANDROID_SDK_ROOT/system-images/ -name "*.img" | head -5 || echo "❌ system-images не найдены"
-        
-        echo "🔍 ==== ПРОВЕРКА ПРАВ НА ВЫПОЛНЕНИЕ ===="
-        echo "🔍 Права на adb:"
-        ls -la $ANDROID_SDK_ROOT/platform-tools/adb | grep -E "^-r.x" || echo "❌ adb не имеет прав на выполнение"
-        
-        echo "🔍 Права на emulator:"
-        ls -la $ANDROID_SDK_ROOT/emulator/emulator | grep -E "^-r.x" || echo "❌ emulator не имеет прав на выполнение"
-        
-        echo "🔍 Права на avdmanager:"
-        ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager | grep -E "^-r.x" || echo "❌ avdmanager не имеет прав на выполнение"
-    
-    - name: 🔧 Восстановление прав на выполнение (Tablet)
-      run: |
-        echo "🔧 ==== ВОССТАНОВЛЕНИЕ ПРАВ НА ВЫПОЛНЕНИЕ ===="
-        echo "🔧 Устанавливаем права на выполнение для всех SDK файлов..."
-        
-        chmod +x $ANDROID_SDK_ROOT/platform-tools/* || echo "⚠️ Не удалось установить права для platform-tools"
-        chmod +x $ANDROID_SDK_ROOT/emulator/* || echo "⚠️ Не удалось установить права для emulator"
-        chmod +x $ANDROID_SDK_ROOT/emulator/qemu/linux-x86_64/* || echo "⚠️ Не удалось установить права для qemu"
-        chmod +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/* || echo "⚠️ Не удалось установить права для cmdline-tools"
-        
-        echo "🔧 ==== ПРОВЕРКА ПРАВ ПОСЛЕ ВОССТАНОВЛЕНИЯ ===="
-        echo "🔧 Права на adb:"
-        ls -la $ANDROID_SDK_ROOT/platform-tools/adb | grep -E "^-r.x" || echo "❌ adb не имеет прав на выполнение"
-        
-        echo "🔧 Права на emulator:"
-        ls -la $ANDROID_SDK_ROOT/emulator/emulator | grep -E "^-r.x" || echo "❌ emulator не имеет прав на выполнение"
-        
-        echo "🔧 Права на avdmanager:"
-        ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager | grep -E "^-r.x" || echo "❌ avdmanager не имеет прав на выполнение"
-        
-        echo "🔧 ==== ТЕСТИРОВАНИЕ КОМАНД ===="
-        echo "🔧 Тест adb:"
-        $ANDROID_SDK_ROOT/platform-tools/adb version || echo "❌ adb version failed"
-        
-        echo "🔧 Тест emulator:"
-        $ANDROID_SDK_ROOT/emulator/emulator -version || echo "❌ emulator version failed"
-        
-        echo "🔧 Тест avdmanager:"
-        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager list avd || echo "❌ avdmanager failed"
-
-    - name: 🔍 Проверка наличия adb в PATH (tablet)
-      run: |
-        echo "🔍 Установка зависимостей для adb..."
-        sudo dpkg --add-architecture i386
-        sudo apt-get update
-        sudo apt-get install -y libc6:i386 libstdc++6:i386 lib32z1 lib32stdc++6
-        
-        echo "🔍 Настройка PATH для adb..."
-        export PATH="$PATH:/home/runner/android-sdk/platform-tools"
-        echo "PATH: $PATH"
-        
-        echo "🔍 Проверка наличия adb..."
-        echo "🔍 Проверяем существование файла adb..."
-        ls -la /home/runner/android-sdk/platform-tools/adb || echo "❌ Файл adb не найден"
-        
-        echo "🔍 Проверяем права на выполнение..."
-        file /home/runner/android-sdk/platform-tools/adb || echo "❌ Не удалось определить тип файла"
-        
-        echo "🔍 Попытка запуска adb по полному пути..."
-        /home/runner/android-sdk/platform-tools/adb version || echo "❌ adb version failed"
-        
-        echo "🔍 Попытка запуска adb через which..."
-        which adb || echo "❌ which adb failed"
-        
-        echo "🔍 Проверка библиотек adb..."
-        ldd /home/runner/android-sdk/platform-tools/adb || echo "❌ ldd failed"
-
-    - name: 🎭 Install Maestro
-      run: |
-        curl -Ls "https://get.maestro.mobile.dev" | bash
-        export PATH="$PATH:$HOME/.maestro/bin"
-        echo "n" | maestro --version
-
-    - name: 📱 Start Android Emulator and Install APK (Tablet)
-      shell: bash
-      env:
-        ANDROID_SDK_ROOT: /home/runner/android-sdk
-        ANDROID_HOME: /home/runner/android-sdk
-      run: |
-        echo "📱 ==== ЗАПУСК ЭМУЛЯТОРА ПЛАНШЕТА ===="
-        export PATH="$PATH:/home/runner/android-sdk/emulator:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
-        set -e
-        
-        echo "📱 Настройка переменных окружения..."
-        echo "📱 SDK root: $ANDROID_SDK_ROOT"
-        echo "📱 ANDROID_HOME: $ANDROID_HOME"
-        echo "📱 PATH: $PATH"
-        
-        echo "📱 Проверка system-images..."
-        ls -la $ANDROID_SDK_ROOT/system-images/android-34/default/x86_64/ || echo "❌ system-images не найдены"
-        
-        echo "📱 Очистка старых AVD..."
-        rm -rf ~/.android/avd/*
-        echo "📱 Содержимое ~/.android/avd/ после очистки:"
-        ls -la ~/.android/avd/ || echo "❌ ~/.android/avd/ не существует"
-
-        echo "📱 ==== СОЗДАНИЕ AVD ===="
-        echo "📱 Проверка существующих AVD..."
-        avdmanager list avd || echo "❌ avdmanager list avd failed"
-        
-        echo "📱 Создание AVD ci_nexus10..."
-        if ! avdmanager list avd | grep -q "ci_nexus10"; then
-          echo "📱 AVD ci_nexus10 не существует, создаем..."
-          echo "no" | avdmanager create avd --name "ci_nexus10" --package "system-images;android-34;default;x86_64" --device "Nexus 10" || { echo "❌ ОШИБКА: Не удалось создать AVD"; exit 1; }
-          echo "✅ AVD ci_nexus10 создан"
-        else
-          echo "✅ AVD ci_nexus10 уже существует"
-        fi
-        
-        echo "📱 Проверка созданного AVD..."
-        avdmanager list avd | grep ci_nexus10 || echo "❌ AVD ci_nexus10 не найден в списке"
-
-        echo "📱 ==== ЗАПУСК ЭМУЛЯТОРА ===="
-        echo "📱 Запуск эмулятора в фоне..."
-        emulator -avd "ci_nexus10" -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics -verbose &
-        EMULATOR_PID=$!
-        echo "📱 PID эмулятора: $EMULATOR_PID"
-        
-        echo "📱 Проверка процесса эмулятора..."
-        ps aux | grep emulator | grep -v grep || echo "❌ Процесс эмулятора не найден"
-
-        echo "📱 Пауза после запуска эмулятора (30 секунд)..."
-        sleep 30
-        
-        echo "📱 Проверка процесса эмулятора после паузы..."
-        ps aux | grep emulator | grep -v grep || echo "❌ Процесс эмулятора не найден после паузы"
-
-        echo "📱 ==== ОЖИДАНИЕ ПОЯВЛЕНИЯ В ADB ===="
-        emulator_timeout=120
-        emulator_elapsed=0
-        for i in {1..60}; do
-          echo "📱 Попытка $i/60: проверка adb devices..."
-          adb devices || echo "❌ adb devices failed"
-          
-          if adb devices | grep -q "emulator"; then
-            echo "✅ Эмулятор появился в adb"
-            echo "📱 Полный список устройств:"
-            adb devices
-            break
-          fi
-          
-          if [ $i -eq 60 ]; then
-            echo "❌ Не удалось запустить эмулятор за $emulator_timeout секунд"
-            echo "📱 Логи эмулятора:"
-            ps aux | grep emulator | grep -v grep || echo "❌ Процесс эмулятора не найден"
-            kill $EMULATOR_PID 2>/dev/null || true
-            exit 1
-          fi
-          
-          sleep 2
-          emulator_elapsed=$((emulator_elapsed + 2))
-          if [ $((emulator_elapsed % 30)) -eq 0 ]; then
-            echo "⏳ Ожидание эмулятора: $emulator_elapsed секунд из $emulator_timeout..."
-            echo "📱 Проверка процесса эмулятора:"
-            ps aux | grep emulator | grep -v grep || echo "❌ Процесс эмулятора не найден"
-          fi
-        done
-
-        echo "📱 ==== ОЖИДАНИЕ ЗАГРУЗКИ ANDROID ===="
-        boot_timeout=600
-        boot_elapsed=0
-        logcat_dumped=0
-        for i in {1..150}; do
-          echo "📱 Попытка $i/150: проверка sys.boot_completed..."
-          adb shell getprop sys.boot_completed 2>/dev/null || echo "❌ adb shell getprop failed"
-
-          # Диагностика при первой неудачной попытке
-          if [ $i -eq 1 ]; then
-            echo "📋 === LOGCAT (первые 100 строк) ==="
-            adb logcat -d | head -100 || echo "logcat failed"
-            echo "📋 === EMULATOR STATUS ==="
-            adb -s emulator-5554 emu avd status || echo "emu avd status failed"
-            echo "📋 === EMULATOR PROCESSES ==="
-            ps aux | grep emulator | grep -v grep || echo "❌ Процесс эмулятора не найден"
-          fi
-
-          # Диагностика каждые 30 секунд
-          if [ $((boot_elapsed % 30)) -eq 0 ] && [ $boot_elapsed -ne 0 ]; then
-            echo "📋 === LOGCAT (последние 100 строк) ==="
-            adb logcat -d | tail -100 || echo "logcat failed"
-            echo "📋 === EMULATOR STATUS ==="
-            adb -s emulator-5554 emu avd status || echo "emu avd status failed"
-          fi
-
-          if adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; then
-            echo "✅ Android полностью загружен"
-            echo "📱 Дополнительные свойства загрузки:"
-            adb shell getprop | grep -E "(sys.boot_completed|init.svc.bootanim|init.svc.zygote)" || echo "❌ Не удалось получить свойства"
-            break
-          fi
-
-          if [ $i -eq 150 ]; then
-            echo "❌ Android не загрузился за $boot_timeout секунд"
-            echo "📱 Последние свойства загрузки:"
-            adb shell getprop | grep -E "(sys.boot_completed|init.svc.bootanim|init.svc.zygote)" || echo "❌ Не удалось получить свойства"
-            echo "📋 === LOGCAT (последние 200 строк) ==="
-            adb logcat -d | tail -200 || echo "logcat failed"
-            echo "📋 === EMULATOR STATUS ==="
-            adb -s emulator-5554 emu avd status || echo "emu avd status failed"
-            kill $EMULATOR_PID 2>/dev/null || true
-            exit 1
-          fi
-
-          sleep 2
-          boot_elapsed=$((boot_elapsed + 2))
-          if [ $((boot_elapsed % 30)) -eq 0 ]; then
-            echo "⏳ Ожидание загрузки Android: $boot_elapsed секунд из $boot_timeout..."
-            echo "📱 Проверка процесса эмулятора:"
-            ps aux | grep emulator | grep -v grep || echo "❌ Процесс эмулятора не найден"
-          fi
-        done
-
-        echo "📱 ==== РАЗБЛОКИРОВКА ЭКРАНА ===="
-        echo "📱 Разблокировка экрана..."
-        adb shell input keyevent 82 || echo "❌ keyevent 82 failed"
-        adb shell input keyevent 82 || echo "❌ keyevent 82 failed"
-        sleep 2
-
-        echo "📱 ==== УСТАНОВКА APK ===="
-        echo "📱 Проверка наличия APK..."
-        if [ ! -f "releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk" ]; then
-          echo "❌ Error: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk not found in releases/debug/"
-          echo "📱 Содержимое releases/debug/:"
-          ls -la releases/debug/ || echo "❌ releases/debug/ не существует"
-          echo "📱 Поиск APK файлов в проекте:"
-          find . -name "*.apk" -type f || echo "❌ APK файлы не найдены"
-          kill $EMULATOR_PID 2>/dev/null || true
-          exit 1
-        fi
-        
-        echo "📱 Размер APK:"
-        du -h "releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk" || echo "❌ Не удалось получить размер APK"
-        
-        echo "📱 Установка APK..."
-        adb install "releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk" || { echo "❌ ОШИБКА: adb install failed"; kill $EMULATOR_PID 2>/dev/null || true; exit 1; }
-        
-        echo "📱 Проверка установки APK..."
-        adb shell pm list packages | grep financialsuccess || echo "❌ Пакет financialsuccess не найден"
-        
-        if adb shell pm list packages | grep -q financialsuccess; then
-          echo "✅ APK успешно установлен"
-          echo "📱 Информация о пакете:"
-          adb shell pm dump financialsuccess | head -20 || echo "❌ Не удалось получить информацию о пакете"
-        else
-          echo "❌ Error: APK installation failed"
-          echo "📱 Список всех пакетов:"
-          adb shell pm list packages | head -20 || echo "❌ Не удалось получить список пакетов"
-          kill $EMULATOR_PID 2>/dev/null || true
-          exit 1
-        fi
-
-        echo "📱 ==== ЗАВЕРШЕНИЕ РАБОТЫ ===="
-        echo "📱 Остановка эмулятора..."
-        kill $EMULATOR_PID 2>/dev/null || true
-        pkill -f emulator 2>/dev/null || true
-        
-        echo "📱 Проверка остановки эмулятора..."
-        sleep 5
-        ps aux | grep emulator | grep -v grep || echo "✅ Эмулятор остановлен"
-
-    - name: 📸 Run Maestro Screenshots (Tablet)
-      run: |
-        export PATH="$PATH:$HOME/.maestro/bin"
-        mkdir -p screenshots/tablet
-        # Пробуем специфичную конфигурацию для планшета
-        config_file="maestro/screenshots-tablet.yaml"
-        if [ ! -f "$config_file" ]; then
-          config_file="maestro/screenshots.yaml"
-        fi
-        if [ -f "$config_file" ]; then
-          echo "Using tablet screenshots configuration: $config_file"
-          maestro test "$config_file" --format junit --output screenshots/tablet/
-          echo "📱 Tablet screenshots completed!"
-        else
-          echo "⚠️ Warning: Maestro configuration file not found: $config_file"
-          echo "📱 Tablet screenshots skipped!"
-        fi
-    - name: 📱 Stop Android Emulator (Tablet)
-      run: |
-        echo "📱 Остановка эмулятора..."
-        kill $EMULATOR_PID 2>/dev/null || true
-        pkill -f emulator 2>/dev/null || true
-        echo "📱 Проверка остановки эмулятора..."
-        sleep 5
-        ps aux | grep emulator | grep -v grep || echo "✅ Эмулятор остановлен"
-
-    - name: 📤 Upload Tablet Screenshots
-      uses: actions/upload-artifact@v4
-      with:
-        name: tablet-screenshots-v${{ needs.build-and-test.outputs.version }}
-        path: screenshots/tablet/
-        retention-days: 30
-
   # Финальная сборка релиза
   create-release:
     runs-on: ubuntu-latest
-    needs: [setup-android-sdk, build-and-test, screenshots-phone, screenshots-tablet]
+    needs: [setup-android-sdk, build-and-test, screenshots-phone]
     # Убрано условие should_release
     permissions:
       contents: write
@@ -996,28 +655,18 @@ jobs:
       with:
         name: phone-screenshots-v${{ needs.build-and-test.outputs.version }}
 
-    - name: 📥 Download Tablet Screenshots
-      uses: actions/download-artifact@v4
-      with:
-        name: tablet-screenshots-v${{ needs.build-and-test.outputs.version }}
-
     - name: 📸 Prepare screenshots for repository
       run: |
-        mkdir -p screenshots/phone screenshots/tablet
+        mkdir -p screenshots/phone
         
         # Копируем скриншоты в правильные папки
         if [ -d "screenshots/phone" ]; then
           cp -r screenshots/phone/* screenshots/phone/ 2>/dev/null || true
         fi
-        if [ -d "screenshots/tablet" ]; then
-          cp -r screenshots/tablet/* screenshots/tablet/ 2>/dev/null || true
-        fi
         
         echo "📱 Phone screenshots:"
         ls -la screenshots/phone/ 2>/dev/null || echo "No phone screenshots"
         echo ""
-        echo "📱 Tablet screenshots:"
-        ls -la screenshots/tablet/ 2>/dev/null || echo "No tablet screenshots"
 
     - name: 📝 Commit Screenshots to Repository
       run: |
@@ -1031,7 +680,6 @@ jobs:
           
           📱 Screenshots:
           - Phone: $(ls screenshots/phone/*.png 2>/dev/null | wc -l) files
-          - Tablet: $(ls screenshots/tablet/*.png 2>/dev/null | wc -l) files
           - Total: $(find screenshots/ -name "*.png" 2>/dev/null | wc -l) files"
           git push
         fi
@@ -1045,7 +693,6 @@ jobs:
         files: |
           releases/debug/*.apk
           screenshots/phone/*.png
-          screenshots/tablet/*.png
         draft: false
         prerelease: false
         generate_release_notes: false
@@ -1060,13 +707,9 @@ jobs:
         echo "📅 Date: ${{ needs.build-and-test.outputs.date }}"
         echo "� APK: releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk"
         echo "📸 Phone screenshots: screenshots/phone/"
-        echo "📸 Tablet screenshots: screenshots/tablet/"
         echo ""
-        echo "� Files:"
+        echo " Files:"
         ls -la releases/debug/ || echo "No APK files found"
         echo ""
         echo "📸 Phone screenshots:"
         ls -la screenshots/phone/ 2>/dev/null || echo "No phone screenshots"
-        echo ""
-        echo "📸 Tablet screenshots:"
-        ls -la screenshots/tablet/ 2>/dev/null || echo "No tablet screenshots"
