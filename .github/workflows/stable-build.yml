@@ -463,8 +463,8 @@ jobs:
         echo "📱 Проверка процесса эмулятора..."
         ps aux | grep emulator | grep -v grep || echo "❌ Процесс эмулятора не найден"
 
-        echo "📱 Пауза после запуска эмулятора (30 секунд)..."
-        sleep 30
+        echo "📱 Пауза после запуска эмулятора (45 секунд)..."
+        sleep 45
         
         echo "📱 Проверка процесса эмулятора после паузы..."
         ps aux | grep emulator | grep -v grep || echo "❌ Процесс эмулятора не найден после паузы"
@@ -472,11 +472,29 @@ jobs:
         echo "📱 ==== ОЖИДАНИЕ ПОЯВЛЕНИЯ В ADB ===="
         emulator_timeout=120
         emulator_elapsed=0
+        
+        # Перезапускаем ADB сервер для очистки состояния
+        echo "📱 Перезапуск ADB сервера..."
+        adb kill-server || echo "⚠️ adb kill-server failed"
+        sleep 2
+        adb start-server || echo "⚠️ adb start-server failed"
+        sleep 3
+        
         for i in {1..60}; do
           echo "📱 Попытка $i/60: проверка adb devices..."
-          adb devices || echo "❌ adb devices failed"
           
-          if adb devices | grep -q "emulator"; then
+          # Проверяем доступность ADB
+          if ! adb devices >/dev/null 2>&1; then
+            echo "❌ adb devices failed, перезапускаем ADB..."
+            adb kill-server || true
+            sleep 2
+            adb start-server || true
+            sleep 3
+            continue
+          fi
+          
+          devices_output=$(adb devices 2>/dev/null || echo "")
+          if echo "$devices_output" | grep -q "emulator"; then
             echo "✅ Эмулятор появился в adb"
             echo "📱 Полный список устройств:"
             adb devices
@@ -485,6 +503,8 @@ jobs:
           
           if [ $i -eq 60 ]; then
             echo "❌ Не удалось запустить эмулятор за $emulator_timeout секунд"
+            echo "📱 Проверка ADB состояния:"
+            adb devices || echo "adb devices failed"
             echo "📱 Логи эмулятора:"
             ps aux | grep emulator | grep -v grep || echo "❌ Процесс эмулятора не найден"
             kill $EMULATOR_PID 2>/dev/null || true
@@ -505,18 +525,35 @@ jobs:
         boot_elapsed=0
         for i in {1..75}; do
           echo "📱 Попытка $i/75: проверка sys.boot_completed..."
-          adb shell getprop sys.boot_completed 2>/dev/null || echo "❌ adb shell getprop failed"
           
-          if adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; then
-            echo "✅ Android полностью загружен"
-            echo "📱 Дополнительные свойства загрузки:"
-            adb shell getprop | grep -E "(sys.boot_completed|init.svc.bootanim|init.svc.zygote)" || echo "❌ Не удалось получить свойства"
-            break
+          # Проверяем доступность ADB
+          if ! adb devices | grep -q "emulator"; then
+            echo "❌ Эмулятор не найден в adb devices"
+            sleep 4
+            continue
           fi
           
-          # Альтернативная проверка - если система отвечает на команды
+          # Проверяем, отвечает ли Android на команды
           if adb shell "echo 'test'" 2>/dev/null | grep -q "test"; then
             echo "✅ Android отвечает на команды"
+            
+            # Дополнительная проверка готовности системы
+            if adb shell "which pm" 2>/dev/null | grep -q "pm" && adb shell "which input" 2>/dev/null | grep -q "input"; then
+              echo "✅ Системные сервисы доступны (pm, input)"
+              echo "📱 Дополнительные свойства загрузки:"
+              adb shell getprop | grep -E "(sys.boot_completed|init.svc.bootanim|init.svc.zygote)" || echo "❌ Не удалось получить свойства"
+              break
+            else
+              echo "⚠️ Android отвечает, но системные сервисы еще не готовы"
+              sleep 4
+              continue
+            fi
+          fi
+          
+          # Проверяем sys.boot_completed
+          boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null || echo "")
+          if [ "$boot_completed" = "1" ]; then
+            echo "✅ Android полностью загружен"
             echo "📱 Дополнительные свойства загрузки:"
             adb shell getprop | grep -E "(sys.boot_completed|init.svc.bootanim|init.svc.zygote)" || echo "❌ Не удалось получить свойства"
             break
@@ -524,6 +561,8 @@ jobs:
           
           if [ $i -eq 75 ]; then
             echo "❌ Android не загрузился за $boot_timeout секунд"
+            echo "📱 Проверка ADB подключения:"
+            adb devices || echo "adb devices failed"
             echo "📱 Последние свойства загрузки:"
             adb shell getprop | grep -E "(sys.boot_completed|init.svc.bootanim|init.svc.zygote)" || echo "❌ Не удалось получить свойства"
             echo "📋 === LOGCAT (последние 200 строк) ==="
@@ -545,8 +584,19 @@ jobs:
 
         echo "📱 ==== РАЗБЛОКИРОВКА ЭКРАНА ===="
         echo "📱 Разблокировка экрана..."
-        adb shell input keyevent 82 || echo "❌ keyevent 82 failed"
-        adb shell input keyevent 82 || echo "❌ keyevent 82 failed"
+        
+        # Ждем немного для стабилизации системы
+        sleep 5
+        
+        # Проверяем доступность input сервиса
+        if adb shell "which input" 2>/dev/null | grep -q "input"; then
+          echo "✅ Input сервис доступен"
+          adb shell input keyevent 82 || echo "❌ keyevent 82 failed"
+          adb shell input keyevent 82 || echo "❌ keyevent 82 failed"
+        else
+          echo "⚠️ Input сервис недоступен, пропускаем разблокировку"
+        fi
+        
         sleep 2
 
         echo "📱 ==== УСТАНОВКА APK ===="
@@ -564,8 +614,34 @@ jobs:
         echo "📱 Размер APK:"
         du -h "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" || echo "❌ Не удалось получить размер APK"
         
+        # Ждем дополнительное время для стабилизации системы
+        echo "📱 Ожидание стабилизации системы перед установкой APK..."
+        sleep 10
+        
+        # Проверяем доступность package manager
+        if adb shell "which pm" 2>/dev/null | grep -q "pm"; then
+          echo "✅ Package manager доступен"
+        else
+          echo "⚠️ Package manager недоступен, ждем еще..."
+          sleep 15
+        fi
+        
         echo "📱 Установка APK..."
-        adb install "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" || { echo "❌ ОШИБКА: adb install failed"; kill $EMULATOR_PID 2>/dev/null || true; exit 1; }
+        install_result=$(adb install "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" 2>&1)
+        if [ $? -eq 0 ]; then
+          echo "✅ APK установлен успешно"
+        else
+          echo "❌ ОШИБКА: adb install failed"
+          echo "📱 Результат установки: $install_result"
+          echo "📱 Попытка альтернативной установки..."
+          
+          # Попытка установки с дополнительными параметрами
+          adb install -r -d "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" || { 
+            echo "❌ ОШИБКА: Альтернативная установка также не удалась"; 
+            kill $EMULATOR_PID 2>/dev/null || true; 
+            exit 1; 
+          }
+        fi
         
         echo "📱 Проверка установки APK..."
         adb shell pm list packages | grep financialsuccess || echo "❌ Пакет financialsuccess не найден"
