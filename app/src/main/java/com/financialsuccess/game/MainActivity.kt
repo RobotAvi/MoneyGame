@@ -10,7 +10,6 @@ import com.financialsuccess.game.models.Player
 import android.view.View
 import com.financialsuccess.game.GameActivity
 import android.widget.TextView
-import com.financialsuccess.game.BuildConfig
 
 class MainActivity : AppCompatActivity() {
     
