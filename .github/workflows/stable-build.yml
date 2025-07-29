@@ -335,8 +335,8 @@ jobs:
       - name: 📦 Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk
-          path: releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk
+                  name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk
+        path: releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk
 
       - name: Bump version in build.gradle
         run: |
@@ -665,8 +665,8 @@ jobs:
 
         echo "📱 ==== УСТАНОВКА APK ===="
         echo "📱 Проверка наличия APK..."
-        if [ ! -f "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" ]; then
-          echo "❌ Error: FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk not found in releases/debug/"
+        if [ ! -f "releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk" ]; then
+          echo "❌ Error: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk not found in releases/debug/"
           echo "📱 Содержимое releases/debug/:"
           ls -la releases/debug/ || echo "❌ releases/debug/ не существует"
           echo "📱 Поиск APK файлов в проекте:"
@@ -676,7 +676,7 @@ jobs:
         fi
         
         echo "📱 Размер APK:"
-        du -h "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" || echo "❌ Не удалось получить размер APK"
+        du -h "releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk" || echo "❌ Не удалось получить размер APK"
         
         # Проверяем доступность package сервиса
         echo "📱 Проверка доступности package сервиса..."
@@ -687,7 +687,7 @@ jobs:
         sleep 10
         
         echo "📱 Установка APK..."
-        adb install "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" || { 
+        adb install "releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk" || { 
           echo "❌ ОШИБКА: adb install failed"
           echo "📱 Попытка получить больше информации об ошибке..."
           adb logcat -d | tail -50 || echo "logcat failed"
@@ -742,7 +742,7 @@ jobs:
         # Run fallback script
         if [ -f "scripts/emulator-fallback.sh" ]; then
           chmod +x scripts/emulator-fallback.sh
-          ./scripts/emulator-fallback.sh "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" || {
+          ./scripts/emulator-fallback.sh "releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk" || {
             echo "❌ Fallback emulator setup also failed"
             exit 1
           }
