@@ -24,9 +24,11 @@ jobs:
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
+        
       - name: 📅 Get current date
         id: date
         run: echo "date=$(date '+%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
+        
       - name: 🔖 Get version info
         id: version
         run: |
@@ -55,16 +57,23 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
           echo "✅ Версия успешно извлечена: $VERSION ($VERSION_CODE)"
-      - name: 🏗️ Prepare Android SDK directories
-        id: set-sdk-path
+
+      - name: 🗄️ Cache Android SDK
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.android/cache
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            /home/runner/android-sdk
+          key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-android-sdk-
+
+      - name: 🛠️ Setup Android SDK (Cached)
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          echo "sdk_path=/home/runner/android-sdk" >> $GITHUB_OUTPUT
-          mkdir -p /home/runner/android-sdk
-          echo "ANDROID_SDK_ROOT=/home/runner/android-sdk" >> $GITHUB_ENV
-          echo "ANDROID_HOME=/home/runner/android-sdk" >> $GITHUB_ENV
-      - name: 🛠️ Download and install Android commandline tools
-        run: |
-          echo "🔧 ==== УСТАНОВКА ANDROID COMMANDLINE TOOLS ===="
+          echo "🔧 ==== УСТАНОВКА ANDROID SDK (если не в кэше) ===="
           set -x
           
           echo "🔧 Обновление пакетов..."
@@ -75,87 +84,35 @@ jobs:
           
           echo "🔧 Загрузка commandline tools..."
           wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
-          echo "🔧 Размер скачанного файла:"
-          ls -la cmdline-tools.zip
           
           echo "🔧 Распаковка commandline tools..."
           unzip cmdline-tools.zip -d $HOME
-          echo "🔧 Содержимое $HOME после распаковки:"
-          ls -la $HOME/ | grep cmdline
           
           echo "🔧 Создание структуры директорий..."
           mkdir -p $HOME/android-sdk/cmdline-tools
           mv $HOME/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
-          
-          echo "🔧 ==== СТРУКТУРА CMDLINE-TOOLS ===="
-          find $HOME/android-sdk/cmdline-tools/ -type f | head -20
-          echo "🔧 Проверка sdkmanager:"
-          ls -la $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager || echo "❌ sdkmanager не найден"
-      - name: 🛠️ Install Android SDK components
-        run: |
-          echo "🔧 ==== УСТАНОВКА КОМПОНЕНТОВ ANDROID SDK ===="
-          set -x
           
           echo "🔧 Настройка переменных окружения..."
           export ANDROID_SDK_ROOT=/home/runner/android-sdk
           export ANDROID_HOME=/home/runner/android-sdk
           export PATH="$PATH:/home/runner/android-sdk/emulator:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
           
-          echo "🔧 ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
-          echo "🔧 ANDROID_HOME: $ANDROID_HOME"
-          echo "🔧 PATH: $PATH"
-          
-          echo "🔧 Проверка sdkmanager перед установкой..."
-          which sdkmanager || echo "❌ sdkmanager не найден в PATH"
-          ls -la $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager || echo "❌ sdkmanager не найден по пути"
-          
           echo "🔧 Принятие лицензий..."
           yes | sdkmanager --licenses || { echo "❌ ОШИБКА: sdkmanager license error"; exit 1; }
           
           echo "🔧 Установка компонентов SDK..."
-          echo "🔧 Устанавливаем: platform-tools, emulator, system-images;android-34;default;x86_64"
           sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: sdkmanager install error"; exit 1; }
           
-          echo "🔧 ==== ПРОВЕРКА УСТАНОВЛЕННЫХ КОМПОНЕНТОВ ===="
-          echo "🔧 Структура SDK после установки:"
-          find $ANDROID_SDK_ROOT/ -type d | head -20
-          
-          echo "🔧 Проверка platform-tools:"
-          ls -la $ANDROID_SDK_ROOT/platform-tools/ || echo "❌ platform-tools не найден"
-          
-          echo "🔧 Проверка emulator:"
-          ls -la $ANDROID_SDK_ROOT/emulator/ || echo "❌ emulator не найден"
-          
-          echo "🔧 Проверка system-images:"
-          find $ANDROID_SDK_ROOT/system-images/ -type f | head -10 || echo "❌ system-images не найден"
-          
-          # Установка прав на выполнение для всех исполняемых файлов
-          echo "🔧 ==== УСТАНОВКА ПРАВ НА ВЫПОЛНЕНИЕ ===="
-          echo "🔧 Установка прав на выполнение для SDK файлов..."
+          echo "🔧 Установка прав на выполнение..."
           chmod +x $ANDROID_SDK_ROOT/platform-tools/* || echo "⚠️ Не удалось установить права для platform-tools"
           chmod +x $ANDROID_SDK_ROOT/emulator/* || echo "⚠️ Не удалось установить права для emulator"
           chmod +x $ANDROID_SDK_ROOT/emulator/qemu/linux-x86_64/* || echo "⚠️ Не удалось установить права для qemu"
           chmod +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/* || echo "⚠️ Не удалось установить права для cmdline-tools"
           
-          echo "🔧 ==== ПРОВЕРКА ПРАВ НА ВЫПОЛНЕНИЕ ===="
-          echo "🔧 Права на adb:"
-          ls -la $ANDROID_SDK_ROOT/platform-tools/adb || echo "❌ adb не найден"
-          
-          echo "🔧 Права на emulator:"
-          ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
-          
-          echo "🔧 Права на avdmanager:"
-          ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager || echo "❌ avdmanager не найден"
-          
-          echo "🔧 ==== ФИНАЛЬНАЯ ПРОВЕРКА ===="
-          echo "🔧 Проверка system-images после установки:"
-          find $ANDROID_SDK_ROOT/system-images/ || echo "❌ system-images dir not found"
-          
-          echo "🔧 Проверка доступности команд:"
-          $ANDROID_SDK_ROOT/platform-tools/adb version || echo "❌ adb version failed"
-          $ANDROID_SDK_ROOT/emulator/emulator -version || echo "❌ emulator version failed"
-          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager list avd || echo "❌ avdmanager failed"
-      - name: 📦 Upload Android SDK as artifact
+          echo "✅ Android SDK установлен и готов к использованию"
+
+      - name: 📦 Upload Android SDK as artifact (if not cached)
+        if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: android-sdk
@@ -176,13 +133,24 @@ jobs:
       - name: Remove default GitHub Actions credentials
         run: git config --local --remove-section http."https://github.com/" || true
         
+      - name: 🗄️ Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+            
       - name: 🔧 Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
           
-      - name: 📦 Download Android SDK artifact
+      - name: 📦 Download Android SDK artifact (if needed)
+        if: needs.setup-android-sdk.outputs.sdk-path != '/home/runner/android-sdk'
         uses: actions/download-artifact@v4
         with:
           name: android-sdk
@@ -309,13 +277,23 @@ jobs:
     env:
       ANDROID_SDK_ROOT: /home/runner/android-sdk
       ANDROID_HOME: /home/runner/android-sdk
-    # Убрано условие should_release
     
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
 
-    - name: 📦 Download Android SDK artifact
+    - name: 🗄️ Cache Android SDK for screenshots
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.android/cache
+          /home/runner/android-sdk
+        key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-android-sdk-
+
+    - name: 📦 Download Android SDK artifact (if not cached)
+      if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/download-artifact@v4
       with:
         name: android-sdk
@@ -637,7 +615,6 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     needs: [setup-android-sdk, build-and-test, screenshots-phone]
-    # Убрано условие should_release
     permissions:
       contents: write
 
@@ -701,14 +678,14 @@ jobs:
       run: |
         echo "🎉 Release completed successfully!"
         echo ""
-        echo "� Results:"
-        echo "�� Version: ${{ needs.build-and-test.outputs.version }}"
+        echo "📊 Results:"
+        echo "🏷️ Version: ${{ needs.build-and-test.outputs.version }}"
         echo "🔢 Version Code: ${{ needs.build-and-test.outputs.version_code }}"
         echo "📅 Date: ${{ needs.build-and-test.outputs.date }}"
-        echo "� APK: releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk"
+        echo "📱 APK: releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk"
         echo "📸 Phone screenshots: screenshots/phone/"
         echo ""
-        echo " Files:"
+        echo "📁 Files:"
         ls -la releases/debug/ || echo "No APK files found"
         echo ""
         echo "📸 Phone screenshots:"
