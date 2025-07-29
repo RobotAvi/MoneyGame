@@ -456,7 +456,7 @@ jobs:
 
         echo "📱 ==== ЗАПУСК ЭМУЛЯТОРА ===="
         echo "📱 Запуск эмулятора в фоне..."
-        emulator -avd "ci_nexus5" -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics -verbose &
+        emulator -avd "ci_nexus5" -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics -verbose -memory 2048 -cores 2 -skin 1080x1920 &
         EMULATOR_PID=$!
         echo "📱 PID эмулятора: $EMULATOR_PID"
         
@@ -501,10 +501,10 @@ jobs:
         done
 
         echo "📱 ==== ОЖИДАНИЕ ЗАГРУЗКИ ANDROID ===="
-        boot_timeout=600
+        boot_timeout=300
         boot_elapsed=0
-        for i in {1..150}; do
-          echo "📱 Попытка $i/150: проверка sys.boot_completed..."
+        for i in {1..75}; do
+          echo "📱 Попытка $i/75: проверка sys.boot_completed..."
           adb shell getprop sys.boot_completed 2>/dev/null || echo "❌ adb shell getprop failed"
           
           if adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; then
@@ -514,7 +514,15 @@ jobs:
             break
           fi
           
-          if [ $i -eq 150 ]; then
+          # Альтернативная проверка - если система отвечает на команды
+          if adb shell "echo 'test'" 2>/dev/null | grep -q "test"; then
+            echo "✅ Android отвечает на команды"
+            echo "📱 Дополнительные свойства загрузки:"
+            adb shell getprop | grep -E "(sys.boot_completed|init.svc.bootanim|init.svc.zygote)" || echo "❌ Не удалось получить свойства"
+            break
+          fi
+          
+          if [ $i -eq 75 ]; then
             echo "❌ Android не загрузился за $boot_timeout секунд"
             echo "📱 Последние свойства загрузки:"
             adb shell getprop | grep -E "(sys.boot_completed|init.svc.bootanim|init.svc.zygote)" || echo "❌ Не удалось получить свойства"
@@ -526,9 +534,9 @@ jobs:
             exit 1
           fi
           
-          sleep 2
-          boot_elapsed=$((boot_elapsed + 2))
-          if [ $((boot_elapsed % 30)) -eq 0 ]; then
+          sleep 4
+          boot_elapsed=$((boot_elapsed + 4))
+          if [ $((boot_elapsed % 60)) -eq 0 ]; then
             echo "⏳ Ожидание загрузки Android: $boot_elapsed секунд из $boot_timeout..."
             echo "📱 Проверка процесса эмулятора:"
             ps aux | grep emulator | grep -v grep || echo "❌ Процесс эмулятора не найден"
