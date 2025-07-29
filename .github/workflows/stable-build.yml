@@ -503,20 +503,38 @@ jobs:
         echo "📱 ==== ОЖИДАНИЕ ЗАГРУЗКИ ANDROID ===="
         boot_timeout=300
         boot_elapsed=0
-        for i in {1..75}; do
-          echo "📱 Попытка $i/75: проверка sys.boot_completed..."
-          adb shell getprop sys.boot_completed 2>/dev/null || echo "❌ adb shell getprop failed"
+        
+        # Функция для проверки готовности системы
+        check_system_ready() {
+          # Проверяем различные индикаторы готовности
+          local boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+          local bootanim_status=$(adb shell getprop init.svc.bootanim 2>/dev/null | tr -d '\r')
+          local zygote_status=$(adb shell getprop init.svc.zygote 2>/dev/null | tr -d '\r')
           
-          if adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; then
-            echo "✅ Android полностью загружен"
-            echo "📱 Дополнительные свойства загрузки:"
-            adb shell getprop | grep -E "(sys.boot_completed|init.svc.bootanim|init.svc.zygote)" || echo "❌ Не удалось получить свойства"
-            break
+          echo "📱 Проверка состояния системы:"
+          echo "  - sys.boot_completed: $boot_completed"
+          echo "  - init.svc.bootanim: $bootanim_status"
+          echo "  - init.svc.zygote: $zygote_status"
+          
+          # Система готова если boot_completed = 1 или bootanim = stopped
+          if [ "$boot_completed" = "1" ] || [ "$bootanim_status" = "stopped" ]; then
+            return 0
           fi
           
-          # Альтернативная проверка - если система отвечает на команды
+          # Дополнительная проверка - если система отвечает на команды
           if adb shell "echo 'test'" 2>/dev/null | grep -q "test"; then
             echo "✅ Android отвечает на команды"
+            return 0
+          fi
+          
+          return 1
+        }
+        
+        for i in {1..75}; do
+          echo "📱 Попытка $i/75: проверка готовности системы..."
+          
+          if check_system_ready; then
+            echo "✅ Android полностью загружен"
             echo "📱 Дополнительные свойства загрузки:"
             adb shell getprop | grep -E "(sys.boot_completed|init.svc.bootanim|init.svc.zygote)" || echo "❌ Не удалось получить свойства"
             break
@@ -545,9 +563,23 @@ jobs:
 
         echo "📱 ==== РАЗБЛОКИРОВКА ЭКРАНА ===="
         echo "📱 Разблокировка экрана..."
-        adb shell input keyevent 82 || echo "❌ keyevent 82 failed"
+        
+        # Ждем немного после загрузки системы
+        sleep 5
+        
+        # Проверяем доступность input сервиса
+        echo "📱 Проверка доступности input сервиса..."
+        adb shell "service list | grep input" || echo "⚠️ input сервис не найден в списке"
+        
+        # Пробуем разблокировать экран
         adb shell input keyevent 82 || echo "❌ keyevent 82 failed"
         sleep 2
+        adb shell input keyevent 82 || echo "❌ keyevent 82 failed"
+        sleep 2
+        
+        # Дополнительные команды для разблокировки
+        adb shell input swipe 540 1500 540 500 || echo "❌ swipe failed"
+        sleep 1
 
         echo "📱 ==== УСТАНОВКА APK ===="
         echo "📱 Проверка наличия APK..."
@@ -564,8 +596,24 @@ jobs:
         echo "📱 Размер APK:"
         du -h "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" || echo "❌ Не удалось получить размер APK"
         
+        # Проверяем доступность package сервиса
+        echo "📱 Проверка доступности package сервиса..."
+        adb shell "service list | grep package" || echo "⚠️ package сервис не найден в списке"
+        
+        # Ждем дополнительное время для стабилизации системы
+        echo "📱 Ожидание стабилизации системы перед установкой APK..."
+        sleep 10
+        
         echo "📱 Установка APK..."
-        adb install "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" || { echo "❌ ОШИБКА: adb install failed"; kill $EMULATOR_PID 2>/dev/null || true; exit 1; }
+        adb install "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" || { 
+          echo "❌ ОШИБКА: adb install failed"
+          echo "📱 Попытка получить больше информации об ошибке..."
+          adb logcat -d | tail -50 || echo "logcat failed"
+          echo "📱 Проверка состояния системы:"
+          adb shell getprop | grep -E "(sys.boot_completed|init.svc.bootanim|init.svc.zygote)" || echo "❌ Не удалось получить свойства"
+          kill $EMULATOR_PID 2>/dev/null || true
+          exit 1
+        }
         
         echo "📱 Проверка установки APK..."
         adb shell pm list packages | grep financialsuccess || echo "❌ Пакет financialsuccess не найден"
@@ -590,6 +638,36 @@ jobs:
         echo "📱 Проверка остановки эмулятора..."
         sleep 5
         ps aux | grep emulator | grep -v grep || echo "✅ Эмулятор остановлен"
+
+    - name: 🔄 Fallback Emulator Setup (if main fails)
+      if: failure()
+      shell: bash
+      env:
+        ANDROID_SDK_ROOT: /home/runner/android-sdk
+        ANDROID_HOME: /home/runner/android-sdk
+      run: |
+        echo "🔄 ==== FALLBACK EMULATOR SETUP ===="
+        echo "🔄 Main emulator setup failed, trying fallback approach..."
+        
+        export PATH="$PATH:/home/runner/android-sdk/emulator:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
+        
+        # Kill any existing emulator processes
+        pkill -f emulator 2>/dev/null || true
+        pkill -f qemu 2>/dev/null || true
+        adb kill-server 2>/dev/null || true
+        sleep 5
+        
+        # Run fallback script
+        if [ -f "scripts/emulator-fallback.sh" ]; then
+          chmod +x scripts/emulator-fallback.sh
+          ./scripts/emulator-fallback.sh "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" || {
+            echo "❌ Fallback emulator setup also failed"
+            exit 1
+          }
+        else
+          echo "❌ Fallback script not found"
+          exit 1
+        fi
 
     - name: 📋 Log workspace structure after screenshots
       run: |
