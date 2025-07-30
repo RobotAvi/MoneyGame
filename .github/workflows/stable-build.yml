@@ -124,7 +124,7 @@ jobs:
             yes | sdkmanager --licenses || { echo "❌ ОШИБКА: sdkmanager license error"; exit 1; }
             
             echo "🔧 Установка компонентов SDK..."
-            yes | sdkmanager --install "platform-tools" "emulator" "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: sdkmanager install error"; exit 1; }
+            yes | sdkmanager --install "platform-tools" "emulator" "system-images;android-34;default;arm64-v8a" || { echo "❌ ОШИБКА: sdkmanager install error"; exit 1; }
             echo "🔧 Проверка установки компонентов..."
             sdkmanager --list | grep -E "platform-tools|emulator|system-images;android-34" || { echo "❌ ОШИБКА: Компоненты не установлены"; exit 1; }
             
@@ -357,7 +357,7 @@ jobs:
           yes | sdkmanager --licenses || { echo "❌ ОШИБКА: sdkmanager license error"; exit 1; }
           
           echo "🔧 Установка компонентов..."
-          yes | sdkmanager --install "emulator" "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: sdkmanager install error"; exit 1; }
+          yes | sdkmanager --install "emulator" "system-images;android-34;default;arm64-v8a" || { echo "❌ ОШИБКА: sdkmanager install error"; exit 1; }
           
           echo "🔧 Проверка установки..."
           sdkmanager --list | grep -E "emulator|system-images;android-34" || { echo "❌ ОШИБКА: Компоненты не установлены"; exit 1; }
@@ -379,7 +379,7 @@ jobs:
           mkdir -p ~/.android/avd
           
           echo "🔧 Создание AVD..."
-          echo "no" | avdmanager create avd --name "ci_nexus5" --package "system-images;android-34;default;x86_64" --device "Nexus 5" --force || { echo "❌ ОШИБКА: Не удалось создать AVD"; exit 1; }
+          echo "no" | avdmanager create avd --name "ci_nexus5" --package "system-images;android-34;default;arm64-v8a" --device "Nexus 5" --force || { echo "❌ ОШИБКА: Не удалось создать AVD"; exit 1; }
           
           echo "🔧 Проверка созданного AVD..."
           ls -la ~/.android/avd/ || echo "❌ AVD директория не найдена"
@@ -492,7 +492,7 @@ jobs:
         
         # Установка необходимых компонентов через sdkmanager
         echo "📦 Установка компонентов..."
-        yes | sdkmanager --install "platform-tools" "emulator" "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: Не удалось установить компоненты"; exit 1; }
+        yes | sdkmanager --install "platform-tools" "emulator" "system-images;android-34;default;arm64-v8a" || { echo "❌ ОШИБКА: Не удалось установить компоненты"; exit 1; }
         
         echo "📦 Проверка установки..."
         sdkmanager --list | grep -E "platform-tools|emulator|system-images;android-34" || { echo "❌ ОШИБКА: Компоненты не установлены"; exit 1; }
@@ -524,7 +524,7 @@ jobs:
         done
         
         # Установка прав на выполнение для директорий
-        chmod +x $ANDROID_SDK_ROOT/emulator/qemu/linux-x86_64/* || echo "⚠️ Не удалось установить права для qemu"
+        chmod +x $ANDROID_SDK_ROOT/emulator/qemu/linux-arm64-v8a/* || echo "⚠️ Не удалось установить права для qemu"
         
         # Быстрая проверка работоспособности
         echo "🔧 Проверка работоспособности команд:"
@@ -578,13 +578,13 @@ jobs:
         echo "📱 PATH: $PATH"
         
         echo "📱 Проверка system-images..."
-        if [ ! -d "$ANDROID_SDK_ROOT/system-images/android-34/default/x86_64/" ]; then
+        if [ ! -d "$ANDROID_SDK_ROOT/system-images/android-34/default/arm64-v8a/" ]; then
           echo "❌ system-images не найдены, устанавливаем..."
           export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
-          yes | sdkmanager --install "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: Не удалось установить system-images"; exit 1; }
+          yes | sdkmanager --install "system-images;android-34;default;arm64-v8a" || { echo "❌ ОШИБКА: Не удалось установить system-images"; exit 1; }
           yes | sdkmanager --licenses || { echo "❌ ОШИБКА: Не удалось принять лицензии"; exit 1; }
         fi
-        ls -la $ANDROID_SDK_ROOT/system-images/android-34/default/x86_64/ || { echo "❌ system-images не найдены после установки"; exit 1; }
+        ls -la $ANDROID_SDK_ROOT/system-images/android-34/default/arm64-v8a/ || { echo "❌ system-images не найдены после установки"; exit 1; }
         
         echo "📱 Подготовка директорий для AVD..."
         # Создаем все необходимые директории
@@ -610,7 +610,7 @@ jobs:
         echo "📱 Создание AVD ci_nexus5..."
         if ! avdmanager list avd | grep -q "ci_nexus5"; then
           echo "📱 AVD ci_nexus5 не существует, создаем..."
-          echo "no" | avdmanager create avd --name "ci_nexus5" --package "system-images;android-34;default;x86_64" --device "Nexus 5" --force || { echo "❌ ОШИБКА: Не удалось создать AVD"; exit 1; }
+          echo "no" | avdmanager create avd --name "ci_nexus5" --package "system-images;android-34;default;arm64-v8a" --device "Nexus 5" --force || { echo "❌ ОШИБКА: Не удалось создать AVD"; exit 1; }
           echo "✅ AVD ci_nexus5 создан"
         else
           echo "✅ AVD ci_nexus5 уже существует"
