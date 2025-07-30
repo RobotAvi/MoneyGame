@@ -18,90 +18,135 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      # Динамическая очистка всех кэшей
-      - name: 🗑️ Clear All Caches Dynamically
+      # Установка jq для парсинга JSON
+      - name: 🔧 Install jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      # Улучшенная очистка всех кэшей
+      - name: 🗑️ Clear All Caches Improved
         run: |
           echo "🔍 Получение списка всех кэшей..."
           
-          # Получаем все кэши через API
-          CACHES=$(curl -s -H "Authorization: token ${{ github.token }}" \
+          # Получаем все кэши через API с обработкой ошибок
+          CACHES_RESPONSE=$(curl -s -H "Authorization: token ${{ github.token }}" \
                         -H "Accept: application/vnd.github.v3+json" \
-                        "https://api.github.com/repos/${{ github.repository }}/actions/caches" | \
-                   jq -r '.actions_caches[] | .key' 2>/dev/null || echo "")
+                        "https://api.github.com/repos/${{ github.repository }}/actions/caches")
+          
+          echo "📊 Ответ API: $CACHES_RESPONSE"
+          
+          # Извлекаем ключи кэшей
+          CACHES=$(echo "$CACHES_RESPONSE" | jq -r '.actions_caches[] | .key' 2>/dev/null || echo "")
           
           # Подсчитываем количество кэшей в начале
           CACHE_COUNT_BEFORE=$(echo "$CACHES" | grep -c . || echo "0")
           echo "📊 Кэшей в начале: $CACHE_COUNT_BEFORE"
           
-          if [ -n "$CACHES" ]; then
-            echo "🗑️ Найдено кэшей: $(echo "$CACHES" | wc -l)"
-            echo "🧹 Очистка всех кэшей параллельно..."
+          if [ -n "$CACHES" ] && [ "$CACHE_COUNT_BEFORE" -gt 0 ]; then
+            echo "🗑️ Найдено кэшей: $CACHE_COUNT_BEFORE"
+            echo "🧹 Очистка всех кэшей..."
             
-            # Очищаем каждый кэш параллельно
-            echo "$CACHES" | while read -r cache_key; do
+            # Очищаем каждый кэш последовательно для надежности
+            CLEARED_COUNT=0
+            while IFS= read -r cache_key; do
               if [ -n "$cache_key" ]; then
                 echo "🗑️ Очистка кэша: $cache_key"
-                curl -X DELETE \
+                DELETE_RESPONSE=$(curl -s -X DELETE \
                      -H "Authorization: token ${{ github.token }}" \
                      -H "Accept: application/vnd.github.v3+json" \
-                     "https://api.github.com/repos/${{ github.repository }}/actions/caches?key=$cache_key" &
+                     "https://api.github.com/repos/${{ github.repository }}/actions/caches?key=$cache_key")
+                
+                if [ $? -eq 0 ]; then
+                  echo "✅ Кэш удален: $cache_key"
+                  ((CLEARED_COUNT++))
+                else
+                  echo "❌ Ошибка удаления кэша: $cache_key"
+                fi
               fi
-            done
+            done <<< "$CACHES"
             
-            # Ждем завершения всех запросов
-            wait
-            echo "✅ Все кэши очищены"
+            echo "✅ Успешно очищено $CLEARED_COUNT кэшей"
           else
             echo "ℹ️ Кэши не найдены"
           fi
           
           # Проверяем количество кэшей в конце
           echo "🔍 Проверка кэшей после очистки..."
-          CACHES_AFTER=$(curl -s -H "Authorization: token ${{ github.token }}" \
+          CACHES_AFTER_RESPONSE=$(curl -s -H "Authorization: token ${{ github.token }}" \
                               -H "Accept: application/vnd.github.v3+json" \
-                              "https://api.github.com/repos/${{ github.repository }}/actions/caches" | \
-                         jq -r '.actions_caches[] | .key' 2>/dev/null || echo "")
+                              "https://api.github.com/repos/${{ github.repository }}/actions/caches")
+          CACHES_AFTER=$(echo "$CACHES_AFTER_RESPONSE" | jq -r '.actions_caches[] | .key' 2>/dev/null || echo "")
           CACHE_COUNT_AFTER=$(echo "$CACHES_AFTER" | grep -c . || echo "0")
           echo "📊 Кэшей в конце: $CACHE_COUNT_AFTER"
           
           # Выводим результат
           if [ "$CACHE_COUNT_BEFORE" -gt 0 ] && [ "$CACHE_COUNT_AFTER" -eq 0 ]; then
-            echo "🎉 Успешно очищено $CACHE_COUNT_BEFORE кэшей!"
+            echo "🎉 Успешно очищено все $CACHE_COUNT_BEFORE кэшей!"
           elif [ "$CACHE_COUNT_BEFORE" -eq 0 ]; then
             echo "ℹ️ Кэши не были найдены для очистки"
           else
-            echo "⚠️ Очищено $((CACHE_COUNT_BEFORE - CACHE_COUNT_AFTER)) из $CACHE_COUNT_BEFORE кэшей"
+            REMAINING=$((CACHE_COUNT_BEFORE - CACHE_COUNT_AFTER))
+            echo "⚠️ Очищено $REMAINING из $CACHE_COUNT_BEFORE кэшей"
+            echo "📋 Оставшиеся кэши:"
+            echo "$CACHES_AFTER" | head -10
           fi
 
-      # Динамическая очистка локальных файлов
-      - name: 🧹 Clear Local Files Dynamically
+      # Очистка локальных файлов
+      - name: 🧹 Clear Local Files
         run: |
-          echo "🧹 Динамическая очистка локальных файлов..."
+          echo "🧹 Очистка локальных файлов..."
           
-          # Очищаем все возможные кэш директории без привязки к именам
+          # Очищаем Gradle кэши
+          if [ -d "$HOME/.gradle" ]; then
+            echo "🧹 Очистка Gradle кэша..."
+            rm -rf "$HOME/.gradle/caches" 2>/dev/null || true
+            rm -rf "$HOME/.gradle/wrapper" 2>/dev/null || true
+          fi
+          
+          # Очищаем Android SDK кэши
+          if [ -d "$ANDROID_HOME" ]; then
+            echo "🧹 Очистка Android SDK кэша..."
+            rm -rf "$ANDROID_HOME/.temp" 2>/dev/null || true
+            rm -rf "$ANDROID_HOME/build-cache" 2>/dev/null || true
+          fi
+          
+          # Очищаем все возможные кэш директории
           find ~ -type d -name "*cache*" 2>/dev/null | \
           while read -r dir; do
             if [ -d "$dir" ] && [ -w "$dir" ]; then
               echo "🧹 Очистка: $dir"
-              rm -rf "$dir"/* 2>/dev/null &
-            fi
-          done
-          
-          # Ждем завершения всех операций
-          wait
-          
-          # Динамическая очистка build кэшей (если есть build файлы)
-          find . -name "*build*" -type f -executable 2>/dev/null | head -1 | \
-          while read -r build_file; do
-            if [ -n "$build_file" ] && [ -x "$build_file" ]; then
-              echo "🧹 Очистка build кэша: $build_file"
-              timeout 30s "$build_file" clean --no-daemon --parallel --max-workers=2 --quiet 2>/dev/null || echo "⚠️ Build cleanup failed"
+              rm -rf "$dir"/* 2>/dev/null || true
             fi
           done
           
           echo "✅ Все локальные файлы очищены"
 
+      # Принудительная очистка через GitHub CLI
+      - name: 🔧 Force Clear via GitHub CLI
+        run: |
+          echo "🔧 Принудительная очистка через GitHub CLI..."
+          
+          # Получаем список кэшей через gh
+          CACHE_KEYS=$(gh api repos/${{ github.repository }}/actions/caches --jq '.actions_caches[] | .key' 2>/dev/null || echo "")
+          
+          if [ -n "$CACHE_KEYS" ]; then
+            echo "🗑️ Найдено кэшей для удаления: $(echo "$CACHE_KEYS" | wc -l)"
+            
+            # Удаляем каждый кэш
+            while IFS= read -r key; do
+              if [ -n "$key" ]; then
+                echo "🗑️ Удаление кэша: $key"
+                gh api repos/${{ github.repository }}/actions/caches -X DELETE --field key="$key" 2>/dev/null || echo "❌ Ошибка удаления: $key"
+              fi
+            done <<< "$CACHE_KEYS"
+          else
+            echo "ℹ️ Кэши не найдены через GitHub CLI"
+          fi
+
       - name: ✅ Done
         run: |
-          echo "✅ Все кэши очищены!"
+          echo "✅ Очистка завершена!"
           echo "🔧 Следующий запуск будет с чистого листа"
+          echo "📊 Итоговая проверка кэшей:"
+          gh api repos/${{ github.repository }}/actions/caches --jq '.total_count' 2>/dev/null || echo "Не удалось проверить количество кэшей"

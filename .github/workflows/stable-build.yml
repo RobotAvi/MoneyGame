@@ -405,6 +405,18 @@ jobs:
           
           # Проверяем доступность emulator
           echo "🔧 Проверка emulator:"
+          if [ ! -f "$ANDROID_SDK_ROOT/emulator/emulator" ]; then
+            echo "🔧 Эмулятор не найден, устанавливаем..."
+            yes | sdkmanager --install "emulator" || { echo "❌ ОШИБКА: Установка эмулятора не удалась"; exit 1; }
+          fi
+          
+          # Проверяем наличие system-image
+          echo "🔧 Проверка system-image:"
+          if ! sdkmanager --list | grep -q "system-images;android-34;google_apis;x86_64"; then
+            echo "🔧 System image не найден, устанавливаем..."
+            yes | sdkmanager --install "system-images;android-34;google_apis;x86_64" || { echo "❌ ОШИБКА: Установка system-image не удалась"; exit 1; }
+          fi
+          
           emulator -version || { echo "❌ emulator не найден - SDK не установлен в setup-android-sdk job"; exit 1; }
 
 
