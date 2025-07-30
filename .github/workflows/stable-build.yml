@@ -454,6 +454,10 @@ jobs:
         echo "📱 Проверка adb:"
         adb version || { echo "❌ adb не найден - SDK не установлен в setup-android-sdk job"; exit 1; }
         
+        # Проверяем доступность эмулятора
+        echo "📱 Проверка эмулятора:"
+        emulator -version || { echo "❌ emulator не найден - SDK не установлен в setup-android-sdk job"; exit 1; }
+        
         # Устанавливаем APK
         adb install "releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk"
         
