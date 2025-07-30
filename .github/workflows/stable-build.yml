@@ -72,9 +72,11 @@ jobs:
             ~/.android/cache
             ~/.gradle/caches
             ~/.gradle/wrapper
+            ~/.android/avd
             ${{ env.ANDROID_SDK_ROOT }}
-          key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-android-sdk-emulator-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
+            ${{ runner.os }}-android-sdk-emulator-
             ${{ runner.os }}-android-sdk-
 
       - name: 🛠️ Setup Android SDK (Cached)
@@ -141,28 +143,42 @@ jobs:
             echo "✅ Android SDK установлен и готов к использованию"
           fi
 
-      - name: 🛠️ Установка эмулятора (всегда)
+      - name: 🛠️ Установка эмулятора (с кэшированием)
         run: |
-          echo "🔧 ==== УСТАНОВКА ЭМУЛЯТОРА ===="
+          echo "🔧 ==== УСТАНОВКА ЭМУЛЯТОРА (С КЭШИРОВАНИЕМ) ===="
           export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
           
-          echo "🔧 Проверка наличия эмулятора..."
-          if [ ! -f "$ANDROID_SDK_ROOT/emulator/emulator" ]; then
-            echo "🔧 Эмулятор не найден, устанавливаем..."
-            yes | sdkmanager --install "emulator" || { echo "❌ ОШИБКА: Установка эмулятора не удалась"; exit 1; }
+          echo "🔧 Проверка кэша эмулятора..."
+          if [ -d "~/.android/avd" ] && [ "$(ls -A ~/.android/avd/)" ]; then
+            echo "✅ Найден кэшированный AVD, пропускаем установку эмулятора"
+            echo "🔧 Проверка кэшированного эмулятора..."
+            ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
+            avdmanager list avd || echo "⚠️ AVD не найдены"
+          else
+            echo "🔧 Кэш эмулятора не найден, устанавливаем..."
+            
+            echo "🔧 Проверка наличия эмулятора..."
+            if [ ! -f "$ANDROID_SDK_ROOT/emulator/emulator" ]; then
+              echo "🔧 Эмулятор не найден, устанавливаем..."
+              yes | sdkmanager --install "emulator" || { echo "❌ ОШИБКА: Установка эмулятора не удалась"; exit 1; }
+            fi
+            
+            echo "🔧 Проверка наличия system-image..."
+            if ! sdkmanager --list | grep -q "system-images;android-34"; then
+              echo "🔧 System image не найден, устанавливаем..."
+              yes | sdkmanager --install "system-images;android-34;google_apis;x86_64" || { echo "❌ ОШИБКА: Установка system-image не удалась"; exit 1; }
+            fi
+            
+            echo "🔧 Создание AVD для кэширования..."
+            echo "no" | avdmanager create avd -n "cached-emulator" -k "system-images;android-34;google_apis;x86_64" || echo "⚠️ Не удалось создать AVD"
+            
+            echo "🔧 Проверка установки..."
+            ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
+            sdkmanager --list | grep -E "emulator|system-images;android-34" || echo "⚠️ Компоненты эмулятора не найдены в списке"
+            avdmanager list avd || echo "⚠️ AVD не найдены"
+            
+            echo "✅ Эмулятор установлен и готов к кэшированию"
           fi
-          
-          echo "🔧 Проверка наличия system-image..."
-          if ! sdkmanager --list | grep -q "system-images;android-34"; then
-            echo "🔧 System image не найден, устанавливаем..."
-            yes | sdkmanager --install "system-images;android-34;google_apis;x86_64" || { echo "❌ ОШИБКА: Установка system-image не удалась"; exit 1; }
-          fi
-          
-          echo "🔧 Проверка установки..."
-          ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
-          sdkmanager --list | grep -E "emulator|system-images;android-34" || echo "⚠️ Компоненты эмулятора не найдены в списке"
-          
-          echo "✅ Эмулятор готов к использованию"
 
 
   # Сборка и тестирование APK
@@ -328,12 +344,19 @@ jobs:
           echo "🔧 Проверка emulator:"
           emulator -version || echo "❌ emulator не найден"
 
-      - name: Проверка содержимого emulator
+      - name: Проверка кэша эмулятора
         run: |
+          echo "🔧 ==== ПРОВЕРКА КЭША ЭМУЛЯТОРА ===="
+          echo "🔧 Проверка содержимого emulator:"
           ls -l $ANDROID_SDK_ROOT/emulator
+          echo "🔧 Проверка содержимого SDK:"
           ls -l $ANDROID_SDK_ROOT
+          echo "🔧 Проверка кэшированных AVD:"
+          ls -la ~/.android/avd/ 2>/dev/null || echo "❌ AVD директория не найдена"
+          echo "🔧 Список доступных AVD:"
+          avdmanager list avd || echo "❌ AVD не найдены"
 
-      - name: Запуск Android-эмулятора
+      - name: Запуск Android-эмулятора (с кэшированием)
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
@@ -343,9 +366,10 @@ jobs:
           ram-size: 1024
           heap-size: 256
           disable-animations: true
+          avd-name: cached-emulator
           emulator-options: "-no-window -no-audio -no-boot-anim -no-accel -no-snapshot -no-snapshot-save -no-snapshot-load -memory 1024 -cores 1"
           script: |
-            echo "🧪 Эмулятор запущен"
+            echo "🧪 Эмулятор запущен (кэшированный)"
             adb devices
             echo "🧪 Быстрая проверка состояния..."
             timeout 60 adb wait-for-device
@@ -364,10 +388,24 @@ jobs:
     env:
       ANDROID_SDK_ROOT: ${{ needs.setup-android-sdk.outputs.sdk-path }}
       ANDROID_HOME: ${{ needs.setup-android-sdk.outputs.sdk-path }}
-    
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
+
+    - name: 🗄️ Cache Android SDK and Emulator
+      id: cache-sdk-screenshots
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.android/cache
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          ~/.android/avd
+          ${{ env.ANDROID_SDK_ROOT }}
+        key: ${{ runner.os }}-android-sdk-emulator-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-android-sdk-emulator-
+          ${{ runner.os }}-android-sdk-
 
     - name: 📦 Download APK artifact
       uses: actions/download-artifact@v4
