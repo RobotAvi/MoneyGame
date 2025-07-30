@@ -279,285 +279,46 @@ jobs:
           GH_PAT: ${{ secrets.GH_PAT }}
 
   prepare-emulator:
-    needs: setup-android-sdk
+    name: 🧪 Запуск Android-эмулятора
     runs-on: ubuntu-latest
-    timeout-minutes: 20  # Увеличиваем таймаут до 20 минут
-    env:
-      ACTIONS_CACHE_DEBUG: true
-      ACTIONS_STEP_DEBUG: true
-      ANDROID_SDK_ROOT: ${{ needs.setup-android-sdk.outputs.sdk-path }}
-      ANDROID_HOME: ${{ needs.setup-android-sdk.outputs.sdk-path }}
+    timeout-minutes: 15
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
-      - name: 📊 Setup and debug cache paths
-        run: |
-          echo "==== SETUP AND DEBUG CACHE INFO ===="
-          echo "Creating required directories..."
-          mkdir -p ~/.android/avd
-          mkdir -p ~/.android/emulator
-          
-          echo "Checking ~/.android/avd:"
-          ls -la ~/.android/ || echo "Android directory not found"
-          ls -la ~/.android/avd/ || echo "AVD directory not found"
-          echo "Size of ~/.android/avd:"
-          du -sh ~/.android/avd/ 2>/dev/null || echo "Cannot get size"
-          
-          echo "Checking ~/.android/emulator:"
-          ls -la ~/.android/emulator/ || echo "Emulator directory not found"
-          
-          echo "Checking $ANDROID_SDK_ROOT:"
-          ls -la $ANDROID_SDK_ROOT/ || echo "Directory not found"
-          echo "Size of $ANDROID_SDK_ROOT:"
-          du -sh $ANDROID_SDK_ROOT/ 2>/dev/null || echo "Cannot get size"
-          
-          echo "Total cache size estimation:"
-          du -sh ~/.android/avd/ ~/.android/emulator/ 2>/dev/null || echo "Cannot get total size"
 
-      - name: 🗄️ Cache AVD and Emulator
-        id: cache-android
-        uses: actions/cache@v3
+      - name: Установка JDK
+        uses: actions/setup-java@v3
         with:
-          path: |
-            ~/.android/avd
-            ~/.android/emulator
-          key: ${{ runner.os }}-android-avd-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-android-avd-
+          distribution: "temurin"
+          java-version: 17
 
-      - name: 📊 Cache Status
-        run: |
-          echo "Cache hit: ${{ steps.cache-android.outputs.cache-hit }}"
-          echo "Cache key: ${{ steps.cache-android.outputs.cache-primary-key }}"
-          echo "Matched key: ${{ steps.cache-android.outputs.cache-matched-key }}"
+      - name: Запуск Android-эмулятора
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: default
+          arch: x86_64
+          profile: pixel
+          ram-size: 2048
+          disable-animations: true
+          emulator-options: "-no-window -no-audio -no-boot-anim -no-accel"
 
-      - name: 📊 Debug cache result
-        run: |
-          echo "==== POST-CACHE DEBUG INFO ===="
-          echo "Cache directories after operation:"
-          echo "~/.android/avd:"
-          ls -la ~/.android/avd/ || echo "Directory not found"
-          echo "$ANDROID_SDK_ROOT:"
-          ls -la $ANDROID_SDK_ROOT/ || echo "Directory not found"
-      - name: 📱 Prepare Emulator
-        run: |
-          # Установка зависимостей для эмулятора
-          sudo apt-get update
-          sudo apt-get install -y libpulse0 libgl1 libc++1 libxcb1 libxcb-xkb1 \
-            libxkbcommon0 libxkbcommon-x11-0 libxcb-icccm4 \
-            libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
-            libxcb-render0 libxcb-shape0 libxcb-shm0 libxcb-sync1 \
-            libxcb-util1 libxcb-xfixes0 libxcb-xinerama0
-            
-          export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools"
-          
-          echo "🔧 ==== УСТАНОВКА КОМПОНЕНТОВ ===="
-          # Принятие лицензий и установка компонентов
-          echo "🔧 Принятие лицензий..."
-          yes | sdkmanager --licenses || { echo "❌ ОШИБКА: sdkmanager license error"; exit 1; }
-          
-          echo "🔧 Установка компонентов..."
-          yes | sdkmanager --install "emulator" "system-images;android-34;default;arm64-v8a" || { echo "❌ ОШИБКА: sdkmanager install error"; exit 1; }
-          
-          echo "🔧 Проверка установки..."
-          sdkmanager --list | grep -E "emulator|system-images;android-34" || { echo "❌ ОШИБКА: Компоненты не установлены"; exit 1; }
-          
-          echo "🔧 ==== НАСТРОЙКА ПРАВ ===="
-          echo "🔧 Установка прав на выполнение..."
-          sudo chmod -R +x $ANDROID_SDK_ROOT/emulator/ || echo "⚠️ Не удалось установить права для emulator"
-          
-          echo "🔧 Проверка прав..."
-          ls -la $ANDROID_SDK_ROOT/emulator/emulator || { echo "❌ emulator не найден"; exit 1; }
-          $ANDROID_SDK_ROOT/emulator/emulator -version || { echo "❌ emulator version failed"; exit 1; }
-          
-          echo "🔧 ==== СОЗДАНИЕ AVD ===="
-          echo "🔧 Проверка доступных system images..."
-          sdkmanager --list | grep "system-images;android-34" || echo "❌ System images не найдены"
-          
-          echo "🔧 Проверка директории для AVD..."
-          ls -la ~/.android/ || echo "❌ ~/.android/ не существует"
-          mkdir -p ~/.android/avd
-          
-          echo "🔧 Создание AVD..."
-          echo "no" | avdmanager create avd --name "ci_nexus5" --package "system-images;android-34;default;arm64-v8a" --device "Nexus 5" --force || { echo "❌ ОШИБКА: Не удалось создать AVD"; exit 1; }
-          
-          echo "🔧 Проверка созданного AVD..."
-          ls -la ~/.android/avd/ || echo "❌ AVD директория не найдена"
-          
-          echo "🔧 Список доступных AVD:"
-          avdmanager list avd || { echo "❌ ОШИБКА: Не удалось получить список AVD"; exit 1; }
-          
-          echo "🔧 Проверка конфигурации AVD..."
-          # Проверяем оба возможных расположения
-          if [ -f ~/.config/.android/avd/ci_nexus5.avd/config.ini ]; then
-            echo "✅ Найдена конфигурация в ~/.config/.android/avd/"
-            cat ~/.config/.android/avd/ci_nexus5.avd/config.ini
-          elif [ -f ~/.android/avd/ci_nexus5.avd/config.ini ]; then
-            echo "✅ Найдена конфигурация в ~/.android/avd/"
-            cat ~/.android/avd/ci_nexus5.avd/config.ini
-          else
-            echo "❌ Конфигурация AVD не найдена в обоих расположениях"
-            echo "Проверка директорий:"
-            ls -la ~/.config/.android/avd/ || echo "❌ ~/.config/.android/avd/ не существует"
-            ls -la ~/.android/avd/ || echo "❌ ~/.android/avd/ не существует"
-            exit 1
-          fi
-
-          echo "🔧 ==== ТЕСТОВЫЙ ЗАПУСК ЭМУЛЯТОРА ===="
-          echo "🔧 Подготовка директорий..."
-          
-          # Создаем директорию если её нет
-          mkdir -p ~/.android/avd
-          
-          # Копируем файлы из ~/.config/.android/avd в ~/.android/avd
-          cp -r ~/.config/.android/avd/ci_nexus5.avd ~/.android/avd/
-          cp ~/.config/.android/avd/ci_nexus5.ini ~/.android/avd/ 2>/dev/null || true
-          
-          echo "🔧 Запуск эмулятора..."
-          $ANDROID_SDK_ROOT/emulator/emulator -avd "ci_nexus5" -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot -cores 1 &
-          EMULATOR_PID=$!
-          
-          # Ждем 30 секунд и проверяем, что процесс жив
-          sleep 30
-          if ! ps -p $EMULATOR_PID > /dev/null; then
-            echo "❌ Эмулятор не запустился"
-            exit 1
-          fi
-          
-          # Проверяем, что эмулятор виден в adb
-          if ! adb devices | grep -q "emulator"; then
-            echo "❌ Эмулятор не появился в списке устройств"
-            kill $EMULATOR_PID 2>/dev/null || true
-            exit 1
-          fi
-          
-          echo "✅ Эмулятор успешно запущен"
-          
-          # Останавливаем эмулятор
-          kill $EMULATOR_PID 2>/dev/null || true
-
-          
+      - name: Проверка подключения
+        run: adb devices
   # Параллельная генерация скриншотов для телефона
   screenshots-phone:
-    needs: [build-and-test, prepare-emulator, setup-android-sdk]
+    needs: [build-and-test, prepare-emulator]
     runs-on: ubuntu-latest
-    env:
-      ANDROID_SDK_ROOT: ${{ needs.setup-android-sdk.outputs.sdk-path }}
-      ANDROID_HOME: ${{ needs.setup-android-sdk.outputs.sdk-path }}
     
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
-
-    # SDK уже доступен из setup-android-sdk job
-
-    - name: 🗄️ Cache AVD and Emulator
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.android/avd
-          ~/.android/emulator
-        key: ${{ runner.os }}-android-avd-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-android-avd-
 
     - name: 📦 Download APK artifact
       uses: actions/download-artifact@v4
       with:
         name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk
         path: releases/debug/
-        
-    - name: 📦 Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libpulse0 libgl1 libc++1 libxcb1 libxcb-xkb1 \
-          libxkbcommon0 libxkbcommon-x11-0 libxcb-icccm4 \
-          libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
-          libxcb-render0 libxcb-shape0 libxcb-shm0 libxcb-sync1 \
-          libxcb-util1 libxcb-xfixes0 libxcb-xinerama0
-
-    - name: 📦 Install required components
-      run: |
-        echo "📦 ==== УСТАНОВКА КОМПОНЕНТОВ ===="
-        echo "📦 ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
-        
-        # Добавляем sdkmanager в PATH
-        echo "📦 Настройка PATH..."
-        export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
-        echo "📦 PATH: $PATH"
-        
-        # Проверяем наличие sdkmanager
-        echo "📦 Проверка sdkmanager..."
-        which sdkmanager || { echo "❌ ОШИБКА: sdkmanager не найден в PATH"; exit 1; }
-        
-        # Установка необходимых компонентов через sdkmanager
-        echo "📦 Установка компонентов..."
-        yes | sdkmanager --install "platform-tools" "emulator" "system-images;android-34;default;arm64-v8a" || { echo "❌ ОШИБКА: Не удалось установить компоненты"; exit 1; }
-        
-        echo "📦 Проверка установки..."
-        sdkmanager --list | grep -E "platform-tools|emulator|system-images;android-34" || { echo "❌ ОШИБКА: Компоненты не установлены"; exit 1; }
-        
-        echo "📦 Принятие лицензий..."
-        yes | sdkmanager --licenses || { echo "❌ ОШИБКА: Не удалось принять лицензии"; exit 1; }
-
-    - name: 🔧 Проверка и настройка Android SDK
-      run: |
-        echo "🔍 ==== ПРОВЕРКА И НАСТРОЙКА ANDROID SDK ===="
-        echo "🔍 ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
-        
-        # Проверка критических компонентов
-        components=(
-          "platform-tools/adb"
-          "emulator/emulator"
-          "cmdline-tools/latest/bin/avdmanager"
-        )
-        
-        for component in "${components[@]}"; do
-          echo "🔍 Проверка $component:"
-          if [ -f "$ANDROID_SDK_ROOT/$component" ]; then
-            echo "✅ $component найден"
-            sudo chmod +x "$ANDROID_SDK_ROOT/$component" || { echo "❌ ОШИБКА: Не удалось установить права для $component"; exit 1; }
-          else
-            echo "❌ $component не найден"
-            exit 1
-          fi
-        done
-        
-        # Установка прав на выполнение для директорий
-        chmod +x $ANDROID_SDK_ROOT/emulator/qemu/linux-arm64-v8a/* || echo "⚠️ Не удалось установить права для qemu"
-        
-        # Быстрая проверка работоспособности
-        echo "🔧 Проверка работоспособности команд:"
-        $ANDROID_SDK_ROOT/platform-tools/adb version || echo "❌ adb version failed"
-        $ANDROID_SDK_ROOT/emulator/emulator -version || echo "❌ emulator version failed"
-        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager list avd || echo "❌ avdmanager failed"
-
-    - name: 🔍 Проверка наличия adb в PATH (phone)
-      run: |
-        echo "🔍 Установка зависимостей для adb..."
-        sudo dpkg --add-architecture i386
-        sudo apt-get update
-        sudo apt-get install -y libc6:i386 libstdc++6:i386 lib32z1 lib32stdc++6
-        
-        echo "🔍 Настройка PATH для adb..."
-        export PATH="$PATH:$ANDROID_SDK_ROOT/platform-tools"
-        echo "PATH: $PATH"
-        
-        echo "🔍 Проверка наличия adb..."
-        echo "🔍 Проверяем существование файла adb..."
-        ls -la $ANDROID_SDK_ROOT/platform-tools/adb || echo "❌ Файл adb не найден"
-        
-        echo "🔍 Проверяем права на выполнение..."
-        file $ANDROID_SDK_ROOT/platform-tools/adb || echo "❌ Не удалось определить тип файла"
-        
-        echo "🔍 Попытка запуска adb по полному пути..."
-        $ANDROID_SDK_ROOT/platform-tools/adb version || echo "❌ adb version failed"
-        
-        echo "🔍 Попытка запуска adb через which..."
-        which adb || echo "❌ which adb failed"
-        
-        echo "🔍 Проверка библиотек adb..."
-        ldd $ANDROID_SDK_ROOT/platform-tools/adb || echo "❌ ldd failed"
 
     - name: 🎭 Install Maestro
       run: |
@@ -565,190 +326,18 @@ jobs:
         export PATH="$PATH:$HOME/.maestro/bin"
         echo "n" | maestro --version
 
-    - name: 📱 Start Android Emulator and Install APK (Phone)
-      shell: bash
+    - name: 📱 Install APK on Emulator
       run: |
-        echo "📱 ==== ЗАПУСК ЭМУЛЯТОРА ТЕЛЕФОНА ===="
-        export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
-        set -e
-        
-        echo "📱 Настройка переменных окружения..."
-        echo "📱 SDK root: $ANDROID_SDK_ROOT"
-        echo "📱 ANDROID_HOME: $ANDROID_HOME"
-        echo "📱 PATH: $PATH"
-        
-        echo "📱 Проверка system-images..."
-        if [ ! -d "$ANDROID_SDK_ROOT/system-images/android-34/default/arm64-v8a/" ]; then
-          echo "❌ system-images не найдены, устанавливаем..."
-          export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
-          yes | sdkmanager --install "system-images;android-34;default;arm64-v8a" || { echo "❌ ОШИБКА: Не удалось установить system-images"; exit 1; }
-          yes | sdkmanager --licenses || { echo "❌ ОШИБКА: Не удалось принять лицензии"; exit 1; }
-        fi
-        ls -la $ANDROID_SDK_ROOT/system-images/android-34/default/arm64-v8a/ || { echo "❌ system-images не найдены после установки"; exit 1; }
-        
-        echo "📱 Подготовка директорий для AVD..."
-        # Создаем все необходимые директории
-        mkdir -p ~/.android/avd
-        mkdir -p ~/.config/.android/avd
-        
-        echo "📱 Очистка старых AVD..."
-        rm -rf ~/.android/avd/* ~/.config/.android/avd/*
-        
-        echo "📱 Проверка директорий AVD:"
-        echo "~/.android/avd/:"
-        ls -la ~/.android/avd/ || echo "❌ ~/.android/avd/ не существует"
-        echo "~/.config/.android/avd/:"
-        ls -la ~/.config/.android/avd/ || echo "❌ ~/.config/.android/avd/ не существует"
-        
-        # Создаем символическую ссылку для совместимости
-        ln -sf ~/.config/.android/avd ~/.android/avd || echo "⚠️ Не удалось создать символическую ссылку"
-
-        echo "📱 ==== СОЗДАНИЕ AVD ===="
-        echo "📱 Проверка существующих AVD..."
-        avdmanager list avd || echo "❌ avdmanager list avd failed"
-        
-        echo "📱 Создание AVD ci_nexus5..."
-        if ! avdmanager list avd | grep -q "ci_nexus5"; then
-          echo "📱 AVD ci_nexus5 не существует, создаем..."
-          echo "no" | avdmanager create avd --name "ci_nexus5" --package "system-images;android-34;default;arm64-v8a" --device "Nexus 5" --force || { echo "❌ ОШИБКА: Не удалось создать AVD"; exit 1; }
-          echo "✅ AVD ci_nexus5 создан"
-        else
-          echo "✅ AVD ci_nexus5 уже существует"
-        fi
-        
-        echo "📱 Проверка созданного AVD..."
-        avdmanager list avd | grep ci_nexus5 || echo "❌ AVD ci_nexus5 не найден в списке"
-
-        echo "📱 ==== ЗАПУСК ЭМУЛЯТОРА ===="
-        echo "📱 Запуск эмулятора в фоне..."
-        emulator -avd "ci_nexus5" -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics -memory 1024 -cores 1 -skin 1080x1920 &
-        EMULATOR_PID=$!
-        echo "📱 PID эмулятора: $EMULATOR_PID"
-        
-        echo "📱 Проверка процесса эмулятора..."
-        ps aux | grep emulator | grep -v grep || echo "❌ Процесс эмулятора не найден"
-
-        echo "📱 Пауза после запуска эмулятора (45 секунд)..."
-        sleep 45
-        
-        echo "📱 Проверка процесса эмулятора после паузы..."
-        ps aux | grep emulator | grep -v grep || echo "❌ Процесс эмулятора не найден после паузы"
-
-        echo "📱 ==== ОЖИДАНИЕ ПОЯВЛЕНИЯ В ADB ===="
-        emulator_timeout=120
-        emulator_elapsed=0
-        
-        # Перезапускаем ADB сервер для очистки состояния
-        echo "📱 Перезапуск ADB сервера..."
-        adb kill-server || echo "⚠️ adb kill-server failed"
-        sleep 2
-        adb start-server || echo "⚠️ adb start-server failed"
-        sleep 3
-        
-        for i in {1..60}; do
-          echo "📱 Попытка $i/60: проверка adb devices..."
-          
-          # Проверяем доступность ADB
-          if ! adb devices >/dev/null 2>&1; then
-            echo "❌ adb devices failed, перезапускаем ADB..."
-            adb kill-server || true
-            sleep 2
-            adb start-server || true
-            sleep 3
-            continue
-          fi
-          
-          devices_output=$(adb devices 2>/dev/null || echo "")
-          if echo "$devices_output" | grep -q "emulator"; then
-            echo "✅ Эмулятор появился в adb"
-            echo "📱 Полный список устройств:"
-            adb devices
-            break
-          fi
-          
-          if [ $i -eq 60 ]; then
-            echo "❌ Не удалось запустить эмулятор за $emulator_timeout секунд"
-            echo "📱 Проверка ADB состояния:"
-            adb devices || echo "adb devices failed"
-            echo "📱 Логи эмулятора:"
-            ps aux | grep emulator | grep -v grep || echo "❌ Процесс эмулятора не найден"
-            kill $EMULATOR_PID 2>/dev/null || true
-            exit 1
-          fi
-          
-          sleep 2
-          emulator_elapsed=$((emulator_elapsed + 2))
-          if [ $((emulator_elapsed % 30)) -eq 0 ]; then
-            echo "⏳ Ожидание эмулятора: $emulator_elapsed секунд из $emulator_timeout..."
-            echo "📱 Проверка процесса эмулятора:"
-            ps aux | grep emulator | grep -v grep || echo "❌ Процесс эмулятора не найден"
-          fi
-        done
-
-        echo "📱 ==== ОЖИДАНИЕ ЗАГРУЗКИ ANDROID ===="
-        boot_timeout=180
-        boot_elapsed=0
-        for i in {1..45}; do
-          echo "📱 Попытка $i/45: проверка загрузки..."
-          
-          # Проверяем доступность ADB
-          if ! adb devices | grep -q "emulator"; then
-            sleep 4
-            continue
-          fi
-          
-          # Проверяем, отвечает ли Android на команды
-          if adb shell "echo 'test'" 2>/dev/null | grep -q "test"; then
-            echo "✅ Android отвечает на команды"
-            break
-          fi
-          
-          # Проверяем sys.boot_completed
-          boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null || echo "")
-          if [ "$boot_completed" = "1" ]; then
-            echo "✅ Android полностью загружен"
-            break
-          fi
-          
-          if [ $i -eq 45 ]; then
-            echo "❌ Android не загрузился за $boot_timeout секунд"
-            kill $EMULATOR_PID 2>/dev/null || true
-            exit 1
-          fi
-          
-          sleep 4
-          boot_elapsed=$((boot_elapsed + 4))
-          if [ $((boot_elapsed % 60)) -eq 0 ]; then
-            echo "⏳ Ожидание загрузки Android: $boot_elapsed секунд из $boot_timeout..."
-          fi
-        done
-
-        echo "📱 ==== РАЗБЛОКИРОВКА ЭКРАНА ===="
-        echo "📱 Разблокировка экрана..."
-        adb shell input keyevent 82 || echo "❌ keyevent 82 failed"
-        sleep 2
-
-        echo "📱 ==== УСТАНОВКА APK ===="
-        echo "📱 Установка APK..."
-        adb install "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" || { echo "❌ ОШИБКА: adb install failed"; kill $EMULATOR_PID 2>/dev/null || true; exit 1; }
+        echo "📱 ==== УСТАНОВКА APK НА ЭМУЛЯТОР ===="
+        adb install "releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk"
         
         echo "📱 Проверка установки..."
         if adb shell pm list packages | grep -q financialsuccess; then
           echo "✅ APK успешно установлен"
         else
           echo "❌ APK installation failed"
-          kill $EMULATOR_PID 2>/dev/null || true
           exit 1
         fi
-
-    - name: 📋 Log workspace structure after screenshots
-      run: |
-        echo "==== WORKSPACE STRUCTURE AFTER SCREENSHOTS ===="
-        ls -la
-        echo "==== FIND ALL APK FILES ===="
-        find . -name "*.apk" -type f
-        echo "==== ANDROID DEVICES ===="
-        adb devices || echo "adb not available"
 
     - name: 📸 Run Maestro Screenshots (Phone)
       run: |
@@ -767,14 +356,6 @@ jobs:
           echo "⚠️ Warning: Maestro configuration file not found: $config_file"
           echo "📱 Phone screenshots skipped!"
         fi
-    - name: 📱 Stop Android Emulator (Phone)
-      run: |
-        echo "📱 Остановка эмулятора..."
-        kill $EMULATOR_PID 2>/dev/null || true
-        pkill -f emulator 2>/dev/null || true
-        echo "📱 Проверка остановки эмулятора..."
-        sleep 5
-        ps aux | grep emulator | grep -v grep || echo "✅ Эмулятор остановлен"
 
     - name: 📤 Upload Phone Screenshots
       uses: actions/upload-artifact@v4
@@ -786,7 +367,7 @@ jobs:
   # Финальная сборка релиза
   create-release:
     runs-on: ubuntu-latest
-    needs: [setup-android-sdk, build-and-test, screenshots-phone]
+    needs: [build-and-test, screenshots-phone]
     permissions:
       contents: write
 
