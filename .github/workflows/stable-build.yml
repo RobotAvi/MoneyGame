@@ -392,7 +392,7 @@ jobs:
 
   # Параллельная генерация скриншотов для телефона
   screenshots-phone:
-    needs: [build-and-test, prepare-emulator]
+    needs: [build-and-test, prepare-emulator, setup-android-sdk]
     runs-on: ubuntu-latest
     env:
       ANDROID_SDK_ROOT: ${{ needs.setup-android-sdk.outputs.sdk-path }}
@@ -402,7 +402,22 @@ jobs:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
 
-    - name: ��️ Cache Android SDK and AVD
+    - name: 🗄️ Cache Android SDK
+      id: cache-android-screenshots
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.ANDROID_SDK_ROOT }}
+        key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-android-sdk-
+
+    - name: 📊 Cache Status
+      run: |
+        echo "Cache hit: ${{ steps.cache-android-screenshots.outputs.cache-hit }}"
+        echo "Cache key: ${{ steps.cache-android-screenshots.outputs.cache-primary-key }}"
+        echo "Matched key: ${{ steps.cache-android-screenshots.outputs.cache-matched-key }}"
+
+    - name: 🗄️ Cache Android SDK and AVD
       uses: actions/cache@v3
       with:
         path: |
@@ -419,6 +434,15 @@ jobs:
         name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk
         path: releases/debug/
         
+    - name: 📦 Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libpulse0 libgl1 libc++1 libxcb1 libxcb-xkb1 \
+          libxkbcommon0 libxkbcommon-x11-0 libxcb-icccm4 \
+          libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
+          libxcb-render0 libxcb-shape0 libxcb-shm0 libxcb-sync1 \
+          libxcb-util1 libxcb-xfixes0 libxcb-xinerama0
+
     - name: 🔧 Проверка и настройка Android SDK
       run: |
         echo "🔍 ==== ПРОВЕРКА И НАСТРОЙКА ANDROID SDK ===="
