@@ -72,7 +72,7 @@ jobs:
             ~/.android/cache
             ~/.gradle/caches
             ~/.gradle/wrapper
-            /home/runner/android-sdk
+            ${{ env.ANDROID_SDK_ROOT }}
           key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-android-sdk-
@@ -208,9 +208,8 @@ jobs:
         run: |
           echo "🏗️ ==== СБОРКА APK ===="
           echo "🏗️ Настройка переменных окружения..."
-          export ANDROID_SDK_ROOT=/home/runner/android-sdk
-          export ANDROID_HOME=/home/runner/android-sdk
-          export PATH="$PATH:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
+          # Используем переменные, переданные из setup-android-sdk
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
           
           echo "🏗️ ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
           echo "🏗️ ANDROID_HOME: $ANDROID_HOME"
@@ -385,24 +384,24 @@ jobs:
         sudo apt-get install -y libc6:i386 libstdc++6:i386 lib32z1 lib32stdc++6
         
         echo "🔍 Настройка PATH для adb..."
-        export PATH="$PATH:/home/runner/android-sdk/platform-tools"
+        export PATH="$PATH:$ANDROID_SDK_ROOT/platform-tools"
         echo "PATH: $PATH"
         
         echo "🔍 Проверка наличия adb..."
         echo "🔍 Проверяем существование файла adb..."
-        ls -la /home/runner/android-sdk/platform-tools/adb || echo "❌ Файл adb не найден"
+        ls -la $ANDROID_SDK_ROOT/platform-tools/adb || echo "❌ Файл adb не найден"
         
         echo "🔍 Проверяем права на выполнение..."
-        file /home/runner/android-sdk/platform-tools/adb || echo "❌ Не удалось определить тип файла"
+        file $ANDROID_SDK_ROOT/platform-tools/adb || echo "❌ Не удалось определить тип файла"
         
         echo "🔍 Попытка запуска adb по полному пути..."
-        /home/runner/android-sdk/platform-tools/adb version || echo "❌ adb version failed"
+        $ANDROID_SDK_ROOT/platform-tools/adb version || echo "❌ adb version failed"
         
         echo "🔍 Попытка запуска adb через which..."
         which adb || echo "❌ which adb failed"
         
         echo "🔍 Проверка библиотек adb..."
-        ldd /home/runner/android-sdk/platform-tools/adb || echo "❌ ldd failed"
+        ldd $ANDROID_SDK_ROOT/platform-tools/adb || echo "❌ ldd failed"
 
     - name: 🎭 Install Maestro
       run: |
