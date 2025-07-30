@@ -410,10 +410,10 @@ jobs:
             yes | sdkmanager --install "emulator" || { echo "❌ ОШИБКА: Установка эмулятора не удалась"; exit 1; }
           fi
           
-          # Устанавливаем системные зависимости для эмулятора
-          echo "🔧 Установка системных зависимостей для эмулятора..."
-          sudo apt-get update
-          sudo apt-get install -y libpulse0 libasound2 libc6 libstdc++6 libx11-6 libxext6 libxrender1 libxtst6 libxi6 libgconf-2-4
+                     # Устанавливаем системные зависимости для эмулятора
+           echo "🔧 Установка системных зависимостей для эмулятора..."
+           sudo apt-get update
+           sudo apt-get install -y libpulse0 libc6 libstdc++6 libx11-6 libxext6 libxrender1 libxtst6 libxi6 libgl1 libfontconfig1 libdbus-1-3 libqt5widgets5 libqt5gui5 libqt5core5a
           
           # Проверяем наличие system-image
           echo "🔧 Проверка system-image:"
