@@ -285,7 +285,7 @@ jobs:
   prepare-emulator:
     needs: setup-android-sdk
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20  # Увеличиваем таймаут до 20 минут
     env:
       ACTIONS_CACHE_DEBUG: true
       ACTIONS_STEP_DEBUG: true
@@ -314,6 +314,7 @@ jobs:
           du -sh ~/.android/avd/ ~/.android/emu* $ANDROID_SDK_ROOT/ 2>/dev/null || echo "Cannot get total size"
 
       - name: 🗄️ Cache Android SDK and AVD
+        id: cache-android
         uses: actions/cache@v3
         with:
           path: |
@@ -323,6 +324,12 @@ jobs:
           key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-android-sdk-
+
+      - name: 📊 Cache Status
+        run: |
+          echo "Cache hit: ${{ steps.cache-android.outputs.cache-hit }}"
+          echo "Cache key: ${{ steps.cache-android.outputs.cache-primary-key }}"
+          echo "Matched key: ${{ steps.cache-android.outputs.cache-matched-key }}"
 
       - name: 📊 Debug cache result
         run: |
@@ -364,11 +371,24 @@ jobs:
           $ANDROID_SDK_ROOT/emulator/emulator -version || { echo "❌ emulator version failed"; exit 1; }
           
           echo "🔧 ==== СОЗДАНИЕ AVD ===="
+          echo "🔧 Проверка доступных system images..."
+          sdkmanager --list | grep "system-images;android-34" || echo "❌ System images не найдены"
+          
+          echo "🔧 Проверка директории для AVD..."
+          ls -la ~/.android/ || echo "❌ ~/.android/ не существует"
+          mkdir -p ~/.android/avd
+          
           echo "🔧 Создание AVD..."
-          echo "no" | avdmanager create avd --name "ci_nexus5" --package "system-images;android-34;default;x86_64" --device "Nexus 5" --force || true
+          echo "no" | avdmanager create avd --name "ci_nexus5" --package "system-images;android-34;default;x86_64" --device "Nexus 5" --force || { echo "❌ ОШИБКА: Не удалось создать AVD"; exit 1; }
+          
+          echo "🔧 Проверка созданного AVD..."
+          ls -la ~/.android/avd/ || echo "❌ AVD директория не найдена"
           
           echo "🔧 Список доступных AVD:"
-          avdmanager list avd
+          avdmanager list avd || { echo "❌ ОШИБКА: Не удалось получить список AVD"; exit 1; }
+          
+          echo "🔧 Проверка конфигурации AVD..."
+          cat ~/.android/avd/ci_nexus5.avd/config.ini || echo "❌ Конфигурация AVD не найдена"
 
   # Параллельная генерация скриншотов для телефона
   screenshots-phone:
