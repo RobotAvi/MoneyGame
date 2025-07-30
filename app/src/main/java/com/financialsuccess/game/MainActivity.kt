@@ -35,7 +35,9 @@ class MainActivity : AppCompatActivity() {
 
         btnNew.setOnClickListener {
             // Запуск только стандартного флоу (без custom)
-            startActivity(Intent(this, CharacterCreationActivity::class.java))
+            val intent = Intent(this, CharacterCreationActivity::class.java)
+            intent.putExtra("custom", false)  // Явно указываем, что хотим стандартный режим
+            startActivity(intent)
         }
         btnLoad.setOnClickListener {
             val player = GameSaveManager.loadPlayer(this)
