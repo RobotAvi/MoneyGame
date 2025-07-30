@@ -10,7 +10,13 @@ on:
   workflow_dispatch:
 
 env:
-  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true
+  GRADLE_OPTS: >-
+    -Dorg.gradle.daemon=false
+    -Dorg.gradle.parallel=true
+    -Dorg.gradle.configureondemand=true
+    -Dorg.gradle.caching=true
+    -Dorg.gradle.workers.max=4
+    -Dorg.gradle.jvmargs=-Xmx4g -XX:+UseParallelGC
   MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: "true"
 
 jobs:
@@ -165,24 +171,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: 📥 Download Android SDK artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: android-sdk
-          path: /home/runner/android-sdk
-            
       - name: 🔧 Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
-          
-      - name: 📦 Download Android SDK artifact
-        id: download-sdk
-        uses: actions/download-artifact@v4
-        with:
-          name: android-sdk
-          path: /home/runner/android-sdk
           
 
           
@@ -300,10 +293,31 @@ jobs:
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
 
+  prepare-emulator:
+    needs: setup-android-sdk
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      - name: 🗄️ Cache Android SDK and AVD
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.android/avd
+            ~/.android/emu*
+            /home/runner/android-sdk
+          key: ${{ runner.os }}-android-sdk-avd-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-android-sdk-avd-
+      - name: 📱 Prepare Emulator
+        run: |
+          echo "no" | avdmanager create avd --name "ci_nexus5" --package "system-images;android-34;default;x86_64" --device "Nexus 5" --force || true
+          avdmanager list avd
+
   # Параллельная генерация скриншотов для телефона
   screenshots-phone:
+    needs: [build-and-test, prepare-emulator]
     runs-on: ubuntu-latest
-    needs: [setup-android-sdk, build-and-test]
     env:
       ANDROID_SDK_ROOT: /home/runner/android-sdk
       ANDROID_HOME: /home/runner/android-sdk
@@ -312,23 +326,17 @@ jobs:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
 
-    - name: 🗄️ Cache Android SDK for screenshots
-      id: cache-sdk-screenshots
+    - name: ��️ Cache Android SDK and AVD
       uses: actions/cache@v3
       with:
         path: |
-          ~/.android/cache
+          ~/.android/avd
+          ~/.android/emu*
           /home/runner/android-sdk
-        key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
+        key: ${{ runner.os }}-android-sdk-avd-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: |
-          ${{ runner.os }}-android-sdk-
+          ${{ runner.os }}-android-sdk-avd-
 
-    - name: 📦 Download Android SDK artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: android-sdk
-        path: ${{ env.ANDROID_SDK_ROOT }}
-        
     - name: 📦 Download APK artifact
       uses: actions/download-artifact@v4
       with:
@@ -472,7 +480,7 @@ jobs:
 
         echo "📱 ==== ЗАПУСК ЭМУЛЯТОРА ===="
         echo "📱 Запуск эмулятора в фоне..."
-        emulator -avd "ci_nexus5" -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics -verbose -memory 2048 -cores 2 -skin 1080x1920 &
+        emulator -avd "ci_nexus5" -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off -no-snapshot -no-metrics -memory 1024 -cores 1 -skin 1080x1920 &
         EMULATOR_PID=$!
         echo "📱 PID эмулятора: $EMULATOR_PID"
         
@@ -537,14 +545,13 @@ jobs:
         done
 
         echo "📱 ==== ОЖИДАНИЕ ЗАГРУЗКИ ANDROID ===="
-        boot_timeout=300
+        boot_timeout=180
         boot_elapsed=0
-        for i in {1..75}; do
-          echo "📱 Попытка $i/75: проверка sys.boot_completed..."
+        for i in {1..45}; do
+          echo "📱 Попытка $i/45: проверка загрузки..."
           
           # Проверяем доступность ADB
           if ! adb devices | grep -q "emulator"; then
-            echo "❌ Эмулятор не найден в adb devices"
             sleep 4
             continue
           fi
@@ -552,39 +559,18 @@ jobs:
           # Проверяем, отвечает ли Android на команды
           if adb shell "echo 'test'" 2>/dev/null | grep -q "test"; then
             echo "✅ Android отвечает на команды"
-            
-            # Дополнительная проверка готовности системы
-            if adb shell "which pm" 2>/dev/null | grep -q "pm" && adb shell "which input" 2>/dev/null | grep -q "input"; then
-              echo "✅ Системные сервисы доступны (pm, input)"
-              echo "📱 Дополнительные свойства загрузки:"
-              adb shell getprop | grep -E "(sys.boot_completed|init.svc.bootanim|init.svc.zygote)" || echo "❌ Не удалось получить свойства"
-              break
-            else
-              echo "⚠️ Android отвечает, но системные сервисы еще не готовы"
-              sleep 4
-              continue
-            fi
+            break
           fi
           
           # Проверяем sys.boot_completed
           boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null || echo "")
           if [ "$boot_completed" = "1" ]; then
             echo "✅ Android полностью загружен"
-            echo "📱 Дополнительные свойства загрузки:"
-            adb shell getprop | grep -E "(sys.boot_completed|init.svc.bootanim|init.svc.zygote)" || echo "❌ Не удалось получить свойства"
             break
           fi
           
-          if [ $i -eq 75 ]; then
+          if [ $i -eq 45 ]; then
             echo "❌ Android не загрузился за $boot_timeout секунд"
-            echo "📱 Проверка ADB подключения:"
-            adb devices || echo "adb devices failed"
-            echo "📱 Последние свойства загрузки:"
-            adb shell getprop | grep -E "(sys.boot_completed|init.svc.bootanim|init.svc.zygote)" || echo "❌ Не удалось получить свойства"
-            echo "📋 === LOGCAT (последние 200 строк) ==="
-            adb logcat -d | tail -200 || echo "logcat failed"
-            echo "📋 === EMULATOR STATUS ==="
-            adb -s emulator-5554 emu avd status || echo "emu avd status failed"
             kill $EMULATOR_PID 2>/dev/null || true
             exit 1
           fi
@@ -593,95 +579,29 @@ jobs:
           boot_elapsed=$((boot_elapsed + 4))
           if [ $((boot_elapsed % 60)) -eq 0 ]; then
             echo "⏳ Ожидание загрузки Android: $boot_elapsed секунд из $boot_timeout..."
-            echo "📱 Проверка процесса эмулятора:"
-            ps aux | grep emulator | grep -v grep || echo "❌ Процесс эмулятора не найден"
           fi
         done
 
         echo "📱 ==== РАЗБЛОКИРОВКА ЭКРАНА ===="
         echo "📱 Разблокировка экрана..."
-        
-        # Ждем немного для стабилизации системы
-        sleep 5
-        
-        # Проверяем доступность input сервиса
-        if adb shell "which input" 2>/dev/null | grep -q "input"; then
-          echo "✅ Input сервис доступен"
-          adb shell input keyevent 82 || echo "❌ keyevent 82 failed"
-          adb shell input keyevent 82 || echo "❌ keyevent 82 failed"
-        else
-          echo "⚠️ Input сервис недоступен, пропускаем разблокировку"
-        fi
-        
+        adb shell input keyevent 82 || echo "❌ keyevent 82 failed"
         sleep 2
 
         echo "📱 ==== УСТАНОВКА APK ===="
-        echo "📱 Проверка наличия APK..."
-        if [ ! -f "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" ]; then
-          echo "❌ Error: FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk not found in releases/debug/"
-          echo "📱 Содержимое releases/debug/:"
-          ls -la releases/debug/ || echo "❌ releases/debug/ не существует"
-          echo "📱 Поиск APK файлов в проекте:"
-          find . -name "*.apk" -type f || echo "❌ APK файлы не найдены"
-          kill $EMULATOR_PID 2>/dev/null || true
-          exit 1
-        fi
-        
-        echo "📱 Размер APK:"
-        du -h "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" || echo "❌ Не удалось получить размер APK"
-        
-        # Ждем дополнительное время для стабилизации системы
-        echo "📱 Ожидание стабилизации системы перед установкой APK..."
-        sleep 10
-        
-        # Проверяем доступность package manager
-        if adb shell "which pm" 2>/dev/null | grep -q "pm"; then
-          echo "✅ Package manager доступен"
-        else
-          echo "⚠️ Package manager недоступен, ждем еще..."
-          sleep 15
-        fi
-        
         echo "📱 Установка APK..."
-        install_result=$(adb install "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" 2>&1)
-        if [ $? -eq 0 ]; then
-          echo "✅ APK установлен успешно"
-        else
-          echo "❌ ОШИБКА: adb install failed"
-          echo "📱 Результат установки: $install_result"
-          echo "📱 Попытка альтернативной установки..."
-          
-          # Попытка установки с дополнительными параметрами
-          adb install -r -d "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" || { 
-            echo "❌ ОШИБКА: Альтернативная установка также не удалась"; 
-            kill $EMULATOR_PID 2>/dev/null || true; 
-            exit 1; 
-          }
-        fi
+        adb install "releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk" || { echo "❌ ОШИБКА: adb install failed"; kill $EMULATOR_PID 2>/dev/null || true; exit 1; }
         
-        echo "📱 Проверка установки APK..."
-        adb shell pm list packages | grep financialsuccess || echo "❌ Пакет financialsuccess не найден"
-        
+        echo "📱 Проверка установки..."
         if adb shell pm list packages | grep -q financialsuccess; then
           echo "✅ APK успешно установлен"
-          echo "📱 Информация о пакете:"
-          adb shell pm dump financialsuccess | head -20 || echo "❌ Не удалось получить информацию о пакете"
         else
-          echo "❌ Error: APK installation failed"
-          echo "📱 Список всех пакетов:"
-          adb shell pm list packages | head -20 || echo "❌ Не удалось получить список пакетов"
+          echo "❌ APK installation failed"
           kill $EMULATOR_PID 2>/dev/null || true
           exit 1
         fi
 
-        echo "📱 ==== ЗАВЕРШЕНИЕ РАБОТЫ ===="
         echo "📱 Остановка эмулятора..."
         kill $EMULATOR_PID 2>/dev/null || true
-        pkill -f emulator 2>/dev/null || true
-        
-        echo "📱 Проверка остановки эмулятора..."
-        sleep 5
-        ps aux | grep emulator | grep -v grep || echo "✅ Эмулятор остановлен"
 
     - name: 📋 Log workspace structure after screenshots
       run: |
