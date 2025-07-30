@@ -280,8 +280,12 @@ jobs:
 
   prepare-emulator:
     name: 🧪 Запуск Android-эмулятора
+    needs: setup-android-sdk
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      ANDROID_SDK_ROOT: ${{ needs.setup-android-sdk.outputs.sdk-path }}
+      ANDROID_HOME: ${{ needs.setup-android-sdk.outputs.sdk-path }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -307,8 +311,11 @@ jobs:
         run: adb devices
   # Параллельная генерация скриншотов для телефона
   screenshots-phone:
-    needs: [build-and-test, prepare-emulator]
+    needs: [build-and-test, prepare-emulator, setup-android-sdk]
     runs-on: ubuntu-latest
+    env:
+      ANDROID_SDK_ROOT: ${{ needs.setup-android-sdk.outputs.sdk-path }}
+      ANDROID_HOME: ${{ needs.setup-android-sdk.outputs.sdk-path }}
     
     steps:
     - name: 📥 Checkout code
@@ -367,7 +374,7 @@ jobs:
   # Финальная сборка релиза
   create-release:
     runs-on: ubuntu-latest
-    needs: [build-and-test, screenshots-phone]
+    needs: [setup-android-sdk, build-and-test, screenshots-phone]
     permissions:
       contents: write
 
