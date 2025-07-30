@@ -313,11 +313,12 @@ jobs:
         run: |
           export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools"
           
-          # Установка system image, если его нет
-          if ! sdkmanager --list | grep -q "system-images;android-34;default;x86_64"; then
-            echo "🔧 Установка system image..."
-            sdkmanager "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: Не удалось установить system image"; exit 1; }
-          fi
+          # Принятие лицензий и установка system image
+          echo "🔧 Принятие лицензий..."
+          yes | sdkmanager --licenses || { echo "❌ ОШИБКА: sdkmanager license error"; exit 1; }
+          
+          echo "🔧 Установка system image..."
+          yes | sdkmanager "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: Не удалось установить system image"; exit 1; }
           
           echo "🔧 Создание AVD..."
           echo "no" | avdmanager create avd --name "ci_nexus5" --package "system-images;android-34;default;x86_64" --device "Nexus 5" --force || true
@@ -422,11 +423,11 @@ jobs:
     - name: 📱 Start Android Emulator and Install APK (Phone)
       shell: bash
       env:
-        ANDROID_SDK_ROOT: /home/runner/android-sdk
-        ANDROID_HOME: /home/runner/android-sdk
+        ANDROID_SDK_ROOT: ${{ needs.setup-android-sdk.outputs.sdk-path }}
+        ANDROID_HOME: ${{ needs.setup-android-sdk.outputs.sdk-path }}
       run: |
         echo "📱 ==== ЗАПУСК ЭМУЛЯТОРА ТЕЛЕФОНА ===="
-        export PATH="$PATH:/home/runner/android-sdk/emulator:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
+        export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
         set -e
         
         echo "📱 Настройка переменных окружения..."
@@ -653,8 +654,8 @@ jobs:
           
           # Копируем только если есть новые файлы
           cp -r screenshots/phone/* screenshots/phone/ 2>/dev/null || true
-          
-          echo "📱 Phone screenshots:"
+        
+        echo "📱 Phone screenshots:"
           ls -la screenshots/phone/
         else
           echo "📱 Новых скриншотов нет, пропускаем..."
