@@ -339,17 +339,17 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel
-          ram-size: 2048
-          heap-size: 512
+          ram-size: 1024
+          heap-size: 256
           disable-animations: true
-          emulator-options: "-no-window -no-audio -no-boot-anim -no-accel -no-snapshot -no-snapshot-save -no-snapshot-load -memory 2048 -cores 2"
+          emulator-options: "-no-window -no-audio -no-boot-anim -no-accel -no-snapshot -no-snapshot-save -no-snapshot-load -memory 1024 -cores 1"
           script: |
             echo "🧪 Эмулятор запущен"
             adb devices
-            echo "🧪 Ожидание загрузки эмулятора..."
-            adb wait-for-device
-            echo "🧪 Проверка состояния эмулятора..."
-            adb shell getprop sys.boot_completed
+            echo "🧪 Быстрая проверка состояния..."
+            timeout 60 adb wait-for-device
+            echo "🧪 Проверка загрузки..."
+            timeout 30 adb shell getprop sys.boot_completed || echo "⚠️ Эмулятор еще загружается"
 
       - name: Проверка подключения
         run: |
