@@ -306,13 +306,23 @@ jobs:
             ~/.android/avd
             ~/.android/emu*
             ${{ env.ANDROID_SDK_ROOT }}
-          key: ${{ runner.os }}-android-sdk-avd-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
-            ${{ runner.os }}-android-sdk-avd-
+            ${{ runner.os }}-android-sdk-
       - name: 📱 Prepare Emulator
         run: |
           export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools"
+          
+          # Установка system image, если его нет
+          if ! sdkmanager --list | grep -q "system-images;android-34;default;x86_64"; then
+            echo "🔧 Установка system image..."
+            sdkmanager "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: Не удалось установить system image"; exit 1; }
+          fi
+          
+          echo "🔧 Создание AVD..."
           echo "no" | avdmanager create avd --name "ci_nexus5" --package "system-images;android-34;default;x86_64" --device "Nexus 5" --force || true
+          
+          echo "🔧 Список доступных AVD:"
           avdmanager list avd
 
   # Параллельная генерация скриншотов для телефона
