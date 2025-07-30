@@ -1,0 +1,51 @@
+name: 🗑️ Clear Android Cache
+
+on:
+  workflow_dispatch:
+    inputs:
+      cache_type:
+        description: 'Тип кэша для очистки'
+        required: true
+        default: 'android-sdk'
+        type: choice
+        options:
+          - android-sdk
+          - gradle
+          - all
+
+jobs:
+  clear-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🗑️ Clear Android SDK Cache
+        if: inputs.cache_type == 'android-sdk' || inputs.cache_type == 'all'
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.android/cache
+            ~/.android/avd
+            /usr/local/lib/android/sdk
+          key: ${{ runner.os }}-android-sdk-emulator-v2
+          restore-keys: |
+            ${{ runner.os }}-android-sdk-emulator-
+            ${{ runner.os }}-android-sdk-
+
+      - name: 🗑️ Clear Gradle Cache
+        if: inputs.cache_type == 'gradle' || inputs.cache_type == 'all'
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: ✅ Cache Cleared
+        run: |
+          echo "✅ Кэш успешно очищен!"
+          echo "🔧 Тип очищенного кэша: ${{ inputs.cache_type }}"
+          echo "🔧 Следующий запуск stable-build.yml будет использовать свежую установку"

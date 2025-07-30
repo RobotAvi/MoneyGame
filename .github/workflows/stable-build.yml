@@ -80,17 +80,18 @@ jobs:
             ${{ runner.os }}-android-sdk-
 
       - name: 🛠️ Setup Android SDK (Cached)
+        if: steps.cache-sdk-setup.outputs.cache-hit != 'true'
         run: |
-          echo "🔧 ==== УСТАНОВКА ANDROID SDK ===="
+          echo "🔧 ==== УСТАНОВКА ANDROID SDK (если не в кэше) ===="
           set -x
           
-          # Проверяем полноту кэша - если эмулятор отсутствует, переустанавливаем
-          if [ -f "$ANDROID_SDK_ROOT/emulator/emulator" ] && [ -d "~/.android/avd" ] && [ "$(ls -A ~/.android/avd/)" ]; then
-            echo "✅ Полный кэш найден (SDK + эмулятор + AVD), пропускаем установку"
+          # Проверяем, установлен ли уже SDK
+          if [ -d "$ANDROID_SDK_ROOT/cmdline-tools/latest" ] && [ -f "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]; then
+            echo "✅ Android SDK уже установлен, пропускаем установку"
             echo "🔧 Настройка переменных окружения..."
             export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
           else
-            echo "🔧 Неполный кэш или SDK не найден, начинаем установку..."
+            echo "🔧 Android SDK не найден, начинаем установку..."
             
             echo "🔧 Очистка существующих файлов..."
             rm -rf $HOME/cmdline-tools.zip $HOME/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
@@ -143,18 +144,19 @@ jobs:
           fi
 
       - name: 🛠️ Установка эмулятора (с кэшированием)
+        if: steps.cache-sdk-setup.outputs.cache-hit != 'true'
         run: |
           echo "🔧 ==== УСТАНОВКА ЭМУЛЯТОРА (С КЭШИРОВАНИЕМ) ===="
           export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
           
-          echo "🔧 Проверка полноты установки эмулятора..."
+          echo "🔧 Проверка кэша эмулятора..."
           if [ -f "$ANDROID_SDK_ROOT/emulator/emulator" ] && [ -d "~/.android/avd" ] && [ "$(ls -A ~/.android/avd/)" ]; then
-            echo "✅ Полная установка эмулятора найдена (эмулятор + AVD), пропускаем установку"
-            echo "🔧 Проверка установленного эмулятора..."
+            echo "✅ Найден кэшированный эмулятор и AVD, пропускаем установку"
+            echo "🔧 Проверка кэшированного эмулятора..."
             ls -la $ANDROID_SDK_ROOT/emulator/emulator
             avdmanager list avd || echo "⚠️ AVD не найдены"
           else
-            echo "🔧 Неполная установка эмулятора или AVD отсутствует, устанавливаем..."
+            echo "🔧 Кэш эмулятора не найден, устанавливаем..."
             
             echo "🔧 Проверка наличия эмулятора..."
           if [ ! -f "$ANDROID_SDK_ROOT/emulator/emulator" ]; then
@@ -208,20 +210,6 @@ jobs:
           ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
           echo "🔍 Проверка adb:"
           ls -la $ANDROID_SDK_ROOT/platform-tools/adb || echo "❌ adb не найден"
-
-      - name: 🗄️ Принудительное сохранение кэша
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.android/cache
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            ~/.android/avd
-            ${{ env.ANDROID_SDK_ROOT }}
-          key: ${{ runner.os }}-android-sdk-emulator-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-android-sdk-emulator-
-            ${{ runner.os }}-android-sdk-
 
 
 
