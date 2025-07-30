@@ -290,11 +290,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Установка JDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: "temurin"
-          java-version: 17
+      - name: Настройка PATH для SDK
+        run: |
+          echo "🔧 ==== НАСТРОЙКА PATH ДЛЯ SDK ===="
+          export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
+          echo "PATH: $PATH"
+          echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+          
+          # Проверяем доступность adb
+          echo "🔧 Проверка adb:"
+          adb version || echo "❌ adb не найден"
+          
+          # Проверяем доступность emulator
+          echo "🔧 Проверка emulator:"
+          emulator -version || echo "❌ emulator не найден"
 
       - name: Запуск Android-эмулятора
         uses: reactivecircus/android-emulator-runner@v2
@@ -306,9 +315,15 @@ jobs:
           ram-size: 2048
           disable-animations: true
           emulator-options: "-no-window -no-audio -no-boot-anim -no-accel"
+          script: |
+            echo "🧪 Эмулятор запущен"
+            adb devices
 
       - name: Проверка подключения
-        run: adb devices
+        run: |
+          echo "📱 ==== ПРОВЕРКА ПОДКЛЮЧЕНИЯ ===="
+          # Используем adb из нашего SDK
+          $ANDROID_SDK_ROOT/platform-tools/adb devices
   # Параллельная генерация скриншотов для телефона
   screenshots-phone:
     needs: [build-and-test, prepare-emulator, setup-android-sdk]
@@ -336,6 +351,16 @@ jobs:
     - name: 📱 Install APK on Emulator
       run: |
         echo "📱 ==== УСТАНОВКА APK НА ЭМУЛЯТОР ===="
+        # Настраиваем PATH для adb
+        export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
+        echo "PATH: $PATH"
+        echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+        
+        # Проверяем доступность adb
+        echo "📱 Проверка adb:"
+        adb version || echo "❌ adb не найден"
+        
+        # Устанавливаем APK
         adb install "releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk"
         
         echo "📱 Проверка установки..."
