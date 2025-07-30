@@ -170,7 +170,23 @@ jobs:
             fi
             
             echo "🔧 Создание AVD для кэширования..."
-            echo "no" | avdmanager create avd -n "cached-emulator" -k "system-images;android-34;google_apis;x86_64" || echo "⚠️ Не удалось создать AVD"
+            # Создаем директорию AVD если её нет
+            mkdir -p ~/.android/avd
+            
+            echo "🔧 Проверка доступных system-images..."
+            sdkmanager --list | grep "system-images;android-34;google_apis;x86_64" || echo "❌ system-images;android-34;google_apis;x86_64 не найден"
+            
+            echo "🔧 Создание AVD..."
+            echo "no" | avdmanager create avd -n "cached-emulator" -k "system-images;android-34;google_apis;x86_64" || echo "⚠️ Не удалось создать AVD с google_apis"
+            
+            echo "🔧 Проверка созданного AVD..."
+            ls -la ~/.android/avd/ || echo "❌ AVD директория не создана"
+            
+            # Если AVD не создался, пробуем с default system-image
+            if [ ! -f "~/.android/avd/cached-emulator.avd/config.ini" ]; then
+              echo "🔧 Попытка создания AVD с default system-image..."
+              echo "no" | avdmanager create avd -n "cached-emulator" -k "system-images;android-34;default;x86_64" || echo "⚠️ Не удалось создать AVD с default"
+            fi
             
             echo "🔧 Проверка установки..."
             ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
