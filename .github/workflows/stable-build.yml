@@ -427,7 +427,7 @@ jobs:
 
     - name: 🎭 Install Maestro
       run: |
-        curl -Ls "https://get.maestro.mobile.dev" | bash
+        curl -L "https://get.maestro.mobile.dev" | bash
         export PATH="$PATH:$HOME/.maestro/bin"
         echo "n" | maestro --version
 
