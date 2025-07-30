@@ -84,17 +84,15 @@ jobs:
           set -x
           
           # Проверяем, установлен ли уже SDK
-          if [ -d "$HOME/android-sdk/cmdline-tools/latest" ] && [ -f "$HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager" ]; then
+          if [ -d "$ANDROID_SDK_ROOT/cmdline-tools/latest" ] && [ -f "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]; then
             echo "✅ Android SDK уже установлен, пропускаем установку"
             echo "🔧 Настройка переменных окружения..."
-            export ANDROID_SDK_ROOT=/home/runner/android-sdk
-            export ANDROID_HOME=/home/runner/android-sdk
-            export PATH="$PATH:/home/runner/android-sdk/emulator:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
+            export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
           else
             echo "🔧 Android SDK не найден, начинаем установку..."
             
             echo "🔧 Очистка существующих файлов..."
-            rm -rf $HOME/cmdline-tools.zip $HOME/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+            rm -rf $HOME/cmdline-tools.zip $HOME/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
             
             echo "🔧 Обновление пакетов..."
             sudo apt-get update
@@ -109,20 +107,18 @@ jobs:
             unzip cmdline-tools.zip -d $HOME
             
             echo "🔧 Создание структуры директорий..."
-            mkdir -p $HOME/android-sdk/cmdline-tools
+            mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
             
             # Удаляем существующую директорию, если она есть
-            if [ -d "$HOME/android-sdk/cmdline-tools/latest" ]; then
+            if [ -d "$ANDROID_SDK_ROOT/cmdline-tools/latest" ]; then
               echo "🔧 Удаление существующей директории latest..."
-              rm -rf $HOME/android-sdk/cmdline-tools/latest
+              rm -rf $ANDROID_SDK_ROOT/cmdline-tools/latest
             fi
             
-            mv $HOME/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+            mv $HOME/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
             
             echo "🔧 Настройка переменных окружения..."
-            export ANDROID_SDK_ROOT=/home/runner/android-sdk
-            export ANDROID_HOME=/home/runner/android-sdk
-            export PATH="$PATH:/home/runner/android-sdk/emulator:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
+            export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
             
             echo "🔧 Принятие лицензий..."
             yes | sdkmanager --licenses || { echo "❌ ОШИБКА: sdkmanager license error"; exit 1; }
