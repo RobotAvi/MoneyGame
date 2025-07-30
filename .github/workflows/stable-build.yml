@@ -80,7 +80,6 @@ jobs:
             ${{ runner.os }}-android-sdk-
 
       - name: 🛠️ Setup Android SDK (Cached)
-        if: steps.cache-sdk-setup.outputs.cache-hit != 'true'
         run: |
           echo "🔧 ==== УСТАНОВКА ANDROID SDK (если не в кэше) ===="
           set -x
@@ -148,53 +147,43 @@ jobs:
           echo "🔧 ==== УСТАНОВКА ЭМУЛЯТОРА (С КЭШИРОВАНИЕМ) ===="
           export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
           
-          echo "🔧 Проверка кэша эмулятора..."
-          if [ -d "~/.android/avd" ] && [ "$(ls -A ~/.android/avd/)" ]; then
-            echo "✅ Найден кэшированный AVD, пропускаем установку эмулятора"
-            echo "🔧 Проверка кэшированного эмулятора..."
-            ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
-            avdmanager list avd || echo "⚠️ AVD не найдены"
-          else
-            echo "🔧 Кэш эмулятора не найден, устанавливаем..."
-            
-            echo "🔧 Проверка наличия эмулятора..."
-            if [ ! -f "$ANDROID_SDK_ROOT/emulator/emulator" ]; then
-              echo "🔧 Эмулятор не найден, устанавливаем..."
-              yes | sdkmanager --install "emulator" || { echo "❌ ОШИБКА: Установка эмулятора не удалась"; exit 1; }
-            fi
-            
-            echo "🔧 Проверка наличия system-image..."
-            if ! sdkmanager --list | grep -q "system-images;android-34"; then
-              echo "🔧 System image не найден, устанавливаем..."
-              yes | sdkmanager --install "system-images;android-34;google_apis;x86_64" || { echo "❌ ОШИБКА: Установка system-image не удалась"; exit 1; }
-            fi
-            
-            echo "🔧 Создание AVD для кэширования..."
-            # Создаем директорию AVD если её нет
-            mkdir -p ~/.android/avd
-            
-            echo "🔧 Проверка доступных system-images..."
-            sdkmanager --list | grep "system-images;android-34;google_apis;x86_64" || echo "❌ system-images;android-34;google_apis;x86_64 не найден"
-            
-            echo "🔧 Создание AVD..."
-            echo "no" | avdmanager create avd -n "cached-emulator" -k "system-images;android-34;google_apis;x86_64" || echo "⚠️ Не удалось создать AVD с google_apis"
-            
-            echo "🔧 Проверка созданного AVD..."
-            ls -la ~/.android/avd/ || echo "❌ AVD директория не создана"
-            
-            # Если AVD не создался, пробуем с default system-image
-            if [ ! -f "~/.android/avd/cached-emulator.avd/config.ini" ]; then
-              echo "🔧 Попытка создания AVD с default system-image..."
-              echo "no" | avdmanager create avd -n "cached-emulator" -k "system-images;android-34;default;x86_64" || echo "⚠️ Не удалось создать AVD с default"
-            fi
-            
-            echo "🔧 Проверка установки..."
-            ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
-            sdkmanager --list | grep -E "emulator|system-images;android-34" || echo "⚠️ Компоненты эмулятора не найдены в списке"
-            avdmanager list avd || echo "⚠️ AVD не найдены"
-            
-            echo "✅ Эмулятор установлен и готов к кэшированию"
+          echo "🔧 Проверка наличия эмулятора..."
+          if [ ! -f "$ANDROID_SDK_ROOT/emulator/emulator" ]; then
+            echo "🔧 Эмулятор не найден, устанавливаем..."
+            yes | sdkmanager --install "emulator" || { echo "❌ ОШИБКА: Установка эмулятора не удалась"; exit 1; }
           fi
+          
+          echo "🔧 Проверка наличия system-image..."
+          if ! sdkmanager --list | grep -q "system-images;android-34"; then
+            echo "🔧 System image не найден, устанавливаем..."
+            yes | sdkmanager --install "system-images;android-34;google_apis;x86_64" || { echo "❌ ОШИБКА: Установка system-image не удалась"; exit 1; }
+          fi
+          
+          echo "🔧 Создание AVD для кэширования..."
+          # Создаем директорию AVD если её нет
+          mkdir -p ~/.android/avd
+          
+          echo "🔧 Проверка доступных system-images..."
+          sdkmanager --list | grep "system-images;android-34;google_apis;x86_64" || echo "❌ system-images;android-34;google_apis;x86_64 не найден"
+          
+          echo "🔧 Создание AVD..."
+          echo "no" | avdmanager create avd -n "cached-emulator" -k "system-images;android-34;google_apis;x86_64" || echo "⚠️ Не удалось создать AVD с google_apis"
+          
+          echo "🔧 Проверка созданного AVD..."
+          ls -la ~/.android/avd/ || echo "❌ AVD директория не создана"
+          
+          # Если AVD не создался, пробуем с default system-image
+          if [ ! -f "~/.android/avd/cached-emulator.avd/config.ini" ]; then
+            echo "🔧 Попытка создания AVD с default system-image..."
+            echo "no" | avdmanager create avd -n "cached-emulator" -k "system-images;android-34;default;x86_64" || echo "⚠️ Не удалось создать AVD с default"
+          fi
+          
+          echo "🔧 Проверка установки..."
+          ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
+          sdkmanager --list | grep -E "emulator|system-images;android-34" || echo "⚠️ Компоненты эмулятора не найдены в списке"
+          avdmanager list avd || echo "⚠️ AVD не найдены"
+          
+          echo "✅ Эмулятор установлен и готов к кэшированию"
 
 
 
