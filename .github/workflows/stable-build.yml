@@ -144,19 +144,18 @@ jobs:
           fi
 
       - name: 🛠️ Установка эмулятора (с кэшированием)
-        if: steps.cache-sdk-setup.outputs.cache-hit != 'true'
         run: |
           echo "🔧 ==== УСТАНОВКА ЭМУЛЯТОРА (С КЭШИРОВАНИЕМ) ===="
           export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
           
           echo "🔧 Проверка кэша эмулятора..."
-          if [ -d "~/.android/avd" ] && [ "$(ls -A ~/.android/avd/)" ]; then
-            echo "✅ Найден кэшированный AVD, пропускаем установку эмулятора"
+          if [ -f "$ANDROID_SDK_ROOT/emulator/emulator" ] && [ -d "~/.android/avd" ] && [ "$(ls -A ~/.android/avd/)" ]; then
+            echo "✅ Найден кэшированный эмулятор и AVD, пропускаем установку"
             echo "🔧 Проверка кэшированного эмулятора..."
-            ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
+            ls -la $ANDROID_SDK_ROOT/emulator/emulator
             avdmanager list avd || echo "⚠️ AVD не найдены"
           else
-            echo "🔧 Кэш эмулятора не найден, устанавливаем..."
+            echo "🔧 Кэш эмулятора не найден или неполный, устанавливаем..."
             
             echo "🔧 Проверка наличия эмулятора..."
           if [ ! -f "$ANDROID_SDK_ROOT/emulator/emulator" ]; then
