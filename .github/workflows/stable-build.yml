@@ -444,11 +444,14 @@ jobs:
         which sdkmanager || { echo "❌ ОШИБКА: sdkmanager не найден в PATH"; exit 1; }
         
         # Установка необходимых компонентов через sdkmanager
-        echo "📦 Установка platform-tools и emulator..."
-        yes | sdkmanager --install "platform-tools" "emulator" || { echo "❌ ОШИБКА: Не удалось установить компоненты"; exit 1; }
+        echo "📦 Установка компонентов..."
+        yes | sdkmanager --install "platform-tools" "emulator" "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: Не удалось установить компоненты"; exit 1; }
         
         echo "📦 Проверка установки..."
-        sdkmanager --list | grep -E "platform-tools|emulator" || { echo "❌ ОШИБКА: Компоненты не установлены"; exit 1; }
+        sdkmanager --list | grep -E "platform-tools|emulator|system-images;android-34" || { echo "❌ ОШИБКА: Компоненты не установлены"; exit 1; }
+        
+        echo "📦 Принятие лицензий..."
+        yes | sdkmanager --licenses || { echo "❌ ОШИБКА: Не удалось принять лицензии"; exit 1; }
 
     - name: 🔧 Проверка и настройка Android SDK
       run: |
@@ -528,7 +531,13 @@ jobs:
         echo "📱 PATH: $PATH"
         
         echo "📱 Проверка system-images..."
-        ls -la $ANDROID_SDK_ROOT/system-images/android-34/default/x86_64/ || echo "❌ system-images не найдены"
+        if [ ! -d "$ANDROID_SDK_ROOT/system-images/android-34/default/x86_64/" ]; then
+          echo "❌ system-images не найдены, устанавливаем..."
+          export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
+          yes | sdkmanager --install "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: Не удалось установить system-images"; exit 1; }
+          yes | sdkmanager --licenses || { echo "❌ ОШИБКА: Не удалось принять лицензии"; exit 1; }
+        fi
+        ls -la $ANDROID_SDK_ROOT/system-images/android-34/default/x86_64/ || { echo "❌ system-images не найдены после установки"; exit 1; }
         
         echo "📱 Очистка старых AVD..."
         rm -rf ~/.android/avd/*
