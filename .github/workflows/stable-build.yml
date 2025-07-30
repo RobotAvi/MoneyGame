@@ -423,11 +423,11 @@ jobs:
     - name: 📱 Start Android Emulator and Install APK (Phone)
       shell: bash
       env:
-        ANDROID_SDK_ROOT: /home/runner/android-sdk
-        ANDROID_HOME: /home/runner/android-sdk
+        ANDROID_SDK_ROOT: ${{ needs.setup-android-sdk.outputs.sdk-path }}
+        ANDROID_HOME: ${{ needs.setup-android-sdk.outputs.sdk-path }}
       run: |
         echo "📱 ==== ЗАПУСК ЭМУЛЯТОРА ТЕЛЕФОНА ===="
-        export PATH="$PATH:/home/runner/android-sdk/emulator:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
+        export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
         set -e
         
         echo "📱 Настройка переменных окружения..."
