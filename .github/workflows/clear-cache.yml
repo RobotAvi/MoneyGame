@@ -214,8 +214,9 @@ jobs:
         run: |
           echo "✅ Кэш успешно очищен (оптимизированная версия)!"
           echo "🔧 Тип очищенного кэша: ${{ inputs.cache_type }}"
-          if: inputs.force_clear == 'true'
-          echo "🚨 ПРИНУДИТЕЛЬНАЯ ОЧИСТКА ВСЕХ КЭШЕЙ!"
+          if [ "${{ inputs.force_clear }}" == "true" ]; then
+            echo "🚨 ПРИНУДИТЕЛЬНАЯ ОЧИСТКА ВСЕХ КЭШЕЙ!"
+          fi
           echo "⚡ Оптимизации производительности:"
           echo "   - Параллельная очистка локальных файлов"
           echo "   - Объединенные операции кэширования"
@@ -228,7 +229,8 @@ jobs:
           echo "     • Restore-keys"
           echo "     • Разные варианты ключей (v3, build hash)"
           echo "     • Уникальные ключи для гарантии"
-          if: inputs.force_clear == 'true'
-          echo "     • ПРИНУДИТЕЛЬНАЯ ОЧИСТКА (force_clear=true)"
+          if [ "${{ inputs.force_clear }}" == "true" ]; then
+            echo "     • ПРИНУДИТЕЛЬНАЯ ОЧИСТКА (force_clear=true)"
+          fi
           echo "🔧 Следующий запуск stable-build.yml будет использовать свежую установку"
           echo "🚀 Время выполнения сокращено на ~70%"
