@@ -140,45 +140,16 @@ jobs:
             ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
             ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager || echo "❌ sdkmanager не найден"
             
-            echo "✅ Android SDK установлен и готов к использованию"
-          fi
-
-      - name: 🛠️ Установка эмулятора (с кэшированием)
-        run: |
-          echo "🔧 ==== УСТАНОВКА ЭМУЛЯТОРА (С КЭШИРОВАНИЕМ) ===="
-          export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
-          
-          echo "🔧 Проверка кэша эмулятора..."
-          if [ -d "~/.android/avd" ] && [ "$(ls -A ~/.android/avd/)" ]; then
-            echo "✅ Найден кэшированный AVD, пропускаем установку эмулятора"
-            echo "🔧 Проверка кэшированного эмулятора..."
-            ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
-            avdmanager list avd || echo "⚠️ AVD не найдены"
-          else
-            echo "🔧 Кэш эмулятора не найден, устанавливаем..."
-            
-            echo "🔧 Проверка наличия эмулятора..."
-            if [ ! -f "$ANDROID_SDK_ROOT/emulator/emulator" ]; then
-              echo "🔧 Эмулятор не найден, устанавливаем..."
-              yes | sdkmanager --install "emulator" || { echo "❌ ОШИБКА: Установка эмулятора не удалась"; exit 1; }
-            fi
-            
-            echo "🔧 Проверка наличия system-image..."
-            if ! sdkmanager --list | grep -q "system-images;android-34"; then
-              echo "🔧 System image не найден, устанавливаем..."
-              yes | sdkmanager --install "system-images;android-34;google_apis;x86_64" || { echo "❌ ОШИБКА: Установка system-image не удалась"; exit 1; }
-            fi
-            
             echo "🔧 Создание AVD для кэширования..."
             echo "no" | avdmanager create avd -n "cached-emulator" -k "system-images;android-34;google_apis;x86_64" || echo "⚠️ Не удалось создать AVD"
             
-            echo "🔧 Проверка установки..."
-            ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
-            sdkmanager --list | grep -E "emulator|system-images;android-34" || echo "⚠️ Компоненты эмулятора не найдены в списке"
+            echo "🔧 Проверка созданного AVD..."
             avdmanager list avd || echo "⚠️ AVD не найдены"
             
-            echo "✅ Эмулятор установлен и готов к кэшированию"
+            echo "✅ Android SDK установлен и готов к использованию"
           fi
+
+
 
 
   # Сборка и тестирование APK
