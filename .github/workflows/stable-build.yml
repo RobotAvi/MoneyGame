@@ -331,6 +331,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: 🗄️ Cache Android SDK and Emulator
+        id: cache-sdk-emulator
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.android/cache
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.android/avd
+            ${{ env.ANDROID_SDK_ROOT }}
+          key: ${{ runner.os }}-android-sdk-emulator-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-android-sdk-emulator-
+            ${{ runner.os }}-android-sdk-
+
       - name: Настройка PATH для SDK
         run: |
           echo "🔧 ==== НАСТРОЙКА PATH ДЛЯ SDK ===="
