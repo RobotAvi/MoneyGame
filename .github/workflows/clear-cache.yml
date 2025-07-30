@@ -22,20 +22,23 @@ jobs:
 
       - name: 🗑️ Clear Android SDK Cache
         if: inputs.cache_type == 'android-sdk' || inputs.cache_type == 'all'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.android/cache
             ~/.android/avd
             /usr/local/lib/android/sdk
-          key: ${{ runner.os }}-android-sdk-emulator-v2
+          key: ${{ runner.os }}-android-sdk-emulator-v3
           restore-keys: |
             ${{ runner.os }}-android-sdk-emulator-
             ${{ runner.os }}-android-sdk-
+          # Оптимизация производительности
+          compression-level: 6
+          enableCrossOsArchive: false
 
       - name: 🗑️ Clear Gradle Cache
         if: inputs.cache_type == 'gradle' || inputs.cache_type == 'all'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
@@ -43,9 +46,29 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+          # Оптимизация производительности
+          compression-level: 6
+          enableCrossOsArchive: false
+
+      - name: 🧹 Clean Gradle Build Cache
+        if: inputs.cache_type == 'gradle' || inputs.cache_type == 'all'
+        run: |
+          echo "🧹 Очистка локального кэша Gradle..."
+          ./gradlew clean
+          ./gradlew cleanBuildCache
+          echo "✅ Локальный кэш Gradle очищен"
+
+      - name: 🧹 Clean Android Build Cache
+        if: inputs.cache_type == 'android-sdk' || inputs.cache_type == 'all'
+        run: |
+          echo "🧹 Очистка кэша Android..."
+          rm -rf ~/.android/cache/*
+          rm -rf ~/.android/avd/*
+          echo "✅ Кэш Android очищен"
 
       - name: ✅ Cache Cleared
         run: |
           echo "✅ Кэш успешно очищен!"
           echo "🔧 Тип очищенного кэша: ${{ inputs.cache_type }}"
           echo "🔧 Следующий запуск stable-build.yml будет использовать свежую установку"
+          echo "⚡ Оптимизированная версия с улучшенной производительностью"
