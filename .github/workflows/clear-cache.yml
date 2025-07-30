@@ -1,22 +1,7 @@
-name: 🗑️ Clear Android Cache (Optimized)
+name: 🗑️ Clear Android Cache
 
 on:
   workflow_dispatch:
-    inputs:
-      cache_type:
-        description: 'Тип кэша для очистки'
-        required: true
-        default: 'android-sdk'
-        type: choice
-        options:
-          - android-sdk
-          - gradle
-          - all
-      force_clear:
-        description: 'Принудительная очистка всех кэшей (включая старые версии)'
-        required: false
-        default: false
-        type: boolean
 
 jobs:
   clear-cache:
@@ -33,204 +18,68 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      # Принудительная очистка всех возможных кэшей
-      - name: 🗑️ Force Clear All Caches
-        if: inputs.force_clear == 'true'
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.android/cache
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            ~/.android/avd
-            /usr/local/lib/android/sdk
-          key: ${{ runner.os }}-force-clear-${{ github.run_id }}-${{ github.run_number }}
-          enableCrossOsArchive: false
-
-      # Очистка ВСЕХ возможных кэшей основного воркфлоу
-      - name: 🗑️ Clear All Main Workflow Caches
-        if: (inputs.cache_type == 'all' || inputs.cache_type == 'android-sdk') && inputs.force_clear != 'true'
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.android/cache
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            ~/.android/avd
-            /usr/local/lib/android/sdk
-          key: ${{ runner.os }}-android-sdk-emulator-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-android-sdk-emulator-
-            ${{ runner.os }}-android-sdk-
-          # Оптимизация производительности
-          enableCrossOsArchive: false
-
-      - name: 🗑️ Clear Gradle Cache (Main Workflow)
-        if: (inputs.cache_type == 'all' || inputs.cache_type == 'gradle') && inputs.force_clear != 'true'
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-          # Оптимизация производительности
-          enableCrossOsArchive: false
-
-      # Очистка кэшей с разными вариантами ключей
-      - name: 🗑️ Clear Android SDK Cache (Build Hash)
-        if: (inputs.cache_type == 'android-sdk' || inputs.cache_type == 'all') && inputs.force_clear != 'true'
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.android/cache
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            ~/.android/avd
-            /usr/local/lib/android/sdk
-          key: ${{ runner.os }}-android-sdk-emulator-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-android-sdk-emulator-
-            ${{ runner.os }}-android-sdk-
-          # Оптимизация производительности
-          enableCrossOsArchive: false
-
-      - name: 🗑️ Clear Android SDK Cache (v3)
-        if: (inputs.cache_type == 'android-sdk' || inputs.cache_type == 'all') && inputs.force_clear != 'true'
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.android/cache
-            ~/.android/avd
-            /usr/local/lib/android/sdk
-          key: ${{ runner.os }}-android-sdk-emulator-v3
-          restore-keys: |
-            ${{ runner.os }}-android-sdk-emulator-
-            ${{ runner.os }}-android-sdk-
-          # Оптимизация производительности
-          enableCrossOsArchive: false
-
-      # Параллельная очистка кэшей GitHub Actions
-      - name: 🗑️ Clear All GitHub Actions Caches
-        if: inputs.cache_type == 'all' && inputs.force_clear != 'true'
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.android/cache
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            ~/.android/avd
-            /usr/local/lib/android/sdk
-          key: ${{ runner.os }}-clear-all-${{ github.run_id }}
-          # Оптимизация производительности
-          enableCrossOsArchive: false
-
-      - name: 🗑️ Clear Android SDK Cache Only
-        if: inputs.cache_type == 'android-sdk' && inputs.force_clear != 'true'
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.android/cache
-            ~/.android/avd
-            /usr/local/lib/android/sdk
-          key: ${{ runner.os }}-clear-sdk-${{ github.run_id }}
-          # Оптимизация производительности
-          enableCrossOsArchive: false
-
-      - name: 🗑️ Clear Gradle Cache Only
-        if: inputs.cache_type == 'gradle' && inputs.force_clear != 'true'
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-clear-gradle-${{ github.run_id }}
-          # Оптимизация производительности
-          enableCrossOsArchive: false
-
-      # Параллельная очистка локальных файлов (оптимизированная)
-      - name: 🧹 Clean Local Caches (Parallel)
-        if: inputs.cache_type == 'all' || inputs.force_clear == 'true'
+      # Динамическая очистка всех кэшей
+      - name: 🗑️ Clear All Caches Dynamically
         run: |
-          echo "🧹 ==== ПАРАЛЛЕЛЬНАЯ ОЧИСТКА ЛОКАЛЬНЫХ КЭШЕЙ ===="
+          echo "🔍 Получение списка всех кэшей..."
           
-          # Быстрая очистка файлов (без Gradle для ускорения)
-          (
-            echo "🧹 Очистка Android cache..."
-            rm -rf ~/.android/cache/* ~/.android/avd/* &
+          # Получаем все кэши через API
+          CACHES=$(curl -s -H "Authorization: token ${{ github.token }}" \
+                        -H "Accept: application/vnd.github.v3+json" \
+                        "https://api.github.com/repos/${{ github.repository }}/actions/caches" | \
+                   jq -r '.actions_caches[] | .key' 2>/dev/null || echo "")
+          
+          if [ -n "$CACHES" ]; then
+            echo "🗑️ Найдено кэшей: $(echo "$CACHES" | wc -l)"
+            echo "🧹 Очистка всех кэшей параллельно..."
             
-            echo "🧹 Очистка Gradle cache..."
-            rm -rf ~/.gradle/caches/* ~/.gradle/wrapper/* &
+            # Очищаем каждый кэш параллельно
+            echo "$CACHES" | while read -r cache_key; do
+              if [ -n "$cache_key" ]; then
+                echo "🗑️ Очистка кэша: $cache_key"
+                curl -X DELETE \
+                     -H "Authorization: token ${{ github.token }}" \
+                     -H "Accept: application/vnd.github.v3+json" \
+                     "https://api.github.com/repos/${{ github.repository }}/actions/caches?key=$cache_key" &
+              fi
+            done
             
-            echo "🧹 Очистка SDK directories..."
-            rm -rf /usr/local/lib/android/sdk/* $ANDROID_SDK_ROOT/* $ANDROID_HOME/* 2>/dev/null &
-            
-            # Ждем завершения быстрых операций
+            # Ждем завершения всех запросов
             wait
-          )
-          
-          echo "✅ Быстрые кэши очищены"
-          
-          # Отдельно запускаем Gradle (если нужно)
-          if [ -f "./gradlew" ]; then
-            echo "🧹 Очистка Gradle build cache..."
-            timeout 30s ./gradlew clean cleanBuildCache --no-daemon --parallel --max-workers=2 --quiet || echo "⚠️ Gradle cleanup timeout or failed"
+            echo "✅ Все кэши очищены"
+          else
+            echo "ℹ️ Кэши не найдены"
           fi
-          
-          echo "✅ Все локальные кэши очищены"
 
-      - name: 🧹 Clean Android SDK Only
-        if: inputs.cache_type == 'android-sdk' && inputs.force_clear != 'true'
+      # Динамическая очистка локальных файлов
+      - name: 🧹 Clean Local Files Dynamically
         run: |
-          echo "🧹 ==== ОЧИСТКА ANDROID SDK ===="
+          echo "🧹 Динамическая очистка локальных файлов..."
           
-          # Параллельная очистка Android
-          (
-            rm -rf ~/.android/cache/* ~/.android/avd/* &
-            rm -rf /usr/local/lib/android/sdk/* $ANDROID_SDK_ROOT/* $ANDROID_HOME/* 2>/dev/null &
-            wait
-          )
+          # Очищаем все возможные кэш директории без привязки к именам
+          find ~ -type d -name "*cache*" 2>/dev/null | \
+          while read -r dir; do
+            if [ -d "$dir" ] && [ -w "$dir" ]; then
+              echo "🧹 Очистка: $dir"
+              rm -rf "$dir"/* 2>/dev/null &
+            fi
+          done
           
-          echo "✅ Android SDK кэши очищены"
+          # Ждем завершения всех операций
+          wait
+          
+          # Динамическая очистка build кэшей (если есть build файлы)
+          find . -name "*build*" -type f -executable 2>/dev/null | head -1 | \
+          while read -r build_file; do
+            if [ -n "$build_file" ] && [ -x "$build_file" ]; then
+              echo "🧹 Очистка build кэша: $build_file"
+              timeout 30s "$build_file" clean cleanBuildCache --no-daemon --parallel --max-workers=2 --quiet 2>/dev/null || echo "⚠️ Build cleanup failed"
+            fi
+          done
+          
+          echo "✅ Все локальные файлы очищены"
 
-      - name: 🧹 Clean Gradle Only
-        if: inputs.cache_type == 'gradle' && inputs.force_clear != 'true'
+      - name: ✅ Done
         run: |
-          echo "🧹 ==== ОЧИСТКА GRADLE ===="
-          
-          # Сначала быстрая очистка файлов
-          rm -rf ~/.gradle/caches/* ~/.gradle/wrapper/*
-          
-          # Затем Gradle команды с таймаутом
-          if [ -f "./gradlew" ]; then
-            echo "🧹 Очистка Gradle build cache..."
-            timeout 30s ./gradlew clean cleanBuildCache --no-daemon --parallel --max-workers=2 --quiet || echo "⚠️ Gradle cleanup timeout or failed"
-          fi
-          
-          echo "✅ Gradle кэши очищены"
-
-      - name: ✅ Cache Cleared (Optimized)
-        run: |
-          echo "✅ Кэш успешно очищен (оптимизированная версия)!"
-          echo "🔧 Тип очищенного кэша: ${{ inputs.cache_type }}"
-          if [ "${{ inputs.force_clear }}" == "true" ]; then
-            echo "🚨 ПРИНУДИТЕЛЬНАЯ ОЧИСТКА ВСЕХ КЭШЕЙ!"
-          fi
-          echo "⚡ Оптимизации производительности:"
-          echo "   - Параллельная очистка локальных файлов"
-          echo "   - Объединенные операции кэширования"
-          echo "   - Отключенное кросс-платформенное архивирование"
-          echo "   - Уникальные ключи кэша для принудительной очистки"
-          echo "   - Таймаут для Gradle операций (30s)"
-          echo "   - Оптимизированные Gradle настройки"
-          echo "   - Очистка ВСЕХ возможных кэшей проекта:"
-          echo "     • Основные ключи кэша"
-          echo "     • Restore-keys"
-          echo "     • Разные варианты ключей (v3, build hash)"
-          echo "     • Уникальные ключи для гарантии"
-          if [ "${{ inputs.force_clear }}" == "true" ]; then
-            echo "     • ПРИНУДИТЕЛЬНАЯ ОЧИСТКА (force_clear=true)"
-          fi
-          echo "🔧 Следующий запуск stable-build.yml будет использовать свежую установку"
-          echo "🚀 Время выполнения сокращено на ~70%"
+          echo "✅ Все кэши очищены!"
+          echo "🔧 Следующий запуск будет с чистого листа"
