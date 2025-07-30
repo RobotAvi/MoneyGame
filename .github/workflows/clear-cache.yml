@@ -12,6 +12,11 @@ on:
           - android-sdk
           - gradle
           - all
+      force_clear:
+        description: 'Принудительная очистка всех кэшей (включая старые версии)'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   clear-cache:
@@ -28,9 +33,23 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      # Очистка кэшей с ключами основного воркфлоу
-      - name: 🗑️ Clear Main Workflow Caches
-        if: inputs.cache_type == 'all'
+      # Принудительная очистка всех возможных кэшей
+      - name: 🗑️ Force Clear All Caches
+        if: inputs.force_clear == 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.android/cache
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.android/avd
+            /usr/local/lib/android/sdk
+          key: ${{ runner.os }}-force-clear-${{ github.run_id }}-${{ github.run_number }}
+          enableCrossOsArchive: false
+
+      # Очистка ВСЕХ возможных кэшей основного воркфлоу
+      - name: 🗑️ Clear All Main Workflow Caches
+        if: (inputs.cache_type == 'all' || inputs.cache_type == 'android-sdk') && inputs.force_clear != 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -47,7 +66,7 @@ jobs:
           enableCrossOsArchive: false
 
       - name: 🗑️ Clear Gradle Cache (Main Workflow)
-        if: inputs.cache_type == 'all'
+        if: (inputs.cache_type == 'all' || inputs.cache_type == 'gradle') && inputs.force_clear != 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -59,9 +78,42 @@ jobs:
           # Оптимизация производительности
           enableCrossOsArchive: false
 
+      # Очистка кэшей с разными вариантами ключей
+      - name: 🗑️ Clear Android SDK Cache (Build Hash)
+        if: (inputs.cache_type == 'android-sdk' || inputs.cache_type == 'all') && inputs.force_clear != 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.android/cache
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.android/avd
+            /usr/local/lib/android/sdk
+          key: ${{ runner.os }}-android-sdk-emulator-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-android-sdk-emulator-
+            ${{ runner.os }}-android-sdk-
+          # Оптимизация производительности
+          enableCrossOsArchive: false
+
+      - name: 🗑️ Clear Android SDK Cache (v3)
+        if: (inputs.cache_type == 'android-sdk' || inputs.cache_type == 'all') && inputs.force_clear != 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.android/cache
+            ~/.android/avd
+            /usr/local/lib/android/sdk
+          key: ${{ runner.os }}-android-sdk-emulator-v3
+          restore-keys: |
+            ${{ runner.os }}-android-sdk-emulator-
+            ${{ runner.os }}-android-sdk-
+          # Оптимизация производительности
+          enableCrossOsArchive: false
+
       # Параллельная очистка кэшей GitHub Actions
       - name: 🗑️ Clear All GitHub Actions Caches
-        if: inputs.cache_type == 'all'
+        if: inputs.cache_type == 'all' && inputs.force_clear != 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -75,7 +127,7 @@ jobs:
           enableCrossOsArchive: false
 
       - name: 🗑️ Clear Android SDK Cache Only
-        if: inputs.cache_type == 'android-sdk'
+        if: inputs.cache_type == 'android-sdk' && inputs.force_clear != 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -87,7 +139,7 @@ jobs:
           enableCrossOsArchive: false
 
       - name: 🗑️ Clear Gradle Cache Only
-        if: inputs.cache_type == 'gradle'
+        if: inputs.cache_type == 'gradle' && inputs.force_clear != 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -99,7 +151,7 @@ jobs:
 
       # Параллельная очистка локальных файлов (оптимизированная)
       - name: 🧹 Clean Local Caches (Parallel)
-        if: inputs.cache_type == 'all'
+        if: inputs.cache_type == 'all' || inputs.force_clear == 'true'
         run: |
           echo "🧹 ==== ПАРАЛЛЕЛЬНАЯ ОЧИСТКА ЛОКАЛЬНЫХ КЭШЕЙ ===="
           
@@ -129,7 +181,7 @@ jobs:
           echo "✅ Все локальные кэши очищены"
 
       - name: 🧹 Clean Android SDK Only
-        if: inputs.cache_type == 'android-sdk'
+        if: inputs.cache_type == 'android-sdk' && inputs.force_clear != 'true'
         run: |
           echo "🧹 ==== ОЧИСТКА ANDROID SDK ===="
           
@@ -143,7 +195,7 @@ jobs:
           echo "✅ Android SDK кэши очищены"
 
       - name: 🧹 Clean Gradle Only
-        if: inputs.cache_type == 'gradle'
+        if: inputs.cache_type == 'gradle' && inputs.force_clear != 'true'
         run: |
           echo "🧹 ==== ОЧИСТКА GRADLE ===="
           
@@ -162,6 +214,8 @@ jobs:
         run: |
           echo "✅ Кэш успешно очищен (оптимизированная версия)!"
           echo "🔧 Тип очищенного кэша: ${{ inputs.cache_type }}"
+          if: inputs.force_clear == 'true'
+          echo "🚨 ПРИНУДИТЕЛЬНАЯ ОЧИСТКА ВСЕХ КЭШЕЙ!"
           echo "⚡ Оптимизации производительности:"
           echo "   - Параллельная очистка локальных файлов"
           echo "   - Объединенные операции кэширования"
@@ -169,6 +223,12 @@ jobs:
           echo "   - Уникальные ключи кэша для принудительной очистки"
           echo "   - Таймаут для Gradle операций (30s)"
           echo "   - Оптимизированные Gradle настройки"
-          echo "   - Очистка кэшей с ключами основного воркфлоу"
+          echo "   - Очистка ВСЕХ возможных кэшей проекта:"
+          echo "     • Основные ключи кэша"
+          echo "     • Restore-keys"
+          echo "     • Разные варианты ключей (v3, build hash)"
+          echo "     • Уникальные ключи для гарантии"
+          if: inputs.force_clear == 'true'
+          echo "     • ПРИНУДИТЕЛЬНАЯ ОЧИСТКА (force_clear=true)"
           echo "🔧 Следующий запуск stable-build.yml будет использовать свежую установку"
           echo "🚀 Время выполнения сокращено на ~70%"
