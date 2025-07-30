@@ -1,4 +1,4 @@
-name: 🗑️ Clear Android Cache
+name: 🗑️ Clear All Caches
 
 on:
   workflow_dispatch:
@@ -7,13 +7,13 @@ jobs:
   clear-cache:
     runs-on: ubuntu-latest
     env:
-      GRADLE_OPTS: >-
-        -Dorg.gradle.daemon=false
-        -Dorg.gradle.parallel=true
-        -Dorg.gradle.configureondemand=true
-        -Dorg.gradle.caching=false
-        -Dorg.gradle.workers.max=4
-        -Dorg.gradle.jvmargs=-Xmx2g -XX:+UseParallelGC
+      BUILD_OPTS: >-
+        -Dorg.build.daemon=false
+        -Dorg.build.parallel=true
+        -Dorg.build.configureondemand=true
+        -Dorg.build.caching=false
+        -Dorg.build.workers.max=4
+        -Dorg.build.jvmargs=-Xmx2g -XX:+UseParallelGC
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -28,6 +28,10 @@ jobs:
                         -H "Accept: application/vnd.github.v3+json" \
                         "https://api.github.com/repos/${{ github.repository }}/actions/caches" | \
                    jq -r '.actions_caches[] | .key' 2>/dev/null || echo "")
+          
+          # Подсчитываем количество кэшей в начале
+          CACHE_COUNT_BEFORE=$(echo "$CACHES" | grep -c . || echo "0")
+          echo "📊 Кэшей в начале: $CACHE_COUNT_BEFORE"
           
           if [ -n "$CACHES" ]; then
             echo "🗑️ Найдено кэшей: $(echo "$CACHES" | wc -l)"
@@ -50,9 +54,27 @@ jobs:
           else
             echo "ℹ️ Кэши не найдены"
           fi
+          
+          # Проверяем количество кэшей в конце
+          echo "🔍 Проверка кэшей после очистки..."
+          CACHES_AFTER=$(curl -s -H "Authorization: token ${{ github.token }}" \
+                              -H "Accept: application/vnd.github.v3+json" \
+                              "https://api.github.com/repos/${{ github.repository }}/actions/caches" | \
+                         jq -r '.actions_caches[] | .key' 2>/dev/null || echo "")
+          CACHE_COUNT_AFTER=$(echo "$CACHES_AFTER" | grep -c . || echo "0")
+          echo "📊 Кэшей в конце: $CACHE_COUNT_AFTER"
+          
+          # Выводим результат
+          if [ "$CACHE_COUNT_BEFORE" -gt 0 ] && [ "$CACHE_COUNT_AFTER" -eq 0 ]; then
+            echo "🎉 Успешно очищено $CACHE_COUNT_BEFORE кэшей!"
+          elif [ "$CACHE_COUNT_BEFORE" -eq 0 ]; then
+            echo "ℹ️ Кэши не были найдены для очистки"
+          else
+            echo "⚠️ Очищено $((CACHE_COUNT_BEFORE - CACHE_COUNT_AFTER)) из $CACHE_COUNT_BEFORE кэшей"
+          fi
 
       # Динамическая очистка локальных файлов
-      - name: 🧹 Clean Local Files Dynamically
+      - name: 🧹 Clear Local Files Dynamically
         run: |
           echo "🧹 Динамическая очистка локальных файлов..."
           
@@ -73,7 +95,7 @@ jobs:
           while read -r build_file; do
             if [ -n "$build_file" ] && [ -x "$build_file" ]; then
               echo "🧹 Очистка build кэша: $build_file"
-              timeout 30s "$build_file" clean cleanBuildCache --no-daemon --parallel --max-workers=2 --quiet 2>/dev/null || echo "⚠️ Build cleanup failed"
+              timeout 30s "$build_file" clean --no-daemon --parallel --max-workers=2 --quiet 2>/dev/null || echo "⚠️ Build cleanup failed"
             fi
           done
           
