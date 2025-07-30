@@ -305,6 +305,10 @@ jobs:
           echo "🔧 Проверка emulator:"
           emulator -version || echo "❌ emulator не найден"
 
+      - name: Проверка содержимого emulator
+        run: |
+          ls -l $ANDROID_SDK_ROOT/emulator
+
       - name: Запуск Android-эмулятора
         uses: reactivecircus/android-emulator-runner@v2
         with:
