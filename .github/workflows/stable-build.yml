@@ -140,13 +140,44 @@ jobs:
             ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
             ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager || echo "❌ sdkmanager не найден"
             
+            echo "✅ Android SDK установлен и готов к использованию"
+          fi
+
+      - name: 🛠️ Установка эмулятора (с кэшированием)
+        run: |
+          echo "🔧 ==== УСТАНОВКА ЭМУЛЯТОРА (С КЭШИРОВАНИЕМ) ===="
+          export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
+          
+          echo "🔧 Проверка кэша эмулятора..."
+          if [ -d "~/.android/avd" ] && [ "$(ls -A ~/.android/avd/)" ]; then
+            echo "✅ Найден кэшированный AVD, пропускаем установку эмулятора"
+            echo "🔧 Проверка кэшированного эмулятора..."
+            ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
+            avdmanager list avd || echo "⚠️ AVD не найдены"
+          else
+            echo "🔧 Кэш эмулятора не найден, устанавливаем..."
+            
+            echo "🔧 Проверка наличия эмулятора..."
+            if [ ! -f "$ANDROID_SDK_ROOT/emulator/emulator" ]; then
+              echo "🔧 Эмулятор не найден, устанавливаем..."
+              yes | sdkmanager --install "emulator" || { echo "❌ ОШИБКА: Установка эмулятора не удалась"; exit 1; }
+            fi
+            
+            echo "🔧 Проверка наличия system-image..."
+            if ! sdkmanager --list | grep -q "system-images;android-34"; then
+              echo "🔧 System image не найден, устанавливаем..."
+              yes | sdkmanager --install "system-images;android-34;google_apis;x86_64" || { echo "❌ ОШИБКА: Установка system-image не удалась"; exit 1; }
+            fi
+            
             echo "🔧 Создание AVD для кэширования..."
             echo "no" | avdmanager create avd -n "cached-emulator" -k "system-images;android-34;google_apis;x86_64" || echo "⚠️ Не удалось создать AVD"
             
-            echo "🔧 Проверка созданного AVD..."
+            echo "🔧 Проверка установки..."
+            ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
+            sdkmanager --list | grep -E "emulator|system-images;android-34" || echo "⚠️ Компоненты эмулятора не найдены в списке"
             avdmanager list avd || echo "⚠️ AVD не найдены"
             
-            echo "✅ Android SDK установлен и готов к использованию"
+            echo "✅ Эмулятор установлен и готов к кэшированию"
           fi
 
 
@@ -300,23 +331,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: 🗄️ Cache Android SDK and Emulator
-        id: cache-sdk-emulator
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.android/cache
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            ~/.android/avd
-            ${{ env.ANDROID_SDK_ROOT }}
-          key: ${{ runner.os }}-android-sdk-emulator-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-android-sdk-emulator-
-            ${{ runner.os }}-android-sdk-
-
-
-
       - name: Настройка PATH для SDK
         run: |
           echo "🔧 ==== НАСТРОЙКА PATH ДЛЯ SDK ===="
@@ -326,11 +340,11 @@ jobs:
           
           # Проверяем доступность adb
           echo "🔧 Проверка adb:"
-          adb version || { echo "❌ adb не найден - SDK не установлен в setup-android-sdk job"; exit 1; }
+          adb version || echo "❌ adb не найден"
           
           # Проверяем доступность emulator
           echo "🔧 Проверка emulator:"
-          emulator -version || { echo "❌ emulator не найден - SDK не установлен в setup-android-sdk job"; exit 1; }
+          emulator -version || echo "❌ emulator не найден"
 
 
 
@@ -423,11 +437,7 @@ jobs:
         
         # Проверяем доступность adb
         echo "📱 Проверка adb:"
-        adb version || { echo "❌ adb не найден - SDK не установлен в setup-android-sdk job"; exit 1; }
-        
-        # Проверяем доступность эмулятора
-        echo "📱 Проверка эмулятора:"
-        emulator -version || { echo "❌ emulator не найден - SDK не установлен в setup-android-sdk job"; exit 1; }
+        adb version || echo "❌ adb не найден"
         
         # Устанавливаем APK
         adb install "releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk"
