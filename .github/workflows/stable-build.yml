@@ -124,7 +124,7 @@ jobs:
             yes | sdkmanager --licenses || { echo "❌ ОШИБКА: sdkmanager license error"; exit 1; }
             
             echo "🔧 Установка компонентов SDK..."
-            yes | sdkmanager --install "platform-tools" "emulator" "system-images;android-34;default;arm64-v8a" || { echo "❌ ОШИБКА: sdkmanager install error"; exit 1; }
+            yes | sdkmanager --install "platform-tools" "emulator" "system-images;android-34;google_apis;x86_64" || { echo "❌ ОШИБКА: sdkmanager install error"; exit 1; }
             echo "🔧 Проверка установки компонентов..."
             sdkmanager --list | grep -E "platform-tools|emulator|system-images;android-34" || { echo "❌ ОШИБКА: Компоненты не установлены"; exit 1; }
             
