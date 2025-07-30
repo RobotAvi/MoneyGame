@@ -23,7 +23,7 @@ jobs:
   setup-android-sdk:
     runs-on: ubuntu-latest
     outputs:
-      sdk-path: /home/runner/android-sdk
+      sdk-path: /usr/local/lib/android/sdk
       version: ${{ steps.version.outputs.version }}
       version_code: ${{ steps.version.outputs.version_code }}
       date: ${{ steps.date.outputs.date }}
@@ -145,8 +145,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: setup-android-sdk
     env:
-      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: ${{ needs.setup-android-sdk.outputs.sdk-path }}
+      ANDROID_HOME: ${{ needs.setup-android-sdk.outputs.sdk-path }}
     outputs:
       version: ${{ needs.setup-android-sdk.outputs.version }}
       version_code: ${{ needs.setup-android-sdk.outputs.version_code }}
@@ -295,8 +295,8 @@ jobs:
     needs: setup-android-sdk
     runs-on: ubuntu-latest
     env:
-      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: ${{ needs.setup-android-sdk.outputs.sdk-path }}
+      ANDROID_HOME: ${{ needs.setup-android-sdk.outputs.sdk-path }}
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -321,8 +321,8 @@ jobs:
     needs: [build-and-test, prepare-emulator]
     runs-on: ubuntu-latest
     env:
-      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: ${{ needs.setup-android-sdk.outputs.sdk-path }}
+      ANDROID_HOME: ${{ needs.setup-android-sdk.outputs.sdk-path }}
     
     steps:
     - name: 📥 Checkout code
