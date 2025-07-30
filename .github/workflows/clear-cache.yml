@@ -28,6 +28,37 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
+      # Очистка кэшей с ключами основного воркфлоу
+      - name: 🗑️ Clear Main Workflow Caches
+        if: inputs.cache_type == 'all'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.android/cache
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.android/avd
+            /usr/local/lib/android/sdk
+          key: ${{ runner.os }}-android-sdk-emulator-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-android-sdk-emulator-
+            ${{ runner.os }}-android-sdk-
+          # Оптимизация производительности
+          enableCrossOsArchive: false
+
+      - name: 🗑️ Clear Gradle Cache (Main Workflow)
+        if: inputs.cache_type == 'all'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+          # Оптимизация производительности
+          enableCrossOsArchive: false
+
       # Параллельная очистка кэшей GitHub Actions
       - name: 🗑️ Clear All GitHub Actions Caches
         if: inputs.cache_type == 'all'
@@ -138,5 +169,6 @@ jobs:
           echo "   - Уникальные ключи кэша для принудительной очистки"
           echo "   - Таймаут для Gradle операций (30s)"
           echo "   - Оптимизированные Gradle настройки"
+          echo "   - Очистка кэшей с ключами основного воркфлоу"
           echo "🔧 Следующий запуск stable-build.yml будет использовать свежую установку"
           echo "🚀 Время выполнения сокращено на ~70%"
