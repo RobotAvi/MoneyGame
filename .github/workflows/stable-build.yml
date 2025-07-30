@@ -194,8 +194,22 @@ jobs:
           sdkmanager --list | grep -E "emulator|system-images;android-34" || echo "⚠️ Компоненты эмулятора не найдены в списке"
           avdmanager list avd || echo "⚠️ AVD не найдены"
           
-          echo "✅ Эмулятор установлен и готов к кэшированию"
+                      echo "✅ Эмулятор установлен и готов к кэшированию"
           fi
+
+      - name: 🔍 Отладка кэша
+        run: |
+          echo "🔍 ==== ОТЛАДКА КЭША ===="
+          echo "🔍 Проверяем что будет кэшироваться..."
+          echo "🔍 ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+          echo "🔍 Содержимое ANDROID_SDK_ROOT:"
+          ls -la $ANDROID_SDK_ROOT/ || echo "❌ ANDROID_SDK_ROOT не существует"
+          echo "🔍 Содержимое ~/.android/avd:"
+          ls -la ~/.android/avd/ || echo "❌ ~/.android/avd не существует"
+          echo "🔍 Проверка эмулятора:"
+          ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
+          echo "🔍 Проверка adb:"
+          ls -la $ANDROID_SDK_ROOT/platform-tools/adb || echo "❌ adb не найден"
 
 
 
@@ -364,6 +378,19 @@ jobs:
             ${{ runner.os }}-android-sdk-
 
 
+
+      - name: 🔍 Отладка восстановленного кэша
+        run: |
+          echo "🔍 ==== ОТЛАДКА ВОССТАНОВЛЕННОГО КЭША ===="
+          echo "🔍 ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+          echo "🔍 Содержимое ANDROID_SDK_ROOT:"
+          ls -la $ANDROID_SDK_ROOT/ || echo "❌ ANDROID_SDK_ROOT не существует"
+          echo "🔍 Содержимое ~/.android/avd:"
+          ls -la ~/.android/avd/ || echo "❌ ~/.android/avd не существует"
+          echo "🔍 Проверка эмулятора:"
+          ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
+          echo "🔍 Проверка adb:"
+          ls -la $ANDROID_SDK_ROOT/platform-tools/adb || echo "❌ adb не найден"
 
       - name: Настройка PATH для SDK
         run: |
