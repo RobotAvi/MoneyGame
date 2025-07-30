@@ -344,69 +344,7 @@ jobs:
             ${{ runner.os }}-android-sdk-emulator-
             ${{ runner.os }}-android-sdk-
 
-      - name: 🛠️ Setup Android SDK (if not cached)
-        if: steps.cache-sdk-emulator.outputs.cache-hit != 'true'
-        run: |
-          echo "🔧 ==== УСТАНОВКА ANDROID SDK (если не в кэше) ===="
-          set -x
-          
-          # Проверяем, установлен ли уже SDK
-          if [ -d "$ANDROID_SDK_ROOT/cmdline-tools/latest" ] && [ -f "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]; then
-            echo "✅ Android SDK уже установлен, пропускаем установку"
-            echo "🔧 Настройка переменных окружения..."
-            export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
-          else
-            echo "🔧 Android SDK не найден, начинаем установку..."
-            
-            echo "🔧 Очистка существующих файлов..."
-            rm -rf $HOME/cmdline-tools.zip $HOME/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
-            
-            echo "🔧 Обновление пакетов..."
-            sudo apt-get update
-            
-            echo "🔧 Установка wget и unzip..."
-            sudo apt-get install -y wget unzip
-            
-            echo "🔧 Загрузка commandline tools..."
-            wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
-            
-            echo "🔧 Распаковка commandline tools..."
-            unzip cmdline-tools.zip -d $HOME
-            
-            echo "🔧 Создание структуры директорий..."
-            mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
-            
-            # Удаляем существующую директорию, если она есть
-            if [ -d "$ANDROID_SDK_ROOT/cmdline-tools/latest" ]; then
-              echo "🔧 Удаление существующей директории latest..."
-              rm -rf $ANDROID_SDK_ROOT/cmdline-tools/latest
-            fi
-            
-            mv $HOME/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
-            
-            echo "🔧 Настройка переменных окружения..."
-            export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
-            
-            echo "🔧 Принятие лицензий..."
-            yes | sdkmanager --licenses || { echo "❌ ОШИБКА: sdkmanager license error"; exit 1; }
-            
-            echo "🔧 Установка компонентов SDK..."
-            yes | sdkmanager --install "platform-tools" "emulator" "system-images;android-34;google_apis;x86_64" || { echo "❌ ОШИБКА: sdkmanager install error"; exit 1; }
-            echo "🔧 Проверка установки компонентов..."
-            sdkmanager --list | grep -E "platform-tools|emulator|system-images;android-34" || { echo "❌ ОШИБКА: Компоненты не установлены"; exit 1; }
-            
-            echo "🔧 Установка прав на выполнение..."
-            sudo chmod -R +x $ANDROID_SDK_ROOT/platform-tools/ || echo "⚠️ Не удалось установить права для platform-tools"
-            sudo chmod -R +x $ANDROID_SDK_ROOT/emulator/ || echo "⚠️ Не удалось установить права для emulator"
-            sudo chmod -R +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/ || echo "⚠️ Не удалось установить права для cmdline-tools"
-            
-            echo "🔧 Проверка прав на выполнение..."
-            ls -la $ANDROID_SDK_ROOT/platform-tools/adb || echo "❌ adb не найден"
-            ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
-            ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager || echo "❌ sdkmanager не найден"
-            
-            echo "✅ Android SDK установлен и готов к использованию"
-          fi
+
 
       - name: Настройка PATH для SDK
         run: |
@@ -417,49 +355,13 @@ jobs:
           
           # Проверяем доступность adb
           echo "🔧 Проверка adb:"
-          adb version || echo "❌ adb не найден"
+          adb version || { echo "❌ adb не найден - SDK не установлен в setup-android-sdk job"; exit 1; }
           
           # Проверяем доступность emulator
           echo "🔧 Проверка emulator:"
-          emulator -version || echo "❌ emulator не найден"
+          emulator -version || { echo "❌ emulator не найден - SDK не установлен в setup-android-sdk job"; exit 1; }
 
-      - name: 🛠️ Установка эмулятора (если не в кэше)
-        if: steps.cache-sdk-emulator.outputs.cache-hit != 'true'
-        run: |
-          echo "🔧 ==== УСТАНОВКА ЭМУЛЯТОРА (ЕСЛИ НЕ В КЭШЕ) ===="
-          export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
-          
-          echo "🔧 Проверка кэша эмулятора..."
-          if [ -d "~/.android/avd" ] && [ "$(ls -A ~/.android/avd/)" ]; then
-            echo "✅ Найден кэшированный AVD, пропускаем установку эмулятора"
-            echo "🔧 Проверка кэшированного эмулятора..."
-            ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
-            avdmanager list avd || echo "⚠️ AVD не найдены"
-          else
-            echo "🔧 Кэш эмулятора не найден, устанавливаем..."
-            
-            echo "🔧 Проверка наличия эмулятора..."
-            if [ ! -f "$ANDROID_SDK_ROOT/emulator/emulator" ]; then
-              echo "🔧 Эмулятор не найден, устанавливаем..."
-              yes | sdkmanager --install "emulator" || { echo "❌ ОШИБКА: Установка эмулятора не удалась"; exit 1; }
-            fi
-            
-            echo "🔧 Проверка наличия system-image..."
-            if ! sdkmanager --list | grep -q "system-images;android-34"; then
-              echo "🔧 System image не найден, устанавливаем..."
-              yes | sdkmanager --install "system-images;android-34;google_apis;x86_64" || { echo "❌ ОШИБКА: Установка system-image не удалась"; exit 1; }
-            fi
-            
-            echo "🔧 Создание AVD для кэширования..."
-            echo "no" | avdmanager create avd -n "cached-emulator" -k "system-images;android-34;google_apis;x86_64" || echo "⚠️ Не удалось создать AVD"
-            
-            echo "🔧 Проверка установки..."
-            ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
-            sdkmanager --list | grep -E "emulator|system-images;android-34" || echo "⚠️ Компоненты эмулятора не найдены в списке"
-            avdmanager list avd || echo "⚠️ AVD не найдены"
-            
-            echo "✅ Эмулятор установлен и готов к кэшированию"
-          fi
+
 
       - name: Проверка кэша эмулятора
         run: |
@@ -524,107 +426,9 @@ jobs:
           ${{ runner.os }}-android-sdk-emulator-
           ${{ runner.os }}-android-sdk-
 
-    - name: 🛠️ Setup Android SDK (if not cached)
-      if: steps.cache-sdk-screenshots.outputs.cache-hit != 'true'
-      run: |
-        echo "🔧 ==== УСТАНОВКА ANDROID SDK (если не в кэше) ===="
-        set -x
-        
-        # Проверяем, установлен ли уже SDK
-        if [ -d "$ANDROID_SDK_ROOT/cmdline-tools/latest" ] && [ -f "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]; then
-          echo "✅ Android SDK уже установлен, пропускаем установку"
-          echo "🔧 Настройка переменных окружения..."
-          export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
-        else
-          echo "🔧 Android SDK не найден, начинаем установку..."
-          
-          echo "🔧 Очистка существующих файлов..."
-          rm -rf $HOME/cmdline-tools.zip $HOME/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
-          
-          echo "🔧 Обновление пакетов..."
-          sudo apt-get update
-          
-          echo "🔧 Установка wget и unzip..."
-          sudo apt-get install -y wget unzip
-          
-          echo "🔧 Загрузка commandline tools..."
-          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
-          
-          echo "🔧 Распаковка commandline tools..."
-          unzip cmdline-tools.zip -d $HOME
-          
-          echo "🔧 Создание структуры директорий..."
-          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
-          
-          # Удаляем существующую директорию, если она есть
-          if [ -d "$ANDROID_SDK_ROOT/cmdline-tools/latest" ]; then
-            echo "🔧 Удаление существующей директории latest..."
-            rm -rf $ANDROID_SDK_ROOT/cmdline-tools/latest
-          fi
-          
-          mv $HOME/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
-          
-          echo "🔧 Настройка переменных окружения..."
-          export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
-          
-          echo "🔧 Принятие лицензий..."
-          yes | sdkmanager --licenses || { echo "❌ ОШИБКА: sdkmanager license error"; exit 1; }
-          
-          echo "🔧 Установка компонентов SDK..."
-          yes | sdkmanager --install "platform-tools" "emulator" "system-images;android-34;google_apis;x86_64" || { echo "❌ ОШИБКА: sdkmanager install error"; exit 1; }
-          echo "🔧 Проверка установки компонентов..."
-          sdkmanager --list | grep -E "platform-tools|emulator|system-images;android-34" || { echo "❌ ОШИБКА: Компоненты не установлены"; exit 1; }
-          
-          echo "🔧 Установка прав на выполнение..."
-          sudo chmod -R +x $ANDROID_SDK_ROOT/platform-tools/ || echo "⚠️ Не удалось установить права для platform-tools"
-          sudo chmod -R +x $ANDROID_SDK_ROOT/emulator/ || echo "⚠️ Не удалось установить права для emulator"
-          sudo chmod -R +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/ || echo "⚠️ Не удалось установить права для cmdline-tools"
-          
-          echo "🔧 Проверка прав на выполнение..."
-          ls -la $ANDROID_SDK_ROOT/platform-tools/adb || echo "❌ adb не найден"
-          ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
-          ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager || echo "❌ sdkmanager не найден"
-          
-          echo "✅ Android SDK установлен и готов к использованию"
-        fi
 
-    - name: 🛠️ Установка эмулятора (если не в кэше)
-      if: steps.cache-sdk-screenshots.outputs.cache-hit != 'true'
-      run: |
-        echo "🔧 ==== УСТАНОВКА ЭМУЛЯТОРА (ЕСЛИ НЕ В КЭШЕ) ===="
-        export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
-        
-        echo "🔧 Проверка кэша эмулятора..."
-        if [ -d "~/.android/avd" ] && [ "$(ls -A ~/.android/avd/)" ]; then
-          echo "✅ Найден кэшированный AVD, пропускаем установку эмулятора"
-          echo "🔧 Проверка кэшированного эмулятора..."
-          ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
-          avdmanager list avd || echo "⚠️ AVD не найдены"
-        else
-          echo "🔧 Кэш эмулятора не найден, устанавливаем..."
-          
-          echo "🔧 Проверка наличия эмулятора..."
-          if [ ! -f "$ANDROID_SDK_ROOT/emulator/emulator" ]; then
-            echo "🔧 Эмулятор не найден, устанавливаем..."
-            yes | sdkmanager --install "emulator" || { echo "❌ ОШИБКА: Установка эмулятора не удалась"; exit 1; }
-          fi
-          
-          echo "🔧 Проверка наличия system-image..."
-          if ! sdkmanager --list | grep -q "system-images;android-34"; then
-            echo "🔧 System image не найден, устанавливаем..."
-            yes | sdkmanager --install "system-images;android-34;google_apis;x86_64" || { echo "❌ ОШИБКА: Установка system-image не удалась"; exit 1; }
-          fi
-          
-          echo "🔧 Создание AVD для кэширования..."
-          echo "no" | avdmanager create avd -n "cached-emulator" -k "system-images;android-34;google_apis;x86_64" || echo "⚠️ Не удалось создать AVD"
-          
-          echo "🔧 Проверка установки..."
-          ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
-          sdkmanager --list | grep -E "emulator|system-images;android-34" || echo "⚠️ Компоненты эмулятора не найдены в списке"
-          avdmanager list avd || echo "⚠️ AVD не найдены"
-          
-          echo "✅ Эмулятор установлен и готов к кэшированию"
-        fi
+
+
 
     - name: 📦 Download APK artifact
       uses: actions/download-artifact@v4
@@ -648,7 +452,7 @@ jobs:
         
         # Проверяем доступность adb
         echo "📱 Проверка adb:"
-        adb version || echo "❌ adb не найден"
+        adb version || { echo "❌ adb не найден - SDK не установлен в setup-android-sdk job"; exit 1; }
         
         # Устанавливаем APK
         adb install "releases/debug/FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk"
