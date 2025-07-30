@@ -80,6 +80,7 @@ jobs:
             ${{ runner.os }}-android-sdk-
 
       - name: 🛠️ Setup Android SDK (Cached)
+        if: steps.cache-sdk-setup.outputs.cache-hit != 'true'
         run: |
           echo "🔧 ==== УСТАНОВКА ANDROID SDK (если не в кэше) ===="
           set -x
@@ -143,11 +144,21 @@ jobs:
           fi
 
       - name: 🛠️ Установка эмулятора (с кэшированием)
+        if: steps.cache-sdk-setup.outputs.cache-hit != 'true'
         run: |
           echo "🔧 ==== УСТАНОВКА ЭМУЛЯТОРА (С КЭШИРОВАНИЕМ) ===="
           export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
           
-          echo "🔧 Проверка наличия эмулятора..."
+          echo "🔧 Проверка кэша эмулятора..."
+          if [ -d "~/.android/avd" ] && [ "$(ls -A ~/.android/avd/)" ]; then
+            echo "✅ Найден кэшированный AVD, пропускаем установку эмулятора"
+            echo "🔧 Проверка кэшированного эмулятора..."
+            ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
+            avdmanager list avd || echo "⚠️ AVD не найдены"
+          else
+            echo "🔧 Кэш эмулятора не найден, устанавливаем..."
+            
+            echo "🔧 Проверка наличия эмулятора..."
           if [ ! -f "$ANDROID_SDK_ROOT/emulator/emulator" ]; then
             echo "🔧 Эмулятор не найден, устанавливаем..."
             yes | sdkmanager --install "emulator" || { echo "❌ ОШИБКА: Установка эмулятора не удалась"; exit 1; }
@@ -184,6 +195,7 @@ jobs:
           avdmanager list avd || echo "⚠️ AVD не найдены"
           
           echo "✅ Эмулятор установлен и готов к кэшированию"
+          fi
 
 
 
