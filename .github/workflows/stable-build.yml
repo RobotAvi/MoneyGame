@@ -404,9 +404,16 @@ jobs:
           fi
 
           echo "🔧 ==== ТЕСТОВЫЙ ЗАПУСК ЭМУЛЯТОРА ===="
-          echo "🔧 Запуск эмулятора..."
+          echo "🔧 Подготовка директорий..."
           
-          # Запускаем эмулятор
+          # Создаем директорию если её нет
+          mkdir -p ~/.android/avd
+          
+          # Копируем файлы из ~/.config/.android/avd в ~/.android/avd
+          cp -r ~/.config/.android/avd/ci_nexus5.avd ~/.android/avd/
+          cp ~/.config/.android/avd/ci_nexus5.ini ~/.android/avd/ 2>/dev/null || true
+          
+          echo "🔧 Запуск эмулятора..."
           $ANDROID_SDK_ROOT/emulator/emulator -avd "ci_nexus5" -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot -cores 1 &
           EMULATOR_PID=$!
           
@@ -429,6 +436,7 @@ jobs:
           # Останавливаем эмулятор
           kill $EMULATOR_PID 2>/dev/null || true
 
+          
   # Параллельная генерация скриншотов для телефона
   screenshots-phone:
     needs: [build-and-test, prepare-emulator, setup-android-sdk]
