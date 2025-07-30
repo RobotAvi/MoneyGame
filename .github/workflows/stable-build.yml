@@ -182,29 +182,35 @@ jobs:
       - name: 🔧 Восстановление прав на выполнение (Build)
         run: |
           echo "🔧 ==== ВОССТАНОВЛЕНИЕ ПРАВ НА ВЫПОЛНЕНИЕ (BUILD) ===="
+          
+          # Настройка переменных окружения
+          export ANDROID_SDK_ROOT=/home/runner/android-sdk
+          export ANDROID_HOME=/home/runner/android-sdk
+          export PATH="$PATH:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
+          
           echo "🔧 ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
           echo "🔧 Проверяем существование SDK:"
-          ls -la /home/runner/android-sdk/ || echo "❌ SDK не найден"
+          ls -la $ANDROID_SDK_ROOT/ || echo "❌ SDK не найден"
           
           echo "🔧 Устанавливаем права на выполнение для всех SDK файлов..."
-          chmod +x /home/runner/android-sdk/platform-tools/* || echo "⚠️ Не удалось установить права для platform-tools"
-          chmod +x /home/runner/android-sdk/emulator/* || echo "⚠️ Не удалось установить права для emulator"
-          chmod +x /home/runner/android-sdk/emulator/qemu/linux-x86_64/* || echo "⚠️ Не удалось установить права для qemu"
-          chmod +x /home/runner/android-sdk/cmdline-tools/latest/bin/* || echo "⚠️ Не удалось установить права для cmdline-tools"
+          chmod +x $ANDROID_SDK_ROOT/platform-tools/* || echo "⚠️ Не удалось установить права для platform-tools"
+          chmod +x $ANDROID_SDK_ROOT/emulator/* || echo "⚠️ Не удалось установить права для emulator"
+          chmod +x $ANDROID_SDK_ROOT/emulator/qemu/linux-x86_64/* || echo "⚠️ Не удалось установить права для qemu"
+          chmod +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/* || echo "⚠️ Не удалось установить права для cmdline-tools"
           
           echo "🔧 ==== ПРОВЕРКА ПРАВ ПОСЛЕ ВОССТАНОВЛЕНИЯ ===="
           echo "🔧 Права на adb:"
-          ls -la /home/runner/android-sdk/platform-tools/adb | grep -E "^-r.x" || echo "❌ adb не имеет прав на выполнение"
+          ls -la $ANDROID_SDK_ROOT/platform-tools/adb | grep -E "^-r.x" || echo "❌ adb не имеет прав на выполнение"
           
           echo "🔧 Права на emulator:"
-          ls -la /home/runner/android-sdk/emulator/emulator | grep -E "^-r.x" || echo "❌ emulator не имеет прав на выполнение"
+          ls -la $ANDROID_SDK_ROOT/emulator/emulator | grep -E "^-r.x" || echo "❌ emulator не имеет прав на выполнение"
           
           echo "🔧 ==== ТЕСТИРОВАНИЕ КОМАНД ===="
           echo "🔧 Тест adb:"
-          /home/runner/android-sdk/platform-tools/adb version || echo "❌ adb version failed"
+          $ANDROID_SDK_ROOT/platform-tools/adb version || echo "❌ adb version failed"
           
           echo "🔧 Тест emulator:"
-          /home/runner/android-sdk/emulator/emulator -version || echo "❌ emulator version failed"
+          $ANDROID_SDK_ROOT/emulator/emulator -version || echo "❌ emulator version failed"
           
       - name: 🏗️ Build APK
         run: |
@@ -311,6 +317,16 @@ jobs:
             ${{ runner.os }}-android-sdk-avd-
       - name: 📱 Prepare Emulator
         run: |
+          echo "🔧 Настройка переменных окружения для AVD..."
+          export ANDROID_SDK_ROOT=/home/runner/android-sdk
+          export ANDROID_HOME=/home/runner/android-sdk
+          export PATH="$PATH:/home/runner/android-sdk/platform-tools:/home/runner/android-sdk/cmdline-tools/latest/bin"
+          
+          echo "🔧 Проверка наличия avdmanager..."
+          which avdmanager || echo "avdmanager not in PATH"
+          ls -la /home/runner/android-sdk/cmdline-tools/latest/bin/avdmanager || echo "avdmanager not found"
+          
+          echo "🔧 Создание AVD..."
           echo "no" | avdmanager create avd --name "ci_nexus5" --package "system-images;android-34;default;x86_64" --device "Nexus 5" --force || true
           avdmanager list avd
 
