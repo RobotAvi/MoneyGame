@@ -313,11 +313,12 @@ jobs:
         run: |
           export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools"
           
-          # Установка system image, если его нет
-          if ! sdkmanager --list | grep -q "system-images;android-34;default;x86_64"; then
-            echo "🔧 Установка system image..."
-            sdkmanager "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: Не удалось установить system image"; exit 1; }
-          fi
+          # Принятие лицензий и установка system image
+          echo "🔧 Принятие лицензий..."
+          yes | sdkmanager --licenses || { echo "❌ ОШИБКА: sdkmanager license error"; exit 1; }
+          
+          echo "🔧 Установка system image..."
+          yes | sdkmanager "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: Не удалось установить system image"; exit 1; }
           
           echo "🔧 Создание AVD..."
           echo "no" | avdmanager create avd --name "ci_nexus5" --package "system-images;android-34;default;x86_64" --device "Nexus 5" --force || true
