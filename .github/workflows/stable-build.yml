@@ -293,6 +293,7 @@ jobs:
   prepare-emulator:
     needs: setup-android-sdk
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     env:
       ANDROID_SDK_ROOT: ${{ needs.setup-android-sdk.outputs.sdk-path }}
       ANDROID_HOME: ${{ needs.setup-android-sdk.outputs.sdk-path }}
