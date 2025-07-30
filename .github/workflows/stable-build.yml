@@ -413,7 +413,7 @@ jobs:
                      # Устанавливаем системные зависимости для эмулятора
            echo "🔧 Установка системных зависимостей для эмулятора..."
            sudo apt-get update
-           sudo apt-get install -y libpulse0 libc6 libstdc++6 libx11-6 libxext6 libxrender1 libxtst6 libxi6 libgl1 libfontconfig1 libdbus-1-3 libqt5widgets5 libqt5gui5 libqt5core5a
+           sudo apt-get install -y libpulse0 libc6 libstdc++6 libx11-6 libxext6 libxrender1 libxtst6 libxi6 libgl1 libfontconfig1 libdbus-1-3 libqt5widgets5 libqt5gui5 libqt5core5a libnss3 libxcomposite1 libxcursor1 libxdamage1 libxrandr2 libasound2 libxss1 libxkbcommon0 libxshmfence1 libwayland-client0 libwayland-cursor0 libwayland-egl1 mesa-utils
           
           # Проверяем наличие system-image
           echo "🔧 Проверка system-image:"
