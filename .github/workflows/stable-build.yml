@@ -1,5 +1,9 @@
 name: 🚀 Stable Build & Release
 
+env:
+  ACTIONS_CACHE_DEBUG: true
+  ACTIONS_STEP_DEBUG: true
+
 on:
   push:
     branches: [ main ]
@@ -292,6 +296,25 @@ jobs:
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
+      - name: 📊 Debug cache paths
+        run: |
+          echo "==== CACHE DEBUG INFO ===="
+          echo "Checking ~/.android/avd:"
+          ls -la ~/.android/avd/ || echo "Directory not found"
+          echo "Size of ~/.android/avd:"
+          du -sh ~/.android/avd/ 2>/dev/null || echo "Cannot get size"
+          
+          echo "Checking ~/.android/emu*:"
+          ls -la ~/.android/emu* || echo "No emu* files found"
+          
+          echo "Checking $ANDROID_SDK_ROOT:"
+          ls -la $ANDROID_SDK_ROOT/ || echo "Directory not found"
+          echo "Size of $ANDROID_SDK_ROOT:"
+          du -sh $ANDROID_SDK_ROOT/ 2>/dev/null || echo "Cannot get size"
+          
+          echo "Total cache size estimation:"
+          du -sh ~/.android/avd/ ~/.android/emu* $ANDROID_SDK_ROOT/ 2>/dev/null || echo "Cannot get total size"
+
       - name: 🗄️ Cache Android SDK and AVD
         uses: actions/cache@v3
         with:
@@ -302,8 +325,25 @@ jobs:
           key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-android-sdk-
+
+      - name: 📊 Debug cache result
+        run: |
+          echo "==== POST-CACHE DEBUG INFO ===="
+          echo "Cache directories after operation:"
+          echo "~/.android/avd:"
+          ls -la ~/.android/avd/ || echo "Directory not found"
+          echo "$ANDROID_SDK_ROOT:"
+          ls -la $ANDROID_SDK_ROOT/ || echo "Directory not found"
       - name: 📱 Prepare Emulator
         run: |
+          # Установка зависимостей для эмулятора
+          sudo apt-get update
+          sudo apt-get install -y libpulse0 libgl1 libc++1 libxcb1 libxcb-xkb1 \
+            libxkbcommon0 libxkbcommon-x11-0 libxcb-icccm4 \
+            libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
+            libxcb-render0 libxcb-shape0 libxcb-shm0 libxcb-sync1 \
+            libxcb-util1 libxcb-xfixes0 libxcb-xinerama0
+            
           export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools"
           
           echo "🔧 ==== УСТАНОВКА КОМПОНЕНТОВ ===="
