@@ -6,13 +6,13 @@
 
 ### Установка
 ```bash
-git clone https://github.com/your-username/financial-success-game.git
-cd financial-success-game
+git clone https://github.com/RobotAvi/MoneyGame.git
+cd MoneyGame
 ./gradlew assembleDebug
 ```
 
 ### Требования
-- Android 6.0 (API 23) или выше
+- Android 7.0 (API 24) или выше
 - Минимум 100 МБ свободного места
 
 ## 🎯 О проекте
@@ -61,9 +61,9 @@ app/src/main/java/com/financialsuccess/game/
 
 ## 📊 Статистика проекта
 
-- **Строк кода**: ~15,000
-- **Тестов**: 70+ (unit + интеграционные)
-- **Версия**: 2.0.0
+- **Строк кода**: ~20,000
+- **Тестов**: 100+ (unit + интеграционные)
+- **Версия**: 1.87
 - **Язык**: Kotlin
 - **Минимальный SDK**: 24 (Android 7.0)
 
@@ -82,4 +82,4 @@ MIT License - см. [LICENSE](LICENSE)
 
 ## � Поддержка
 
-- 🐛 [Issues](https://github.com/your-username/financial-success-game/issues)
+- 🐛 [Issues](https://github.com/RobotAvi/MoneyGame/issues)

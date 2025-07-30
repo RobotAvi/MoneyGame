@@ -12,8 +12,8 @@
 #### Компоненты:
 - **Activities**: Основные экраны приложения
 - **Adapters**: Адаптеры для RecyclerView
-- **ViewModels**: Управление состоянием UI (планируется)
-- **Fragments**: Переиспользуемые UI компоненты (планируется)
+- **ViewModels**: Управление состоянием UI
+- **Fragments**: Переиспользуемые UI компоненты
 
 #### Структура:
 ```
@@ -30,9 +30,10 @@ presentation/
 │   ├── SkillAdapter.kt
 │   ├── AssetAdapter.kt
 │   └── FinancialEntryAdapter.kt
-└── viewmodels/ (планируется)
+└── viewmodels/
     ├── GameViewModel.kt
-    └── CharacterCreationViewModel.kt
+    ├── CharacterCreationViewModel.kt
+    └── MainViewModel.kt
 ```
 
 ### 2. Domain Layer (Бизнес-логика)
@@ -263,11 +264,11 @@ User Selection → GameActivity → GameManager → Player Update → UI Update
 
 ## 🔮 Планы развития архитектуры
 
-### Краткосрочные планы (v2.1)
-- [ ] Добавление ViewModels для лучшего управления состоянием
+### Краткосрочные планы (v1.9)
+- [x] Добавление ViewModels для лучшего управления состоянием
 - [ ] Внедрение Repository паттерна
 - [ ] Добавление Use Cases для бизнес-логики
-- [ ] Улучшение тестирования
+- [x] Улучшение тестирования
 
 ### Среднесрочные планы (v3.0)
 - [ ] Переход на Jetpack Compose
@@ -344,6 +345,6 @@ dependencies {
 
 ---
 
-**Версия документации**: 2.0.0  
-**Последнее обновление**: Декабрь 2024  
+**Версия документации**: 1.87  
+**Последнее обновление**: Июль 2023  
 **Автор**: Команда разработки Financial Success Game

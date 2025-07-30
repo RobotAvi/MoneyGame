@@ -139,16 +139,14 @@ jobs:
             echo "✅ Android SDK установлен и готов к использованию"
           fi
 
-      - name: 📦 Upload Android SDK as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-sdk
-          path: /home/runner/android-sdk
 
   # Сборка и тестирование APK
   build-and-test:
     runs-on: ubuntu-latest
     needs: setup-android-sdk
+    env:
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+      ANDROID_HOME: /usr/local/lib/android/sdk
     outputs:
       version: ${{ needs.setup-android-sdk.outputs.version }}
       version_code: ${{ needs.setup-android-sdk.outputs.version_code }}
@@ -184,27 +182,27 @@ jobs:
           echo "🔧 ==== ВОССТАНОВЛЕНИЕ ПРАВ НА ВЫПОЛНЕНИЕ (BUILD) ===="
           echo "🔧 ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
           echo "🔧 Проверяем существование SDK:"
-          ls -la /home/runner/android-sdk/ || echo "❌ SDK не найден"
+          ls -la $ANDROID_SDK_ROOT/ || echo "❌ SDK не найден"
           
           echo "🔧 Устанавливаем права на выполнение для всех SDK файлов..."
-          chmod +x /home/runner/android-sdk/platform-tools/* || echo "⚠️ Не удалось установить права для platform-tools"
-          chmod +x /home/runner/android-sdk/emulator/* || echo "⚠️ Не удалось установить права для emulator"
-          chmod +x /home/runner/android-sdk/emulator/qemu/linux-x86_64/* || echo "⚠️ Не удалось установить права для qemu"
-          chmod +x /home/runner/android-sdk/cmdline-tools/latest/bin/* || echo "⚠️ Не удалось установить права для cmdline-tools"
+          chmod +x $ANDROID_SDK_ROOT/platform-tools/* || echo "⚠️ Не удалось установить права для platform-tools"
+          chmod +x $ANDROID_SDK_ROOT/emulator/* || echo "⚠️ Не удалось установить права для emulator"
+          chmod +x $ANDROID_SDK_ROOT/emulator/qemu/linux-x86_64/* || echo "⚠️ Не удалось установить права для qemu"
+          chmod +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/* || echo "⚠️ Не удалось установить права для cmdline-tools"
           
           echo "🔧 ==== ПРОВЕРКА ПРАВ ПОСЛЕ ВОССТАНОВЛЕНИЯ ===="
           echo "🔧 Права на adb:"
-          ls -la /home/runner/android-sdk/platform-tools/adb | grep -E "^-r.x" || echo "❌ adb не имеет прав на выполнение"
+          ls -la $ANDROID_SDK_ROOT/platform-tools/adb | grep -E "^-r.x" || echo "❌ adb не имеет прав на выполнение"
           
           echo "🔧 Права на emulator:"
-          ls -la /home/runner/android-sdk/emulator/emulator | grep -E "^-r.x" || echo "❌ emulator не имеет прав на выполнение"
+          ls -la $ANDROID_SDK_ROOT/emulator/emulator | grep -E "^-r.x" || echo "❌ emulator не имеет прав на выполнение"
           
           echo "🔧 ==== ТЕСТИРОВАНИЕ КОМАНД ===="
           echo "🔧 Тест adb:"
-          /home/runner/android-sdk/platform-tools/adb version || echo "❌ adb version failed"
+          $ANDROID_SDK_ROOT/platform-tools/adb version || echo "❌ adb version failed"
           
           echo "🔧 Тест emulator:"
-          /home/runner/android-sdk/emulator/emulator -version || echo "❌ emulator version failed"
+          $ANDROID_SDK_ROOT/emulator/emulator -version || echo "❌ emulator version failed"
           
       - name: 🏗️ Build APK
         run: |
@@ -296,6 +294,9 @@ jobs:
   prepare-emulator:
     needs: setup-android-sdk
     runs-on: ubuntu-latest
+    env:
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+      ANDROID_HOME: /usr/local/lib/android/sdk
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -305,12 +306,13 @@ jobs:
           path: |
             ~/.android/avd
             ~/.android/emu*
-            /home/runner/android-sdk
+            ${{ env.ANDROID_SDK_ROOT }}
           key: ${{ runner.os }}-android-sdk-avd-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-android-sdk-avd-
       - name: 📱 Prepare Emulator
         run: |
+          export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools"
           echo "no" | avdmanager create avd --name "ci_nexus5" --package "system-images;android-34;default;x86_64" --device "Nexus 5" --force || true
           avdmanager list avd
 
@@ -319,8 +321,8 @@ jobs:
     needs: [build-and-test, prepare-emulator]
     runs-on: ubuntu-latest
     env:
-      ANDROID_SDK_ROOT: /home/runner/android-sdk
-      ANDROID_HOME: /home/runner/android-sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+      ANDROID_HOME: /usr/local/lib/android/sdk
     
     steps:
     - name: 📥 Checkout code
@@ -343,67 +345,36 @@ jobs:
         name: FinancialSuccess-v${{ needs.build-and-test.outputs.version }}-${{ needs.build-and-test.outputs.date }}-debug.apk
         path: releases/debug/
         
-    - name: 🧾 Log Android SDK structure
+    - name: 🔧 Проверка и настройка Android SDK
       run: |
-        echo "🔍 ==== ПРОВЕРКА ЗАГРУЖЕННОГО ANDROID SDK (PHONE) ===="
+        echo "🔍 ==== ПРОВЕРКА И НАСТРОЙКА ANDROID SDK ===="
         echo "🔍 ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
-        echo "🔍 Проверяем существование директории:"
-        ls -la $ANDROID_SDK_ROOT/ || echo "❌ ANDROID_SDK_ROOT не существует"
         
-        echo "🔍 ==== СТРУКТУРА SDK ===="
-        find $ANDROID_SDK_ROOT/ -type d | head -20
+        # Проверка критических компонентов
+        components=(
+          "platform-tools/adb"
+          "emulator/emulator"
+          "cmdline-tools/latest/bin/avdmanager"
+        )
         
-        echo "🔍 ==== ПРОВЕРКА КРИТИЧЕСКИХ ФАЙЛОВ ===="
-        echo "🔍 Проверка adb:"
-        ls -la $ANDROID_SDK_ROOT/platform-tools/adb || echo "❌ adb не найден"
+        for component in "${components[@]}"; do
+          echo "🔍 Проверка $component:"
+          if [ -f "$ANDROID_SDK_ROOT/$component" ]; then
+            echo "✅ $component найден"
+            chmod +x "$ANDROID_SDK_ROOT/$component" || echo "⚠️ Не удалось установить права для $component"
+          else
+            echo "❌ $component не найден"
+            exit 1
+          fi
+        done
         
-        echo "🔍 Проверка emulator:"
-        ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
-        
-        echo "🔍 Проверка avdmanager:"
-        ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager || echo "❌ avdmanager не найден"
-        
-        echo "🔍 Проверка system-images:"
-        find $ANDROID_SDK_ROOT/system-images/ -name "*.img" | head -5 || echo "❌ system-images не найдены"
-        
-        echo "🔍 ==== ПРОВЕРКА ПРАВ НА ВЫПОЛНЕНИЕ ===="
-        echo "🔍 Права на adb:"
-        ls -la $ANDROID_SDK_ROOT/platform-tools/adb | grep -E "^-r.x" || echo "❌ adb не имеет прав на выполнение"
-        
-        echo "🔍 Права на emulator:"
-        ls -la $ANDROID_SDK_ROOT/emulator/emulator | grep -E "^-r.x" || echo "❌ emulator не имеет прав на выполнение"
-        
-        echo "🔍 Права на avdmanager:"
-        ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager | grep -E "^-r.x" || echo "❌ avdmanager не имеет прав на выполнение"
-    
-    - name: 🔧 Восстановление прав на выполнение (Phone)
-      run: |
-        echo "🔧 ==== ВОССТАНОВЛЕНИЕ ПРАВ НА ВЫПОЛНЕНИЕ ===="
-        echo "🔧 Устанавливаем права на выполнение для всех SDK файлов..."
-        
-        chmod +x $ANDROID_SDK_ROOT/platform-tools/* || echo "⚠️ Не удалось установить права для platform-tools"
-        chmod +x $ANDROID_SDK_ROOT/emulator/* || echo "⚠️ Не удалось установить права для emulator"
+        # Установка прав на выполнение для директорий
         chmod +x $ANDROID_SDK_ROOT/emulator/qemu/linux-x86_64/* || echo "⚠️ Не удалось установить права для qemu"
-        chmod +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/* || echo "⚠️ Не удалось установить права для cmdline-tools"
         
-        echo "🔧 ==== ПРОВЕРКА ПРАВ ПОСЛЕ ВОССТАНОВЛЕНИЯ ===="
-        echo "🔧 Права на adb:"
-        ls -la $ANDROID_SDK_ROOT/platform-tools/adb | grep -E "^-r.x" || echo "❌ adb не имеет прав на выполнение"
-        
-        echo "🔧 Права на emulator:"
-        ls -la $ANDROID_SDK_ROOT/emulator/emulator | grep -E "^-r.x" || echo "❌ emulator не имеет прав на выполнение"
-        
-        echo "🔧 Права на avdmanager:"
-        ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager | grep -E "^-r.x" || echo "❌ avdmanager не имеет прав на выполнение"
-        
-        echo "🔧 ==== ТЕСТИРОВАНИЕ КОМАНД ===="
-        echo "🔧 Тест adb:"
+        # Быстрая проверка работоспособности
+        echo "🔧 Проверка работоспособности команд:"
         $ANDROID_SDK_ROOT/platform-tools/adb version || echo "❌ adb version failed"
-        
-        echo "🔧 Тест emulator:"
         $ANDROID_SDK_ROOT/emulator/emulator -version || echo "❌ emulator version failed"
-        
-        echo "🔧 Тест avdmanager:"
         $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager list avd || echo "❌ avdmanager failed"
 
     - name: 🔍 Проверка наличия adb в PATH (phone)
@@ -600,9 +571,6 @@ jobs:
           exit 1
         fi
 
-        echo "📱 Остановка эмулятора..."
-        kill $EMULATOR_PID 2>/dev/null || true
-
     - name: 📋 Log workspace structure after screenshots
       run: |
         echo "==== WORKSPACE STRUCTURE AFTER SCREENSHOTS ===="
@@ -670,13 +638,18 @@ jobs:
       run: |
         mkdir -p screenshots/phone
         
-        # Копируем скриншоты в правильные папки
-        if [ -d "screenshots/phone" ]; then
+        # Проверяем наличие новых скриншотов
+        if [ -d "screenshots/phone" ] && [ "$(ls -A screenshots/phone/)" ]; then
+          echo "📱 Найдены новые скриншоты, подготавливаем для репозитория..."
+          
+          # Копируем только если есть новые файлы
           cp -r screenshots/phone/* screenshots/phone/ 2>/dev/null || true
+          
+          echo "📱 Phone screenshots:"
+          ls -la screenshots/phone/
+        else
+          echo "📱 Новых скриншотов нет, пропускаем..."
         fi
-        
-        echo "📱 Phone screenshots:"
-        ls -la screenshots/phone/ 2>/dev/null || echo "No phone screenshots"
         echo ""
 
     - name: 📝 Commit Screenshots to Repository
