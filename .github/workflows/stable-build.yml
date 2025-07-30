@@ -141,6 +141,29 @@ jobs:
             echo "✅ Android SDK установлен и готов к использованию"
           fi
 
+      - name: 🛠️ Установка эмулятора (всегда)
+        run: |
+          echo "🔧 ==== УСТАНОВКА ЭМУЛЯТОРА ===="
+          export PATH="$PATH:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
+          
+          echo "🔧 Проверка наличия эмулятора..."
+          if [ ! -f "$ANDROID_SDK_ROOT/emulator/emulator" ]; then
+            echo "🔧 Эмулятор не найден, устанавливаем..."
+            yes | sdkmanager --install "emulator" || { echo "❌ ОШИБКА: Установка эмулятора не удалась"; exit 1; }
+          fi
+          
+          echo "🔧 Проверка наличия system-image..."
+          if ! sdkmanager --list | grep -q "system-images;android-34"; then
+            echo "🔧 System image не найден, устанавливаем..."
+            yes | sdkmanager --install "system-images;android-34;google_apis;x86_64" || { echo "❌ ОШИБКА: Установка system-image не удалась"; exit 1; }
+          fi
+          
+          echo "🔧 Проверка установки..."
+          ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
+          sdkmanager --list | grep -E "emulator|system-images;android-34" || echo "⚠️ Компоненты эмулятора не найдены в списке"
+          
+          echo "✅ Эмулятор готов к использованию"
+
 
   # Сборка и тестирование APK
   build-and-test:
@@ -282,7 +305,7 @@ jobs:
     name: 🧪 Запуск Android-эмулятора
     needs: setup-android-sdk
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     env:
       ANDROID_SDK_ROOT: ${{ needs.setup-android-sdk.outputs.sdk-path }}
       ANDROID_HOME: ${{ needs.setup-android-sdk.outputs.sdk-path }}
@@ -313,15 +336,20 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
-          target: default
+          target: google_apis
           arch: x86_64
           profile: pixel
           ram-size: 2048
+          heap-size: 512
           disable-animations: true
-          emulator-options: "-no-window -no-audio -no-boot-anim -no-accel"
+          emulator-options: "-no-window -no-audio -no-boot-anim -no-accel -no-snapshot -no-snapshot-save -no-snapshot-load -memory 2048 -cores 2"
           script: |
             echo "🧪 Эмулятор запущен"
             adb devices
+            echo "🧪 Ожидание загрузки эмулятора..."
+            adb wait-for-device
+            echo "🧪 Проверка состояния эмулятора..."
+            adb shell getprop sys.boot_completed
 
       - name: Проверка подключения
         run: |
