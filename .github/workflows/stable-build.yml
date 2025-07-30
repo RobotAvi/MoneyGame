@@ -66,7 +66,7 @@ jobs:
 
       - name: 🗄️ Cache Android SDK
         id: cache-sdk-setup
-        uses: actions/cache@v4
+        uses: actions/cache@v3
         with:
           path: |
             ~/.android/cache
@@ -78,9 +78,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-android-sdk-emulator-
             ${{ runner.os }}-android-sdk-
-          # Оптимизация производительности
-          compression-level: 6
-          enableCrossOsArchive: false
 
       - name: 🛠️ Setup Android SDK (Cached)
         if: steps.cache-sdk-setup.outputs.cache-hit != 'true'
@@ -237,7 +234,7 @@ jobs:
         
       - name: 🗄️ Cache Gradle dependencies
         id: cache-gradle
-        uses: actions/cache@v4
+        uses: actions/cache@v3
         with:
           path: |
             ~/.gradle/caches
@@ -245,9 +242,6 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-          # Оптимизация производительности
-          compression-level: 6
-          enableCrossOsArchive: false
 
       - name: 🔧 Setup Java
         uses: actions/setup-java@v4
@@ -370,7 +364,7 @@ jobs:
 
       - name: 🗄️ Cache Android SDK and Emulator
         id: cache-sdk-emulator
-        uses: actions/cache@v4
+        uses: actions/cache@v3
         with:
           path: |
             ~/.android/cache
@@ -382,9 +376,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-android-sdk-emulator-
             ${{ runner.os }}-android-sdk-
-          # Оптимизация производительности
-          compression-level: 6
-          enableCrossOsArchive: false
 
 
 
@@ -468,7 +459,7 @@ jobs:
 
     - name: 🗄️ Cache Android SDK and Emulator
       id: cache-sdk-screenshots
-      uses: actions/cache@v4
+      uses: actions/cache@v3
       with:
         path: |
           ~/.android/cache
@@ -480,9 +471,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-android-sdk-emulator-
           ${{ runner.os }}-android-sdk-
-        # Оптимизация производительности
-        compression-level: 6
-        enableCrossOsArchive: false
 
 
 
