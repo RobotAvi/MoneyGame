@@ -32,8 +32,7 @@ jobs:
             ~/.android/avd
             /usr/local/lib/android/sdk
           key: ${{ runner.os }}-clear-all-${{ github.run_id }}
-          # Максимальная оптимизация производительности
-          compression-level: 1
+          # Оптимизация производительности
           enableCrossOsArchive: false
 
       - name: 🗑️ Clear Android SDK Cache Only
@@ -45,8 +44,7 @@ jobs:
             ~/.android/avd
             /usr/local/lib/android/sdk
           key: ${{ runner.os }}-clear-sdk-${{ github.run_id }}
-          # Максимальная оптимизация производительности
-          compression-level: 1
+          # Оптимизация производительности
           enableCrossOsArchive: false
 
       - name: 🗑️ Clear Gradle Cache Only
@@ -57,8 +55,7 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: ${{ runner.os }}-clear-gradle-${{ github.run_id }}
-          # Максимальная оптимизация производительности
-          compression-level: 1
+          # Оптимизация производительности
           enableCrossOsArchive: false
 
       # Параллельная очистка локальных файлов
@@ -122,7 +119,6 @@ jobs:
           echo "⚡ Оптимизации производительности:"
           echo "   - Параллельная очистка локальных файлов"
           echo "   - Объединенные операции кэширования"
-          echo "   - Минимальное сжатие (compression-level: 1)"
           echo "   - Отключенное кросс-платформенное архивирование"
           echo "   - Уникальные ключи кэша для принудительной очистки"
           echo "🔧 Следующий запуск stable-build.yml будет использовать свежую установку"
