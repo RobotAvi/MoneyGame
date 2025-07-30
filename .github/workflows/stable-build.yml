@@ -387,8 +387,21 @@ jobs:
           echo "🔧 Список доступных AVD:"
           avdmanager list avd || { echo "❌ ОШИБКА: Не удалось получить список AVD"; exit 1; }
           
-          echo "🔧 Проверка конфигурации AVD..."
-          cat ~/.android/avd/ci_nexus5.avd/config.ini || echo "❌ Конфигурация AVD не найдена"
+                  echo "🔧 Проверка конфигурации AVD..."
+        # Проверяем оба возможных расположения
+        if [ -f ~/.config/.android/avd/ci_nexus5.avd/config.ini ]; then
+          echo "✅ Найдена конфигурация в ~/.config/.android/avd/"
+          cat ~/.config/.android/avd/ci_nexus5.avd/config.ini
+        elif [ -f ~/.android/avd/ci_nexus5.avd/config.ini ]; then
+          echo "✅ Найдена конфигурация в ~/.android/avd/"
+          cat ~/.android/avd/ci_nexus5.avd/config.ini
+        else
+          echo "❌ Конфигурация AVD не найдена в обоих расположениях"
+          echo "Проверка директорий:"
+          ls -la ~/.config/.android/avd/ || echo "❌ ~/.config/.android/avd/ не существует"
+          ls -la ~/.android/avd/ || echo "❌ ~/.android/avd/ не существует"
+          exit 1
+        fi
 
   # Параллельная генерация скриншотов для телефона
   screenshots-phone:
@@ -539,10 +552,22 @@ jobs:
         fi
         ls -la $ANDROID_SDK_ROOT/system-images/android-34/default/x86_64/ || { echo "❌ system-images не найдены после установки"; exit 1; }
         
+        echo "📱 Подготовка директорий для AVD..."
+        # Создаем все необходимые директории
+        mkdir -p ~/.android/avd
+        mkdir -p ~/.config/.android/avd
+        
         echo "📱 Очистка старых AVD..."
-        rm -rf ~/.android/avd/*
-        echo "📱 Содержимое ~/.android/avd/ после очистки:"
+        rm -rf ~/.android/avd/* ~/.config/.android/avd/*
+        
+        echo "📱 Проверка директорий AVD:"
+        echo "~/.android/avd/:"
         ls -la ~/.android/avd/ || echo "❌ ~/.android/avd/ не существует"
+        echo "~/.config/.android/avd/:"
+        ls -la ~/.config/.android/avd/ || echo "❌ ~/.config/.android/avd/ не существует"
+        
+        # Создаем символическую ссылку для совместимости
+        ln -sf ~/.config/.android/avd ~/.android/avd || echo "⚠️ Не удалось создать символическую ссылку"
 
         echo "📱 ==== СОЗДАНИЕ AVD ===="
         echo "📱 Проверка существующих AVD..."
