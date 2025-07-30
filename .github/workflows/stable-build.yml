@@ -290,16 +290,21 @@ jobs:
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
-      - name: 📊 Debug cache paths
+      - name: 📊 Setup and debug cache paths
         run: |
-          echo "==== CACHE DEBUG INFO ===="
+          echo "==== SETUP AND DEBUG CACHE INFO ===="
+          echo "Creating required directories..."
+          mkdir -p ~/.android/avd
+          mkdir -p ~/.android/emulator
+          
           echo "Checking ~/.android/avd:"
-          ls -la ~/.android/avd/ || echo "Directory not found"
+          ls -la ~/.android/ || echo "Android directory not found"
+          ls -la ~/.android/avd/ || echo "AVD directory not found"
           echo "Size of ~/.android/avd:"
           du -sh ~/.android/avd/ 2>/dev/null || echo "Cannot get size"
           
-          echo "Checking ~/.android/emu*:"
-          ls -la ~/.android/emu* || echo "No emu* files found"
+          echo "Checking ~/.android/emulator:"
+          ls -la ~/.android/emulator/ || echo "Emulator directory not found"
           
           echo "Checking $ANDROID_SDK_ROOT:"
           ls -la $ANDROID_SDK_ROOT/ || echo "Directory not found"
@@ -307,15 +312,15 @@ jobs:
           du -sh $ANDROID_SDK_ROOT/ 2>/dev/null || echo "Cannot get size"
           
           echo "Total cache size estimation:"
-          du -sh ~/.android/avd/ ~/.android/emu* $ANDROID_SDK_ROOT/ 2>/dev/null || echo "Cannot get total size"
+          du -sh ~/.android/avd/ ~/.android/emulator/ 2>/dev/null || echo "Cannot get total size"
 
-      - name: 🗄️ Cache AVD
+      - name: 🗄️ Cache AVD and Emulator
         id: cache-android
         uses: actions/cache@v3
         with:
           path: |
             ~/.android/avd
-            ~/.android/emu*
+            ~/.android/emulator
           key: ${{ runner.os }}-android-avd-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-android-avd-
@@ -399,12 +404,12 @@ jobs:
 
     # SDK уже доступен из setup-android-sdk job
 
-    - name: 🗄️ Cache AVD
+    - name: 🗄️ Cache AVD and Emulator
       uses: actions/cache@v3
       with:
         path: |
           ~/.android/avd
-          ~/.android/emu*
+          ~/.android/emulator
         key: ${{ runner.os }}-android-avd-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-android-avd-
