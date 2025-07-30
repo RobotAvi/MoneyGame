@@ -434,6 +434,15 @@ jobs:
         echo "📦 ==== УСТАНОВКА КОМПОНЕНТОВ ===="
         echo "📦 ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
         
+        # Добавляем sdkmanager в PATH
+        echo "📦 Настройка PATH..."
+        export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
+        echo "📦 PATH: $PATH"
+        
+        # Проверяем наличие sdkmanager
+        echo "📦 Проверка sdkmanager..."
+        which sdkmanager || { echo "❌ ОШИБКА: sdkmanager не найден в PATH"; exit 1; }
+        
         # Установка необходимых компонентов через sdkmanager
         echo "📦 Установка platform-tools и emulator..."
         yes | sdkmanager --install "platform-tools" "emulator" || { echo "❌ ОШИБКА: Не удалось установить компоненты"; exit 1; }
