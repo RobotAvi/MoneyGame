@@ -410,6 +410,11 @@ jobs:
             yes | sdkmanager --install "emulator" || { echo "❌ ОШИБКА: Установка эмулятора не удалась"; exit 1; }
           fi
           
+          # Устанавливаем системные зависимости для эмулятора
+          echo "🔧 Установка системных зависимостей для эмулятора..."
+          sudo apt-get update
+          sudo apt-get install -y libpulse0 libasound2 libc6 libstdc++6 libx11-6 libxext6 libxrender1 libxtst6 libxi6 libgconf-2-4
+          
           # Проверяем наличие system-image
           echo "🔧 Проверка system-image:"
           if ! sdkmanager --list | grep -q "system-images;android-34;google_apis;x86_64"; then
