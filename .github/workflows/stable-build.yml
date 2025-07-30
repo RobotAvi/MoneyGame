@@ -128,13 +128,19 @@ jobs:
             yes | sdkmanager --licenses || { echo "❌ ОШИБКА: sdkmanager license error"; exit 1; }
             
             echo "🔧 Установка компонентов SDK..."
-            sdkmanager "platform-tools" "emulator" "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: sdkmanager install error"; exit 1; }
+            yes | sdkmanager --install "platform-tools" "emulator" "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: sdkmanager install error"; exit 1; }
+            echo "🔧 Проверка установки компонентов..."
+            sdkmanager --list | grep -E "platform-tools|emulator|system-images;android-34" || { echo "❌ ОШИБКА: Компоненты не установлены"; exit 1; }
             
             echo "🔧 Установка прав на выполнение..."
-            chmod +x $ANDROID_SDK_ROOT/platform-tools/* || echo "⚠️ Не удалось установить права для platform-tools"
-            chmod +x $ANDROID_SDK_ROOT/emulator/* || echo "⚠️ Не удалось установить права для emulator"
-            chmod +x $ANDROID_SDK_ROOT/emulator/qemu/linux-x86_64/* || echo "⚠️ Не удалось установить права для qemu"
-            chmod +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/* || echo "⚠️ Не удалось установить права для cmdline-tools"
+            sudo chmod -R +x $ANDROID_SDK_ROOT/platform-tools/ || echo "⚠️ Не удалось установить права для platform-tools"
+            sudo chmod -R +x $ANDROID_SDK_ROOT/emulator/ || echo "⚠️ Не удалось установить права для emulator"
+            sudo chmod -R +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/ || echo "⚠️ Не удалось установить права для cmdline-tools"
+            
+            echo "🔧 Проверка прав на выполнение..."
+            ls -la $ANDROID_SDK_ROOT/platform-tools/adb || echo "❌ adb не найден"
+            ls -la $ANDROID_SDK_ROOT/emulator/emulator || echo "❌ emulator не найден"
+            ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager || echo "❌ sdkmanager не найден"
             
             echo "✅ Android SDK установлен и готов к использованию"
           fi
@@ -177,32 +183,18 @@ jobs:
           
 
           
-      - name: 🔧 Восстановление прав на выполнение (Build)
+      - name: 🔧 Проверка SDK для сборки
         run: |
-          echo "🔧 ==== ВОССТАНОВЛЕНИЕ ПРАВ НА ВЫПОЛНЕНИЕ (BUILD) ===="
+          echo "🔧 ==== ПРОВЕРКА SDK ДЛЯ СБОРКИ ===="
           echo "🔧 ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
           echo "🔧 Проверяем существование SDK:"
           ls -la $ANDROID_SDK_ROOT/ || echo "❌ SDK не найден"
           
-          echo "🔧 Устанавливаем права на выполнение для всех SDK файлов..."
-          chmod +x $ANDROID_SDK_ROOT/platform-tools/* || echo "⚠️ Не удалось установить права для platform-tools"
-          chmod +x $ANDROID_SDK_ROOT/emulator/* || echo "⚠️ Не удалось установить права для emulator"
-          chmod +x $ANDROID_SDK_ROOT/emulator/qemu/linux-x86_64/* || echo "⚠️ Не удалось установить права для qemu"
-          chmod +x $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/* || echo "⚠️ Не удалось установить права для cmdline-tools"
+          echo "🔧 Проверка наличия platform-tools..."
+          ls -la $ANDROID_SDK_ROOT/platform-tools/adb || echo "❌ adb не найден"
           
-          echo "🔧 ==== ПРОВЕРКА ПРАВ ПОСЛЕ ВОССТАНОВЛЕНИЯ ===="
-          echo "🔧 Права на adb:"
-          ls -la $ANDROID_SDK_ROOT/platform-tools/adb | grep -E "^-r.x" || echo "❌ adb не имеет прав на выполнение"
-          
-          echo "🔧 Права на emulator:"
-          ls -la $ANDROID_SDK_ROOT/emulator/emulator | grep -E "^-r.x" || echo "❌ emulator не имеет прав на выполнение"
-          
-          echo "🔧 ==== ТЕСТИРОВАНИЕ КОМАНД ===="
           echo "🔧 Тест adb:"
           $ANDROID_SDK_ROOT/platform-tools/adb version || echo "❌ adb version failed"
-          
-          echo "🔧 Тест emulator:"
-          $ANDROID_SDK_ROOT/emulator/emulator -version || echo "❌ emulator version failed"
           
       - name: 🏗️ Build APK
         run: |
@@ -314,13 +306,26 @@ jobs:
         run: |
           export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools"
           
-          # Принятие лицензий и установка system image
+          echo "🔧 ==== УСТАНОВКА КОМПОНЕНТОВ ===="
+          # Принятие лицензий и установка компонентов
           echo "🔧 Принятие лицензий..."
           yes | sdkmanager --licenses || { echo "❌ ОШИБКА: sdkmanager license error"; exit 1; }
           
-          echo "🔧 Установка system image..."
-          yes | sdkmanager "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: Не удалось установить system image"; exit 1; }
+          echo "🔧 Установка компонентов..."
+          yes | sdkmanager --install "emulator" "system-images;android-34;default;x86_64" || { echo "❌ ОШИБКА: sdkmanager install error"; exit 1; }
           
+          echo "🔧 Проверка установки..."
+          sdkmanager --list | grep -E "emulator|system-images;android-34" || { echo "❌ ОШИБКА: Компоненты не установлены"; exit 1; }
+          
+          echo "🔧 ==== НАСТРОЙКА ПРАВ ===="
+          echo "🔧 Установка прав на выполнение..."
+          sudo chmod -R +x $ANDROID_SDK_ROOT/emulator/ || echo "⚠️ Не удалось установить права для emulator"
+          
+          echo "🔧 Проверка прав..."
+          ls -la $ANDROID_SDK_ROOT/emulator/emulator || { echo "❌ emulator не найден"; exit 1; }
+          $ANDROID_SDK_ROOT/emulator/emulator -version || { echo "❌ emulator version failed"; exit 1; }
+          
+          echo "🔧 ==== СОЗДАНИЕ AVD ===="
           echo "🔧 Создание AVD..."
           echo "no" | avdmanager create avd --name "ci_nexus5" --package "system-images;android-34;default;x86_64" --device "Nexus 5" --force || true
           
