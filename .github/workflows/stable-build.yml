@@ -313,17 +313,16 @@ jobs:
           echo "Total cache size estimation:"
           du -sh ~/.android/avd/ ~/.android/emu* $ANDROID_SDK_ROOT/ 2>/dev/null || echo "Cannot get total size"
 
-      - name: 🗄️ Cache Android SDK and AVD
+      - name: 🗄️ Cache AVD
         id: cache-android
         uses: actions/cache@v3
         with:
           path: |
             ~/.android/avd
             ~/.android/emu*
-            ${{ env.ANDROID_SDK_ROOT }}
-          key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-android-avd-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
-            ${{ runner.os }}-android-sdk-
+            ${{ runner.os }}-android-avd-
 
       - name: 📊 Cache Status
         run: |
@@ -402,28 +401,17 @@ jobs:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
 
-    - name: 🗄️ Cache Android SDK
-      id: cache-android-screenshots
-      uses: actions/cache@v3
-      with:
-        path: ${{ env.ANDROID_SDK_ROOT }}
-        key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-android-sdk-
+    # SDK уже доступен из setup-android-sdk job
 
-    - name: 📊 Cache Status
-      run: |
-        echo "Cache hit: ${{ steps.cache-android-screenshots.outputs.cache-hit }}"
-        echo "Cache key: ${{ steps.cache-android-screenshots.outputs.cache-primary-key }}"
-        echo "Matched key: ${{ steps.cache-android-screenshots.outputs.cache-matched-key }}"
-
-    - name: 🗄️ Cache Android SDK and AVD
+    - name: 🗄️ Cache AVD
       uses: actions/cache@v3
       with:
         path: |
           ~/.android/avd
           ~/.android/emu*
-          /home/runner/android-sdk
+        key: ${{ runner.os }}-android-avd-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-android-avd-
         key: ${{ runner.os }}-android-sdk-avd-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-android-sdk-avd-
