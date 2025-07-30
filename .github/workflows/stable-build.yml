@@ -403,6 +403,32 @@ jobs:
             exit 1
           fi
 
+          echo "🔧 ==== ТЕСТОВЫЙ ЗАПУСК ЭМУЛЯТОРА ===="
+          echo "🔧 Запуск эмулятора..."
+          
+          # Запускаем эмулятор
+          $ANDROID_SDK_ROOT/emulator/emulator -avd "ci_nexus5" -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot -cores 1 &
+          EMULATOR_PID=$!
+          
+          # Ждем 30 секунд и проверяем, что процесс жив
+          sleep 30
+          if ! ps -p $EMULATOR_PID > /dev/null; then
+            echo "❌ Эмулятор не запустился"
+            exit 1
+          fi
+          
+          # Проверяем, что эмулятор виден в adb
+          if ! adb devices | grep -q "emulator"; then
+            echo "❌ Эмулятор не появился в списке устройств"
+            kill $EMULATOR_PID 2>/dev/null || true
+            exit 1
+          fi
+          
+          echo "✅ Эмулятор успешно запущен"
+          
+          # Останавливаем эмулятор
+          kill $EMULATOR_PID 2>/dev/null || true
+
   # Параллельная генерация скриншотов для телефона
   screenshots-phone:
     needs: [build-and-test, prepare-emulator, setup-android-sdk]
