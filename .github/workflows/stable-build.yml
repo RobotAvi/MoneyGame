@@ -387,21 +387,21 @@ jobs:
           echo "🔧 Список доступных AVD:"
           avdmanager list avd || { echo "❌ ОШИБКА: Не удалось получить список AVD"; exit 1; }
           
-                  echo "🔧 Проверка конфигурации AVD..."
-        # Проверяем оба возможных расположения
-        if [ -f ~/.config/.android/avd/ci_nexus5.avd/config.ini ]; then
-          echo "✅ Найдена конфигурация в ~/.config/.android/avd/"
-          cat ~/.config/.android/avd/ci_nexus5.avd/config.ini
-        elif [ -f ~/.android/avd/ci_nexus5.avd/config.ini ]; then
-          echo "✅ Найдена конфигурация в ~/.android/avd/"
-          cat ~/.android/avd/ci_nexus5.avd/config.ini
-        else
-          echo "❌ Конфигурация AVD не найдена в обоих расположениях"
-          echo "Проверка директорий:"
-          ls -la ~/.config/.android/avd/ || echo "❌ ~/.config/.android/avd/ не существует"
-          ls -la ~/.android/avd/ || echo "❌ ~/.android/avd/ не существует"
-          exit 1
-        fi
+          echo "🔧 Проверка конфигурации AVD..."
+          # Проверяем оба возможных расположения
+          if [ -f ~/.config/.android/avd/ci_nexus5.avd/config.ini ]; then
+            echo "✅ Найдена конфигурация в ~/.config/.android/avd/"
+            cat ~/.config/.android/avd/ci_nexus5.avd/config.ini
+          elif [ -f ~/.android/avd/ci_nexus5.avd/config.ini ]; then
+            echo "✅ Найдена конфигурация в ~/.android/avd/"
+            cat ~/.android/avd/ci_nexus5.avd/config.ini
+          else
+            echo "❌ Конфигурация AVD не найдена в обоих расположениях"
+            echo "Проверка директорий:"
+            ls -la ~/.config/.android/avd/ || echo "❌ ~/.config/.android/avd/ не существует"
+            ls -la ~/.android/avd/ || echo "❌ ~/.android/avd/ не существует"
+            exit 1
+          fi
 
   # Параллельная генерация скриншотов для телефона
   screenshots-phone:
