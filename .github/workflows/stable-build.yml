@@ -46,8 +46,10 @@ jobs:
           echo "🔍 Содержимое app/build.gradle:"
           cat app/build.gradle | grep -E "(versionName|versionCode)" || echo "❌ Не найдены versionName или versionCode"
           
-          VERSION=$(grep -oP 'versionName\s+"\K[^"]+' app/build.gradle)
-          VERSION_CODE=$(grep -oP 'versionCode\s+\K[0-9]+' app/build.gradle)
+          # Извлекаем первую строку с versionName и берём строку в кавычках
+          VERSION=$(grep -oP 'versionName.*' app/build.gradle | head -1 | grep -oP '"\K[^\"]+(?=")')
+          # Извлекаем первую строку с versionCode и берём последнее целое число в строке
+          VERSION_CODE=$(grep -oP 'versionCode.*' app/build.gradle | head -1 | grep -oP '[0-9]+' | tail -1)
           
           echo "🔍 Извлеченная версия: $VERSION"
           echo "🔍 Извлеченный код версии: $VERSION_CODE"
