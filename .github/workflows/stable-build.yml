@@ -276,8 +276,10 @@ jobs:
       
       - name: 🔖 Compute CI version for build
         run: |
-          CURR_VERSION=$(grep -oP 'versionName\s+"\K[^"]+' app/build.gradle)
-          CURR_CODE=$(grep -oP 'versionCode\s+\K[0-9]+' app/build.gradle)
+          CURR_VERSION=$(grep -oP 'versionName.*' app/build.gradle | head -1 | grep -oP '"\K[^\"]+(?=")' || true)
+          CURR_CODE=$(grep -oP 'versionCode.*' app/build.gradle | head -1 | grep -oP '[0-9]+' | tail -1 || true)
+          if [ -z "$CURR_VERSION" ]; then CURR_VERSION="1.135"; fi
+          if [ -z "$CURR_CODE" ]; then CURR_CODE=136; fi
           MAJOR=$(echo $CURR_VERSION | cut -d. -f1)
           MINOR=$(echo $CURR_VERSION | cut -d. -f2)
           if [ -z "$MINOR" ]; then MINOR=0; fi
