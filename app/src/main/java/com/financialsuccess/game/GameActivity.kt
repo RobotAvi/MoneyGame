@@ -33,17 +33,37 @@ class GameActivity : AppCompatActivity() {
         binding = ActivityGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
+        // Toolbar menu actions
+        binding.toolbar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.menu_save -> {
+                    currentGameState?.let { GameSaveManager.saveGameState(this, it) }
+                    currentGameState?.player?.let { GameSaveManager.savePlayer(this, it) }
+                    Toast.makeText(this, "Игра сохранена!", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                R.id.menu_rules -> {
+                    startActivity(android.content.Intent(this, RulesActivity::class.java))
+                    true
+                }
+                R.id.menu_exit -> {
+                    finish()
+                    true
+                }
+                else -> false
+            }
+        }
+
         initGame()
         setupUI()
 
+        // Legacy buttons still available lower in content
         binding.btnSaveGame.setOnClickListener {
             currentGameState?.let { GameSaveManager.saveGameState(this, it) }
             currentGameState?.player?.let { GameSaveManager.savePlayer(this, it) }
             Toast.makeText(this, "Игра сохранена!", Toast.LENGTH_SHORT).show()
         }
-        binding.btnExit.setOnClickListener {
-            finish()
-        }
+        binding.btnExit.setOnClickListener { finish() }
     }
     
     private fun initGame() {

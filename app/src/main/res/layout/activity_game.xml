@@ -15,6 +15,16 @@
         android:padding="20dp"
         app:elevation="4dp">
 
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primary_color"
+            app:title="@string/app_name"
+            app:titleTextColor="@color/white"
+            app:navigationIconTint="@color/white"
+            app:menu="@menu/game_actions" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
