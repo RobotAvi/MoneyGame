@@ -31,11 +31,11 @@ jobs:
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
-        
+      
       - name: 📅 Get current date
         id: date
         run: echo "date=$(date '+%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
-        
+      
       - name: 🔖 Get version info
         id: version
         run: |
@@ -60,6 +60,13 @@ jobs:
             echo "❌ ОШИБКА: Не удалось извлечь versionCode"
             exit 1
           fi
+          
+          # Подготовим переменные для сборки: инкрементируем минорную и код
+          MAJOR=$(echo $VERSION | cut -d. -f1)
+          MINOR=$(echo $VERSION | cut -d. -f2)
+          if [ -z "$MINOR" ]; then MINOR=0; fi
+          echo "CI_VERSION_NAME=$MAJOR.$((MINOR+1))" >> $GITHUB_ENV
+          echo "CI_VERSION_CODE=$((VERSION_CODE+1))" >> $GITHUB_ENV
           
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
@@ -264,7 +271,17 @@ jobs:
           
           echo "🔧 Тест adb:"
           $ANDROID_SDK_ROOT/platform-tools/adb version || echo "❌ adb version failed"
-          
+      
+      - name: 🔖 Compute CI version for build
+        run: |
+          CURR_VERSION=$(grep -oP 'versionName\s+"\K[^"]+' app/build.gradle)
+          CURR_CODE=$(grep -oP 'versionCode\s+\K[0-9]+' app/build.gradle)
+          MAJOR=$(echo $CURR_VERSION | cut -d. -f1)
+          MINOR=$(echo $CURR_VERSION | cut -d. -f2)
+          if [ -z "$MINOR" ]; then MINOR=0; fi
+          echo "CI_VERSION_NAME=$MAJOR.$((MINOR+1))" >> $GITHUB_ENV
+          echo "CI_VERSION_CODE=$((CURR_CODE+1))" >> $GITHUB_ENV
+      
       - name: 🏗️ Build APK
         run: |
           echo "🏗️ ==== СБОРКА APK ===="
@@ -275,6 +292,8 @@ jobs:
           echo "🏗️ ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
           echo "🏗️ ANDROID_HOME: $ANDROID_HOME"
           echo "🏗️ PATH: $PATH"
+          echo "🏷️ CI_VERSION_NAME: ${CI_VERSION_NAME:-not-set}"
+          echo "🔢 CI_VERSION_CODE: ${CI_VERSION_CODE:-not-set}"
           
           echo "🏗️ Проверка Gradle wrapper..."
           ls -la ./gradlew || echo "❌ gradlew не найден"
@@ -327,20 +346,24 @@ jobs:
       - name: Bump version in build.gradle
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          VERSION_LINE=$(grep -n 'versionName' app/build.gradle | cut -d: -f1)
-          CODE_LINE=$(grep -n 'versionCode' app/build.gradle | cut -d: -f1)
-          CURR_VERSION=$(grep -oP 'versionName\s+"\K[^"]+' app/build.gradle)
-          CURR_CODE=$(grep -oP 'versionCode\s+\K[0-9]+' app/build.gradle)
+          CURR_VERSION=$(grep -oP 'versionName\s+\(ciVersionName \?: \"\K[^\"]+' app/build.gradle || true)
+          if [ -z "$CURR_VERSION" ]; then
+            CURR_VERSION=$(grep -oP 'versionName\s+\"\K[^\"]+' app/build.gradle)
+          fi
+          CURR_CODE=$(grep -oP 'versionCode\s+\(ciVersionCode.*: \K[0-9]+' app/build.gradle || true)
+          if [ -z "$CURR_CODE" ]; then
+            CURR_CODE=$(grep -oP 'versionCode\s+\K[0-9]+' app/build.gradle)
+          fi
           NEW_CODE=$((CURR_CODE+1))
-          # Увеличиваем минорную версию
           MAJOR=$(echo $CURR_VERSION | cut -d. -f1)
           MINOR=$(echo $CURR_VERSION | cut -d. -f2)
           if [ -z "$MINOR" ]; then MINOR=0; fi
           NEW_MINOR=$((MINOR+1))
           NEW_VERSION="$MAJOR.$NEW_MINOR"
-          sed -i "${CODE_LINE}s/versionCode.*/versionCode $NEW_CODE/" app/build.gradle
-          sed -i "${VERSION_LINE}s/versionName.*/versionName \"$NEW_VERSION\"/" app/build.gradle
-          echo "Bumped version to $NEW_VERSION ($NEW_CODE)"
+          # Обновляем только значения по умолчанию, сохраняя логику с CI переменными
+          sed -i "s/versionCode (ciVersionCode .*: [0-9]*)/versionCode (ciVersionCode != null && ciVersionCode.isInteger() ? ciVersionCode.toInteger() : ${NEW_CODE})/" app/build.gradle
+          sed -i "s/versionName (ciVersionName ?: \"[^\"]*\")/versionName (ciVersionName ?: \"${NEW_VERSION}\")/" app/build.gradle
+          echo "Bumped version defaults to $NEW_VERSION ($NEW_CODE)"
 
       - name: Commit APK and version bump to repository
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -357,6 +380,7 @@ jobs:
 
   prepare-emulator:
     name: 🧪 Запуск Android-эмулятора
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: setup-android-sdk
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -454,7 +478,7 @@ jobs:
           heap-size: 256
           disable-animations: true
           avd-name: cached-emulator
-          emulator-options: "-no-window -no-audio -no-boot-anim -no-accel -no-snapshot -no-snapshot-save -no-snapshot-load -memory 1024 -cores 1"
+          emulator-options: "-no-window -no-audio -no-boot-anim -no-accel -no-snapshot -no-snapshot-save -no-snapshot-load -memory 1024 -cores 1 -no-metrics"
           script: |
             echo "🧪 Эмулятор запущен (кэшированный)"
             adb devices
