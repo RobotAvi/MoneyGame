@@ -12,8 +12,11 @@ android {
         applicationId "com.financialsuccess.game"
         minSdk 24
         targetSdk 34
-        versionCode 136
-        versionName "1.135"
+        // Allow CI to override versions; fallback to current values for local builds
+        def ciVersionCode = System.getenv("CI_VERSION_CODE")
+        def ciVersionName = System.getenv("CI_VERSION_NAME")
+        versionCode (ciVersionCode != null && ciVersionCode.isInteger() ? ciVersionCode.toInteger() : 136)
+        versionName (ciVersionName ?: "1.135")
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

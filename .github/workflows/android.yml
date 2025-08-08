@@ -34,6 +34,18 @@ jobs:
       - name: 🏗️ Setup Gradle
         uses: gradle/actions/setup-gradle@v3   # <https://github.com/gradle/gradle-build-action>
 
+      # 3.1 Подготовить переменные версии для CI
+      - name: 🔖 Compute CI version
+        id: version
+        run: |
+          CURR_VERSION=$(grep -oP 'versionName.*' app/build.gradle | head -1 | grep -oP '"\K[^\"]+(?=")')
+          CURR_CODE=$(grep -oP 'versionCode.*' app/build.gradle | head -1 | grep -oP '[0-9]+' | tail -1)
+          MAJOR=$(echo $CURR_VERSION | cut -d. -f1)
+          MINOR=$(echo $CURR_VERSION | cut -d. -f2)
+          if [ -z "$MINOR" ]; then MINOR=0; fi
+          echo "CI_VERSION_NAME=$MAJOR.$((MINOR+1))" >> $GITHUB_ENV
+          echo "CI_VERSION_CODE=$((CURR_CODE+1))" >> $GITHUB_ENV
+
       # 4. Делаем сборку и юнит-тесты
       - name: 🔨 Assemble & Unit tests
         run: ./gradlew clean :app:assembleDebug testDebugUnitTest --no-configuration-cache
