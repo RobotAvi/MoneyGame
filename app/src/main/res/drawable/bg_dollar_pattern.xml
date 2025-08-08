@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/ic_dream_placeholder"
-    android:tileMode="repeat"
-    android:gravity="center" />
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:startColor="@color/background_color"
+        android:endColor="@color/money_green"
+        android:angle="315" />
+</shape>

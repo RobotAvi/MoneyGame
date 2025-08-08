@@ -16,6 +16,7 @@ import java.text.NumberFormat
 import java.util.*
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import android.os.Build
 
 class GameActivity : AppCompatActivity() {
     
@@ -46,8 +47,12 @@ class GameActivity : AppCompatActivity() {
     }
     
     private fun initGame() {
-        // Проверяем, передан ли готовый игрок
-        val player = intent.getParcelableExtra("player", Player::class.java)
+        // Проверяем, передан ли готовый игрок (совместимость до Android 13)
+        val player: Player? = if (Build.VERSION.SDK_INT >= 33) {
+            intent.getParcelableExtra("player", Player::class.java)
+        } else {
+            @Suppress("DEPRECATION") intent.getParcelableExtra("player")
+        }
         
         if (player != null) {
             // Используем готового игрока
@@ -56,8 +61,16 @@ class GameActivity : AppCompatActivity() {
             updateUI()
         } else {
             // Старый способ - создаем игрока из отдельных параметров
-            val profession = intent.getParcelableExtra("profession", Profession::class.java)
-            val dream = intent.getParcelableExtra("dream", Dream::class.java)
+            val profession: Profession? = if (Build.VERSION.SDK_INT >= 33) {
+                intent.getParcelableExtra("profession", Profession::class.java)
+            } else {
+                @Suppress("DEPRECATION") intent.getParcelableExtra("profession")
+            }
+            val dream: Dream? = if (Build.VERSION.SDK_INT >= 33) {
+                intent.getParcelableExtra("dream", Dream::class.java)
+            } else {
+                @Suppress("DEPRECATION") intent.getParcelableExtra("dream")
+            }
             val playerAge = intent.getIntExtra("playerAge", 25)
             val playerName = intent.getStringExtra("playerName")
             val startDateMillis = intent.getLongExtra("startDate", 0L).takeIf { it != 0L }

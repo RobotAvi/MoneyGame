@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths-ignore:
       - 'releases/debug/**'
+      - '.github/workflows/**'
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -324,6 +325,7 @@ jobs:
           path: releases/debug/FinancialSuccess-v${{ needs.setup-android-sdk.outputs.version }}-${{ needs.setup-android-sdk.outputs.date }}-debug.apk
 
       - name: Bump version in build.gradle
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           VERSION_LINE=$(grep -n 'versionName' app/build.gradle | cut -d: -f1)
           CODE_LINE=$(grep -n 'versionCode' app/build.gradle | cut -d: -f1)
@@ -341,11 +343,14 @@ jobs:
           echo "Bumped version to $NEW_VERSION ($NEW_CODE)"
 
       - name: Commit APK and version bump to repository
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git rebase origin/main
           git add releases/debug/*.apk app/build.gradle
-          git commit -m "Update APK and bump version [skip ci]"
+          git commit -m "Update APK and bump version [skip ci]" || echo "Nothing to commit"
           git push https://x-access-token:${GH_PAT}@github.com/RobotAvi/MoneyGame.git HEAD:main
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
