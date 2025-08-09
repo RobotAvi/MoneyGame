@@ -11,11 +11,13 @@ import android.view.View
 import com.financialsuccess.game.GameActivity
 import android.widget.TextView
 import com.financialsuccess.game.BuildConfig
+import android.media.MediaPlayer
 
 
 class MainActivity : AppCompatActivity() {
     
     private lateinit var binding: ActivityMainBinding
+    private var menuPlayer: MediaPlayer? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,5 +66,29 @@ class MainActivity : AppCompatActivity() {
         binding.btnExit.setOnClickListener {
             finish()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (menuPlayer == null) {
+            menuPlayer = MediaPlayer.create(this, R.raw.menu).apply {
+                isLooping = true
+                setVolume(0.5f, 0.5f)
+                start()
+            }
+        } else {
+            menuPlayer?.start()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        menuPlayer?.pause()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        menuPlayer?.release()
+        menuPlayer = null
     }
 }
