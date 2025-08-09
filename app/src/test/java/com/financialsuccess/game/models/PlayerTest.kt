@@ -17,9 +17,9 @@ class PlayerTest {
             id = "test_engineer",
             name = "Тестовый инженер",
             description = "Тестовая профессия",
-            salary = 80000,
-            expenses = 35000,
-            taxes = 15000,
+            salary = 130000,
+            expenses = 60000,
+            taxes = 26000,
             education = "Высшее техническое"
         )
         
@@ -60,42 +60,42 @@ class PlayerTest {
         val experienceBonus = player.calculateExperienceBonus()
 
         assertEquals(0, highSchoolBonus) // Только образование
-        assertEquals(10000, bachelorBonus)
-        assertEquals(15000, masterBonus)
-        assertEquals(20000, phdBonus)
-        assertEquals(4000, experienceBonus) // 2*2000
+        assertEquals(20000, bachelorBonus)
+        assertEquals(30000, masterBonus)
+        assertEquals(40000, phdBonus)
+        assertEquals(5000, experienceBonus) // 2*2500
     }
     
     @Test
     fun `test skills bonus calculation`() {
         // Тест бонуса за навыки
         val skills = listOf(
-            Skill("Программирование", "Навыки разработки ПО", 15000, SkillCategory.TECHNICAL),
-            Skill("Менеджмент", "Управление командой", 12000, SkillCategory.LEADERSHIP)
+            Skill("Программирование", "Навыки разработки ПО", 35000, SkillCategory.TECHNICAL),
+            Skill("Менеджмент", "Управление командой", 28000, SkillCategory.LEADERSHIP)
         )
         
         player.skills.addAll(skills)
         val skillsBonus = player.calculateSkillsBonus()
         
-        assertEquals(27000, skillsBonus) // 15000 + 12000
+        assertEquals(63000, skillsBonus) // 35000 + 28000
     }
     
     @Test
     fun `test salary with bonuses calculation`() {
         // Тест расчета зарплаты с бонусами
         val skills = listOf(
-            Skill("Программирование", "Навыки разработки ПО", 15000, SkillCategory.TECHNICAL)
+            Skill("Программирование", "Навыки разработки ПО", 35000, SkillCategory.TECHNICAL)
         )
         player.skills.addAll(skills)
         
         player.updateSalaryWithBonuses()
         
-        // Базовая зарплата: 80000
-        // Бонус за образование (BACHELOR): 10000
-        // Бонус за опыт (2 года): 4000
-        // Бонус за навык: 15000
-        // Ожидаемая зарплата: 80000 + 10000 + 4000 + 15000 = 109000
-        assertEquals(109000, player.salary)
+        // Базовая зарплата: 130000
+        // Бонус за образование (BACHELOR): 20000
+        // Бонус за опыт (2 года): 5000
+        // Бонус за навык: 35000
+        // Ожидаемая зарплата: 130000 + 20000 + 5000 + 35000 = 190000
+        assertEquals(190000, player.salary)
     }
     
     @Test
@@ -108,7 +108,7 @@ class PlayerTest {
         val marriedExpenses = marriedPlayer.calculateFamilyExpenses()
         
         assertEquals(0, singleExpenses) // Нет семьи, нет детей
-        assertEquals(21000, marriedExpenses) // 2*8000 (дети) + 5000 (супруг)
+        assertEquals(46000, marriedExpenses) // 2*18000 (дети) + 10000 (супруг)
     }
     
     @Test
@@ -205,13 +205,13 @@ class PlayerTest {
         
         player.updateTotalExpenses()
         
-        // Базовые расходы профессии: 35000
-        // Расходы на ребенка: 8000
-        // Расходы на супруга: 5000
-        // Модификатор здоровья (1.5): (35000 + 5000) * 1.5 = 60000
-        // Налоги: 15000
-        // Ожидаемые общие расходы: 60000 + 8000 + 15000 = 83000
-        assertTrue(player.totalExpenses > 80000)
+        // Базовые расходы профессии: 60000
+        // Расходы на ребенка: 18000
+        // Расходы на супруга: 10000
+        // Модификатор здоровья (1.5): (60000 + 10000) * 1.5 = 105000
+        // Налоги: 26000
+        // Ожидаемые общие расходы: 105000 + 18000 + 26000 = 149000
+        assertTrue(player.totalExpenses >= 149000)
     }
     
     @Test
