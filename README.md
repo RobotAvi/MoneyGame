@@ -74,7 +74,15 @@ app/src/main/java/com/financialsuccess/game/
 3. Внесите изменения и добавьте тесты
 4. Создайте Pull Request
 
-Подробности в [CONTRIBUTING.md](CONTRIBUTING.md)
+Подробности в [CONTRIBUTING.md](docs/CONTRIBUTING.md)
+
+## 📚 Документация
+
+Подробная документация проекта находится в папке [docs/](docs/README.md):
+- 🎮 [Дизайн и архитектура](docs/README.md#-дизайн-и-архитектура)
+- 💰 [Финансовые функции](docs/README.md#-финансовые-функции)
+- 🛠️ [Разработка и тестирование](docs/README.md#-разработка-и-тестирование)
+- 🚀 [Производительность и CI/CD](docs/README.md#-производительность-и-cicd)
 
 ## 📄 Лицензия
 
