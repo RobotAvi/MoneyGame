@@ -25,6 +25,12 @@ import android.widget.ImageView
 import android.widget.NumberPicker
 import android.speech.RecognizerIntent
 import android.content.ActivityNotFoundException
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
+import android.graphics.Typeface
+import android.text.TextUtils
 
 class CharacterCreationActivity : AppCompatActivity() {
     // Переменные для сбора данных персонажа
@@ -69,6 +75,33 @@ class CharacterCreationActivity : AppCompatActivity() {
         }
     }
 
+    private fun buildColoredParams(lines: List<Triple<String, Pair<String, Int>, Int>>): CharSequence {
+        // Triple: label, Pair(value, valueColor), labelColor
+        val builder = SpannableStringBuilder()
+        lines.forEachIndexed { index, triple ->
+            val label = triple.first
+            val value = triple.second.first
+            val valueColor = triple.second.second
+            val labelColor = triple.third
+
+            val startLabel = builder.length
+            builder.append(label)
+            val endLabel = builder.length
+            builder.setSpan(ForegroundColorSpan(labelColor), startLabel, endLabel, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+            builder.append(": ")
+
+            val startValue = builder.length
+            builder.append(value)
+            val endValue = builder.length
+            builder.setSpan(ForegroundColorSpan(valueColor), startValue, endValue, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            builder.setSpan(StyleSpan(Typeface.BOLD), startValue, endValue, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+            if (index != lines.lastIndex) builder.append("\n")
+        }
+        return builder
+    }
+
     private fun showProfessionStep() {
         val view = LayoutInflater.from(this).inflate(R.layout.step_profession, stepContainer, false)
         val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
@@ -89,7 +122,23 @@ class CharacterCreationActivity : AppCompatActivity() {
             if (resId != 0) ivPhoto.setImageResource(resId)
             else ivPhoto.setImageResource(R.drawable.ic_profession_placeholder)
             tvName.text = prof.name
-            tvParams.text = "${prof.description}\nЗарплата: ${prof.salary}₽\nРасходы: ${prof.expenses}₽\nНалоги: ${prof.taxes}₽\nОбразование: ${prof.education}"
+
+            val labelColor = resources.getColor(R.color.text_secondary, null)
+            val salaryColor = resources.getColor(R.color.money_green, null)
+            val expenseColor = resources.getColor(R.color.expense_red, null)
+            val taxColor = resources.getColor(R.color.liability_orange, null)
+            val educationColor = resources.getColor(R.color.asset_blue, null)
+
+            val colored = buildColoredParams(
+                listOf(
+                    Triple("Зарплата", Pair("${prof.salary}₽", salaryColor), labelColor),
+                    Triple("Расходы", Pair("${prof.expenses}₽", expenseColor), labelColor),
+                    Triple("Налоги", Pair("${prof.taxes}₽", taxColor), labelColor),
+                    Triple("Образование", Pair(prof.education, educationColor), labelColor)
+                )
+            )
+            tvParams.text = TextUtils.concat(prof.description, "\n", colored)
+            tvParams.setLineSpacing(8f, 1f)
         }
         updateProfessionUI()
         btnLeft.setOnClickListener {
@@ -147,7 +196,21 @@ class CharacterCreationActivity : AppCompatActivity() {
             if (resId != 0) ivPhoto.setImageResource(resId)
             else ivPhoto.setImageResource(R.drawable.ic_dream_placeholder)
             tvName.text = dream.name
-            tvParams.text = "${dream.description}\nСтоимость: ${dream.cost}₽\nПассивный доход: ${dream.cashFlowRequired}₽\nЧисло на кубике: ${dream.fastTrackNumber}"
+
+            val labelColor = resources.getColor(R.color.text_secondary, null)
+            val costColor = resources.getColor(R.color.expense_red, null)
+            val incomeColor = resources.getColor(R.color.money_green, null)
+            val diceColor = resources.getColor(R.color.asset_blue, null)
+
+            val colored = buildColoredParams(
+                listOf(
+                    Triple("Стоимость", Pair("${dream.cost}₽", costColor), labelColor),
+                    Triple("Пассивный доход", Pair("${dream.cashFlowRequired}₽", incomeColor), labelColor),
+                    Triple("Число на кубике", Pair(dream.fastTrackNumber.toString(), diceColor), labelColor)
+                )
+            )
+            tvParams.text = colored
+            tvParams.setLineSpacing(8f, 1f)
         }
         updateDreamUI()
         btnLeft.setOnClickListener {
