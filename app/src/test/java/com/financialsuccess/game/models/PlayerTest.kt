@@ -218,10 +218,10 @@ class PlayerTest {
     fun `test total income with spouse`() {
         // Тест общего дохода с учетом супруга
         player.spouseIncome = 50000
-        player.salary = 80000
+        player.salary = 130000
         player.updateTotalIncome()
         // Зарплата игрока + доход супруга
-        assertEquals(130000, player.totalIncome) // 80000 + 50000
+        assertEquals(180000, player.totalIncome) // 130000 + 50000
     }
     
     @Test

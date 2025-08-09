@@ -500,11 +500,11 @@ data class Player(
          var familyExpenses = 0
          
          // Расходы на детей
-         familyExpenses += childrenCount * 8000
+         familyExpenses += childrenCount * 18000
          
          // Расходы на супруга/супругу
          if (maritalStatus == MaritalStatus.MARRIED) {
-             familyExpenses += 5000 // Дополнительные расходы на семью
+             familyExpenses += 10000 // Дополнительные расходы на семью
          }
          
          return familyExpenses
