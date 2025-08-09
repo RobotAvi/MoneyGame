@@ -14,6 +14,7 @@ import android.app.DatePickerDialog
 import java.util.Calendar
 import android.speech.tts.TextToSpeech
 import java.util.Locale
+import android.speech.tts.UtteranceProgressListener
 
 class ProfessionSelectionActivity : AppCompatActivity() {
     
@@ -94,9 +95,6 @@ class ProfessionSelectionActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
 
-                // Speak greeting after successful validation of name
-                textToSpeech?.speak("Рада познакомиться, ${playerName}!", TextToSpeech.QUEUE_FLUSH, null, "greet_name_profession")
-
                 val intent = Intent(this, GameActivity::class.java).apply {
                     putExtra("profession", selectedProfession)
                     putExtra("dream", selectedDream)
@@ -104,8 +102,28 @@ class ProfessionSelectionActivity : AppCompatActivity() {
                     putExtra("playerName", playerName)
                     putExtra("startDate", selectedStartDate)
                 }
-                startActivity(intent)
-                finish()
+
+                val utteranceId = "greet_name_profession"
+                textToSpeech?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                    override fun onStart(utteranceIdParam: String?) {}
+                    override fun onDone(utteranceIdParam: String?) {
+                        if (utteranceIdParam == utteranceId) {
+                            runOnUiThread {
+                                startActivity(intent)
+                                finish()
+                            }
+                        }
+                    }
+                    override fun onError(utteranceIdParam: String?) {
+                        runOnUiThread {
+                            startActivity(intent)
+                            finish()
+                        }
+                    }
+                })
+
+                // Speak greeting after successful validation of name and then navigate on DONE
+                textToSpeech?.speak("Рада познакомиться, ${playerName}!", TextToSpeech.QUEUE_FLUSH, null, utteranceId)
             }
         }
 
