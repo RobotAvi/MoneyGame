@@ -106,11 +106,11 @@ class CharacterCreationActivity : AppCompatActivity() {
         if (!::stepContainer.isInitialized) return
         stepContainer.removeAllViews()
         when (step) {
-            1 -> showProfessionStep()
-            2 -> showDreamStep()
-            3 -> showAgeStep()
-            4 -> showNameStep()
-            5 -> showDateStep()
+            1 -> showNameStep()        // Имя
+            2 -> showAgeStep()         // Возраст
+            3 -> showDateStep()        // Дата
+            4 -> showProfessionStep()  // Профессия
+            5 -> showDreamStep()       // Мечта
             else -> showStartScreen()
         }
     }
@@ -162,7 +162,7 @@ class CharacterCreationActivity : AppCompatActivity() {
     private fun showProfessionStep() {
         val view = LayoutInflater.from(this).inflate(R.layout.step_profession, stepContainer, false)
         val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
-        stepTitle.text = "ШАГ 1/5"
+        stepTitle.text = "ШАГ 4/5"
         val ivPhoto = view.findViewById<ImageView>(R.id.ivProfessionPhoto)
         val tvName = view.findViewById<TextView>(R.id.tvProfessionName)
         val tvParams = view.findViewById<TextView>(R.id.tvProfessionParams)
@@ -233,7 +233,7 @@ class CharacterCreationActivity : AppCompatActivity() {
     private fun showDreamStep() {
         val view = LayoutInflater.from(this).inflate(R.layout.step_dream, stepContainer, false)
         val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
-        stepTitle.text = "ШАГ 2/5"
+        stepTitle.text = "ШАГ 5/5"
         val ivPhoto = view.findViewById<ImageView>(R.id.ivDreamPhoto)
         val tvName = view.findViewById<TextView>(R.id.tvDreamName)
         val tvParams = view.findViewById<TextView>(R.id.tvDreamParams)
@@ -312,7 +312,7 @@ class CharacterCreationActivity : AppCompatActivity() {
     private fun showAgeStep() {
         val view = LayoutInflater.from(this).inflate(R.layout.step_age, stepContainer, false)
         val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
-        stepTitle.text = "ШАГ 3/5"
+        stepTitle.text = "ШАГ 2/5"
         val numberPicker = view.findViewById<NumberPicker>(R.id.numberPickerAge)
         numberPicker.minValue = 18
         numberPicker.maxValue = 65
@@ -389,7 +389,7 @@ class CharacterCreationActivity : AppCompatActivity() {
     private fun showNameStep() {
         val view = LayoutInflater.from(this).inflate(R.layout.step_name, stepContainer, false)
         val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
-        stepTitle.text = "ШАГ 4/5"
+        stepTitle.text = "ШАГ 1/5"
         val etName = view.findViewById<android.widget.EditText>(R.id.etPlayerName)
         etName.setText(playerName)
         etName.setTextColor(resources.getColor(R.color.text_primary, null))
@@ -418,7 +418,7 @@ class CharacterCreationActivity : AppCompatActivity() {
     private fun showDateStep() {
         val view = LayoutInflater.from(this).inflate(R.layout.step_date, stepContainer, false)
         val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
-        stepTitle.text = "ШАГ 5/5"
+        stepTitle.text = "ШАГ 3/5"
         val tvSelectedDate = view.findViewById<TextView>(R.id.tvSelectedDate)
         val btnPickDate = view.findViewById<Button>(R.id.btnPickDate)
         val btnNext = view.findViewById<Button>(R.id.btnNextDate)

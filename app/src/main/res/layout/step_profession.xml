@@ -1,15 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/background_color">
+    android:layout_height="match_parent">
+
+    <!-- Океанский фон -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/ocean"
+        android:scaleType="centerCrop" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
     <TextView
         android:id="@+id/tvStepTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="ШАГ 1/5"
+        android:text="ШАГ 4/5"
         android:textSize="28sp"
         android:textStyle="bold"
         android:textColor="@color/primary_color"
@@ -119,4 +129,5 @@
             android:textSize="32sp"
             android:background="@drawable/btn_circle_bg" />
     </LinearLayout>
-</LinearLayout>
+    </LinearLayout>
+</FrameLayout>

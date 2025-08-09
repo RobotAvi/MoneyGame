@@ -1,100 +1,135 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_main_screen"
-    android:fillViewport="true"
     android:fitsSystemWindows="true">
 
+
+    <!-- Реальный океанский фон -->
+    <ImageView
+        android:id="@+id/oceanBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/ocean"
+        android:scaleType="centerCrop"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+
+
+
+    <!-- Контейнер для анимированных монет -->
+    <FrameLayout
+        android:id="@+id/coinsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+
+
+        <!-- Основной контент (меню) -->
     <LinearLayout
+        android:id="@+id/mainContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp"
-        android:gravity="center_horizontal">
+        android:gravity="center"
+        android:padding="32dp"
+        android:alpha="0"
+        android:translationY="100dp"
+        android:scaleX="0.9"
+        android:scaleY="0.9"
+        android:elevation="100dp"
+        android:background="@android:color/transparent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <ImageView
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:src="@drawable/ic_finance_logo"
-            android:layout_marginBottom="32dp"
-            android:contentDescription="@string/app_logo" />
-
+        <!-- Заголовок игры -->
         <TextView
-            android:id="@+id/tv_version"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Версия 1.81"
-            android:textSize="16sp"
-            android:textColor="@color/text_secondary"
-            android:layout_marginBottom="8dp"
-            android:textStyle="bold"
-            android:gravity="center" />
-
-        <TextView
+            android:id="@+id/gameTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/app_name"
             android:textSize="32sp"
             android:textStyle="bold"
-            android:textColor="@color/primary_color"
-            android:layout_marginBottom="16dp" />
+            android:textColor="@android:color/white"
+            android:shadowColor="@android:color/black"
+            android:shadowDx="2"
+            android:shadowDy="2"
+            android:shadowRadius="4"
+            android:layout_marginBottom="24dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- Кнопка "Новая игра" -->
+        <Button
+            android:id="@+id/newGameButton"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:text="@string/app_subtitle"
-            android:textSize="16sp"
-            android:textColor="@color/text_secondary"
-            android:textAlignment="center"
-            android:gravity="center"
-            android:layout_marginBottom="48dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_new_game"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/new_game"
+            android:text="Новая игра"
             android:textSize="18sp"
+            android:padding="16dp"
             android:layout_marginBottom="16dp"
-            android:backgroundTint="@color/money_green"
-            style="@style/Widget.Material3.Button" />
+            android:background="@drawable/bg_button_primary"
+            android:textColor="@android:color/white"
+            android:elevation="8dp" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_load_game"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Загрузить персонажа"
-            android:textSize="18sp"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.Button.OutlinedButton" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_advanced_character"
-            android:layout_width="match_parent"
+        <!-- Кнопка "Создать персонажа" -->
+        <Button
+            android:id="@+id/createCharacterButton"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:text="Создать персонажа"
             android:textSize="18sp"
+            android:padding="16dp"
             android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.Button.OutlinedButton" />
+            android:background="@drawable/bg_button_secondary"
+            android:textColor="@android:color/white"
+            android:elevation="8dp" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_rules"
-            android:layout_width="match_parent"
+        <!-- Кнопка "Правила" -->
+        <Button
+            android:id="@+id/rulesButton"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:text="@string/rules"
+            android:text="Правила"
             android:textSize="18sp"
+            android:padding="16dp"
             android:layout_marginBottom="16dp"
-            style="@style/Widget.Material3.Button.OutlinedButton" />
+            android:background="@drawable/bg_button_secondary"
+            android:textColor="@android:color/white"
+            android:elevation="8dp" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_exit"
-            android:layout_width="match_parent"
+        <!-- Кнопка "Выход" -->
+        <Button
+            android:id="@+id/exitButton"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:text="@string/exit"
+            android:text="Выход"
             android:textSize="18sp"
-            style="@style/Widget.Material3.Button.TextButton" />
+            android:padding="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_button_secondary"
+            android:textColor="@android:color/white"
+            android:elevation="8dp" />
+
+        <!-- Информация о версии -->
+        <TextView
+            android:id="@+id/versionInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Версия 1.0"
+            android:textSize="14sp"
+            android:textColor="@android:color/white"
+            android:alpha="0.7"
+            android:layout_marginTop="16dp" />
 
     </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

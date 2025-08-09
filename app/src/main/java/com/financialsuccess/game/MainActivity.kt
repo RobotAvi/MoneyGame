@@ -12,83 +12,240 @@ import com.financialsuccess.game.GameActivity
 import android.widget.TextView
 import com.financialsuccess.game.BuildConfig
 import android.media.MediaPlayer
+import com.financialsuccess.game.animation.MainScreenAnimationManager
+import android.util.Log
 
-
+/**
+ * Главная активность приложения - стартовый экран
+ * 
+ * Функциональность:
+ * - Красивая анимация появления с океаном, светом и монетами
+ * - Фоновая музыка с автоматическим управлением
+ * - Навигация к другим экранам приложения
+ * - Управление жизненным циклом анимации
+ * 
+ * Анимация:
+ * - Автоматический запуск при создании активности
+ * - Перезапуск при возвращении на экран
+ * - Остановка при уходе с экрана
+ * - Сброс к начальному состоянию
+ * 
+ * Меню:
+ * - "Новая игра" → CharacterCreationActivity
+ * - "Создать персонажа" → CharacterCreationActivity  
+ * - "Правила" → RulesActivity
+ * - "Выход" → закрытие приложения
+ */
 class MainActivity : AppCompatActivity() {
     
     private lateinit var binding: ActivityMainBinding
     private var menuPlayer: MediaPlayer? = null
+    private lateinit var animationManager: MainScreenAnimationManager
+    
+    companion object {
+        private const val TAG = "MainActivity"
+    }
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
-        // Отображаем версию приложения
-        val versionView = binding.root.findViewById<TextView>(R.id.tv_version)
-        versionView.text = "Версия ${BuildConfig.VERSION_NAME}"
-        setupUI()
+        Log.d(TAG, "MainActivity onCreate started")
+        
+        // Инициализация менеджера анимации
+        animationManager = MainScreenAnimationManager(
+            oceanBackground = binding.oceanBackground,
+            coinsContainer = binding.coinsContainer,
+            mainContent = binding.mainContent
+        )
+        
+        Log.d(TAG, "AnimationManager initialized")
+        
+        // Настройка кнопок
+        setupButtons()
+        
+        // Обновление информации о версии
+        updateVersionInfo()
+        
+        // Инициализация музыки
+        initMusic()
+        
+        // Запуск анимации при создании активности
+        startMainScreenAnimation()
     }
     
-    private fun setupUI() {
-        val btnNew = binding.btnNewGame
-        val btnLoad = binding.btnLoadGame
-        btnLoad.visibility = if (GameSaveManager.loadPlayer(this) != null) View.VISIBLE else View.GONE
-
-        btnNew.setOnClickListener {
-            // Запуск только стандартного флоу (без custom)
-            val intent = Intent(this, CharacterCreationActivity::class.java)
-            intent.putExtra("custom", false)  // Явно указываем, что хотим стандартный режим
-            startActivity(intent)
-        }
-        btnLoad.setOnClickListener {
-            val player = GameSaveManager.loadPlayer(this)
-            if (player != null) {
-                val intent = Intent(this, GameActivity::class.java)
-                intent.putExtra("player", player)
-                startActivity(intent)
-            } else {
-                btnLoad.visibility = View.GONE
-            }
-        }
-        
-        binding.btnAdvancedCharacter.setOnClickListener {
-            val intent = Intent(this, CharacterCreationActivity::class.java)
-            intent.putExtra("custom", true)
-            startActivity(intent)
-        }
-        
-        binding.btnRules.setOnClickListener {
-            val intent = Intent(this, RulesActivity::class.java)
-            startActivity(intent)
-        }
-        
-        binding.btnExit.setOnClickListener {
-            finish()
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (menuPlayer == null) {
+    private fun initMusic() {
+        try {
             menuPlayer = MediaPlayer.create(this, R.raw.menu).apply {
                 isLooping = true
                 setVolume(0.5f, 0.5f)
                 start()
             }
-        } else {
+            Log.d(TAG, "Music initialized and started")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error initializing music: ${e.message}")
+            // Продолжаем работу без музыки
+        }
+    }
+    
+    private fun setupButtons() {
+        // Кнопка "Новая игра"
+        binding.newGameButton.setOnClickListener {
+            startNewGame()
+        }
+        
+        // Кнопка "Создать персонажа"
+        binding.createCharacterButton.setOnClickListener {
+            createCharacter()
+        }
+        
+        // Кнопка "Правила"
+        binding.rulesButton.setOnClickListener {
+            showRules()
+        }
+        
+        // Кнопка "Выход"
+        binding.exitButton.setOnClickListener {
+            exitGame()
+        }
+    }
+    
+    private fun updateVersionInfo() {
+        binding.versionInfo.text = "Версия ${BuildConfig.VERSION_NAME}"
+    }
+    
+    private fun checkExistingSave() {
+        // Убираем проверку сохранения, так как кнопка "Продолжить" больше не нужна
+        // val existingPlayer = GameSaveManager.loadPlayer(this)
+        // if (existingPlayer != null) {
+        //     binding.continueButton.visibility = View.VISIBLE
+        //     binding.continueButton.isEnabled = true
+        // } else {
+        //     binding.continueButton.visibility = View.GONE
+        //     binding.continueButton.isEnabled = false
+        // }
+    }
+    
+    private fun startMainScreenAnimation() {
+        try {
+            Log.d(TAG, "Starting main screen animation")
+
+            // Сброс к начальному состоянию
+            animationManager.resetToInitialState()
+
+            // Проверяем состояние меню после сброса
+            Log.d(TAG, "After reset - mainContent alpha: ${binding.mainContent.alpha}, visible: ${binding.mainContent.visibility}")
+
+            // Запуск анимации после завершения layout
+            binding.root.viewTreeObserver.addOnGlobalLayoutListener(object : android.view.ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    try {
+                        Log.d(TAG, "Layout completed, starting animation")
+                        Log.d(TAG, "Layout sizes - root: ${binding.root.width}x${binding.root.height}")
+                        Log.d(TAG, "Layout sizes - coinsContainer: ${binding.coinsContainer.width}x${binding.coinsContainer.height}")
+                        Log.d(TAG, "Layout sizes - mainContent: ${binding.mainContent.width}x${binding.mainContent.height}")
+                        binding.root.viewTreeObserver.removeOnGlobalLayoutListener(this)
+
+                        // Проверяем, видно ли меню перед запуском анимации
+                        Log.d(TAG, "Before animation - mainContent alpha: ${binding.mainContent.alpha}, visible: ${binding.mainContent.visibility}")
+
+                        animationManager.startAnimation()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error in layout listener: ${e.message}")
+                    }
+                }
+            })
+        } catch (e: Exception) {
+            Log.e(TAG, "Error starting animation: ${e.message}")
+        }
+    }
+    
+    private fun startNewGame() {
+        // Остановка анимации
+        animationManager.stopAnimation()
+        
+        // Запуск создания персонажа
+        val intent = Intent(this, CharacterCreationActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+    
+    private fun createCharacter() {
+        // Остановка анимации
+        animationManager.stopAnimation()
+        
+        // Запуск создания персонажа
+        val intent = Intent(this, CharacterCreationActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+    
+    private fun showRules() {
+        // Остановка анимации
+        animationManager.stopAnimation()
+        
+        // Запуск активности с правилами
+        val intent = Intent(this, RulesActivity::class.java)
+        startActivity(intent)
+    }
+    
+    private fun exitGame() {
+        // Остановка анимации
+        animationManager.stopAnimation()
+        
+        // Выход из приложения
+        finish()
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume called")
+
+        // Перезапускаем анимацию при возвращении только если активность не уничтожается
+        if (!isFinishing && !isDestroyed && !animationManager.isAnimating) {
+            Log.d(TAG, "Restarting animation in onResume")
+            startMainScreenAnimation()
+        }
+
+        // Возобновляем музыку только если она была инициализирована
+        try {
             menuPlayer?.start()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error resuming music: ${e.message}")
         }
     }
 
     override fun onPause() {
         super.onPause()
-        menuPlayer?.pause()
+        Log.d(TAG, "onPause called")
+
+        // Останавливаем анимацию при уходе с экрана
+        try {
+            animationManager.stopAnimation()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error stopping animation: ${e.message}")
+        }
+
+        // Останавливаем музыку
+        try {
+            menuPlayer?.pause()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error pausing music: ${e.message}")
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        menuPlayer?.release()
-        menuPlayer = null
+        Log.d(TAG, "onDestroy called")
+
+        // Освобождаем ресурсы
+        try {
+            animationManager.stopAnimation()
+            menuPlayer?.release()
+            menuPlayer = null
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in onDestroy: ${e.message}")
+        }
     }
 }

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Прозрачный фон -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@android:color/transparent" />
+        </shape>
+    </item>
+    
+    <!-- Тень монеты -->
+    <item android:gravity="top|start" android:top="3dp" android:left="3dp">
+        <shape android:shape="oval">
+            <size android:width="54dp" android:height="54dp" />
+            <solid android:color="#40000000" />
+        </shape>
+    </item>
+    
+    <!-- Золотая монета с градиентом -->
+    <item>
+        <shape android:shape="oval">
+            <size android:width="60dp" android:height="60dp" />
+            <gradient
+                android:type="radial"
+                android:gradientRadius="30dp"
+                android:centerX="0.4"
+                android:centerY="0.4"
+                android:startColor="#FFD700"
+                android:centerColor="#FFA500"
+                android:endColor="#FF8C00" />
+            <stroke android:width="2dp" android:color="#B8860B" />
+        </shape>
+    </item>
+    
+    <!-- Блики на монете -->
+    <item android:gravity="top|start" android:top="8dp" android:left="8dp">
+        <shape android:shape="oval">
+            <size android:width="16dp" android:height="16dp" />
+            <gradient
+                android:type="radial"
+                android:gradientRadius="8dp"
+                android:centerX="0.3"
+                android:centerY="0.3"
+                android:startColor="#FFFFFF"
+                android:endColor="#00FFFFFF" />
+        </shape>
+    </item>
+    
+    <!-- Центральный круг для символа -->
+    <item android:gravity="center">
+        <shape android:shape="oval">
+            <size android:width="24dp" android:height="24dp" />
+            <solid android:color="#B8860B" />
+            <stroke android:width="1dp" android:color="#8B6914" />
+        </shape>
+    </item>
+    
+    <!-- Символ доллара (белый) -->
+    <item android:gravity="center">
+        <shape android:shape="oval">
+            <size android:width="18dp" android:height="18dp" />
+            <solid android:color="#FFFFFF" />
+        </shape>
+    </item>
+    
+    <!-- Точка в центре для имитации символа $ -->
+    <item android:gravity="center">
+        <shape android:shape="oval">
+            <size android:width="4dp" android:height="4dp" />
+            <solid android:color="#B8860B" />
+        </shape>
+    </item>
+</layer-list>
