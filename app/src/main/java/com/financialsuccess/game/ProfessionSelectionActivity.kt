@@ -12,6 +12,8 @@ import com.financialsuccess.game.models.Dream
 import com.financialsuccess.game.models.Profession
 import android.app.DatePickerDialog
 import java.util.Calendar
+import android.speech.tts.TextToSpeech
+import java.util.Locale
 
 class ProfessionSelectionActivity : AppCompatActivity() {
     
@@ -20,6 +22,8 @@ class ProfessionSelectionActivity : AppCompatActivity() {
     private var selectedDream: Dream? = null
     private var selectedStartDate: Long? = null
     private var playerName: String? = null
+
+    private var textToSpeech: TextToSpeech? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +31,18 @@ class ProfessionSelectionActivity : AppCompatActivity() {
         setContentView(binding.root)
         
         setupUI()
+
+        textToSpeech = TextToSpeech(this) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                val localeRu = Locale("ru", "RU")
+                val result = textToSpeech?.setLanguage(localeRu)
+                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    // ignore
+                }
+                textToSpeech?.setPitch(1.0f)
+                textToSpeech?.setSpeechRate(1.0f)
+            }
+        }
     }
     
     private fun setupUI() {
@@ -78,6 +94,9 @@ class ProfessionSelectionActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
 
+                // Speak greeting after successful validation of name
+                textToSpeech?.speak("Рада познакомиться, ${playerName}!", TextToSpeech.QUEUE_FLUSH, null, "greet_name_profession")
+
                 val intent = Intent(this, GameActivity::class.java).apply {
                     putExtra("profession", selectedProfession)
                     putExtra("dream", selectedDream)
@@ -121,5 +140,12 @@ class ProfessionSelectionActivity : AppCompatActivity() {
     
     private fun updateStartButtonState() {
         binding.btnStartGame.isEnabled = selectedProfession != null && selectedDream != null
+    }
+
+    override fun onDestroy() {
+        textToSpeech?.stop()
+        textToSpeech?.shutdown()
+        textToSpeech = null
+        super.onDestroy()
     }
 }
