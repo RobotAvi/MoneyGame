@@ -12,6 +12,9 @@ import com.financialsuccess.game.models.Dream
 import com.financialsuccess.game.models.Profession
 import android.app.DatePickerDialog
 import java.util.Calendar
+import android.speech.tts.TextToSpeech
+import java.util.Locale
+import android.speech.tts.UtteranceProgressListener
 
 class ProfessionSelectionActivity : AppCompatActivity() {
     
@@ -20,6 +23,8 @@ class ProfessionSelectionActivity : AppCompatActivity() {
     private var selectedDream: Dream? = null
     private var selectedStartDate: Long? = null
     private var playerName: String? = null
+
+    private var textToSpeech: TextToSpeech? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +32,18 @@ class ProfessionSelectionActivity : AppCompatActivity() {
         setContentView(binding.root)
         
         setupUI()
+
+        textToSpeech = TextToSpeech(this) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                val localeRu = Locale("ru", "RU")
+                val result = textToSpeech?.setLanguage(localeRu)
+                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    // ignore
+                }
+                textToSpeech?.setPitch(1.0f)
+                textToSpeech?.setSpeechRate(1.0f)
+            }
+        }
     }
     
     private fun setupUI() {
@@ -85,8 +102,28 @@ class ProfessionSelectionActivity : AppCompatActivity() {
                     putExtra("playerName", playerName)
                     putExtra("startDate", selectedStartDate)
                 }
-                startActivity(intent)
-                finish()
+
+                val utteranceId = "greet_name_profession"
+                textToSpeech?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                    override fun onStart(utteranceIdParam: String?) {}
+                    override fun onDone(utteranceIdParam: String?) {
+                        if (utteranceIdParam == utteranceId) {
+                            runOnUiThread {
+                                startActivity(intent)
+                                finish()
+                            }
+                        }
+                    }
+                    override fun onError(utteranceIdParam: String?) {
+                        runOnUiThread {
+                            startActivity(intent)
+                            finish()
+                        }
+                    }
+                })
+
+                // Speak greeting after successful validation of name and then navigate on DONE
+                textToSpeech?.speak("Рада познакомиться, ${playerName}!", TextToSpeech.QUEUE_FLUSH, null, utteranceId)
             }
         }
 
@@ -121,5 +158,12 @@ class ProfessionSelectionActivity : AppCompatActivity() {
     
     private fun updateStartButtonState() {
         binding.btnStartGame.isEnabled = selectedProfession != null && selectedDream != null
+    }
+
+    override fun onDestroy() {
+        textToSpeech?.stop()
+        textToSpeech?.shutdown()
+        textToSpeech = null
+        super.onDestroy()
     }
 }

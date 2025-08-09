@@ -33,6 +33,7 @@ import android.graphics.Typeface
 import android.text.TextUtils
 import java.text.NumberFormat
 import java.util.Locale
+import android.speech.tts.TextToSpeech
 
 class CharacterCreationActivity : AppCompatActivity() {
     // Переменные для сбора данных персонажа
@@ -53,6 +54,9 @@ class CharacterCreationActivity : AppCompatActivity() {
     private var currentStep = 1
     private val totalSteps = 5
 
+    // TTS для голосового приветствия
+    private var textToSpeech: TextToSpeech? = null
+
     private val currencyFormat: NumberFormat by lazy {
         NumberFormat.getInstance(Locale("ru")).apply {
             maximumFractionDigits = 0
@@ -71,6 +75,29 @@ class CharacterCreationActivity : AppCompatActivity() {
             stepContainer = findViewById(R.id.stepContainer)
             showStep(currentStep)
             updateProgressDots()
+        }
+
+        // Инициализация TTS (русская локаль, попытка выбрать женский голос, если доступен)
+        textToSpeech = TextToSpeech(this) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                val localeRu = Locale("ru", "RU")
+                val result = textToSpeech?.setLanguage(localeRu)
+                val availableVoices = textToSpeech?.voices
+                val femaleRuVoice = availableVoices?.firstOrNull { v ->
+                    v.locale.language == "ru" && (
+                        v.name.contains("female", ignoreCase = true) ||
+                        v.features?.contains("female") == true
+                    )
+                }
+                if (femaleRuVoice != null) {
+                    textToSpeech?.voice = femaleRuVoice
+                }
+                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    // Локаль недоступна — используем системную по умолчанию
+                }
+                textToSpeech?.setPitch(1.0f)
+                textToSpeech?.setSpeechRate(1.0f)
+            }
         }
     }
 
@@ -327,6 +354,9 @@ class CharacterCreationActivity : AppCompatActivity() {
             if (playerName.isEmpty()) {
                 etName.error = "Введите имя персонажа"
             } else {
+                // Произносим приветствие после подтверждения имени
+                textToSpeech?.speak("Рада познакомиться, $playerName!", TextToSpeech.QUEUE_FLUSH, null, "greet_name")
+
                 currentStep++
                 showStep(currentStep)
                 updateProgressDots()
@@ -439,6 +469,10 @@ class CharacterCreationActivity : AppCompatActivity() {
             val goalsRaw = findViewById<android.widget.EditText>(R.id.etGoals).text.toString()
             val goals = if (goalsRaw.isNotBlank()) goalsRaw.split(",").map { FinancialGoal(it.trim(), "", GoalType.PASSIVE_INCOME, 0, 12) }.toMutableList() else mutableListOf()
 
+            if (name.isNotBlank()) {
+                textToSpeech?.speak("Рада познакомиться, $name!", TextToSpeech.QUEUE_FLUSH, null, "greet_name_custom")
+            }
+
             val player = Player(
                 name = name,
                 age = age,
@@ -463,5 +497,12 @@ class CharacterCreationActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+    }
+
+    override fun onDestroy() {
+        textToSpeech?.stop()
+        textToSpeech?.shutdown()
+        textToSpeech = null
+        super.onDestroy()
     }
 }
