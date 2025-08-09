@@ -1,0 +1,86 @@
+name: 🧹 Cleanup Old APK Files
+
+on:
+  workflow_dispatch:
+    inputs:
+      keep_count:
+        description: 'Number of recent APK files to keep'
+        required: true
+        default: '3'
+        type: string
+  schedule:
+    # Запускается каждый день в 2:00 UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  cleanup-apks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Получаем полную историю для анализа
+
+      - name: 🧹 Cleanup old APK files
+        run: |
+          echo "🧹 ==== ОЧИСТКА СТАРЫХ APK ФАЙЛОВ ===="
+          
+          KEEP_COUNT=${INPUT_KEEP_COUNT:-3}
+          echo "🧹 Оставляем последние $KEEP_COUNT APK файлов"
+          
+          # Проверяем существование директории
+          if [ ! -d "releases/debug" ]; then
+            echo "❌ Директория releases/debug не существует"
+            exit 0
+          fi
+          
+          # Подсчитываем количество APK файлов
+          APK_COUNT=$(find releases/debug/ -name "FinancialSuccess-v*.apk" | wc -l)
+          echo "🧹 Найдено APK файлов: $APK_COUNT"
+          
+          if [ $APK_COUNT -le $KEEP_COUNT ]; then
+            echo "🧹 Количество APK файлов в пределах нормы (≤$KEEP_COUNT), очистка не требуется"
+            echo "🧹 Текущие APK файлы:"
+            ls -la releases/debug/FinancialSuccess-v*.apk 2>/dev/null || echo "Нет APK файлов"
+            exit 0
+          fi
+          
+          echo "🧹 Удаляем старые версии (оставляем только $KEEP_COUNT последние)..."
+          
+          # Получаем список всех APK файлов, сортированных по времени модификации (новые первыми)
+          # И удаляем все, кроме первых KEEP_COUNT
+          OLD_FILES=$(find releases/debug/ -name "FinancialSuccess-v*.apk" -printf '%T@ %p\n' | \
+          sort -nr | \
+          tail -n +$((KEEP_COUNT + 1)) | \
+          cut -d' ' -f2-)
+          
+          if [ ! -z "$OLD_FILES" ]; then
+            echo "🧹 Файлы для удаления:"
+            echo "$OLD_FILES" | while read file; do
+              echo "🧹 Удаляем: $file"
+              rm -f "$file"
+            done
+            
+            echo "🧹 Очистка завершена"
+          else
+            echo "🧹 Нет файлов для удаления"
+          fi
+          
+          echo "🧹 Оставшиеся APK файлы:"
+          ls -la releases/debug/FinancialSuccess-v*.apk 2>/dev/null || echo "Нет APK файлов"
+
+      - name: 📝 Commit cleanup changes
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Проверяем, есть ли изменения для коммита
+          if git diff --quiet; then
+            echo "📝 Нет изменений для коммита"
+            exit 0
+          fi
+          
+          git add releases/debug/
+          git commit -m "🧹 Cleanup old APK files (keep ${{ github.event.inputs.keep_count || '3' }} latest)" || echo "Nothing to commit"
+          git push origin main

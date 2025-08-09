@@ -335,11 +335,48 @@ jobs:
           echo "🏗️ Проверка APK через aapt..."
           $ANDROID_SDK_ROOT/build-tools/*/aapt dump badging releases/debug/latest-debug.apk | head -10 || echo "❌ aapt failed"
           
+      - name: 🧹 Очистка старых версий APK (оставляем только 3 последние)
+        run: |
+          echo "🧹 ==== ОЧИСТКА СТАРЫХ ВЕРСИЙ APK ===="
+          echo "🧹 Проверяем количество APK файлов в releases/debug/"
+          
+          # Подсчитываем количество APK файлов
+          APK_COUNT=$(find releases/debug/ -name "FinancialSuccess-v*.apk" | wc -l)
+          echo "🧹 Найдено APK файлов: $APK_COUNT"
+          
+          if [ $APK_COUNT -gt 3 ]; then
+            echo "🧹 Удаляем старые версии (оставляем только 3 последние)..."
+            
+            # Получаем список всех APK файлов, сортированных по времени модификации (новые первыми)
+            # И удаляем все, кроме первых 3
+            find releases/debug/ -name "FinancialSuccess-v*.apk" -printf '%T@ %p\n' | \
+            sort -nr | \
+            tail -n +4 | \
+            cut -d' ' -f2- | \
+            while read file; do
+              echo "🧹 Удаляем: $file"
+              rm -f "$file"
+            done
+            
+            echo "🧹 Очистка завершена"
+          else
+            echo "🧹 Количество APK файлов в пределах нормы (≤3), очистка не требуется"
+          fi
+          
+          echo "🧹 Текущие APK файлы:"
+          ls -la releases/debug/FinancialSuccess-v*.apk 2>/dev/null || echo "Нет APK файлов"
+
       - name: 🏗️ Копировать apk с красивым именем
         run: |
           VERSION="${{ needs.setup-android-sdk.outputs.version }}"
           DATE="${{ needs.setup-android-sdk.outputs.date }}"
           cp app/build/outputs/apk/debug/app-debug.apk "releases/debug/FinancialSuccess-v${VERSION}-${DATE}-debug.apk"
+          
+          echo "🏗️ APK скопирован: FinancialSuccess-v${VERSION}-${DATE}-debug.apk"
+          
+          # Проверяем количество файлов после копирования
+          APK_COUNT=$(find releases/debug/ -name "FinancialSuccess-v*.apk" | wc -l)
+          echo "🏗️ Всего APK файлов после копирования: $APK_COUNT"
 
       - name: 📦 Upload APK artifact
         uses: actions/upload-artifact@v4
@@ -376,6 +413,22 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin main
           git rebase origin/main
+          
+          # Финальная проверка и очистка перед коммитом
+          echo "🔍 ==== ФИНАЛЬНАЯ ПРОВЕРКА ПЕРЕД КОММИТОМ ===="
+          echo "🔍 Количество APK файлов перед коммитом:"
+          find releases/debug/ -name "FinancialSuccess-v*.apk" | wc -l
+          
+          # Удаляем старые APK из git, если их больше 3
+          APK_FILES=$(find releases/debug/ -name "FinancialSuccess-v*.apk" -printf '%T@ %p\n' | sort -nr | tail -n +4 | cut -d' ' -f2-)
+          if [ ! -z "$APK_FILES" ]; then
+            echo "🔍 Удаляем старые APK из git:"
+            echo "$APK_FILES" | while read file; do
+              echo "🔍 Удаляем из git: $file"
+              git rm -f "$file" 2>/dev/null || echo "Файл $file уже удален"
+            done
+          fi
+          
           git add releases/debug/*.apk app/build.gradle
           git commit -m "Update APK and bump version [skip ci]" || echo "Nothing to commit"
           git push https://x-access-token:${GH_PAT}@github.com/RobotAvi/MoneyGame.git HEAD:main
