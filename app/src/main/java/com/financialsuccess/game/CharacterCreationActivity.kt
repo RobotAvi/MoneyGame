@@ -74,6 +74,20 @@ class CharacterCreationActivity : AppCompatActivity() {
         }
     }
 
+    // Добавлено: метод переключения шагов мастера
+    private fun showStep(step: Int) {
+        if (!::stepContainer.isInitialized) return
+        stepContainer.removeAllViews()
+        when (step) {
+            1 -> showProfessionStep()
+            2 -> showDreamStep()
+            3 -> showAgeStep()
+            4 -> showNameStep()
+            5 -> showDateStep()
+            else -> showStartScreen()
+        }
+    }
+
     private fun updateProgressDots() {
         val dots = listOf<View>(
             findViewById(R.id.dot1),
