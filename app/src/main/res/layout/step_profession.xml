@@ -14,8 +14,8 @@
         android:textStyle="bold"
         android:textColor="@color/primary_color"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="48dp"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="12dp" />
 
     <!-- Прокручиваемая область для карточки, чтобы не перекрывать кнопки -->
     <ScrollView
@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center_horizontal"
-            android:paddingBottom="16dp">
+            android:paddingBottom="8dp">
 
             <!-- Карточка профессии -->
             <LinearLayout
@@ -42,12 +42,13 @@
                 android:padding="24dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
-                android:gravity="center_horizontal">
+                android:gravity="center_horizontal"
+                android:clickable="true">
 
                 <ImageView
                     android:id="@+id/ivProfessionPhoto"
-                    android:layout_width="220dp"
-                    android:layout_height="220dp"
+                    android:layout_width="200dp"
+                    android:layout_height="200dp"
                     android:adjustViewBounds="true"
                     android:scaleType="centerCrop"
                     android:src="@drawable/ic_profession_placeholder" />
@@ -89,8 +90,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:paddingTop="8dp"
-        android:paddingBottom="24dp">
+        android:paddingTop="4dp"
+        android:paddingBottom="12dp">
 
         <Button
             android:id="@+id/btnSwipeLeft"

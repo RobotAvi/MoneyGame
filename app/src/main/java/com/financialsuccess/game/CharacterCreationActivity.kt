@@ -170,6 +170,7 @@ class CharacterCreationActivity : AppCompatActivity() {
         val btnLeft = view.findViewById<Button>(R.id.btnSwipeLeft)
         val btnRight = view.findViewById<Button>(R.id.btnSwipeRight)
         val btnChoose = view.findViewById<Button>(R.id.btnChooseProfession)
+        val professionCard = view.findViewById<View>(R.id.professionCard)
 
         fun updateProfessionUI() {
             val prof = professions[professionIndex]
@@ -198,27 +199,21 @@ class CharacterCreationActivity : AppCompatActivity() {
             tvParams.setLineSpacing(8f, 1f)
         }
         updateProfessionUI()
-        btnLeft.setOnClickListener {
-            professionIndex = (professionIndex - 1 + professions.size) % professions.size
-            updateProfessionUI()
-            fadeOutSwipeHint(tvSwipeHint)
-        }
-        btnRight.setOnClickListener {
-            professionIndex = (professionIndex + 1) % professions.size
-            updateProfessionUI()
-            fadeOutSwipeHint(tvSwipeHint)
-        }
-        view.setOnTouchListener(object : View.OnTouchListener {
+        professionCard.setOnTouchListener(object : View.OnTouchListener {
             private var x1 = 0f
             private var x2 = 0f
             override fun onTouch(v: View?, event: android.view.MotionEvent?): Boolean {
                 when (event?.action) {
-                    android.view.MotionEvent.ACTION_DOWN -> x1 = event.x
+                    android.view.MotionEvent.ACTION_DOWN -> {
+                        x1 = event.x
+                        v?.parent?.requestDisallowInterceptTouchEvent(true)
+                    }
                     android.view.MotionEvent.ACTION_UP -> {
                         x2 = event.x
                         val deltaX = x2 - x1
                         if (deltaX > 100) btnLeft.performClick()
                         if (deltaX < -100) btnRight.performClick()
+                        v?.parent?.requestDisallowInterceptTouchEvent(false)
                     }
                 }
                 return true
@@ -246,6 +241,7 @@ class CharacterCreationActivity : AppCompatActivity() {
         val btnLeft = view.findViewById<Button>(R.id.btnSwipeLeft)
         val btnRight = view.findViewById<Button>(R.id.btnSwipeRight)
         val btnChoose = view.findViewById<Button>(R.id.btnChooseDream)
+        val dreamCard = view.findViewById<View>(R.id.dreamCard)
 
         fun updateDreamUI() {
             val dream = dreams[dreamIndex]
@@ -282,17 +278,21 @@ class CharacterCreationActivity : AppCompatActivity() {
             updateDreamUI()
             fadeOutSwipeHint(tvSwipeHint)
         }
-        view.setOnTouchListener(object : View.OnTouchListener {
+        dreamCard.setOnTouchListener(object : View.OnTouchListener {
             private var x1 = 0f
             private var x2 = 0f
             override fun onTouch(v: View?, event: android.view.MotionEvent?): Boolean {
                 when (event?.action) {
-                    android.view.MotionEvent.ACTION_DOWN -> x1 = event.x
+                    android.view.MotionEvent.ACTION_DOWN -> {
+                        x1 = event.x
+                        v?.parent?.requestDisallowInterceptTouchEvent(true)
+                    }
                     android.view.MotionEvent.ACTION_UP -> {
                         x2 = event.x
                         val deltaX = x2 - x1
                         if (deltaX > 100) btnLeft.performClick()
                         if (deltaX < -100) btnRight.performClick()
+                        v?.parent?.requestDisallowInterceptTouchEvent(false)
                     }
                 }
                 return true
