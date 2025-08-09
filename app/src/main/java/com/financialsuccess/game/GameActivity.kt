@@ -17,6 +17,7 @@ import java.util.*
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import android.os.Build
+import android.media.MediaPlayer
 
 class GameActivity : AppCompatActivity() {
     
@@ -27,6 +28,7 @@ class GameActivity : AppCompatActivity() {
     private val currencyFormat = NumberFormat.getCurrencyInstance(Locale("ru", "RU"))
     
     private var lastDiceValue: Int? = null
+    private var gamePlayer: MediaPlayer? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,6 +66,30 @@ class GameActivity : AppCompatActivity() {
             Toast.makeText(this, "Игра сохранена!", Toast.LENGTH_SHORT).show()
         }
         binding.btnExit.setOnClickListener { finish() }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (gamePlayer == null) {
+            gamePlayer = MediaPlayer.create(this, R.raw.game).apply {
+                isLooping = true
+                setVolume(0.4f, 0.4f)
+                start()
+            }
+        } else {
+            gamePlayer?.start()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        gamePlayer?.pause()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        gamePlayer?.release()
+        gamePlayer = null
     }
     
     private fun initGame() {
@@ -199,17 +225,7 @@ class GameActivity : AppCompatActivity() {
         if (player.isInFastTrack) {
             handleFastTrackDice(diceValue)
         } else {
-            val oldPosition = currentGameState?.player?.position ?: 0
-            currentGameState = gameManager.movePlayer(diceValue)
-            
-            // Проверяем, завершился ли полный круг
-            val passedStart = (oldPosition + diceValue) >= 24
-            if (passedStart) {
-                showMessage("💼 Зарплата получена: ${currencyFormat.format(currentGameState?.player?.salary ?: 0)}")
-            }
-            
-            updateUI()
-            handlePositionEvent()
+            handleSlowTrackDice(diceValue)
         }
     }
     
