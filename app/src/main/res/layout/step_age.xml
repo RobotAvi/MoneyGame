@@ -25,8 +25,8 @@
         android:value="25"
         android:background="@drawable/number_picker_bg"
         android:padding="24dp"
-        android:scaleX="3.0"
-        android:scaleY="3.0" />
+        android:scaleX="4.0"
+        android:scaleY="2.0" />
 
     <Button
         android:id="@+id/btnNextAge"
