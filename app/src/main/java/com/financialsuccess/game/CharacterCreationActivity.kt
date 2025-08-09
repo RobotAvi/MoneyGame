@@ -317,15 +317,65 @@ class CharacterCreationActivity : AppCompatActivity() {
         numberPicker.minValue = 18
         numberPicker.maxValue = 65
         numberPicker.value = playerAge
-        val textColor = resources.getColor(R.color.text_primary, null)
-        val count = numberPicker.childCount
-        for (i in 0 until count) {
+
+        // Set white for all numbers by default
+        val defaultTextColor = resources.getColor(R.color.white, null)
+        val selectedTextColor = resources.getColor(R.color.error_color, null) // red for selected
+        val childCount = numberPicker.childCount
+        for (i in 0 until childCount) {
             val child = numberPicker.getChildAt(i)
             if (child is TextView) {
-                child.setTextColor(textColor)
-                child.textSize = 28f
+                child.setTextColor(defaultTextColor)
+                child.textSize = 36f
             }
         }
+        // Also set selector wheel paint (for non-selected numbers) to white
+        try {
+            val selectorWheelPaintField = NumberPicker::class.java.getDeclaredField("mSelectorWheelPaint")
+            selectorWheelPaintField.isAccessible = true
+            val paint = selectorWheelPaintField.get(numberPicker) as android.graphics.Paint
+            paint.color = defaultTextColor
+            numberPicker.invalidate()
+        } catch (e: Exception) { }
+
+        // Listen for value changes to highlight the selected number in red
+        numberPicker.setOnValueChangedListener { picker, oldVal, newVal ->
+            for (i in 0 until picker.childCount) {
+                val child = picker.getChildAt(i)
+                if (child is TextView) {
+                    // Heuristic: the central displayed value usually has isSelected or higher alpha/scale
+                    // We explicitly set all to white, then try to color the middle (current value) red
+                    child.setTextColor(defaultTextColor)
+                }
+            }
+            try {
+                val field = NumberPicker::class.java.getDeclaredField("mInputText")
+                field.isAccessible = true
+                val inputText = field.get(picker) as TextView
+                inputText.setTextColor(selectedTextColor)
+                inputText.textSize = 40f
+            } catch (e: Exception) {
+                // fallback: no-op if reflection fails
+            }
+            // Ensure wheel paint stays white
+            try {
+                val selectorWheelPaintField = NumberPicker::class.java.getDeclaredField("mSelectorWheelPaint")
+                selectorWheelPaintField.isAccessible = true
+                val paint = selectorWheelPaintField.get(picker) as android.graphics.Paint
+                paint.color = defaultTextColor
+                picker.invalidate()
+            } catch (e: Exception) { }
+        }
+
+        // Initial highlight for selected value
+        try {
+            val field = NumberPicker::class.java.getDeclaredField("mInputText")
+            field.isAccessible = true
+            val inputText = field.get(numberPicker) as TextView
+            inputText.setTextColor(selectedTextColor)
+            inputText.textSize = 40f
+        } catch (e: Exception) { }
+
         val btnNext = view.findViewById<Button>(R.id.btnNextAge)
         btnNext.setOnClickListener {
             playerAge = numberPicker.value
