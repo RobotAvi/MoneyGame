@@ -25,6 +25,14 @@ import android.widget.ImageView
 import android.widget.NumberPicker
 import android.speech.RecognizerIntent
 import android.content.ActivityNotFoundException
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
+import android.graphics.Typeface
+import android.text.TextUtils
+import java.text.NumberFormat
+import java.util.Locale
 
 class CharacterCreationActivity : AppCompatActivity() {
     // Переменные для сбора данных персонажа
@@ -45,6 +53,14 @@ class CharacterCreationActivity : AppCompatActivity() {
     private var currentStep = 1
     private val totalSteps = 5
 
+    private val currencyFormat: NumberFormat by lazy {
+        NumberFormat.getInstance(Locale("ru")).apply {
+            maximumFractionDigits = 0
+        }
+    }
+
+    private fun money(n: Int): String = "${currencyFormat.format(n)} ₽"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (intent.getBooleanExtra("custom", false)) {
@@ -54,10 +70,13 @@ class CharacterCreationActivity : AppCompatActivity() {
             setContentView(R.layout.activity_character_wizard)
             stepContainer = findViewById(R.id.stepContainer)
             showStep(currentStep)
+            updateProgressDots()
         }
     }
 
+    // Добавлено: метод переключения шагов мастера
     private fun showStep(step: Int) {
+        if (!::stepContainer.isInitialized) return
         stepContainer.removeAllViews()
         when (step) {
             1 -> showProfessionStep()
@@ -65,8 +84,52 @@ class CharacterCreationActivity : AppCompatActivity() {
             3 -> showAgeStep()
             4 -> showNameStep()
             5 -> showDateStep()
-            6 -> showStartScreen()
+            else -> showStartScreen()
         }
+    }
+
+    private fun updateProgressDots() {
+        val dots = listOf<View>(
+            findViewById(R.id.dot1),
+            findViewById(R.id.dot2),
+            findViewById(R.id.dot3),
+            findViewById(R.id.dot4),
+            findViewById(R.id.dot5)
+        )
+        dots.forEachIndexed { index, view ->
+            val active = (index + 1) == currentStep
+            view.setBackgroundResource(if (active) R.drawable.progress_dot_active else R.drawable.progress_dot_inactive)
+        }
+    }
+
+    private fun buildColoredParams(lines: List<Triple<String, Pair<String, Int>, Int>>): CharSequence {
+        val builder = SpannableStringBuilder()
+        lines.forEachIndexed { index, triple ->
+            val label = triple.first
+            val value = triple.second.first
+            val valueColor = triple.second.second
+            val labelColor = triple.third
+
+            val startLabel = builder.length
+            builder.append(label)
+            val endLabel = builder.length
+            builder.setSpan(ForegroundColorSpan(labelColor), startLabel, endLabel, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+            builder.append(": ")
+
+            val startValue = builder.length
+            builder.append(value)
+            val endValue = builder.length
+            builder.setSpan(ForegroundColorSpan(valueColor), startValue, endValue, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            builder.setSpan(StyleSpan(Typeface.BOLD), startValue, endValue, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+            if (index != lines.lastIndex) builder.append("\n")
+        }
+        return builder
+    }
+
+    private fun fadeOutSwipeHint(tv: TextView) {
+        tv.animate().alpha(0f).setDuration(600).withEndAction { tv.visibility = View.GONE }.start()
     }
 
     private fun showProfessionStep() {
@@ -76,31 +139,48 @@ class CharacterCreationActivity : AppCompatActivity() {
         val ivPhoto = view.findViewById<ImageView>(R.id.ivProfessionPhoto)
         val tvName = view.findViewById<TextView>(R.id.tvProfessionName)
         val tvParams = view.findViewById<TextView>(R.id.tvProfessionParams)
+        val tvSwipeHint = view.findViewById<TextView>(R.id.tvSwipeHint)
         val btnLeft = view.findViewById<Button>(R.id.btnSwipeLeft)
         val btnRight = view.findViewById<Button>(R.id.btnSwipeRight)
         val btnChoose = view.findViewById<Button>(R.id.btnChooseProfession)
 
         fun updateProfessionUI() {
             val prof = professions[professionIndex]
-            // Картинка: ищем png по id профессии
             val resId = resources.getIdentifier(
                 "profession_${prof.id}", "drawable", packageName
             )
             if (resId != 0) ivPhoto.setImageResource(resId)
             else ivPhoto.setImageResource(R.drawable.ic_profession_placeholder)
             tvName.text = prof.name
-            tvParams.text = "${prof.description}\nЗарплата: ${prof.salary}₽\nРасходы: ${prof.expenses}₽\nНалоги: ${prof.taxes}₽\nОбразование: ${prof.education}"
+
+            val labelColor = resources.getColor(R.color.text_secondary, null)
+            val salaryColor = resources.getColor(R.color.money_green, null)
+            val expenseColor = resources.getColor(R.color.expense_red, null)
+            val taxColor = resources.getColor(R.color.liability_orange, null)
+            val educationColor = resources.getColor(R.color.asset_blue, null)
+
+            val colored = buildColoredParams(
+                listOf(
+                    Triple("Зарплата", Pair(money(prof.salary), salaryColor), labelColor),
+                    Triple("Расходы", Pair(money(prof.expenses), expenseColor), labelColor),
+                    Triple("Налоги", Pair(money(prof.taxes), taxColor), labelColor),
+                    Triple("Образование", Pair(prof.education, educationColor), labelColor)
+                )
+            )
+            tvParams.text = TextUtils.concat(prof.description, "\n", colored)
+            tvParams.setLineSpacing(8f, 1f)
         }
         updateProfessionUI()
         btnLeft.setOnClickListener {
             professionIndex = (professionIndex - 1 + professions.size) % professions.size
             updateProfessionUI()
+            fadeOutSwipeHint(tvSwipeHint)
         }
         btnRight.setOnClickListener {
             professionIndex = (professionIndex + 1) % professions.size
             updateProfessionUI()
+            fadeOutSwipeHint(tvSwipeHint)
         }
-        // Свайпы
         view.setOnTouchListener(object : View.OnTouchListener {
             private var x1 = 0f
             private var x2 = 0f
@@ -121,8 +201,8 @@ class CharacterCreationActivity : AppCompatActivity() {
             selectedProfession = professions[professionIndex]
             currentStep++
             showStep(currentStep)
+            updateProgressDots()
         }
-        // Исправляю ширину кнопки
         btnChoose.textSize = 16f
         btnChoose.minWidth = 220
         stepContainer.addView(view)
@@ -135,6 +215,7 @@ class CharacterCreationActivity : AppCompatActivity() {
         val ivPhoto = view.findViewById<ImageView>(R.id.ivDreamPhoto)
         val tvName = view.findViewById<TextView>(R.id.tvDreamName)
         val tvParams = view.findViewById<TextView>(R.id.tvDreamParams)
+        val tvSwipeHint = view.findViewById<TextView>(R.id.tvSwipeHint)
         val btnLeft = view.findViewById<Button>(R.id.btnSwipeLeft)
         val btnRight = view.findViewById<Button>(R.id.btnSwipeRight)
         val btnChoose = view.findViewById<Button>(R.id.btnChooseDream)
@@ -147,18 +228,33 @@ class CharacterCreationActivity : AppCompatActivity() {
             if (resId != 0) ivPhoto.setImageResource(resId)
             else ivPhoto.setImageResource(R.drawable.ic_dream_placeholder)
             tvName.text = dream.name
-            tvParams.text = "${dream.description}\nСтоимость: ${dream.cost}₽\nПассивный доход: ${dream.cashFlowRequired}₽\nЧисло на кубике: ${dream.fastTrackNumber}"
+
+            val labelColor = resources.getColor(R.color.text_secondary, null)
+            val costColor = resources.getColor(R.color.expense_red, null)
+            val incomeColor = resources.getColor(R.color.money_green, null)
+            val diceColor = resources.getColor(R.color.asset_blue, null)
+
+            val colored = buildColoredParams(
+                listOf(
+                    Triple("Стоимость", Pair(money(dream.cost), costColor), labelColor),
+                    Triple("Пассивный доход", Pair(money(dream.cashFlowRequired), incomeColor), labelColor),
+                    Triple("Число на кубике", Pair(dream.fastTrackNumber.toString(), diceColor), labelColor)
+                )
+            )
+            tvParams.text = colored
+            tvParams.setLineSpacing(8f, 1f)
         }
         updateDreamUI()
         btnLeft.setOnClickListener {
             dreamIndex = (dreamIndex - 1 + dreams.size) % dreams.size
             updateDreamUI()
+            fadeOutSwipeHint(tvSwipeHint)
         }
         btnRight.setOnClickListener {
             dreamIndex = (dreamIndex + 1) % dreams.size
             updateDreamUI()
+            fadeOutSwipeHint(tvSwipeHint)
         }
-        // Свайпы
         view.setOnTouchListener(object : View.OnTouchListener {
             private var x1 = 0f
             private var x2 = 0f
@@ -179,6 +275,7 @@ class CharacterCreationActivity : AppCompatActivity() {
             selectedDream = dreams[dreamIndex]
             currentStep++
             showStep(currentStep)
+            updateProgressDots()
         }
         btnChoose.textSize = 16f
         btnChoose.minWidth = 220
@@ -193,7 +290,6 @@ class CharacterCreationActivity : AppCompatActivity() {
         numberPicker.minValue = 18
         numberPicker.maxValue = 65
         numberPicker.value = playerAge
-        // Цвет и размер
         val textColor = resources.getColor(R.color.text_primary, null)
         val count = numberPicker.childCount
         for (i in 0 until count) {
@@ -208,6 +304,7 @@ class CharacterCreationActivity : AppCompatActivity() {
             playerAge = numberPicker.value
             currentStep++
             showStep(currentStep)
+            updateProgressDots()
         }
         stepContainer.addView(view)
     }
@@ -222,8 +319,6 @@ class CharacterCreationActivity : AppCompatActivity() {
         etName.setHintTextColor(resources.getColor(R.color.text_secondary, null))
         val btnVoice = view.findViewById<Button>(R.id.btnVoiceInput)
         btnVoice.setOnClickListener {
-            // Можно скрыть или реализовать голосовой ввод
-            // Пока скрываю
             btnVoice.visibility = View.GONE
         }
         val btnNext = view.findViewById<Button>(R.id.btnNextName)
@@ -234,6 +329,7 @@ class CharacterCreationActivity : AppCompatActivity() {
             } else {
                 currentStep++
                 showStep(currentStep)
+                updateProgressDots()
             }
         }
         stepContainer.addView(view)
@@ -267,6 +363,7 @@ class CharacterCreationActivity : AppCompatActivity() {
             } else {
                 currentStep++
                 showStep(currentStep)
+                updateProgressDots()
             }
         }
         stepContainer.addView(view)
@@ -275,10 +372,8 @@ class CharacterCreationActivity : AppCompatActivity() {
     private fun showStartScreen() {
         val view = LayoutInflater.from(this).inflate(R.layout.step_start, stepContainer, false)
         stepContainer.addView(view)
-        // Переход к игре через 1.5 секунды
         view.postDelayed({
             val intent = Intent(this, GameActivity::class.java)
-            // Передаём игрока
             val player = Player(
                 name = playerName,
                 age = playerAge,
