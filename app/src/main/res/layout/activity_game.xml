@@ -15,6 +15,16 @@
         android:padding="20dp"
         app:elevation="4dp">
 
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primary_color"
+            app:title="@string/app_name"
+            app:titleTextColor="@color/white"
+            app:navigationIconTint="@color/white"
+            app:menu="@menu/game_actions" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -48,7 +58,9 @@
                         android:text="Профессия: Учитель"
                         android:textSize="14sp"
                         android:textColor="@color/white"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
 
                     <TextView
                         android:id="@+id/tv_current_date"
@@ -57,7 +69,9 @@
                         android:text="1 Января 2024"
                         android:textSize="18sp"
                         android:textColor="@color/white"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
                 </LinearLayout>
 
                 <TextView
@@ -65,13 +79,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="25 лет"
-                    android:textColor="@color/white"
+                    android:textColor="@color/text_primary"
                     android:textSize="16sp"
                     android:background="@drawable/bg_age_chip"
                     android:padding="8dp"
                     android:layout_marginStart="8dp"
                     android:clickable="true"
-                    android:focusable="true" />
+                    android:focusable="true"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
             </LinearLayout>
 
             <ProgressBar
@@ -305,30 +321,6 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Фин. отчет" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnAssets"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Активы"
-                    android:layout_marginStart="8dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnMarket"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Рынок"
-                    android:layout_marginStart="8dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnFinancialJournal"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Журнал"
-                    android:layout_marginStart="8dp" />
             </LinearLayout>
 
             <!-- Кнопки Сохранить/Выйти -->

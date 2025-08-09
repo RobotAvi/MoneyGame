@@ -33,17 +33,37 @@ class GameActivity : AppCompatActivity() {
         binding = ActivityGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
+        // Toolbar menu actions
+        binding.toolbar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.menu_save -> {
+                    currentGameState?.let { GameSaveManager.saveGameState(this, it) }
+                    currentGameState?.player?.let { GameSaveManager.savePlayer(this, it) }
+                    Toast.makeText(this, "Игра сохранена!", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                R.id.menu_rules -> {
+                    startActivity(android.content.Intent(this, RulesActivity::class.java))
+                    true
+                }
+                R.id.menu_exit -> {
+                    finish()
+                    true
+                }
+                else -> false
+            }
+        }
+
         initGame()
         setupUI()
 
+        // Legacy buttons still available lower in content
         binding.btnSaveGame.setOnClickListener {
             currentGameState?.let { GameSaveManager.saveGameState(this, it) }
             currentGameState?.player?.let { GameSaveManager.savePlayer(this, it) }
             Toast.makeText(this, "Игра сохранена!", Toast.LENGTH_SHORT).show()
         }
-        binding.btnExit.setOnClickListener {
-            finish()
-        }
+        binding.btnExit.setOnClickListener { finish() }
     }
     
     private fun initGame() {
@@ -105,30 +125,6 @@ class GameActivity : AppCompatActivity() {
             showFinancialStatement()
         }
         
-        binding.btnAssets.setOnClickListener {
-            if (!binding.btnAssets.isEnabled) {
-                Toast.makeText(this, "Кнопка недоступна: активы появятся после покупки", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            showAssets()
-        }
-        
-        binding.btnMarket.setOnClickListener {
-            if (!binding.btnMarket.isEnabled) {
-                Toast.makeText(this, "Кнопка недоступна: рынок закрыт в данный момент", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            showMarket()
-        }
-        
-        binding.btnFinancialJournal.setOnClickListener {
-            if (!binding.btnFinancialJournal.isEnabled) {
-                Toast.makeText(this, "Кнопка недоступна: журнал появится после первого события", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            showFinancialJournal()
-        }
-        
         binding.btnHealthStatus.setOnClickListener {
             if (!binding.btnHealthStatus.isEnabled) {
                 Toast.makeText(this, "Кнопка недоступна: здоровье недоступно на этом этапе", Toast.LENGTH_SHORT).show()
@@ -137,6 +133,34 @@ class GameActivity : AppCompatActivity() {
             showHealthStatus()
         }
         
+        // Нижняя панель навигации
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    // Возвращаемся к основной карточке/скроллу
+                    binding.contentScroll.smoothScrollTo(0, 0)
+                    true
+                }
+                R.id.nav_assets -> {
+                    showAssets()
+                    true
+                }
+                R.id.nav_market -> {
+                    showMarket()
+                    true
+                }
+                R.id.nav_journal -> {
+                    showFinancialJournal()
+                    true
+                }
+                R.id.nav_health -> {
+                    showHealthStatus()
+                    true
+                }
+                else -> false
+            }
+        }
+
         // Делаем возраст кликабельным
         binding.tvAge.setOnClickListener {
             showAgeStatistics()
