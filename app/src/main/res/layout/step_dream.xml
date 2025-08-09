@@ -69,6 +69,15 @@
                     android:textSize="18sp"
                     android:layout_marginTop="12dp"
                     android:textColor="@color/text_primary" />
+
+                <TextView
+                    android:id="@+id/tvSwipeHint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Свайпайте влево/вправо"
+                    android:textSize="14sp"
+                    android:layout_marginTop="12dp"
+                    android:textColor="@color/text_secondary"/>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

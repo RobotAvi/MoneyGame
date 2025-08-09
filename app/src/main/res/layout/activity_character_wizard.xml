@@ -1,7 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/stepContainer"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp"
-    android:background="@color/background_color" />
+    android:orientation="vertical"
+    android:background="@color/background_color"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:id="@+id/progressDotsContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="8dp"
+        android:gravity="center">
+
+        <View
+            android:id="@+id/dot1"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_margin="6dp"
+            android:background="@drawable/progress_dot_active" />
+        <View
+            android:id="@+id/dot2"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_margin="6dp"
+            android:background="@drawable/progress_dot_inactive" />
+        <View
+            android:id="@+id/dot3"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_margin="6dp"
+            android:background="@drawable/progress_dot_inactive" />
+        <View
+            android:id="@+id/dot4"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_margin="6dp"
+            android:background="@drawable/progress_dot_inactive" />
+        <View
+            android:id="@+id/dot5"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_margin="6dp"
+            android:background="@drawable/progress_dot_inactive" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/stepContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="16dp" />
+
+</LinearLayout>
