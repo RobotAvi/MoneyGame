@@ -61,7 +61,7 @@
                     android:id="@+id/tvAssetValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Стоимость: 1 500 000₽"
+                    android:text="Стоимость: 8 000 000₽"
                     android:textSize="15sp"
                     android:textColor="@color/primary_color"
                     android:layout_marginBottom="4dp" />
@@ -69,7 +69,7 @@
                     android:id="@+id/tvAssetDownPayment"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Первоначальный взнос: 300 000₽"
+                    android:text="Первоначальный взнос: 2 000 000₽"
                     android:textSize="15sp"
                     android:textColor="@color/primary_color"
                     android:layout_marginBottom="4dp" />
@@ -77,7 +77,7 @@
                     android:id="@+id/tvAssetCashFlow"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Денежный поток: +8 000₽/мес"
+                    android:text="Денежный поток: +50 000₽/мес"
                     android:textSize="15sp"
                     android:textColor="@color/success_color"
                     android:layout_marginBottom="4dp" />
@@ -85,7 +85,7 @@
                     android:id="@+id/tvAssetLoan"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Кредит: 1 200 000₽ (12 000₽/мес)"
+                    android:text="Кредит: 6 000 000₽ (60 000₽/мес)"
                     android:textSize="14sp"
                     android:textColor="@color/text_secondary"
                     android:layout_marginBottom="4dp" />
@@ -93,7 +93,7 @@
                     android:id="@+id/tvAssetROI"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ROI: 6.4% годовых"
+                    android:text="ROI: 30.0% годовых"
                     android:textSize="14sp"
                     android:textColor="@color/success_color"
                     android:layout_marginBottom="4dp" />

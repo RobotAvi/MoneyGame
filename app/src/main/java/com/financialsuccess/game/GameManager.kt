@@ -16,7 +16,7 @@ class GameManager {
     ): GameState {
         val player = Player(
             position = 0,
-            cash = 5000, // Стартовый капитал
+            cash = 100000, // Стартовый капитал (2025)
             salary = profession.salary,
             age = playerAge,
             profession = profession,

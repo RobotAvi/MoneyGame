@@ -144,7 +144,7 @@
                         android:id="@+id/tv_cash"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="125 000₽"
+                        android:text="100 000₽"
                         android:textSize="32sp"
                         android:textStyle="bold"
                         android:textColor="@color/primary_color"
@@ -162,7 +162,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Зарплата: 80 000₽"
+                            android:text="Зарплата: 130 000₽"
                             android:textSize="14sp"
                             android:textColor="@color/text_secondary" />
 
@@ -171,7 +171,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Пассивный: 5 000₽"
+                            android:text="Пассивный: 0₽"
                             android:textSize="14sp"
                             android:textColor="@color/success_color" />
                     </LinearLayout>
@@ -187,7 +187,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Расходы: 45 000₽"
+                            android:text="Расходы: 60 000₽"
                             android:textSize="14sp"
                             android:textColor="@color/error_color" />
 

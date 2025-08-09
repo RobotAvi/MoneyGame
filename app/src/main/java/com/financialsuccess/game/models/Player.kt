@@ -57,7 +57,7 @@ data class Player(
     // Жизненные цели
     var financialGoals: MutableList<FinancialGoal> = mutableListOf(),
     var retirementAge: Int = 65,
-    var targetPassiveIncome: Int = 100000, // Целевой пассивный доход
+    var targetPassiveIncome: Int = 300000, // Целевой пассивный доход
     
     // Дополнительные параметры
     var healthLevel: HealthLevel = HealthLevel.GOOD,
@@ -106,7 +106,7 @@ data class Player(
         taxes = professionTaxes
 
         // Добавляем семейные расходы
-        childrenExpenses = childrenCount * 8000 // 8000 рублей на ребенка в месяц
+        childrenExpenses = childrenCount * 18000 // 18000 рублей на ребенка в месяц
 
         // Общие расходы = базовые + кредиты + дети + семья
         totalExpenses = foodExpenses + transportExpenses + housingExpenses + 
@@ -114,7 +114,7 @@ data class Player(
                        liabilities.sumOf { it.payment }
         // Добавляем расходы на супруга/супругу после healthMultiplier
         if (maritalStatus == MaritalStatus.MARRIED) {
-            totalExpenses += (5000 * healthMultiplier).toInt() // Дополнительные расходы на семью с учетом здоровья
+            totalExpenses += (10000 * healthMultiplier).toInt() // Дополнительные расходы на семью с учетом здоровья
         }
     }
     
@@ -126,7 +126,7 @@ data class Player(
     
     // Добавить ребенка (увеличивает расходы)
     fun addChild() {
-        childrenExpenses += 8000 // 8000 рублей на ребенка в месяц
+        childrenExpenses += 18000 // 18000 рублей на ребенка в месяц
         updateTotalExpenses()
     }
     
@@ -468,16 +468,16 @@ data class Player(
      fun calculateEducationBonus(): Int {
          return when (education) {
              EducationLevel.HIGH_SCHOOL -> 0
-             EducationLevel.COLLEGE -> 5000
-             EducationLevel.BACHELOR -> 10000
-             EducationLevel.MASTER -> 15000
-             EducationLevel.PHD -> 20000
+             EducationLevel.COLLEGE -> 10000
+             EducationLevel.BACHELOR -> 20000
+             EducationLevel.MASTER -> 30000
+             EducationLevel.PHD -> 40000
          }
      }
 
      // Рассчитать бонус к зарплате за опыт работы
      fun calculateExperienceBonus(): Int {
-         return workExperience * 2000 // 2000 рублей за каждый год опыта
+         return workExperience * 2500 // 2500 рублей за каждый год опыта
      }
 
      // Рассчитать бонус к зарплате на основе навыков
@@ -500,11 +500,11 @@ data class Player(
          var familyExpenses = 0
          
          // Расходы на детей
-         familyExpenses += childrenCount * 8000
+         familyExpenses += childrenCount * 18000
          
          // Расходы на супруга/супругу
          if (maritalStatus == MaritalStatus.MARRIED) {
-             familyExpenses += 5000 // Дополнительные расходы на семью
+             familyExpenses += 10000 // Дополнительные расходы на семью
          }
          
          return familyExpenses

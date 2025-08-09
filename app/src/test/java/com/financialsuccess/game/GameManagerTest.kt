@@ -20,9 +20,9 @@ class GameManagerTest {
             id = "test_engineer",
             name = "Тестовый инженер",
             description = "Тестовая профессия",
-            salary = 80000,
-            expenses = 35000,
-            taxes = 15000,
+            salary = 130000,
+            expenses = 60000,
+            taxes = 26000,
             education = "Высшее техническое"
         )
         
@@ -70,8 +70,8 @@ class GameManagerTest {
         assertEquals(25, gameState.player.age)
         assertEquals(profession, gameState.player.profession)
         assertEquals(dream, gameState.player.dream)
-        assertEquals(5000, gameState.player.cash) // Стартовый капитал
-        assertEquals(80000, gameState.player.salary) // Базовая зарплата
+        assertEquals(100000, gameState.player.cash) // Стартовый капитал (2025)
+        assertEquals(130000, gameState.player.salary) // Базовая зарплата (инженер, 2025)
         assertTrue(gameState.player.financialJournal.isNotEmpty()) // Должна быть начальная запись
     }
     
@@ -174,7 +174,7 @@ class GameManagerTest {
             type = AssetType.REAL_ESTATE,
             downPayment = 100000,
             value = 500000,
-            cashFlow = 60000 // увеличен для стабильного прохождения теста
+            cashFlow = gameState.player.profession.expenses + gameState.player.profession.taxes + 10000
         )
         
         gameState.player.assets.add(asset)
@@ -315,7 +315,7 @@ class GameManagerTest {
         val gameState = gameManager.startNewGameWithPlayer(player)
         
         // Проверяем, что зарплата рассчитана с бонусами
-        val expectedSalary = 80000 + 10000 + 4000 + 15000 // Базовая + образование + опыт + навык
+        val expectedSalary = 130000 + 20000 + 5000 + 15000 // Базовая + образование + опыт + навык
         assertEquals(expectedSalary, gameState.player.salary)
         
         // Проверяем, что доходы обновлены
