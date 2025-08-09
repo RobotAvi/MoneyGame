@@ -271,6 +271,21 @@ class GameActivity : AppCompatActivity() {
             updateUI()
         }
     }
+
+    private fun handleSlowTrackDice(diceValue: Int) {
+        val oldPosition = currentGameState?.player?.position ?: 0
+        currentGameState = gameManager.movePlayer(diceValue)
+        
+        // Проверяем, завершился ли полный круг
+        val passedStart = (oldPosition + diceValue) >= 24
+        if (passedStart) {
+            val salaryAmount = currentGameState?.player?.salary ?: 0
+            showMessage("💼 Зарплата получена: ${currencyFormat.format(salaryAmount)}")
+        }
+        
+        updateUI()
+        handlePositionEvent()
+    }
     
     private fun handleFastTrackEvent() {
         val events = listOf(
