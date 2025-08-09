@@ -15,9 +15,9 @@ object GameDataManager {
             id = "teacher",
             name = "Учитель",
             description = "Преподаватель в школе",
-            salary = 45000,
-            expenses = 25000,
-            taxes = 8000,
+            salary = 95000,
+            expenses = 50000,
+            taxes = 18000,
             education = "Высшее педагогическое",
             avatarResId = R.drawable.profession_teacher
         ),
@@ -25,9 +25,9 @@ object GameDataManager {
             id = "engineer",
             name = "Инженер",
             description = "Инженер-программист",
-            salary = 80000,
-            expenses = 35000,
-            taxes = 15000,
+            salary = 130000,
+            expenses = 60000,
+            taxes = 26000,
             education = "Высшее техническое",
             avatarResId = R.drawable.profession_engineer
         ),
@@ -35,9 +35,9 @@ object GameDataManager {
             id = "doctor",
             name = "Врач",
             description = "Врач-терапевт",
-            salary = 90000,
-            expenses = 40000,
-            taxes = 18000,
+            salary = 150000,
+            expenses = 70000,
+            taxes = 30000,
             education = "Высшее медицинское",
             avatarResId = R.drawable.profession_doctor
         ),
@@ -45,9 +45,9 @@ object GameDataManager {
             id = "manager",
             name = "Менеджер",
             description = "Менеджер по продажам",
-            salary = 60000,
-            expenses = 30000,
-            taxes = 12000,
+            salary = 115000,
+            expenses = 55000,
+            taxes = 23000,
             education = "Высшее экономическое",
             avatarResId = R.drawable.profession_manager
         ),
@@ -55,9 +55,9 @@ object GameDataManager {
             id = "mechanic",
             name = "Механик",
             description = "Автомеханик",
-            salary = 50000,
-            expenses = 28000,
-            taxes = 9000,
+            salary = 90000,
+            expenses = 45000,
+            taxes = 18000,
             education = "Среднее специальное",
             avatarResId = R.drawable.profession_mechanic
         ),
@@ -65,9 +65,9 @@ object GameDataManager {
             id = "lawyer",
             name = "Юрист",
             description = "Юрист-консультант",
-            salary = 75000,
-            expenses = 38000,
-            taxes = 14000,
+            salary = 160000,
+            expenses = 75000,
+            taxes = 32000,
             education = "Высшее юридическое",
             avatarResId = R.drawable.profession_lawyer
         )
@@ -78,101 +78,123 @@ object GameDataManager {
             id = "yacht",
             name = "Собственная яхта",
             description = "Роскошная яхта для путешествий",
-            cost = 2000000,
-            cashFlowRequired = 50000,
+            cost = 15000000,
+            cashFlowRequired = 300000,
             fastTrackNumber = 5
         ),
         Dream(
             id = "restaurant",
             name = "Ресторан",
             description = "Открыть собственный ресторан",
-            cost = 1500000,
-            cashFlowRequired = 40000,
+            cost = 12000000,
+            cashFlowRequired = 200000,
             fastTrackNumber = 4
         ),
         Dream(
             id = "charity",
-            name = "Благотворительность",
+            name = "Благотворительный фонд",
             description = "Помочь детскому дому",
-            cost = 500000,
-            cashFlowRequired = 20000,
+            cost = 5000000,
+            cashFlowRequired = 100000,
             fastTrackNumber = 2
         ),
         Dream(
             id = "island",
             name = "Частный остров",
             description = "Купить остров в тропиках",
-            cost = 5000000,
-            cashFlowRequired = 100000,
+            cost = 50000000,
+            cashFlowRequired = 800000,
             fastTrackNumber = 6
         ),
         Dream(
             id = "space_trip",
             name = "Космический туризм",
             description = "Полёт в космос",
-            cost = 3000000,
-            cashFlowRequired = 75000,
+            cost = 30000000,
+            cashFlowRequired = 500000,
             fastTrackNumber = 6
         ),
         Dream(
             id = "business_empire",
             name = "Бизнес-империя",
             description = "Создать сеть компаний",
-            cost = 10000000,
-            cashFlowRequired = 200000,
+            cost = 100000000,
+            cashFlowRequired = 2000000,
             fastTrackNumber = 6
         )
     )
     
     fun getSmallDeals(): List<Asset> = listOf(
+        // Недвижимость (СПб рынок 2025)
         Asset(
-            name = "Однокомнатная квартира в спальном районе",
+            name = "Однокомнатная квартира в СПб",
             type = AssetType.REAL_ESTATE,
-            downPayment = 300000,
-            value = 1500000,
-            cashFlow = 8000,
-            loan = 1200000,
-            loanPayment = 12000
+            downPayment = 2000000,
+            value = 8000000,
+            cashFlow = 50000,
+            loan = 6000000,
+            loanPayment = 60000
         ),
         Asset(
-            name = "Акции Сбербанка (10 штук)",
-            type = AssetType.STOCKS,
-            downPayment = 25000,
-            value = 25000,
-            cashFlow = 1200,
-            shares = 10
+            name = "Двухкомнатная квартира в СПб",
+            type = AssetType.REAL_ESTATE,
+            downPayment = 3000000,
+            value = 12000000,
+            cashFlow = 70000,
+            loan = 9000000,
+            loanPayment = 90000
         ),
+        Asset(
+            name = "Студия в СПб",
+            type = AssetType.REAL_ESTATE,
+            downPayment = 1500000,
+            value = 7000000,
+            cashFlow = 40000,
+            loan = 5500000,
+            loanPayment = 55000
+        ),
+        // Бизнес
         Asset(
             name = "Автомойка",
             type = AssetType.BUSINESS,
-            downPayment = 150000,
-            value = 500000,
-            cashFlow = 15000,
-            loan = 350000,
-            loanPayment = 8000
+            downPayment = 250000,
+            value = 900000,
+            cashFlow = 30000,
+            loan = 650000,
+            loanPayment = 12000
+        ),
+        // Ценные бумаги / крипто
+        Asset(
+            name = "Акции Сбербанка (10 штук)",
+            type = AssetType.STOCKS,
+            downPayment = 45000,
+            value = 45000,
+            cashFlow = 2000,
+            shares = 10
         ),
         Asset(
             name = "Биткоин (0.1 BTC)",
             type = AssetType.CRYPTO,
-            downPayment = 200000,
-            value = 200000,
+            downPayment = 900000,
+            value = 900000,
             cashFlow = 0
         ),
         Asset(
             name = "Облигации федерального займа",
             type = AssetType.BONDS,
-            downPayment = 50000,
-            value = 50000,
-            cashFlow = 2500
+            downPayment = 80000,
+            value = 80000,
+            cashFlow = 4000
         ),
+        // Прочее
         Asset(
             name = "Гараж в центре города",
             type = AssetType.REAL_ESTATE,
-            downPayment = 100000,
-            value = 400000,
-            cashFlow = 5000,
-            loan = 300000,
-            loanPayment = 3500
+            downPayment = 300000,
+            value = 1200000,
+            cashFlow = 12000,
+            loan = 900000,
+            loanPayment = 12000
         )
     )
     
@@ -180,44 +202,46 @@ object GameDataManager {
         Asset(
             name = "Торговый центр",
             type = AssetType.REAL_ESTATE,
-            downPayment = 2000000,
-            value = 10000000,
-            cashFlow = 150000,
-            loan = 8000000,
-            loanPayment = 80000
+            downPayment = 4000000,
+            value = 20000000,
+            cashFlow = 250000,
+            loan = 16000000,
+            loanPayment = 160000
         ),
         Asset(
             name = "IT-стартап",
             type = AssetType.BUSINESS,
-            downPayment = 1000000,
-            value = 5000000,
-            cashFlow = 100000
+            downPayment = 3000000,
+            value = 12000000,
+            cashFlow = 200000,
+            loan = 9000000,
+            loanPayment = 90000
         ),
         Asset(
             name = "Акции Газпрома (1000 штук)",
             type = AssetType.STOCKS,
-            downPayment = 250000,
-            value = 250000,
-            cashFlow = 15000,
+            downPayment = 500000,
+            value = 500000,
+            cashFlow = 25000,
             shares = 1000
         ),
         Asset(
             name = "Жилой комплекс",
             type = AssetType.REAL_ESTATE,
-            downPayment = 5000000,
-            value = 25000000,
-            cashFlow = 300000,
-            loan = 20000000,
-            loanPayment = 200000
+            downPayment = 9000000,
+            value = 45000000,
+            cashFlow = 500000,
+            loan = 36000000,
+            loanPayment = 360000
         ),
         Asset(
             name = "Сеть кафе",
             type = AssetType.BUSINESS,
-            downPayment = 800000,
-            value = 3000000,
-            cashFlow = 75000,
-            loan = 2200000,
-            loanPayment = 25000
+            downPayment = 1500000,
+            value = 6000000,
+            cashFlow = 120000,
+            loan = 4500000,
+            loanPayment = 45000
         )
     )
     
@@ -262,13 +286,13 @@ object GameDataManager {
     fun getRandomEvent(): String {
         val events = listOf(
             "Рыночная волатильность! Все ваши акции потеряли 10% стоимости.",
-            "Повышение! Ваша зарплата увеличилась на 5000 рублей.",
-            "Налоговая проверка. Доплатите 15000 рублей налогов.",
-            "Удачная инвестиция! Получите 20000 рублей дополнительного дохода.",
-            "Ремонт автомобиля. Потратьте 25000 рублей.",
-            "Наследство от дальнего родственника. Получите 100000 рублей.",
+            "Повышение! Ваша зарплата увеличилась на 10000 рублей.",
+            "Налоговая проверка. Доплатите 30000 рублей налогов.",
+            "Удачная инвестиция! Получите 40000 рублей дополнительного дохода.",
+            "Ремонт автомобиля. Потратьте 60000 рублей.",
+            "Наследство от дальнего родственника. Получите 500000 рублей.",
             "Экономический кризис. Все доходы от недвижимости снижены на 20% на следующий ход.",
-            "У вас родился ребёнок! Расходы увеличиваются на 8000₽/мес.",
+            "У вас родился ребёнок! Расходы увеличиваются на 18000₽/мес.",
             "Новые инвестиционные возможности! Выберите дополнительную карточку актива."
         )
         return events.random()

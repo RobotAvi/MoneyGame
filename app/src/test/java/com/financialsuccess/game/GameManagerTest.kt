@@ -70,8 +70,8 @@ class GameManagerTest {
         assertEquals(25, gameState.player.age)
         assertEquals(profession, gameState.player.profession)
         assertEquals(dream, gameState.player.dream)
-        assertEquals(5000, gameState.player.cash) // Стартовый капитал
-        assertEquals(80000, gameState.player.salary) // Базовая зарплата
+        assertEquals(100000, gameState.player.cash) // Стартовый капитал (2025)
+        assertEquals(130000, gameState.player.salary) // Базовая зарплата (инженер, 2025)
         assertTrue(gameState.player.financialJournal.isNotEmpty()) // Должна быть начальная запись
     }
     

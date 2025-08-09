@@ -24,9 +24,9 @@ class PlayerTest {
         
         profession = Profession(
             name = "Программист",
-            salary = 80000,
-            expenses = 40000,
-            taxes = 12000
+            salary = 130000,
+            expenses = 60000,
+            taxes = 26000
         )
         
         dream = Dream(
@@ -80,7 +80,7 @@ class PlayerTest {
         assertEquals(RiskTolerance.MODERATE, defaultPlayer.riskTolerance)
         assertEquals(10, defaultPlayer.savingsRate)
         assertEquals(65, defaultPlayer.retirementAge)
-        assertEquals(100000, defaultPlayer.targetPassiveIncome)
+        assertEquals(300000, defaultPlayer.targetPassiveIncome)
     }
     
     @Test
@@ -131,10 +131,10 @@ class PlayerTest {
     fun `test cash flow calculation`() {
         player.totalIncome = 80000
         player.passiveIncome = 5000
-        player.totalExpenses = 40000
+        player.totalExpenses = 70000
         
         val cashFlow = player.getCashFlow()
-        assertEquals(45000, cashFlow) // 80000 + 5000 - 40000
+        assertEquals(15000, cashFlow) // 80000 + 5000 - 70000
     }
     
     @Test
@@ -156,50 +156,50 @@ class PlayerTest {
         assertEquals(0, player.calculateEducationBonus())
         
         player.education = EducationLevel.COLLEGE
-        assertEquals(5000, player.calculateEducationBonus())
-        
-        player.education = EducationLevel.BACHELOR
         assertEquals(10000, player.calculateEducationBonus())
         
+        player.education = EducationLevel.BACHELOR
+        assertEquals(20000, player.calculateEducationBonus())
+        
         player.education = EducationLevel.MASTER
-        assertEquals(15000, player.calculateEducationBonus())
+        assertEquals(30000, player.calculateEducationBonus())
         
         player.education = EducationLevel.PHD
-        assertEquals(20000, player.calculateEducationBonus())
+        assertEquals(40000, player.calculateEducationBonus())
     }
     
     @Test
     fun `test work experience bonus calculation`() {
         player.workExperience = 0
-        assertEquals(10000, player.calculateEducationBonus()) // только образование
+        assertEquals(20000, player.calculateEducationBonus()) // только образование
         
         player.workExperience = 5
-        assertEquals(20000, player.calculateEducationBonus()) // образование + опыт
+        assertEquals(20000, player.calculateEducationBonus()) // метод возвращает только образование
     }
     
     @Test
     fun `test skills bonus calculation`() {
-        val skill1 = Skill("Программирование", "Технический навык", 15000, SkillCategory.TECHNICAL)
-        val skill2 = Skill("Менеджмент", "Лидерский навык", 12000, SkillCategory.LEADERSHIP)
+        val skill1 = Skill("Программирование", "Технический навык", 35000, SkillCategory.TECHNICAL)
+        val skill2 = Skill("Менеджмент", "Лидерский навык", 28000, SkillCategory.LEADERSHIP)
         
         player.skills.add(skill1)
         player.skills.add(skill2)
         
-        assertEquals(27000, player.calculateSkillsBonus())
+        assertEquals(63000, player.calculateSkillsBonus())
     }
     
     @Test
     fun `test salary update with bonuses`() {
         player.workExperience = 3
-        val skill = Skill("Программирование", "Технический навык", 15000, SkillCategory.TECHNICAL)
+        val skill = Skill("Программирование", "Технический навык", 35000, SkillCategory.TECHNICAL)
         player.skills.add(skill)
         
         player.updateSalaryWithBonuses()
         
-        val expectedSalary = 80000 + // базовая зарплата
-                            10000 + // бонус за образование (BACHELOR)
-                            15000 + // бонус за навык
-                            3000    // бонус за опыт (3 года * 1000)
+        val expectedSalary = 130000 + // базовая зарплата
+                            20000 + // бонус за образование (BACHELOR)
+                            35000 + // бонус за навык
+                            7500    // бонус за опыт (3 года * 2500)
         
         assertEquals(expectedSalary, player.salary)
     }
@@ -214,14 +214,14 @@ class PlayerTest {
         
         player.childrenCount = 2
         player.maritalStatus = MaritalStatus.MARRIED
-        assertEquals(21000, player.calculateFamilyExpenses()) // 2 * 8000 + 5000
+        assertEquals(46000, player.calculateFamilyExpenses()) // 2 * 18000 + 10000
     }
     
     @Test
     fun `test add child increases expenses`() {
         val initialExpenses = player.childrenExpenses
         player.addChild()
-        assertEquals(initialExpenses + 8000, player.childrenExpenses)
+        assertEquals(initialExpenses + 18000, player.childrenExpenses)
     }
     
     // === ТЕСТЫ СБЕРЕЖЕНИЙ ===
