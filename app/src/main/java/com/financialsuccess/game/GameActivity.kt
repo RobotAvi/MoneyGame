@@ -967,9 +967,9 @@ class GameActivity : AppCompatActivity() {
         val sb = StringBuilder()
         
         // Заголовок
-        sb.append("=" * 80).append("\n")
+        sb.append("=".repeat(80)).append("\n")
         sb.append("📊 ФИНАНСОВЫЙ ЖУРНАЛ - ИГРА 'ФИНАНСОВЫЙ УСПЕХ'\n")
-        sb.append("=" * 80).append("\n\n")
+        sb.append("=".repeat(80)).append("\n\n")
         
         // Информация об игроке
         sb.append("👤 ИНФОРМАЦИЯ ОБ ИГРОКЕ:\n")
@@ -1051,10 +1051,10 @@ class GameActivity : AppCompatActivity() {
         }
         
         // Футер
-        sb.append("\n" + "=" * 80).append("\n")
+        sb.append("\n" + "=".repeat(80)).append("\n")
         sb.append("📅 Дата экспорта: ${java.text.SimpleDateFormat("dd.MM.yyyy HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())}\n")
         sb.append("🎮 Версия игры: ${packageManager.getPackageInfo(packageName, 0).versionName}\n")
-        sb.append("=" * 80).append("\n")
+        sb.append("=".repeat(80)).append("\n")
         
         return sb.toString()
     }
