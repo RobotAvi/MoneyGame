@@ -383,13 +383,14 @@ class GameActivity : AppCompatActivity() {
     private fun showSmallDeal() {
         val deals = GameDataManager.getSmallDeals()
         val deal = deals.random()
-        
-        AlertDialog.Builder(this)
-            .setTitle("Малая сделка")
-            .setMessage("${deal.name}\nПервоначальный взнос: ${currencyFormat.format(deal.downPayment)}\nДенежный поток: +${currencyFormat.format(deal.cashFlow)}/мес")
-            .setPositiveButton("Купить") { _, _ ->
+
+        val message = "${deal.name}\nПервоначальный взнос: ${currencyFormat.format(deal.downPayment)}\nДенежный поток: +${currencyFormat.format(deal.cashFlow)}/мес"
+        showEventPanel(
+            title = "Малая сделка",
+            message = message,
+            primaryText = "Купить",
+            onPrimary = {
                 if (gameManager.buyAsset(deal)) {
-                    // Логируем покупку актива (без повторного списания)
                     currentGameState?.player?.addFinancialEntry(
                         FinancialEntryType.EXPENSE,
                         FinancialCategory.ASSET_PURCHASE,
@@ -397,25 +398,29 @@ class GameActivity : AppCompatActivity() {
                         "Малая сделка: ${deal.name} (денежный поток: +${currencyFormat.format(deal.cashFlow)}/мес)"
                     )
                     updateUI()
+                    playSfx(sfxOk)
                     showMessage("Актив приобретён!")
                 } else {
+                    playSfx(sfxError)
                     showMessage("Недостаточно средств")
                 }
-            }
-            .setNegativeButton("Пропустить", null)
-            .show()
+            },
+            secondaryText = "Пропустить",
+            onSecondary = { /* no-op */ }
+        )
     }
     
     private fun showBigDeal() {
         val deals = GameDataManager.getBigDeals()
         val deal = deals.random()
-        
-        AlertDialog.Builder(this)
-            .setTitle("Крупная сделка")
-            .setMessage("${deal.name}\nПервоначальный взнос: ${currencyFormat.format(deal.downPayment)}\nДенежный поток: +${currencyFormat.format(deal.cashFlow)}/мес")
-            .setPositiveButton("Купить") { _, _ ->
+
+        val message = "${deal.name}\nПервоначальный взнос: ${currencyFormat.format(deal.downPayment)}\nДенежный поток: +${currencyFormat.format(deal.cashFlow)}/мес"
+        showEventPanel(
+            title = "Крупная сделка",
+            message = message,
+            primaryText = "Купить",
+            onPrimary = {
                 if (gameManager.buyAsset(deal)) {
-                    // Логируем покупку актива (без повторного списания)
                     currentGameState?.player?.addFinancialEntry(
                         FinancialEntryType.EXPENSE,
                         FinancialCategory.ASSET_PURCHASE,
@@ -423,13 +428,16 @@ class GameActivity : AppCompatActivity() {
                         "Крупная сделка: ${deal.name} (денежный поток: +${currencyFormat.format(deal.cashFlow)}/мес)"
                     )
                     updateUI()
+                    playSfx(sfxOk)
                     showMessage("Актив приобретён!")
                 } else {
+                    playSfx(sfxError)
                     showMessage("Недостаточно средств")
                 }
-            }
-            .setNegativeButton("Пропустить", null)
-            .show()
+            },
+            secondaryText = "Пропустить",
+            onSecondary = { /* no-op */ }
+        )
     }
     
     private fun showPaycheck() {
@@ -554,10 +562,11 @@ class GameActivity : AppCompatActivity() {
     }
     
     private fun showCharityEvent() {
-        AlertDialog.Builder(this)
-            .setTitle("Благотворительность")
-            .setMessage("Хотите пожертвовать 10% от вашего дохода на благотворительность?")
-            .setPositiveButton("Да") { _, _ ->
+        showEventPanel(
+            title = "Благотворительность",
+            message = "Хотите пожертвовать 10% от вашего дохода на благотворительность?",
+            primaryText = "Да",
+            onPrimary = {
                 currentGameState?.player?.let { player ->
                     val donation = (player.totalIncome * 0.1).toInt()
                     player.logExpense(
@@ -566,11 +575,13 @@ class GameActivity : AppCompatActivity() {
                         "Пожертвование на благотворительность (10% от дохода)"
                     )
                     updateUI()
+                    playSfx(sfxOk)
                     showMessage("Спасибо за пожертвование: ${currencyFormat.format(donation)}")
                 }
-            }
-            .setNegativeButton("Нет", null)
-            .show()
+            },
+            secondaryText = "Нет",
+            onSecondary = { /* no-op */ }
+        )
     }
     
     private fun showFinancialStatement() {
