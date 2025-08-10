@@ -67,6 +67,15 @@
                 android:shadowDx="0"
                 android:shadowDy="1"
                 android:shadowRadius="2" />
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/lottieDaySelect"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                app:lottie_rawRes="@raw/day_select"
+                app:lottie_autoPlay="false"
+                app:lottie_loop="false" />
         </FrameLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

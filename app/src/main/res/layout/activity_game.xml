@@ -414,69 +414,75 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Панель событий под календарём -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_event_panel"
+            <!-- Панель событий под календарём (MotionLayout) -->
+            <androidx.constraintlayout.motion.widget.MotionLayout
+                android:id="@+id/eventMotion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:visibility="gone"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="8dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/primary_color">
+                app:layoutDescription="@xml/event_panel_scene">
 
-                <LinearLayout
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_event_panel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:id="@+id/tvEventTitle"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Событие"
-                        android:textStyle="bold"
-                        android:textSize="18sp"
-                        android:textColor="@color/text_primary" />
-
-                    <TextView
-                        android:id="@+id/tvEventMessage"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Описание события"
-                        android:textSize="14sp"
-                        android:textColor="@color/text_secondary" />
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="8dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/primary_color">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="end"
-                        android:layout_marginTop="12dp">
+                        android:orientation="vertical"
+                        android:padding="16dp">
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnEventSecondary"
-                            android:layout_width="wrap_content"
+                        <TextView
+                            android:id="@+id/tvEventTitle"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Отмена"
-                            style="@style/Widget.App.Button" />
+                            android:text="Событие"
+                            android:textStyle="bold"
+                            android:textSize="18sp"
+                            android:textColor="@color/text_primary" />
 
-                        <Space
-                            android:layout_width="12dp"
-                            android:layout_height="1dp" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnEventPrimary"
-                            android:layout_width="wrap_content"
+                        <TextView
+                            android:id="@+id/tvEventMessage"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Действие"
-                            style="@style/Widget.App.Button" />
+                            android:layout_marginTop="8dp"
+                            android:text="Описание события"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_secondary" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="end"
+                            android:layout_marginTop="12dp">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnEventSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Отмена"
+                                style="@style/Widget.App.Button" />
+
+                            <Space
+                                android:layout_width="12dp"
+                                android:layout_height="1dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnEventPrimary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Действие"
+                                style="@style/Widget.App.Button" />
+                        </LinearLayout>
                     </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                </com.google.android.material.card.MaterialCardView>
+            </androidx.constraintlayout.motion.widget.MotionLayout>
 
             <!-- Скрытые служебные элементы -->
             <com.google.android.material.button.MaterialButton
