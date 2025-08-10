@@ -28,7 +28,9 @@ class CalendarAdapter(
             .inflate(R.layout.item_calendar_day, parent, false)
         val parentWidth = parent.measuredWidth.takeIf { it > 0 } ?: parent.resources.displayMetrics.widthPixels
         val spacingPx = (parent.resources.displayMetrics.density * 8).toInt()
-        val cellSize = (parentWidth - spacingPx * 8) / 7
+        val rawSize = (parentWidth - spacingPx * 8) / 7
+        val minSize = (parent.resources.displayMetrics.density * 64).toInt()
+        val cellSize = maxOf(rawSize, minSize)
         val params = RecyclerView.LayoutParams(cellSize, cellSize)
         view.layoutParams = params
         return DayViewHolder(view)
