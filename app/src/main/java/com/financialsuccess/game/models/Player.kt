@@ -36,6 +36,8 @@ data class Player(
     var currentDayOfMonth: Int = 1, // Текущий день месяца (игровой)
     var name: String? = null, // Имя персонажа
     var startDateMillis: Long? = null, // Дата начала игры (в миллисекундах)
+    var birthDateMillis: Long? = null, // Дата рождения (в миллисекундах)
+    var nextAgeChangeMillis: Long? = null, // Следующая дата увеличения возраста в игре (ДР)
     
     // === НОВЫЕ ПОЛЯ ДЛЯ РАСШИРЕННОЙ ПЕРСОНАЛИЗАЦИИ ===
     

@@ -19,7 +19,7 @@
         android:id="@+id/tvStepTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="ШАГ 4/5"
+        android:text="ШАГ 2/3"
         android:textSize="28sp"
         android:textStyle="bold"
         android:textColor="@color/primary_color"

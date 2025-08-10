@@ -34,6 +34,7 @@ import android.text.TextUtils
 import java.text.NumberFormat
 import java.util.Locale
 import android.speech.tts.TextToSpeech
+import java.text.SimpleDateFormat
 
 class CharacterCreationActivity : AppCompatActivity() {
     // Переменные для сбора данных персонажа
@@ -42,6 +43,8 @@ class CharacterCreationActivity : AppCompatActivity() {
     private var selectedStartDate: Long? = null
     private var selectedProfession: Profession? = null
     private var selectedDream: Dream? = null
+    private var birthDateMillis: Long? = null
+    private var nextAgeChangeMillis: Long? = null
 
     // Карусель профессий
     private val professions = GameDataManager.getProfessions()
@@ -52,7 +55,7 @@ class CharacterCreationActivity : AppCompatActivity() {
 
     private lateinit var stepContainer: FrameLayout
     private var currentStep = 1
-    private val totalSteps = 5
+    private val totalSteps = 3
 
     // TTS для голосового приветствия
     private var textToSpeech: TextToSpeech? = null
@@ -106,11 +109,9 @@ class CharacterCreationActivity : AppCompatActivity() {
         if (!::stepContainer.isInitialized) return
         stepContainer.removeAllViews()
         when (step) {
-            1 -> showNameStep()        // Имя
-            2 -> showAgeStep()         // Возраст
-            3 -> showDateStep()        // Дата
-            4 -> showProfessionStep()  // Профессия
-            5 -> showDreamStep()       // Мечта
+            1 -> showNameStep()        // Имя + Даты
+            2 -> showProfessionStep()  // Профессия
+            3 -> showDreamStep()       // Мечта
             else -> showStartScreen()
         }
     }
@@ -119,9 +120,7 @@ class CharacterCreationActivity : AppCompatActivity() {
         val dots = listOf<View>(
             findViewById(R.id.dot1),
             findViewById(R.id.dot2),
-            findViewById(R.id.dot3),
-            findViewById(R.id.dot4),
-            findViewById(R.id.dot5)
+            findViewById(R.id.dot3)
         )
         dots.forEachIndexed { index, view ->
             val active = (index + 1) == currentStep
@@ -162,7 +161,7 @@ class CharacterCreationActivity : AppCompatActivity() {
     private fun showProfessionStep() {
         val view = LayoutInflater.from(this).inflate(R.layout.step_profession, stepContainer, false)
         val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
-        stepTitle.text = "ШАГ 4/5"
+        stepTitle.text = "ШАГ 2/3"
         val ivPhoto = view.findViewById<ImageView>(R.id.ivProfessionPhoto)
         val tvName = view.findViewById<TextView>(R.id.tvProfessionName)
         val tvParams = view.findViewById<TextView>(R.id.tvProfessionParams)
@@ -247,7 +246,7 @@ class CharacterCreationActivity : AppCompatActivity() {
     private fun showDreamStep() {
         val view = LayoutInflater.from(this).inflate(R.layout.step_dream, stepContainer, false)
         val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
-        stepTitle.text = "ШАГ 5/5"
+        stepTitle.text = "ШАГ 3/3"
         val ivPhoto = view.findViewById<ImageView>(R.id.ivDreamPhoto)
         val tvName = view.findViewById<TextView>(R.id.tvDreamName)
         val tvParams = view.findViewById<TextView>(R.id.tvDreamParams)
@@ -403,28 +402,113 @@ class CharacterCreationActivity : AppCompatActivity() {
     private fun showNameStep() {
         val view = LayoutInflater.from(this).inflate(R.layout.step_name, stepContainer, false)
         val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
-        stepTitle.text = "ШАГ 1/5"
+        stepTitle.text = "ШАГ 1/3"
         val etName = view.findViewById<android.widget.EditText>(R.id.etPlayerName)
         etName.setText(playerName)
-        etName.setTextColor(resources.getColor(R.color.text_primary, null))
-        etName.setHintTextColor(resources.getColor(R.color.text_secondary, null))
-        val btnVoice = view.findViewById<Button>(R.id.btnVoiceInput)
-        btnVoice.setOnClickListener {
-            btnVoice.visibility = View.GONE
+        etName.setTextColor(resources.getColor(R.color.white, null))
+        etName.setHintTextColor(resources.getColor(R.color.white, null))
+
+        val etBirthDate = view.findViewById<android.widget.EditText>(R.id.etBirthDate)
+        val btnPickBirth = view.findViewById<Button>(R.id.btnPickBirthDate)
+        val etStartDate = view.findViewById<android.widget.EditText>(R.id.etStartDate)
+        val btnPickStart = view.findViewById<Button>(R.id.btnPickStartDate)
+
+        val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale("ru", "RU"))
+
+        fun showDatePicker(targetEt: android.widget.EditText, assign: (Long) -> Unit) {
+            val calendar = Calendar.getInstance()
+            val datePicker = DatePickerDialog(
+                this,
+                { _, year, month, dayOfMonth ->
+                    calendar.set(year, month, dayOfMonth, 0, 0, 0)
+                    calendar.set(Calendar.MILLISECOND, 0)
+                    assign(calendar.timeInMillis)
+                    targetEt.setText("%02d.%02d.%d".format(dayOfMonth, month + 1, year))
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            )
+            datePicker.show()
         }
+
+        btnPickBirth.setOnClickListener {
+            showDatePicker(etBirthDate) { picked -> birthDateMillis = picked }
+        }
+        btnPickStart.setOnClickListener {
+            showDatePicker(etStartDate) { picked -> selectedStartDate = picked }
+        }
+
         val btnNext = view.findViewById<Button>(R.id.btnNextName)
         btnNext.setOnClickListener {
             playerName = etName.text.toString().trim()
             if (playerName.isEmpty()) {
                 etName.error = "Введите имя персонажа"
-            } else {
-                // Произносим приветствие после подтверждения имени
-                textToSpeech?.speak("Рада познакомиться, $playerName!", TextToSpeech.QUEUE_FLUSH, null, "greet_name")
-
-                currentStep++
-                showStep(currentStep)
-                updateProgressDots()
+                return@setOnClickListener
             }
+
+            // Parse manual DOB if needed
+            if (birthDateMillis == null && etBirthDate.text.toString().isNotBlank()) {
+                try {
+                    val parsed = dateFormat.parse(etBirthDate.text.toString().trim())
+                    birthDateMillis = parsed?.time
+                } catch (_: Exception) { }
+            }
+            if (birthDateMillis == null) {
+                etBirthDate.error = "Введите дату рождения"
+                return@setOnClickListener
+            }
+
+            // Parse manual start date if needed (default to today if empty)
+            if (selectedStartDate == null) {
+                if (etStartDate.text.toString().isNotBlank()) {
+                    try {
+                        val parsed = dateFormat.parse(etStartDate.text.toString().trim())
+                        selectedStartDate = parsed?.time
+                    } catch (_: Exception) { }
+                } else {
+                    val today = Calendar.getInstance()
+                    today.set(Calendar.HOUR_OF_DAY, 0)
+                    today.set(Calendar.MINUTE, 0)
+                    today.set(Calendar.SECOND, 0)
+                    today.set(Calendar.MILLISECOND, 0)
+                    selectedStartDate = today.timeInMillis
+                    etStartDate.setText(dateFormat.format(today.time))
+                }
+            }
+            if (selectedStartDate == null) {
+                etStartDate.error = "Введите дату начала"
+                return@setOnClickListener
+            }
+
+            // Compute age at start date and next birthday date
+            val startCal = Calendar.getInstance().apply { timeInMillis = selectedStartDate!! }
+            val dobCal = Calendar.getInstance().apply { timeInMillis = birthDateMillis!! }
+
+            var years = startCal.get(Calendar.YEAR) - dobCal.get(Calendar.YEAR)
+            val startMonthDay = Pair(startCal.get(Calendar.MONTH), startCal.get(Calendar.DAY_OF_MONTH))
+            val birthMonthDay = Pair(dobCal.get(Calendar.MONTH), dobCal.get(Calendar.DAY_OF_MONTH))
+            if (startMonthDay < birthMonthDay) years--
+            playerAge = years.coerceAtLeast(0)
+
+            // Next birthday from start date
+            val nextBirthday = Calendar.getInstance().apply {
+                set(Calendar.YEAR, startCal.get(Calendar.YEAR))
+                set(Calendar.MONTH, dobCal.get(Calendar.MONTH))
+                set(Calendar.DAY_OF_MONTH, dobCal.get(Calendar.DAY_OF_MONTH))
+                set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+            }
+            if (nextBirthday.timeInMillis <= startCal.timeInMillis) {
+                nextBirthday.add(Calendar.YEAR, 1)
+            }
+            nextAgeChangeMillis = nextBirthday.timeInMillis
+
+            // Приветствие по имени
+            textToSpeech?.speak("Рада познакомиться, $playerName!", TextToSpeech.QUEUE_FLUSH, null, "greet_name")
+
+            currentStep++
+            showStep(currentStep)
+            updateProgressDots()
         }
         stepContainer.addView(view)
     }
@@ -483,7 +567,9 @@ class CharacterCreationActivity : AppCompatActivity() {
                 age = playerAge,
                 profession = selectedProfession!!,
                 dream = selectedDream!!,
-                startDateMillis = selectedStartDate
+                startDateMillis = selectedStartDate,
+                birthDateMillis = birthDateMillis,
+                nextAgeChangeMillis = nextAgeChangeMillis
             )
             intent.putExtra("player", player)
             startActivity(intent)
