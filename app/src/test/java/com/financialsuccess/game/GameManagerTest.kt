@@ -72,8 +72,21 @@ class GameManagerTest {
     fun `test age progression after 12 months`() {
         val state = gameManager.startNewGame(profession, dream)
         val initialAge = state.player.age
-        // 12 раз до 1-го числа
-        repeat(12) { gameManager.movePlayer(30) }
+        // Старт: 1 января 2024
+        val startCal = Calendar.getInstance().apply { set(2024, Calendar.JANUARY, 1, 0, 0, 0); set(Calendar.MILLISECOND, 0) }
+        state.player.startDateMillis = startCal.timeInMillis
+        state.player.currentDayOfMonth = 1
+        state.player.monthsPlayed = 0
+        // Следующий ДР через год
+        val nextBirthday = (startCal.clone() as Calendar).apply { add(Calendar.YEAR, 1) }
+        state.player.nextAgeChangeMillis = nextBirthday.timeInMillis
+        // Проходим 12 реальных месяцев
+        val stepCal = startCal.clone() as Calendar
+        repeat(12) {
+            val daysInMonth = stepCal.getActualMaximum(Calendar.DAY_OF_MONTH)
+            gameManager.movePlayer(daysInMonth)
+            stepCal.add(Calendar.MONTH, 1)
+        }
         assertEquals(initialAge + 1, state.player.age)
     }
 }
