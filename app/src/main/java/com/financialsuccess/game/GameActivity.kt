@@ -327,19 +327,15 @@ class GameActivity : AppCompatActivity() {
     
     private fun showVictoryDialog() {
         val player = currentGameState?.player ?: return
-        
-        AlertDialog.Builder(this)
-            .setTitle("🎉 ПОБЕДА!")
-            .setMessage("Поздравляем! Вы достигли своей мечты: ${player.dream.name}!\n\nВы успешно вышли из крысиных бегов и осуществили финансовую мечту!\n\nИтоговый капитал: ${currencyFormat.format(player.cash)}\nПассивный доход: ${currencyFormat.format(player.passiveIncome)}")
-            .setPositiveButton("🎊 Новая игра") { _, _ ->
-                // Перезапуск игры
-                finish()
-            }
-            .setNegativeButton("📊 Итоги") { _, _ ->
-                showFinalStats()
-            }
-            .setCancelable(false)
-            .show()
+        val message = "Поздравляем! Вы достигли своей мечты: ${player.dream.name}!\n\nВы успешно вышли из крысиных бегов и осуществили финансовую мечту!\n\nИтоговый капитал: ${currencyFormat.format(player.cash)}\nПассивный доход: ${currencyFormat.format(player.passiveIncome)}"
+        showEventPanel(
+            title = "🎉 ПОБЕДА!",
+            message = message,
+            primaryText = "🎊 Новая игра",
+            onPrimary = { finish() },
+            secondaryText = "📊 Итоги",
+            onSecondary = { showFinalStats() }
+        )
     }
     
     private fun showFinalStats() {
@@ -358,13 +354,12 @@ class GameActivity : AppCompatActivity() {
             🎉 Вы успешно прошли путь от крысиных бегов до финансовой свободы!
         """.trimIndent()
         
-        AlertDialog.Builder(this)
-            .setTitle("📊 Итоги игры")
-            .setMessage(message)
-            .setPositiveButton("🔄 Новая игра") { _, _ ->
-                finish()
-            }
-            .show()
+        showEventPanel(
+            title = "📊 Итоги игры",
+            message = message,
+            primaryText = "🔄 Новая игра",
+            onPrimary = { finish() }
+        )
     }
     
     private fun handlePositionEvent() {
@@ -611,11 +606,12 @@ class GameActivity : AppCompatActivity() {
                 ${if (player.canEscapeRatRace()) "🎉 Готов к скоростной дорожке!" else "💪 Увеличивайте пассивный доход"}
             """.trimIndent()
             
-            AlertDialog.Builder(this)
-                .setTitle("📋 Финансовый отчёт")
-                .setMessage(message)
-                .setPositiveButton("OK", null)
-                .show()
+            showEventPanel(
+                title = "📋 Финансовый отчёт",
+                message = message,
+                primaryText = "OK",
+                onPrimary = { /* close panel */ }
+            )
         }
     }
     
