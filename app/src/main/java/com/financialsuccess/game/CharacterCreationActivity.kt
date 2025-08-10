@@ -34,6 +34,7 @@ import android.text.TextUtils
 import java.text.NumberFormat
 import java.util.Locale
 import android.speech.tts.TextToSpeech
+import android.widget.Toast
 
 class CharacterCreationActivity : AppCompatActivity() {
     // Переменные для сбора данных персонажа
@@ -64,6 +65,8 @@ class CharacterCreationActivity : AppCompatActivity() {
     }
 
     private fun money(n: Int): String = "${currencyFormat.format(n)} ₽"
+
+    private val REQUEST_CODE_VOICE_INPUT: Int = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -410,7 +413,18 @@ class CharacterCreationActivity : AppCompatActivity() {
         etName.setHintTextColor(resources.getColor(R.color.text_secondary, null))
         val btnVoice = view.findViewById<Button>(R.id.btnVoiceInput)
         btnVoice.setOnClickListener {
-            btnVoice.visibility = View.GONE
+            try {
+                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+                intent.putExtra(
+                    RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                )
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ru-RU")
+                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Назовите своё имя")
+                startActivityForResult(intent, REQUEST_CODE_VOICE_INPUT)
+            } catch (e: ActivityNotFoundException) {
+                Toast.makeText(this, "Распознавание речи недоступно", Toast.LENGTH_SHORT).show()
+            }
         }
         val btnNext = view.findViewById<Button>(R.id.btnNextName)
         btnNext.setOnClickListener {
@@ -570,6 +584,19 @@ class CharacterCreationActivity : AppCompatActivity() {
             intent.putExtra("player", player)
             startActivity(intent)
             finish()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_VOICE_INPUT && resultCode == RESULT_OK) {
+            val results: ArrayList<String>? = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            val recognized: String? = results?.firstOrNull()
+            if (!recognized.isNullOrBlank()) {
+                val etName = stepContainer.findViewById<android.widget.EditText>(R.id.etPlayerName)
+                etName.setText(recognized)
+                etName.setSelection(recognized.length)
+            }
         }
     }
 
