@@ -785,8 +785,8 @@ class GameActivity : AppCompatActivity() {
         val gestureDetector = android.view.GestureDetector(this, object : android.view.GestureDetector.SimpleOnGestureListener() {
             private val SWIPE_THRESHOLD = 100
             private val SWIPE_VELOCITY_THRESHOLD = 100
-            override fun onFling(e1: android.view.MotionEvent?, e2: android.view.MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
-                val diffX = (e2?.x ?: 0f) - (e1?.x ?: 0f)
+            override fun onFling(e1: android.view.MotionEvent, e2: android.view.MotionEvent, velocityX: Float, velocityY: Float): Boolean {
+                val diffX = e2.x - e1.x
                 if (kotlin.math.abs(diffX) > SWIPE_THRESHOLD && kotlin.math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
                     if (diffX < 0) binding.btnNextMonth.performClick() else binding.btnPrevMonth.performClick()
                     return true
