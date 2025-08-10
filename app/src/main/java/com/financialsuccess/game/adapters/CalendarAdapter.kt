@@ -55,12 +55,31 @@ class CalendarAdapter(
         holder.colorStrip.setBackgroundResource(colorRes)
 
         val card = holder.itemView as MaterialCardView
-        val strokePxBase = (holder.itemView.resources.displayMetrics.density * 1).toInt().coerceAtLeast(1)
-        val strokePxWeek = (holder.itemView.resources.displayMetrics.density * 2).toInt().coerceAtLeast(2)
-        card.strokeWidth = if (rowIndex == 1) strokePxWeek else strokePxBase
-        card.strokeColor = holder.itemView.context.getColor(if (isToday) R.color.primary_variant else R.color.primary_color)
-        card.cardElevation = if (isSelected) 8f else 4f
-        card.animate().scaleX(if (isSelected) 1.04f else 1f).scaleY(if (isSelected) 1.04f else 1f).setDuration(120).start()
+        val density = holder.itemView.resources.displayMetrics.density
+        val strokeBase = (density * 1).toInt().coerceAtLeast(1)
+        val strokeWeek = (density * 3).toInt().coerceAtLeast(2)
+        val strokeSelected = (density * 4).toInt().coerceAtLeast(3)
+        val accentWeekColor = holder.itemView.context.getColor(R.color.secondary_variant)
+        val normalStrokeColor = holder.itemView.context.getColor(R.color.primary_color)
+        val todayStrokeColor = holder.itemView.context.getColor(R.color.primary_variant)
+
+        card.strokeWidth = when {
+            isSelected -> strokeSelected
+            rowIndex == 1 -> strokeWeek
+            else -> strokeBase
+        }
+        card.strokeColor = when {
+            isSelected -> todayStrokeColor
+            rowIndex == 1 -> accentWeekColor
+            isToday -> todayStrokeColor
+            else -> normalStrokeColor
+        }
+        card.cardElevation = if (isSelected) 10f else 4f
+        if (isSelected) {
+            card.animate().scaleX(1.06f).scaleY(1.06f).setDuration(120).start()
+        } else {
+            card.animate().scaleX(1f).scaleY(1f).setDuration(120).start()
+        }
 
         holder.icon.isVisible = !isToday
         holder.dayNumber.isVisible = true

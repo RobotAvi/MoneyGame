@@ -220,8 +220,9 @@ class GameActivity : AppCompatActivity() {
     private fun setupCalendarRecycler() {
         binding.recyclerCalendar.layoutManager = GridLayoutManager(this, 7)
         val player = currentGameState?.player ?: return
-        if (calendarAnchor == null) calendarAnchor = realPlayerCalendar(player)
         val currentCal = realPlayerCalendar(player)
+        // Делаем текущую неделю второй строкой
+        calendarAnchor = (currentCal.clone() as Calendar)
         val dates = buildFourWeekWindow(calendarAnchor!!)
 
         val iconProvider: (Calendar) -> Int = { date ->
@@ -271,7 +272,7 @@ class GameActivity : AppCompatActivity() {
             postDelayed({ animate().alpha(0f).setDuration(150).withEndAction { visibility = View.GONE } }, 600)
         }
         playSfx(sfxDice)
-        showMessage("Выпало $diceValue")
+        // Hint removed to reduce noise
         handleSlowTrackDice(diceValue)
     }
     
@@ -470,15 +471,18 @@ class GameActivity : AppCompatActivity() {
                 bonusName
             )
             updateUI()
-            showMessage("🎁 $bonusName: +${currencyFormat.format(bonusAmount)}")
+            showEventPanel(
+                title = "🎁 Бонус",
+                message = "$bonusName: +${currencyFormat.format(bonusAmount)}",
+                primaryText = "OK",
+                onPrimary = { /* close */ }
+            )
         }
     }
     
     private fun showMarketEvent() {
         val event = GameDataManager.getRandomEvent()
         
-        // Риски проверяются в processMonthlyOperations, здесь просто показываем событие
-
         // Обработка специальных событий
         when {
             event.contains("ребёнок") -> {
@@ -530,8 +534,13 @@ class GameActivity : AppCompatActivity() {
             }
         }
         
-        showMessage("🎲 $event")
-    }
+        showEventPanel(
+            title = "🎲 Событие",
+            message = event,
+            primaryText = "OK",
+            onPrimary = { /* close */ }
+        )
+    
     
     private fun showDoodadEvent() {
         val expenses = listOf(1000, 2000, 3000, 4000, 5000)
@@ -546,13 +555,19 @@ class GameActivity : AppCompatActivity() {
         )
         
         currentGameState?.player?.let { player ->
+            val reason = expenseReasons.random()
             player.logExpense(
                 FinancialCategory.EMERGENCY,
                 expense,
-                expenseReasons.random()
+                reason
             )
             updateUI()
-            showMessage("Непредвиденные расходы: ${currencyFormat.format(expense)}")
+            showEventPanel(
+                title = "💥 Непредвиденные расходы",
+                message = "$reason: -${currencyFormat.format(expense)}",
+                primaryText = "OK",
+                onPrimary = { /* close */ }
+            )
         }
     }
     
