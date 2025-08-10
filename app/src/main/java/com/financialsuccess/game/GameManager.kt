@@ -44,12 +44,14 @@ class GameManager {
     }
     
     fun startNewGameWithPlayer(player: Player): GameState {
-        // Зарплата уже установлена правильно в конструкторе Player
+        // Обновляем зарплату с учетом образования/опыта/навыков
+        player.updateSalaryWithBonuses()
         
-        // Обновляем расходы с учетом семьи
+        // Обновляем доходы и расходы с учетом семьи и новых параметров
+        player.updateTotalIncome()
         player.updateTotalExpenses()
         
-        // Добавляем начальную запись в журнал
+        // Добавляем начальную запись в журнал (фиксируем стартовый кэш)
         player.logIncome(
             FinancialCategory.GAME_START,
             player.cash,

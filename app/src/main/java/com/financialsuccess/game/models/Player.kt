@@ -36,6 +36,8 @@ data class Player(
     var currentDayOfMonth: Int = 1, // Текущий день месяца (игровой)
     var name: String? = null, // Имя персонажа
     var startDateMillis: Long? = null, // Дата начала игры (в миллисекундах)
+    var birthDateMillis: Long? = null, // Дата рождения (в миллисекундах)
+    var nextAgeChangeMillis: Long? = null, // Следующая дата увеличения возраста в игре (ДР)
     
     // === НОВЫЕ ПОЛЯ ДЛЯ РАСШИРЕННОЙ ПЕРСОНАЛИЗАЦИИ ===
     
@@ -145,16 +147,15 @@ data class Player(
     
     fun addAsset(asset: Asset) {
         if (cash >= asset.downPayment) {
-            cash -= asset.downPayment
             assets.add(asset)
-            
-            // Логируем покупку актива
+
+            // Логируем и списываем первоначальный взнос (единоразовый расход)
             logExpense(
                 FinancialCategory.ASSET_PURCHASE,
                 asset.downPayment,
                 "Покупка актива: ${asset.name} (денежный поток: +${asset.cashFlow}/мес)"
             )
-            
+
             // Добавляем долг, если есть кредит
             if (asset.loan > 0) {
                 val liability = Liability(
@@ -164,7 +165,7 @@ data class Player(
                 )
                 liabilities.add(liability)
             }
-            
+
             updateTotalIncome()
             updateTotalExpenses()
         }
