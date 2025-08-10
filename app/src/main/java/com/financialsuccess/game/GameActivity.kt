@@ -21,6 +21,8 @@ import android.media.MediaPlayer
 import android.content.Intent
 import androidx.recyclerview.widget.GridLayoutManager
 import com.financialsuccess.game.adapters.CalendarAdapter
+import android.media.SoundPool
+import android.media.AudioAttributes
 
 class GameActivity : AppCompatActivity() {
     
@@ -32,11 +34,18 @@ class GameActivity : AppCompatActivity() {
     
     private var lastDiceValue: Int? = null
     private var gamePlayer: MediaPlayer? = null
+
+    private var soundPool: SoundPool? = null
+    private var sfxDice: Int = 0
+    private var sfxOk: Int = 0
+    private var sfxError: Int = 0
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        
+        initSounds()
         
         binding.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
@@ -58,7 +67,23 @@ class GameActivity : AppCompatActivity() {
 
     override fun onResume() { super.onResume(); if (gamePlayer == null) { gamePlayer = MediaPlayer.create(this, R.raw.game).apply { isLooping = true; setVolume(0.4f, 0.4f); start() } } else { gamePlayer?.start() } }
     override fun onPause() { super.onPause(); gamePlayer?.pause() }
-    override fun onDestroy() { super.onDestroy(); gamePlayer?.release(); gamePlayer = null }
+    override fun onDestroy() { super.onDestroy(); gamePlayer?.release(); gamePlayer = null; soundPool?.release(); soundPool = null }
+
+    private fun initSounds() {
+        val attrs = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_GAME)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+        soundPool = SoundPool.Builder()
+            .setMaxStreams(4)
+            .setAudioAttributes(attrs)
+            .build()
+        sfxDice = soundPool?.load(this, R.raw.dice_drop, 1) ?: 0
+        sfxOk = soundPool?.load(this, R.raw.ok, 1) ?: 0
+        sfxError = soundPool?.load(this, R.raw.error, 1) ?: 0
+    }
+
+    private fun playSfx(id: Int) { if (id != 0) soundPool?.play(id, 0.8f, 0.8f, 1, 0, 1f) }
     
     private fun initGame() {
         val player: Player? = if (Build.VERSION.SDK_INT >= 33) {
@@ -237,6 +262,7 @@ class GameActivity : AppCompatActivity() {
         val player = currentGameState?.player ?: return
         val diceRes = when (diceValue) { 1 -> R.drawable.dice_1; 2 -> R.drawable.dice_2; 3 -> R.drawable.dice_3; 4 -> R.drawable.dice_4; 5 -> R.drawable.dice_5; 6 -> R.drawable.dice_6; else -> R.drawable.dice_1 }
         binding.btnDice.setImageResource(diceRes)
+        playSfx(sfxDice)
         showMessage("Выпало $diceValue")
         handleSlowTrackDice(diceValue)
     }
@@ -692,8 +718,10 @@ class GameActivity : AppCompatActivity() {
                         )
                         
                         updateUI()
+                        playSfx(sfxOk)
                         showMessage("✅ Инвестиция оформлена!")
                     } else {
+                        playSfx(sfxError)
                         showMessage("❌ Недостаточно средств")
                     }
                 }
