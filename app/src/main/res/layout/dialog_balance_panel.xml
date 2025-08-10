@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        app:cardElevation="4dp"
+        app:cardCornerRadius="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tvBalanceCash"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Наличные: 0₽"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tvBalanceSalary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Зарплата: 0₽"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/tvBalancePassive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Пассивный доход: 0₽"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/tvBalanceExpenses"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Расходы: 0₽"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/tvBalanceCashFlow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Денежный поток: 0₽" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOpenJournal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Журнал операций"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_marginEnd="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOpenAnalytics"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Статистика"
+            style="@style/Widget.Material3.Button" />
+    </LinearLayout>
+</LinearLayout>

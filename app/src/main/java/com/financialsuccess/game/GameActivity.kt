@@ -46,14 +46,8 @@ class GameActivity : AppCompatActivity() {
                     Toast.makeText(this, "Игра сохранена!", Toast.LENGTH_SHORT).show()
                     true
                 }
-                R.id.menu_rules -> {
-                    startActivity(android.content.Intent(this, RulesActivity::class.java))
-                    true
-                }
-                R.id.menu_exit -> {
-                    finish()
-                    true
-                }
+                R.id.menu_rules -> { startActivity(android.content.Intent(this, RulesActivity::class.java)); true }
+                R.id.menu_exit -> { finish(); true }
                 else -> false
             }
         }
@@ -90,12 +84,41 @@ class GameActivity : AppCompatActivity() {
     
     private fun setupUI() {
         binding.btnDice.setOnClickListener { rollDiceAndMove() }
-        binding.btnChart.setOnClickListener { showFinancialStatement() }
+        binding.btnChart.setOnClickListener { showBalancePanel() }
         binding.btnUp.setOnClickListener { currentGameState?.player?.let { it.salary += 5000; it.updateTotalIncome(); showMessage("Повышение: +${currencyFormat.format(5000)} к зарплате"); updateUI() } }
         binding.btnDown.setOnClickListener { currentGameState?.player?.let { it.salary = (it.salary - 5000).coerceAtLeast(0); it.updateTotalIncome(); showMessage("Понижение: -${currencyFormat.format(5000)} к зарплате"); updateUI() } }
         binding.tvAge.setOnClickListener { showAgeStatistics() }
         setupAssetsRecyclerView()
         setupCalendarRecycler()
+    }
+    
+    private fun showBalancePanel() {
+        val player = currentGameState?.player ?: return
+        val dialogView = layoutInflater.inflate(R.layout.dialog_balance_panel, null)
+        val tvCash = dialogView.findViewById<android.widget.TextView>(R.id.tvBalanceCash)
+        val tvSalary = dialogView.findViewById<android.widget.TextView>(R.id.tvBalanceSalary)
+        val tvPassive = dialogView.findViewById<android.widget.TextView>(R.id.tvBalancePassive)
+        val tvExpenses = dialogView.findViewById<android.widget.TextView>(R.id.tvBalanceExpenses)
+        val tvCashFlow = dialogView.findViewById<android.widget.TextView>(R.id.tvBalanceCashFlow)
+        val btnJournal = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnOpenJournal)
+        val btnAnalytics = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnOpenAnalytics)
+
+        tvCash.text = "Наличные: ${currencyFormat.format(player.cash)}"
+        tvSalary.text = "Зарплата: ${currencyFormat.format(player.salary)}"
+        tvPassive.text = "Пассивный доход: ${currencyFormat.format(player.passiveIncome)}"
+        tvExpenses.text = "Расходы: ${currencyFormat.format(player.totalExpenses)}"
+        tvCashFlow.text = "Денежный поток: ${currencyFormat.format(player.getCashFlow())}"
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("📊 Финансовая сводка")
+            .setView(dialogView)
+            .setPositiveButton("Закрыть", null)
+            .create()
+
+        btnJournal.setOnClickListener { dialog.dismiss(); showFinancialJournal() }
+        btnAnalytics.setOnClickListener { dialog.dismiss(); showJournalAnalytics() }
+
+        dialog.show()
     }
     
     private fun setupCalendarRecycler() {
