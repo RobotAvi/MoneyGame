@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="12dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFilterAssets"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Активы"
+            android:textSize="15sp"
+            style="@style/Widget.Material3.Button.OutlinedButton" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFilterInvestments"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Инвестиции"
+            android:textSize="15sp"
+            style="@style/Widget.Material3.Button" />
+    </LinearLayout>
+
+    <!-- Список активов/инвестиций -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewMarket"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:nestedScrollingEnabled="true" />
+
+    <!-- Кнопка обновления -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnRefreshMarket"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Обновить"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_marginTop="12dp" />
+</LinearLayout>

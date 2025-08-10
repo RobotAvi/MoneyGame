@@ -99,11 +99,35 @@ class GameActivity : AppCompatActivity() {
             .setItems(options) { _, which ->
                 when (which) {
                     0 -> showAssets()
-                    1 -> showMarket()
+                    1 -> showMarketDialog()
                     2 -> showPortfolio()
                 }
             }
             .show()
+    }
+
+    private fun showMarketDialog() {
+        val view = layoutInflater.inflate(R.layout.dialog_market, null)
+        val recycler = view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerViewMarket)
+        val btnAssets = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnFilterAssets)
+        val btnInvest = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnFilterInvestments)
+        val btnRefresh = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnRefreshMarket)
+        recycler.layoutManager = LinearLayoutManager(this)
+
+        fun loadAssets() { showAvailableAssets() }
+        fun loadInvestments() { showAvailableInvestments() }
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("🏪 Финансовый рынок")
+            .setView(view)
+            .setNegativeButton("Закрыть", null)
+            .create()
+
+        btnAssets.setOnClickListener { dialog.dismiss(); loadAssets() }
+        btnInvest.setOnClickListener { dialog.dismiss(); loadInvestments() }
+        btnRefresh.setOnClickListener { dialog.dismiss(); showMarket() }
+
+        dialog.show()
     }
     
     private fun showBalancePanel() {
