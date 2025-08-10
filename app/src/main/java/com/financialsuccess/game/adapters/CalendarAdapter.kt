@@ -7,21 +7,32 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.financialsuccess.game.R
 import com.google.android.material.card.MaterialCardView
 import java.util.Calendar
 
 class CalendarAdapter(
-    private val dates: List<Calendar>,
     private val currentDate: Calendar,
     private val iconProvider: (Calendar) -> Int,
     private val typeProvider: (Calendar) -> DayType,
     private var selectedDate: Calendar = currentDate,
     private val onDayClick: (Calendar) -> Unit = {}
-) : RecyclerView.Adapter<CalendarAdapter.DayViewHolder>() {
+) : ListAdapter<Calendar, CalendarAdapter.DayViewHolder>(Diff) {
 
     enum class DayType { WORK, GAME, FINANCE, REST }
+
+    object Diff : DiffUtil.ItemCallback<Calendar>() {
+        override fun areItemsTheSame(oldItem: Calendar, newItem: Calendar): Boolean {
+            return oldItem.get(Calendar.YEAR) == newItem.get(Calendar.YEAR) &&
+                    oldItem.get(Calendar.DAY_OF_YEAR) == newItem.get(Calendar.DAY_OF_YEAR)
+        }
+        override fun areContentsTheSame(oldItem: Calendar, newItem: Calendar): Boolean {
+            return true
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DayViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -37,7 +48,7 @@ class CalendarAdapter(
     }
 
     override fun onBindViewHolder(holder: DayViewHolder, position: Int) {
-        val date = dates[position]
+        val date = getItem(position)
         val dayNumber = date.get(Calendar.DAY_OF_MONTH)
 
         holder.dayNumber.text = dayNumber.toString()
@@ -79,8 +90,15 @@ class CalendarAdapter(
         card.cardElevation = if (isSelected) 10f else 4f
         if (isSelected) {
             card.animate().scaleX(1.06f).scaleY(1.06f).setDuration(120).start()
+            holder.lottie?.apply {
+                visibility = View.VISIBLE
+                progress = 0f
+                playAnimation()
+                postDelayed({ visibility = View.GONE }, 400)
+            }
         } else {
             card.animate().scaleX(1f).scaleY(1f).setDuration(120).start()
+            holder.lottie?.visibility = View.GONE
         }
 
         holder.icon.isVisible = !isToday
@@ -92,14 +110,12 @@ class CalendarAdapter(
         card.setOnClickListener {
             val prev = selectedDate
             selectedDate = date
-            val prevIndex = dates.indexOfFirst { sameDay(it, prev) }
+            val prevIndex = currentList.indexOfFirst { sameDay(it, prev) }
             if (prevIndex >= 0) notifyItemChanged(prevIndex)
             notifyItemChanged(position)
             onDayClick(date)
         }
     }
-
-    override fun getItemCount(): Int = dates.size
 
     private fun sameDay(a: Calendar, b: Calendar): Boolean {
         return a.get(Calendar.YEAR) == b.get(Calendar.YEAR) &&
@@ -112,5 +128,6 @@ class CalendarAdapter(
         val dayNumber: TextView = view.findViewById(R.id.tvDayNumber)
         val playerToken: ImageView = view.findViewById(R.id.ivPlayerToken)
         val colorStrip: View = view.findViewById(R.id.vColorStrip)
+        val lottie: com.airbnb.lottie.LottieAnimationView? = view.findViewById(R.id.lottieDaySelect)
     }
 }

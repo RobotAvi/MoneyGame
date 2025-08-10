@@ -266,8 +266,7 @@ class GameActivity : AppCompatActivity() {
                 else -> com.financialsuccess.game.adapters.CalendarAdapter.DayType.REST
             }
         }
-        binding.recyclerCalendar.adapter = com.financialsuccess.game.adapters.CalendarAdapter(
-            dates = dates,
+        val adapter = com.financialsuccess.game.adapters.CalendarAdapter(
             currentDate = currentCal,
             iconProvider = iconProvider,
             typeProvider = typeProvider,
@@ -276,6 +275,8 @@ class GameActivity : AppCompatActivity() {
             calendarAnchor = (date.clone() as Calendar)
             updateMonthLabel()
         }
+        binding.recyclerCalendar.adapter = adapter
+        adapter.submitList(dates)
         updateMonthLabel()
         setupCalendarNav()
     }
