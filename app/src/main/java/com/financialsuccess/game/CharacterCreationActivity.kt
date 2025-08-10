@@ -486,9 +486,11 @@ class CharacterCreationActivity : AppCompatActivity() {
             val dobCal = Calendar.getInstance().apply { timeInMillis = birthDateMillis!! }
 
             var years = startCal.get(Calendar.YEAR) - dobCal.get(Calendar.YEAR)
-            val startMonthDay = Pair(startCal.get(Calendar.MONTH), startCal.get(Calendar.DAY_OF_MONTH))
-            val birthMonthDay = Pair(dobCal.get(Calendar.MONTH), dobCal.get(Calendar.DAY_OF_MONTH))
-            if (startMonthDay < birthMonthDay) years--
+            val startMonth = startCal.get(Calendar.MONTH)
+            val startDay = startCal.get(Calendar.DAY_OF_MONTH)
+            val birthMonth = dobCal.get(Calendar.MONTH)
+            val birthDay = dobCal.get(Calendar.DAY_OF_MONTH)
+            if (startMonth < birthMonth || (startMonth == birthMonth && startDay < birthDay)) years--
             playerAge = years.coerceAtLeast(0)
 
             // Next birthday from start date
