@@ -2,18 +2,20 @@
 
 Добро пожаловать в документацию проекта! Здесь собраны все технические документы, спецификации и руководства.
 
+> Источник правды по релизам и изменениям: корневые файлы `CHANGELOG.md` и `RELEASE_NOTES.md`.
+
 ## 📋 Содержание
 
 ### 🎮 Дизайн и архитектура
-- **[GAME_DESIGN_SUMMARY.md](GAME_DESIGN_SUMMARY.md)** - Краткое резюме дизайна игры
+- **[GAME_DESIGN_OVERVIEW.md](GAME_DESIGN_OVERVIEW.md)** - Краткое резюме дизайна игры
 - **[GAME_DESIGN_SPECIFICATION.md](GAME_DESIGN_SPECIFICATION.md)** - Полная спецификация дизайна
-- **[SCREEN_LAYOUTS.md](SCREEN_LAYOUTS.md)** - Схемы макетов экранов
-- **[architecture copy.md](architecture%20copy.md)** - Архитектурная документация
-- **[goal_architecture.md](goal_architecture.md)** - Целевая архитектура
+- **[SCREEN_LAYOUTS_GUIDE.md](SCREEN_LAYOUTS_GUIDE.md)** - Схемы макетов экранов
+- **[ARCHITECTURE_CURRENT.md](ARCHITECTURE_CURRENT.md)** - Текущая архитектура приложения
+- **[ARCHITECTURE_GOALS.md](ARCHITECTURE_GOALS.md)** - Целевая архитектура (планы)
 
 ### 💰 Финансовые функции
-- **[FINANCIAL_FEATURES_README.md](FINANCIAL_FEATURES_README.md)** - Финансовая функциональность
-- **[FINANCIAL_JOURNAL.md](FINANCIAL_JOURNAL.md)** - Финансовый журнал
+- **[FINANCIAL_FEATURES.md](FINANCIAL_FEATURES.md)** - Финансовая функциональность
+- **[FINANCIAL_JOURNAL.md](FINANCIAL_JOURNAL.md)** - Финансовый журнал и экспорт
 - **[CHANGES_SUMMARY.md](CHANGES_SUMMARY.md)** - Резюме изменений
 
 ### 🛠️ Разработка и тестирование
@@ -42,9 +44,9 @@
 
 ### 📊 Статус и релизы
 - **[STATUS_BADGES.md](STATUS_BADGES.md)** - Статусные бейджи
-- **[CHANGELOG.md](CHANGELOG.md)** - Журнал изменений
+- **[CHANGELOG.md](CHANGELOG.md)** - Журнал изменений (копия)
 - **[RELEASE_v1.4.0.md](RELEASE_v1.4.0.md)** - Релиз v1.4.0
-- **[RELEASE_NOTES.md](RELEASE_NOTES.md)** - Заметки о релизах
+- **[RELEASE_NOTES.md](RELEASE_NOTES.md)** - Архивная ссылка (см. корневой файл)
 
 ### 🔄 Миграция и изменения
 - **[MIGRATION_GUIDE.md](MIGRATION_GUIDE.md)** - Руководство по миграции
@@ -66,7 +68,7 @@
 ## 🔍 Быстрый поиск
 
 ### По категориям:
-- **🎮 Игровой дизайн**: GAME_DESIGN_*, SCREEN_LAYOUTS
+- **🎮 Игровой дизайн**: GAME_DESIGN_*, SCREEN_LAYOUTS*
 - **💰 Финансы**: FINANCIAL_*
 - **🛠️ Разработка**: CONTRIBUTING, TESTING, USECASES
 - **🚀 CI/CD**: GITHUB_ACTIONS_*, PERFORMANCE_OPTIMIZATION
@@ -75,7 +77,7 @@
 - **📊 Статус**: STATUS_*, CHANGELOG, RELEASE_*
 
 ### По ключевым словам:
-- **Архитектура**: architecture, goal_architecture
+- **Архитектура**: ARCHITECTURE_*
 - **Тестирование**: TESTING, test_demo
 - **Производительность**: PERFORMANCE_OPTIMIZATION
 - **Эмулятор**: EMULATOR_*, README_EMULATOR_*
