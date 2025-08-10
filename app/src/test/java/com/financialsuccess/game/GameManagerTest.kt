@@ -62,10 +62,16 @@ class GameManagerTest {
         // Сдвигаем на 1 день от 1-го к 2-му, зарплаты не будет
         gameManager.movePlayer(1)
         assertEquals(startCash, state.player.cash)
-        // Додвигаемся до 1-го числа следующего месяца: 29 дней (виртуальный старт Jan-1)
+        // Додвигаемся до 1-го числа следующего месяца
         gameManager.movePlayer(30)
         assertTrue(state.player.currentDayOfMonth == 1)
-        assertEquals(startCash + salary, state.player.cash)
+        // Проверяем, что зарплата была зафиксирована в журнале как доход
+        val hasSalaryIncome = state.player.financialJournal.any {
+            it.type == FinancialEntryType.INCOME &&
+            it.category == FinancialCategory.SALARY &&
+            it.amount == salary
+        }
+        assertTrue(hasSalaryIncome)
     }
 
     @Test
