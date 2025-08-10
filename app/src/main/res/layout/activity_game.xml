@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_color">
+    android:background="@drawable/bg_app_gradient">
 
     <!-- Верхняя панель -->
     <com.google.android.material.appbar.AppBarLayout
@@ -282,14 +282,44 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Календарь (4 недели)"
-                        android:textStyle="bold"
-                        android:textColor="@color/text_primary"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="8dp" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
+
+                        <ImageButton
+                            android:id="@+id/btnPrevMonth"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/btn_circle_bg"
+                            android:contentDescription="Предыдущий месяц"
+                            android:src="@android:drawable/ic_media_previous"
+                            android:tint="@color/primary_color"
+                            app:tint="@color/primary_color" />
+
+                        <TextView
+                            android:id="@+id/tvMonthLabel"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Январь 2024"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary"
+                            android:textSize="18sp" />
+
+                        <ImageButton
+                            android:id="@+id/btnNextMonth"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/btn_circle_bg"
+                            android:contentDescription="Следующий месяц"
+                            android:src="@android:drawable/ic_media_next"
+                            android:tint="@color/primary_color"
+                            app:tint="@color/primary_color" />
+                    </LinearLayout>
 
                     <LinearLayout
                         android:id="@+id/weekdays_header"
@@ -374,6 +404,70 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:nestedScrollingEnabled="false" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Панель событий под календарём -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_event_panel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="8dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/primary_color">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tvEventTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Событие"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:textColor="@color/text_primary" />
+
+                    <TextView
+                        android:id="@+id/tvEventMessage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Описание события"
+                        android:textSize="14sp"
+                        android:textColor="@color/text_secondary" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="end"
+                        android:layout_marginTop="12dp">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnEventSecondary"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Отмена"
+                            style="@style/Widget.App.Button" />
+
+                        <Space
+                            android:layout_width="12dp"
+                            android:layout_height="1dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnEventPrimary"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Действие"
+                            style="@style/Widget.App.Button" />
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

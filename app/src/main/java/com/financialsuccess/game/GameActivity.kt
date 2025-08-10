@@ -190,11 +190,15 @@ class GameActivity : AppCompatActivity() {
         return dates
     }
 
+    private var calendarAnchor: Calendar? = null
+
     private fun setupCalendarRecycler() {
         binding.recyclerCalendar.layoutManager = GridLayoutManager(this, 7)
         val player = currentGameState?.player ?: return
+        if (calendarAnchor == null) calendarAnchor = realPlayerCalendar(player)
         val currentCal = realPlayerCalendar(player)
-        val dates = buildFourWeekWindow(currentCal)
+        val dates = buildFourWeekWindow(calendarAnchor!!)
+
         val iconProvider: (Calendar) -> Int = { date ->
             when (date.get(Calendar.DAY_OF_MONTH) % 6) {
                 0 -> R.drawable.ic_finance_logo
@@ -205,7 +209,26 @@ class GameActivity : AppCompatActivity() {
                 else -> R.drawable.ic_teacher
             }
         }
-        binding.recyclerCalendar.adapter = CalendarAdapter(dates, currentCal, iconProvider)
+        val typeProvider: (Calendar) -> com.financialsuccess.game.adapters.CalendarAdapter.DayType = { date ->
+            when (date.get(Calendar.DAY_OF_MONTH) % 4) {
+                0 -> com.financialsuccess.game.adapters.CalendarAdapter.DayType.FINANCE
+                1 -> com.financialsuccess.game.adapters.CalendarAdapter.DayType.WORK
+                2 -> com.financialsuccess.game.adapters.CalendarAdapter.DayType.GAME
+                else -> com.financialsuccess.game.adapters.CalendarAdapter.DayType.REST
+            }
+        }
+        binding.recyclerCalendar.adapter = com.financialsuccess.game.adapters.CalendarAdapter(
+            dates = dates,
+            currentDate = currentCal,
+            iconProvider = iconProvider,
+            typeProvider = typeProvider,
+            selectedDate = calendarAnchor!!
+        ) { date ->
+            calendarAnchor = (date.clone() as Calendar)
+            updateMonthLabel()
+        }
+        updateMonthLabel()
+        setupCalendarNav()
     }
     
     private fun rollDiceAndMove() {
@@ -743,6 +766,37 @@ class GameActivity : AppCompatActivity() {
     
     // Метод updateMonthProgressBar удален - monthProgressBar больше не используется
     
+    private fun updateMonthLabel() {
+        val anchor = calendarAnchor ?: return
+        val monthName = android.text.format.DateFormat.format("MMMM yyyy", anchor).toString().replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString() }
+        binding.tvMonthLabel.text = monthName
+    }
+
+    private fun setupCalendarNav() {
+        binding.btnPrevMonth.setOnClickListener {
+            calendarAnchor = (calendarAnchor ?: Calendar.getInstance()).apply { add(Calendar.MONTH, -1) }
+            setupCalendarRecycler()
+        }
+        binding.btnNextMonth.setOnClickListener {
+            calendarAnchor = (calendarAnchor ?: Calendar.getInstance()).apply { add(Calendar.MONTH, 1) }
+            setupCalendarRecycler()
+        }
+        // Simple swipe gestures
+        val gestureDetector = android.view.GestureDetector(this, object : android.view.GestureDetector.SimpleOnGestureListener() {
+            private val SWIPE_THRESHOLD = 100
+            private val SWIPE_VELOCITY_THRESHOLD = 100
+            override fun onFling(e1: android.view.MotionEvent?, e2: android.view.MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
+                val diffX = (e2?.x ?: 0f) - (e1?.x ?: 0f)
+                if (kotlin.math.abs(diffX) > SWIPE_THRESHOLD && kotlin.math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                    if (diffX < 0) binding.btnNextMonth.performClick() else binding.btnPrevMonth.performClick()
+                    return true
+                }
+                return false
+            }
+        })
+        binding.recyclerCalendar.setOnTouchListener { _, event -> gestureDetector.onTouchEvent(event) }
+    }
+
     private fun showEscapeRatRaceDialog() {
         val player = currentGameState?.player ?: return
         
@@ -1207,6 +1261,50 @@ class GameActivity : AppCompatActivity() {
             "🎯\n${player.dream.name}"
         } else {
             "🔄\nКруг"
+        }
+    }
+    
+    private fun showEventPanel(
+        title: String,
+        message: String,
+        primaryText: String? = null,
+        onPrimary: (() -> Unit)? = null,
+        secondaryText: String? = null,
+        onSecondary: (() -> Unit)? = null
+    ) {
+        binding.tvEventTitle.text = title
+        binding.tvEventMessage.text = message
+        val primaryBtn = binding.btnEventPrimary
+        val secondaryBtn = binding.btnEventSecondary
+
+        if (primaryText != null && onPrimary != null) {
+            primaryBtn.visibility = View.VISIBLE
+            primaryBtn.text = primaryText
+            primaryBtn.setOnClickListener { onPrimary.invoke(); hideEventPanel() }
+        } else {
+            primaryBtn.visibility = View.GONE
+        }
+
+        if (secondaryText != null && onSecondary != null) {
+            secondaryBtn.visibility = View.VISIBLE
+            secondaryBtn.text = secondaryText
+            secondaryBtn.setOnClickListener { onSecondary.invoke(); hideEventPanel() }
+        } else {
+            secondaryBtn.visibility = View.GONE
+        }
+
+        if (binding.cardEventPanel.visibility != View.VISIBLE) {
+            binding.cardEventPanel.alpha = 0f
+            binding.cardEventPanel.visibility = View.VISIBLE
+            binding.cardEventPanel.animate().alpha(1f).setDuration(200).start()
+        }
+    }
+
+    private fun hideEventPanel() {
+        if (binding.cardEventPanel.visibility == View.VISIBLE) {
+            binding.cardEventPanel.animate().alpha(0f).setDuration(150).withEndAction {
+                binding.cardEventPanel.visibility = View.GONE
+            }.start()
         }
     }
     

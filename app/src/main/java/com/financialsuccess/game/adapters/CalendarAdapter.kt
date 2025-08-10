@@ -9,13 +9,19 @@ import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.financialsuccess.game.R
+import com.google.android.material.card.MaterialCardView
 import java.util.Calendar
 
 class CalendarAdapter(
-    private val dates: List<Calendar>, // 28 подряд идущих дней (7*4): пред.неделя, текущая, 2 будущих
+    private val dates: List<Calendar>,
     private val currentDate: Calendar,
-    private val iconProvider: (Calendar) -> Int
+    private val iconProvider: (Calendar) -> Int,
+    private val typeProvider: (Calendar) -> DayType,
+    private var selectedDate: Calendar = currentDate,
+    private val onDayClick: (Calendar) -> Unit = {}
 ) : RecyclerView.Adapter<CalendarAdapter.DayViewHolder>() {
+
+    enum class DayType { WORK, GAME, FINANCE, REST }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DayViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -36,15 +42,35 @@ class CalendarAdapter(
         holder.icon.setImageResource(iconProvider(date))
 
         val isToday = sameDay(date, currentDate)
-        holder.container.background = if (isToday) {
-            holder.container.context.getDrawable(R.drawable.bg_day_today)
-        } else {
-            holder.container.context.getDrawable(R.drawable.bg_day_chip)
+        val isSelected = sameDay(date, selectedDate)
+
+        val type = typeProvider(date)
+        val colorRes = when (type) {
+            DayType.WORK -> R.color.info_color
+            DayType.GAME -> R.color.secondary_color
+            DayType.FINANCE -> R.color.asset_blue
+            DayType.REST -> R.color.success_color
         }
+        holder.colorStrip.setBackgroundResource(colorRes)
+
+        val card = holder.itemView as MaterialCardView
+        card.strokeColor = holder.itemView.context.getColor(if (isToday) R.color.primary_variant else R.color.primary_color)
+        card.cardElevation = if (isSelected) 8f else 4f
+        card.animate().scaleX(if (isSelected) 1.04f else 1f).scaleY(if (isSelected) 1.04f else 1f).setDuration(120).start()
 
         holder.icon.isVisible = true
         holder.dayNumber.isVisible = true
         holder.playerToken.isVisible = isToday
+
+        card.contentDescription = "День $dayNumber: ${type.name}"
+
+        card.setOnClickListener {
+            val prev = selectedDate
+            selectedDate = date
+            notifyItemChanged(dates.indexOfFirst { sameDay(it, prev) })
+            notifyItemChanged(position)
+            onDayClick(date)
+        }
     }
 
     override fun getItemCount(): Int = dates.size
@@ -55,9 +81,10 @@ class CalendarAdapter(
     }
 
     class DayViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val container: FrameLayout = view as FrameLayout
+        val container: FrameLayout = view.findViewById(R.id.dayContainer)
         val icon: ImageView = view.findViewById(R.id.ivDayIcon)
         val dayNumber: TextView = view.findViewById(R.id.tvDayNumber)
         val playerToken: ImageView = view.findViewById(R.id.ivPlayerToken)
+        val colorStrip: View = view.findViewById(R.id.vColorStrip)
     }
 }
