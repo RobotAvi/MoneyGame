@@ -52,12 +52,18 @@ class ProfessionSelectionActivity : AppCompatActivity() {
 
         // Date picker for start date
         val etStartDate = binding.etStartDate
+        
+        // Устанавливаем сегодняшнюю дату по умолчанию
+        val today = Calendar.getInstance()
+        selectedStartDate = today.timeInMillis
+        etStartDate.setText("%02d.%02d.%d".format(
+            today.get(Calendar.DAY_OF_MONTH), 
+            today.get(Calendar.MONTH) + 1, 
+            today.get(Calendar.YEAR)
+        ))
+        
         etStartDate.setOnClickListener {
             val calendar = Calendar.getInstance()
-            // Устанавливаем разумную дату по умолчанию (текущий год, май, 15-е число)
-            val currentYear = calendar.get(Calendar.YEAR)
-            calendar.set(currentYear, Calendar.MAY, 15)
-            
             val datePicker = DatePickerDialog(this,
                 { _, year, month, dayOfMonth ->
                     calendar.set(year, month, dayOfMonth)

@@ -6,7 +6,7 @@
             <solid android:color="@android:color/transparent" />
         </shape>
     </item>
-    
+
     <!-- Тень монеты -->
     <item android:gravity="top|start" android:top="3dp" android:left="3dp">
         <shape android:shape="oval">
@@ -14,7 +14,7 @@
             <solid android:color="#40000000" />
         </shape>
     </item>
-    
+
     <!-- Золотая монета с градиентом -->
     <item>
         <shape android:shape="oval">
@@ -30,7 +30,7 @@
             <stroke android:width="2dp" android:color="#B8860B" />
         </shape>
     </item>
-    
+
     <!-- Блики на монете -->
     <item android:gravity="top|start" android:top="8dp" android:left="8dp">
         <shape android:shape="oval">
@@ -44,29 +44,36 @@
                 android:endColor="#00FFFFFF" />
         </shape>
     </item>
-    
+
     <!-- Центральный круг для символа -->
     <item android:gravity="center">
         <shape android:shape="oval">
-            <size android:width="24dp" android:height="24dp" />
+            <size android:width="54dp" android:height="54dp" />
             <solid android:color="#B8860B" />
             <stroke android:width="1dp" android:color="#8B6914" />
         </shape>
     </item>
-    
-    <!-- Символ доллара (белый) -->
+
+    <!-- Знак доллара с двумя палками -->
     <item android:gravity="center">
-        <shape android:shape="oval">
-            <size android:width="18dp" android:height="18dp" />
-            <solid android:color="#FFFFFF" />
-        </shape>
-    </item>
-    
-    <!-- Точка в центре для имитации символа $ -->
-    <item android:gravity="center">
-        <shape android:shape="oval">
-            <size android:width="4dp" android:height="4dp" />
-            <solid android:color="#B8860B" />
-        </shape>
+        <vector android:width="44dp" android:height="44dp"
+            android:viewportWidth="24" android:viewportHeight="24">
+            <!-- Первая вертикальная линия -->
+            <path android:pathData="M10,1L10,23"
+                android:strokeColor="#FFD700"
+                android:strokeWidth="2"
+                android:strokeLineCap="round"/>
+            <!-- S-образная кривая -->
+            <path android:pathData="M17,5H9.5a3.5,3.5 0,0 0,0 7h5a3.5,3.5 0,0 1,0 7H6"
+                android:strokeColor="#FFD700"
+                android:strokeWidth="2"
+                android:strokeLineCap="round"
+                android:fillColor="@android:color/transparent"/>
+            <!-- Вторая вертикальная линия -->
+            <path android:pathData="M14,1L14,23"
+                android:strokeColor="#FFD700"
+                android:strokeWidth="2"
+                android:strokeLineCap="round"/>
+        </vector>
     </item>
 </layer-list>

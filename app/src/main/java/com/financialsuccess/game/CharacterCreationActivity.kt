@@ -422,6 +422,16 @@ class CharacterCreationActivity : AppCompatActivity() {
         val tvSelectedDate = view.findViewById<TextView>(R.id.tvSelectedDate)
         val btnPickDate = view.findViewById<Button>(R.id.btnPickDate)
         val btnNext = view.findViewById<Button>(R.id.btnNextDate)
+        
+        // Устанавливаем сегодняшнюю дату по умолчанию
+        val today = Calendar.getInstance()
+        selectedStartDate = today.timeInMillis
+        tvSelectedDate.text = "%02d.%02d.%d".format(
+            today.get(Calendar.DAY_OF_MONTH), 
+            today.get(Calendar.MONTH) + 1, 
+            today.get(Calendar.YEAR)
+        )
+        
         btnPickDate.setOnClickListener {
             val calendar = Calendar.getInstance()
             val datePicker = DatePickerDialog(this,
