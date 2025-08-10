@@ -43,6 +43,7 @@ class CalendarAdapter(
 
         val isToday = sameDay(date, currentDate)
         val isSelected = sameDay(date, selectedDate)
+        val rowIndex = position / 7
 
         val type = typeProvider(date)
         val colorRes = when (type) {
@@ -54,11 +55,14 @@ class CalendarAdapter(
         holder.colorStrip.setBackgroundResource(colorRes)
 
         val card = holder.itemView as MaterialCardView
+        val strokePxBase = (holder.itemView.resources.displayMetrics.density * 1).toInt().coerceAtLeast(1)
+        val strokePxWeek = (holder.itemView.resources.displayMetrics.density * 2).toInt().coerceAtLeast(2)
+        card.strokeWidth = if (rowIndex == 1) strokePxWeek else strokePxBase
         card.strokeColor = holder.itemView.context.getColor(if (isToday) R.color.primary_variant else R.color.primary_color)
         card.cardElevation = if (isSelected) 8f else 4f
         card.animate().scaleX(if (isSelected) 1.04f else 1f).scaleY(if (isSelected) 1.04f else 1f).setDuration(120).start()
 
-        holder.icon.isVisible = true
+        holder.icon.isVisible = !isToday
         holder.dayNumber.isVisible = true
         holder.playerToken.isVisible = isToday
 

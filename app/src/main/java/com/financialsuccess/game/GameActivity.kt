@@ -262,6 +262,14 @@ class GameActivity : AppCompatActivity() {
         val player = currentGameState?.player ?: return
         val diceRes = when (diceValue) { 1 -> R.drawable.dice_1; 2 -> R.drawable.dice_2; 3 -> R.drawable.dice_3; 4 -> R.drawable.dice_4; 5 -> R.drawable.dice_5; 6 -> R.drawable.dice_6; else -> R.drawable.dice_1 }
         binding.btnDice.setImageResource(diceRes)
+        // Lottie animation if available
+        binding.lottieDice.apply {
+            visibility = View.VISIBLE
+            alpha = 1f
+            progress = 0f
+            playAnimation()
+            postDelayed({ animate().alpha(0f).setDuration(150).withEndAction { visibility = View.GONE } }, 600)
+        }
         playSfx(sfxDice)
         showMessage("Выпало $diceValue")
         handleSlowTrackDice(diceValue)

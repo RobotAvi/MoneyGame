@@ -283,11 +283,14 @@
                     android:padding="16dp">
 
                     <LinearLayout
+                        android:id="@+id/calendar_header"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/bg_header_chip"
+                        android:padding="8dp">
 
                         <ImageButton
                             android:id="@+id/btnPrevMonth"
@@ -307,8 +310,12 @@
                             android:gravity="center"
                             android:text="Январь 2024"
                             android:textStyle="bold"
-                            android:textColor="@color/text_primary"
-                            android:textSize="18sp" />
+                            android:textColor="@color/black"
+                            android:shadowColor="#66000000"
+                            android:shadowDx="0"
+                            android:shadowDy="1"
+                            android:shadowRadius="2"
+                            android:textSize="20sp" />
 
                         <ImageButton
                             android:id="@+id/btnNextMonth"
@@ -577,6 +584,16 @@
             android:scaleType="centerCrop"
             android:contentDescription="Бросить кубик"
             android:padding="8dp" />
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/lottieDice"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            app:lottie_rawRes="@raw/dice_roll"
+            app:lottie_autoPlay="false"
+            app:lottie_loop="false" />
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
