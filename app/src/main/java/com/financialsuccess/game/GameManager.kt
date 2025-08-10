@@ -81,6 +81,34 @@ class GameManager {
             currentState.player.passMonth()
         }
 
+        // Проверяем наступление дня рождения относительно текущей симулированной даты
+        run {
+            val player = currentState.player
+            val startDateMillis = player.startDateMillis
+            val nextAgeChangeMillis = player.nextAgeChangeMillis
+            if (startDateMillis != null && nextAgeChangeMillis != null) {
+                val cal = java.util.Calendar.getInstance().apply {
+                    timeInMillis = startDateMillis
+                    // Переносим календарь на текущий игровой месяц и день
+                    add(java.util.Calendar.MONTH, player.monthsPlayed)
+                    set(java.util.Calendar.DAY_OF_MONTH, player.currentDayOfMonth)
+                    set(java.util.Calendar.HOUR_OF_DAY, 0)
+                    set(java.util.Calendar.MINUTE, 0)
+                    set(java.util.Calendar.SECOND, 0)
+                    set(java.util.Calendar.MILLISECOND, 0)
+                }
+                if (cal.timeInMillis >= nextAgeChangeMillis) {
+                    player.age += 1
+                    // Сдвигаем следующую дату увеличения возраста ровно на 1 год вперёд
+                    val nb = java.util.Calendar.getInstance().apply {
+                        timeInMillis = nextAgeChangeMillis
+                        add(java.util.Calendar.YEAR, 1)
+                    }
+                    player.nextAgeChangeMillis = nb.timeInMillis
+                }
+            }
+        }
+
         // Если прошли полный круг (вернулись на старт)
         val passedStart = (oldPosition + steps) >= 24
         if (passedStart) {

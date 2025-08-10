@@ -182,9 +182,11 @@ data class Player(
     fun passMonth() {
         monthsPlayed++
         currentDayOfMonth = 1
-        // Каждые 12 месяцев увеличиваем возраст на 1 год
-        if (monthsPlayed % 12 == 0) {
-            age++
+        // Увеличиваем возраст по упрощенному правилу только если нет данных о дате рождения
+        if (birthDateMillis == null || nextAgeChangeMillis == null) {
+            if (monthsPlayed % 12 == 0) {
+                age++
+            }
         }
     }
     
