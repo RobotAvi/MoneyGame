@@ -781,20 +781,22 @@ class GameActivity : AppCompatActivity() {
             calendarAnchor = (calendarAnchor ?: Calendar.getInstance()).apply { add(Calendar.MONTH, 1) }
             setupCalendarRecycler()
         }
-        // Simple swipe gestures
-        val gestureDetector = android.view.GestureDetector(this, object : android.view.GestureDetector.SimpleOnGestureListener() {
-            private val SWIPE_THRESHOLD = 100
-            private val SWIPE_VELOCITY_THRESHOLD = 100
-            override fun onFling(e1: android.view.MotionEvent, e2: android.view.MotionEvent, velocityX: Float, velocityY: Float): Boolean {
-                val diffX = e2.x - e1.x
-                if (kotlin.math.abs(diffX) > SWIPE_THRESHOLD && kotlin.math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
-                    if (diffX < 0) binding.btnNextMonth.performClick() else binding.btnPrevMonth.performClick()
-                    return true
+        // Simple swipe gestures without GestureDetector (for broad compatibility)
+        var startX = 0f
+        val swipeThreshold = 100
+        binding.recyclerCalendar.setOnTouchListener { _, event ->
+            when (event.action) {
+                android.view.MotionEvent.ACTION_DOWN -> { startX = event.x; true }
+                android.view.MotionEvent.ACTION_UP -> {
+                    val diffX = event.x - startX
+                    if (kotlin.math.abs(diffX) > swipeThreshold) {
+                        if (diffX < 0) binding.btnNextMonth.performClick() else binding.btnPrevMonth.performClick()
+                        true
+                    } else false
                 }
-                return false
+                else -> false
             }
-        })
-        binding.recyclerCalendar.setOnTouchListener { _, event -> gestureDetector.onTouchEvent(event) }
+        }
     }
 
     private fun showEscapeRatRaceDialog() {
