@@ -90,7 +90,8 @@ class CalendarAdapter(
         card.setOnClickListener {
             val prev = selectedDate
             selectedDate = date
-            notifyItemChanged(dates.indexOfFirst { sameDay(it, prev) })
+            val prevIndex = dates.indexOfFirst { sameDay(it, prev) }
+            if (prevIndex >= 0) notifyItemChanged(prevIndex)
             notifyItemChanged(position)
             onDayClick(date)
         }

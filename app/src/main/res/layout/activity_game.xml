@@ -575,25 +575,29 @@
             android:layout_width="16dp"
             android:layout_height="1dp" />
 
-        <ImageButton
-            android:id="@+id/btnDice"
+        <FrameLayout
             android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:background="@drawable/btn_circle_bg"
-            android:src="@drawable/dice_1"
-            android:scaleType="centerCrop"
-            android:contentDescription="Бросить кубик"
-            android:padding="8dp" />
+            android:layout_height="56dp">
 
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/lottieDice"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_gravity="center"
-            android:visibility="gone"
-            app:lottie_rawRes="@raw/dice_roll"
-            app:lottie_autoPlay="false"
-            app:lottie_loop="false" />
+            <ImageButton
+                android:id="@+id/btnDice"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/btn_circle_bg"
+                android:src="@drawable/dice_1"
+                android:scaleType="centerCrop"
+                android:contentDescription="Бросить кубик"
+                android:padding="8dp" />
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/lottieDice"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                app:lottie_rawRes="@raw/dice_roll"
+                app:lottie_autoPlay="false"
+                app:lottie_loop="false" />
+        </FrameLayout>
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

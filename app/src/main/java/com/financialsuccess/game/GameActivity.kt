@@ -842,11 +842,12 @@ class GameActivity : AppCompatActivity() {
         // Simple swipe gestures without GestureDetector (for broad compatibility)
         var startX = 0f
         val swipeThreshold = 100
-        binding.recyclerCalendar.setOnTouchListener { _, event ->
-            when (event.action) {
-                android.view.MotionEvent.ACTION_DOWN -> { startX = event.x; true }
-                android.view.MotionEvent.ACTION_UP -> {
+        binding.recyclerCalendar.setOnTouchListener { v, event ->
+            when (event.actionMasked) {
+                android.view.MotionEvent.ACTION_DOWN -> { startX = event.x; v.parent.requestDisallowInterceptTouchEvent(true); true }
+                android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
                     val diffX = event.x - startX
+                    v.parent.requestDisallowInterceptTouchEvent(false)
                     if (kotlin.math.abs(diffX) > swipeThreshold) {
                         if (diffX < 0) binding.btnNextMonth.performClick() else binding.btnPrevMonth.performClick()
                         true
