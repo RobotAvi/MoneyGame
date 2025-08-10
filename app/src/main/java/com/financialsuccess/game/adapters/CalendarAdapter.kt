@@ -12,39 +12,10 @@ import com.financialsuccess.game.R
 import java.util.Calendar
 
 class CalendarAdapter(
-    private val year: Int,
-    private val monthZeroBased: Int,
-    private val currentDayOfMonth: Int,
-    private val playerDayOfMonth: Int,
-    private val iconProvider: (day: Int) -> Int
+    private val dates: List<Calendar>, // 28 подряд идущих дней (7*4): пред.неделя, текущая, 2 будущих
+    private val currentDate: Calendar,
+    private val iconProvider: (Calendar) -> Int
 ) : RecyclerView.Adapter<CalendarAdapter.DayViewHolder>() {
-
-    private val daysInMonth: Int
-    private val leadingEmpty: Int
-    private val totalCells: Int
-
-    init {
-        val cal = Calendar.getInstance().apply {
-            set(Calendar.YEAR, year)
-            set(Calendar.MONTH, monthZeroBased)
-            set(Calendar.DAY_OF_MONTH, 1)
-        }
-        // Calendar.DAY_OF_WEEK: 1=Sunday ... 7=Saturday. We'll make Monday=0.
-        val dayOfWeek = cal.get(Calendar.DAY_OF_WEEK)
-        leadingEmpty = when (dayOfWeek) {
-            Calendar.MONDAY -> 0
-            Calendar.TUESDAY -> 1
-            Calendar.WEDNESDAY -> 2
-            Calendar.THURSDAY -> 3
-            Calendar.FRIDAY -> 4
-            Calendar.SATURDAY -> 5
-            Calendar.SUNDAY -> 6
-            else -> 0
-        }
-        daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
-        // 6 rows max to cover all months in a 7-column grid (42 cells)
-        totalCells = ((leadingEmpty + daysInMonth + 6) / 7) * 7
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DayViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -58,33 +29,30 @@ class CalendarAdapter(
     }
 
     override fun onBindViewHolder(holder: DayViewHolder, position: Int) {
-        val dayNumber = position - leadingEmpty + 1
-        if (dayNumber in 1..daysInMonth) {
-            holder.dayNumber.text = dayNumber.toString()
-            holder.icon.setImageResource(iconProvider(dayNumber))
-            holder.container.background = if (dayNumber == currentDayOfMonth) {
-                holder.container.context.getDrawable(R.drawable.bg_day_today)
-            } else {
-                holder.container.context.getDrawable(R.drawable.bg_day_chip)
-            }
-            holder.icon.isVisible = true
-            holder.dayNumber.isVisible = true
-            // Player token on his current day
-            holder.playerToken.isVisible = (dayNumber == playerDayOfMonth)
-            // Salary day on the 1st could be emphasized by using a special icon if desired
-            if (dayNumber == 1) {
-                // Optional: use income icon for day 1
-                // holder.icon.setImageResource(R.drawable.icon_income)
-            }
+        val date = dates[position]
+        val dayNumber = date.get(Calendar.DAY_OF_MONTH)
+
+        holder.dayNumber.text = dayNumber.toString()
+        holder.icon.setImageResource(iconProvider(date))
+
+        val isToday = sameDay(date, currentDate)
+        holder.container.background = if (isToday) {
+            holder.container.context.getDrawable(R.drawable.bg_day_today)
         } else {
-            holder.dayNumber.text = ""
-            holder.icon.isVisible = false
-            holder.playerToken.isVisible = false
-            holder.container.background = holder.container.context.getDrawable(R.drawable.bg_day_chip)
+            holder.container.context.getDrawable(R.drawable.bg_day_chip)
         }
+
+        holder.icon.isVisible = true
+        holder.dayNumber.isVisible = true
+        holder.playerToken.isVisible = isToday
     }
 
-    override fun getItemCount(): Int = totalCells
+    override fun getItemCount(): Int = dates.size
+
+    private fun sameDay(a: Calendar, b: Calendar): Boolean {
+        return a.get(Calendar.YEAR) == b.get(Calendar.YEAR) &&
+                a.get(Calendar.DAY_OF_YEAR) == b.get(Calendar.DAY_OF_YEAR)
+    }
 
     class DayViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val container: FrameLayout = view as FrameLayout

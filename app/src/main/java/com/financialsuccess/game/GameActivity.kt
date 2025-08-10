@@ -121,19 +121,42 @@ class GameActivity : AppCompatActivity() {
         dialog.show()
     }
     
+    private fun realPlayerCalendar(player: Player): Calendar = Calendar.getInstance().apply {
+        if (player.startDateMillis != null) timeInMillis = player.startDateMillis!! else set(2024, Calendar.JANUARY, 1)
+        add(Calendar.MONTH, player.monthsPlayed)
+        set(Calendar.DAY_OF_MONTH, player.currentDayOfMonth)
+        set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+    }
+
+    private fun weekStart(cal: Calendar): Calendar {
+        val c = cal.clone() as Calendar
+        // Понедельник — начало недели
+        while (c.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
+            c.add(Calendar.DAY_OF_MONTH, -1)
+        }
+        return c
+    }
+
+    private fun buildFourWeekWindow(anchor: Calendar): List<Calendar> {
+        val startOfCurrentWeek = weekStart(anchor)
+        val startOfPrevWeek = (startOfCurrentWeek.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, -7) }
+        val dates = mutableListOf<Calendar>()
+        // 4 недели: пред + текущая + 2 будущих
+        var cursor = startOfPrevWeek.clone() as Calendar
+        repeat(28) {
+            dates.add((cursor.clone() as Calendar))
+            cursor.add(Calendar.DAY_OF_MONTH, 1)
+        }
+        return dates
+    }
+
     private fun setupCalendarRecycler() {
         binding.recyclerCalendar.layoutManager = GridLayoutManager(this, 7)
         val player = currentGameState?.player ?: return
-        val cal = Calendar.getInstance().apply {
-            if (player.startDateMillis != null) timeInMillis = player.startDateMillis!! else set(2024, Calendar.JANUARY, 1)
-            add(Calendar.MONTH, player.monthsPlayed)
-        }
-        val year = cal.get(Calendar.YEAR)
-        val month = cal.get(Calendar.MONTH)
-        val today = player.currentDayOfMonth
-        val iconProvider: (Int) -> Int = { day ->
-            // Простейший провайдер иконок: разные типы по дню
-            when (day % 6) {
+        val currentCal = realPlayerCalendar(player)
+        val dates = buildFourWeekWindow(currentCal)
+        val iconProvider: (Calendar) -> Int = { date ->
+            when (date.get(Calendar.DAY_OF_MONTH) % 6) {
                 0 -> R.drawable.ic_finance_logo
                 1 -> R.drawable.ic_runner
                 2 -> R.drawable.ic_businessman_successful
@@ -142,13 +165,7 @@ class GameActivity : AppCompatActivity() {
                 else -> R.drawable.ic_teacher
             }
         }
-        binding.recyclerCalendar.adapter = CalendarAdapter(
-            year = year,
-            monthZeroBased = month,
-            currentDayOfMonth = today,
-            playerDayOfMonth = today,
-            iconProvider = iconProvider
-        )
+        binding.recyclerCalendar.adapter = CalendarAdapter(dates, currentCal, iconProvider)
     }
     
     private fun rollDiceAndMove() {
@@ -667,7 +684,7 @@ class GameActivity : AppCompatActivity() {
         val ageColor = when { player.isInCriticalAge() -> "🔴"; player.getYearsLeft() <= 10 -> "🟡"; else -> "🟢" }
         binding.tvAge.text = "$ageColor Возраст: ${player.age} лет (осталось: ${player.getYearsLeft()})"
         binding.tvHealthStatus.text = player.getHealthStatus()
-        // Реинициализация календаря (позиция токена и подсветка сегодня)
+        // Обновляем 4-недельное окно календаря; при переходе конца недели текущее сместится наверх
         setupCalendarRecycler()
         if (player.canEscapeRatRace() && !player.isInFastTrack) { showEscapeRatRaceDialog() }
     }
