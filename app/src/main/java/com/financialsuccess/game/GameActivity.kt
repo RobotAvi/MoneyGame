@@ -23,9 +23,13 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.financialsuccess.game.adapters.CalendarAdapter
 import android.media.SoundPool
 import android.media.AudioAttributes
+import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.collectLatest
 
 class GameActivity : AppCompatActivity() {
     
+    private val viewModel: GameViewModel by viewModels()
     private lateinit var binding: ActivityGameBinding
     private lateinit var gameManager: GameManager
     private var currentGameState: GameState? = null
@@ -58,6 +62,25 @@ class GameActivity : AppCompatActivity() {
                 R.id.menu_rules -> { startActivity(android.content.Intent(this, RulesActivity::class.java)); true }
                 R.id.menu_exit -> { finish(); true }
                 else -> false
+            }
+        }
+
+        // Observe event panel state from ViewModel
+        lifecycleScope.launchWhenStarted {
+            viewModel.eventPanel.collectLatest { state ->
+                if (state == null) {
+                    binding.eventMotion.transitionToStart()
+                } else {
+                    binding.tvEventTitle.text = state.title
+                    binding.tvEventMessage.text = state.message
+                    binding.btnEventPrimary.visibility = if (state.primaryText != null && state.onPrimary != null) View.VISIBLE else View.GONE
+                    binding.btnEventSecondary.visibility = if (state.secondaryText != null && state.onSecondary != null) View.VISIBLE else View.GONE
+                    state.primaryText?.let { binding.btnEventPrimary.text = it }
+                    state.secondaryText?.let { binding.btnEventSecondary.text = it }
+                    binding.btnEventPrimary.setOnClickListener { state.onPrimary?.invoke(); viewModel.hideEventPanel() }
+                    binding.btnEventSecondary.setOnClickListener { state.onSecondary?.invoke(); viewModel.hideEventPanel() }
+                    binding.eventMotion.transitionToEnd()
+                }
             }
         }
 
@@ -1334,41 +1357,19 @@ class GameActivity : AppCompatActivity() {
         secondaryText: String? = null,
         onSecondary: (() -> Unit)? = null
     ) {
-        binding.tvEventTitle.text = title
-        binding.tvEventMessage.text = message
-        val primaryBtn = binding.btnEventPrimary
-        val secondaryBtn = binding.btnEventSecondary
-
-        if (primaryText != null && onPrimary != null) {
-            primaryBtn.visibility = View.VISIBLE
-            primaryBtn.text = primaryText
-            primaryBtn.setOnClickListener { onPrimary.invoke(); hideEventPanel() }
-        } else {
-            primaryBtn.visibility = View.GONE
-        }
-
-        if (secondaryText != null && onSecondary != null) {
-            secondaryBtn.visibility = View.VISIBLE
-            secondaryBtn.text = secondaryText
-            secondaryBtn.setOnClickListener { onSecondary.invoke(); hideEventPanel() }
-        } else {
-            secondaryBtn.visibility = View.GONE
-        }
-
-        if (binding.cardEventPanel.visibility != View.VISIBLE) {
-            binding.cardEventPanel.alpha = 0f
-            binding.cardEventPanel.visibility = View.VISIBLE
-            binding.cardEventPanel.animate().alpha(1f).setDuration(200).start()
-        }
+        viewModel.showEventPanel(
+            EventPanelState(
+                title = title,
+                message = message,
+                primaryText = primaryText,
+                onPrimary = onPrimary,
+                secondaryText = secondaryText,
+                onSecondary = onSecondary
+            )
+        )
     }
 
-    private fun hideEventPanel() {
-        if (binding.cardEventPanel.visibility == View.VISIBLE) {
-            binding.cardEventPanel.animate().alpha(0f).setDuration(150).withEndAction {
-                binding.cardEventPanel.visibility = View.GONE
-            }.start()
-        }
-    }
+    private fun hideEventPanel() { viewModel.hideEventPanel() }
     
     private fun showAgeStatistics() {
         val player = currentGameState?.player ?: return
