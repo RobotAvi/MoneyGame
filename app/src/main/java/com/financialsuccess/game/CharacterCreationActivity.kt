@@ -225,6 +225,20 @@ class CharacterCreationActivity : AppCompatActivity() {
             showStep(currentStep)
             updateProgressDots()
         }
+        
+        // Добавляем обработчики для кнопок влево/вправо
+        btnLeft.setOnClickListener {
+            professionIndex = (professionIndex - 1 + professions.size) % professions.size
+            updateProfessionUI()
+            fadeOutSwipeHint(tvSwipeHint)
+        }
+        
+        btnRight.setOnClickListener {
+            professionIndex = (professionIndex + 1) % professions.size
+            updateProfessionUI()
+            fadeOutSwipeHint(tvSwipeHint)
+        }
+        
         btnChoose.textSize = 16f
         btnChoose.minWidth = 220
         stepContainer.addView(view)
