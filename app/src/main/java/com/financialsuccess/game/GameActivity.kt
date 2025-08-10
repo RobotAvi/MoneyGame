@@ -19,6 +19,8 @@ import androidx.core.content.ContextCompat
 import android.os.Build
 import android.media.MediaPlayer
 import android.content.Intent
+import androidx.recyclerview.widget.GridLayoutManager
+import com.financialsuccess.game.adapters.CalendarAdapter
 
 class GameActivity : AppCompatActivity() {
     
@@ -59,10 +61,6 @@ class GameActivity : AppCompatActivity() {
 
         initGame()
         setupUI()
-
-        // Убираем дублирующиеся кнопки - функционал уже есть в toolbar
-        // binding.btnSaveGame.setOnClickListener { ... }
-        // binding.btnExit.setOnClickListener { ... }
     }
 
     override fun onResume() {
@@ -90,7 +88,6 @@ class GameActivity : AppCompatActivity() {
     }
     
     private fun initGame() {
-        // Проверяем, передан ли готовый игрок (совместимость до Android 13)
         val player: Player? = if (Build.VERSION.SDK_INT >= 33) {
             intent.getParcelableExtra("player", Player::class.java)
         } else {
@@ -98,12 +95,10 @@ class GameActivity : AppCompatActivity() {
         }
         
         if (player != null) {
-            // Используем готового игрока
             gameManager = GameManager()
             currentGameState = gameManager.startNewGameWithPlayer(player)
             updateUI()
         } else {
-            // Старый способ - создаем игрока из отдельных параметров
             val profession: Profession? = if (Build.VERSION.SDK_INT >= 33) {
                 intent.getParcelableExtra("profession", Profession::class.java)
             } else {
@@ -135,56 +130,48 @@ class GameActivity : AppCompatActivity() {
     }
     
     private fun setupUI() {
-        // Клик по карточке с кубиком
-        binding.cardDice.setOnClickListener {
-            rollDiceAndMove()
-        }
-        
-        binding.btnFinancialStatement.setOnClickListener {
-            if (!binding.btnFinancialStatement.isEnabled) {
-                Toast.makeText(this, "Кнопка недоступна: отчеты доступны только после первого хода", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+        // Новые круглые кнопки снизу
+        binding.btnDice.setOnClickListener { rollDiceAndMove() }
+        binding.btnChart.setOnClickListener { showFinancialStatement() }
+        binding.btnUp.setOnClickListener {
+            currentGameState?.player?.let { player ->
+                val bonus = 5000
+                player.salary += bonus
+                player.updateTotalIncome()
+                showMessage("Повышение: +${currencyFormat.format(bonus)} к зарплате")
+                updateUI()
             }
-            showFinancialStatement()
         }
-        
-        binding.btnHealthStatus.setOnClickListener {
-            if (!binding.btnHealthStatus.isEnabled) {
-                Toast.makeText(this, "Кнопка недоступна: здоровье недоступно на этом этапе", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            showHealthStatus()
-        }
-        
-        // Нижняя панель навигации
-        binding.bottomNavigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_assets -> {
-                    showAssets()
-                    true
-                }
-                R.id.nav_market -> {
-                    showMarket()
-                    true
-                }
-                R.id.nav_journal -> {
-                    showFinancialJournal()
-                    true
-                }
-                R.id.nav_health -> {
-                    showHealthStatus()
-                    true
-                }
-                else -> false
+        binding.btnDown.setOnClickListener {
+            currentGameState?.player?.let { player ->
+                val cut = 5000
+                player.salary = (player.salary - cut).coerceAtLeast(0)
+                player.updateTotalIncome()
+                showMessage("Понижение: -${currencyFormat.format(cut)} к зарплате")
+                updateUI()
             }
         }
 
         // Делаем возраст кликабельным
-        binding.tvAge.setOnClickListener {
-            showAgeStatistics()
-        }
-        
+        binding.tvAge.setOnClickListener { showAgeStatistics() }
+
         setupAssetsRecyclerView()
+        setupCalendarRecycler()
+    }
+    
+    private fun setupCalendarRecycler() {
+        binding.recyclerCalendar.layoutManager = GridLayoutManager(this, 7)
+        val icons = listOf(
+            R.drawable.ic_runner,
+            R.drawable.ic_finance_logo,
+            R.drawable.ic_businessman_successful,
+            R.drawable.ic_car,
+            R.drawable.ic_engineer_successful,
+            R.drawable.ic_teacher
+        )
+        val days = MutableList(28) { index -> icons[index % icons.size] }
+        val todayIndex = (currentGameState?.player?.currentDayOfMonth ?: 1).let { (it - 1) % 28 }
+        binding.recyclerCalendar.adapter = CalendarAdapter(days, todayIndex)
     }
     
     private fun rollDiceAndMove() {
@@ -192,7 +179,7 @@ class GameActivity : AppCompatActivity() {
         lastDiceValue = diceValue
         val player = currentGameState?.player ?: return
         
-        // Устанавливаем соответствующее изображение кубика
+        // Устанавливаем соответствующее изображение на кнопку кубика
         val diceRes = when (diceValue) {
             1 -> R.drawable.dice_1
             2 -> R.drawable.dice_2
@@ -202,17 +189,10 @@ class GameActivity : AppCompatActivity() {
             6 -> R.drawable.dice_6
             else -> R.drawable.dice_1
         }
+        binding.btnDice.setImageResource(diceRes)
         
-        try {
-            val diceField = binding.javaClass.getDeclaredField("ivDice")
-            val imageView = diceField.get(binding) as? android.widget.ImageView
-            imageView?.setBackgroundResource(diceRes)
-        } catch (e: Exception) {
-            // Игнорируем если поле не найдено (совместимость)
-        }
-        
-        // Обновляем подпись
-        binding.tvDiceValue.text = "Выпало $diceValue. Бросай еще!"
+        // Показ сообщения о результате
+        showMessage("Выпало $diceValue")
         
         if (player.isInFastTrack) {
             handleFastTrackDice(diceValue)
@@ -225,24 +205,16 @@ class GameActivity : AppCompatActivity() {
         val player = currentGameState?.player ?: return
         val dreamNumber = player.dream.fastTrackNumber
         
-        binding.tvDiceValue.text = "Результат: $diceValue (Нужно: ${dreamNumber})"
-        
         if (diceValue == dreamNumber) {
-            // Попал на мечту!
             if (player.cash >= player.dream.cost) {
-                // Может купить мечту - победа!
                 showVictoryDialog()
             } else {
-                // Попал, но недостаточно денег
                 val needed = player.dream.cost - player.cash
-                showMessage("🎯 Вы попали на свою мечту!\n\nОднако вам не хватает ${currencyFormat.format(needed)} для её покупки.\n\nПродолжайте инвестировать и накапливать деньги!")
-                
-                // Получаем денежный поток за ход
+                showMessage("🎯 Вы попали на свою мечту! Не хватает ${currencyFormat.format(needed)}")
                 player.cash += player.getCashFlow()
                 updateUI()
             }
         } else {
-            // Не попал на мечту
             val messages = listOf(
                 "🎲 Мимо! Попробуйте ещё раз.",
                 "🎯 Почти попали! Следующий бросок будет удачнее.",
@@ -251,15 +223,10 @@ class GameActivity : AppCompatActivity() {
                 "🚀 Каждый бросок приближает к цели!"
             )
             showMessage(messages.random())
-            
-            // Получаем денежный поток за ход
             player.cash += player.getCashFlow()
-            
-            // Случайные события на скоростной дорожке
             if (diceValue == 1 || diceValue == 6) {
                 handleFastTrackEvent()
             }
-            
             updateUI()
         }
     }
@@ -267,14 +234,11 @@ class GameActivity : AppCompatActivity() {
     private fun handleSlowTrackDice(diceValue: Int) {
         val oldPosition = currentGameState?.player?.position ?: 0
         currentGameState = gameManager.movePlayer(diceValue)
-        
-        // Проверяем, завершился ли полный круг
         val passedStart = (oldPosition + diceValue) >= 24
         if (passedStart) {
             val salaryAmount = currentGameState?.player?.salary ?: 0
             showMessage("💼 Зарплата получена: ${currencyFormat.format(salaryAmount)}")
         }
-        
         updateUI()
         handlePositionEvent()
     }
@@ -737,94 +701,52 @@ class GameActivity : AppCompatActivity() {
     
     private fun updateUI() {
         val player = currentGameState?.player ?: return
-        // Проверяем смерть игрока
         if (!player.isAlive()) {
             showDeathDialog()
             return
         }
         
-        // Обновляем дату и статус игры
+        // Шапка
+        binding.tvPlayerName.text = player.name ?: "Игрок"
         updateCurrentDate(player)
-        // updateMonthProgressBar(player.currentDayOfMonth) // Убрано - monthProgressBar удален
         updateGameStatus(player)
         updatePlayerAvatar(player)
-        
-        // Обновляем профессию на экране
+
+        // Основные метрики
         binding.tvProfession.text = "Профессия: ${player.profession.name}"
-        
-        // Обновляем финансовую информацию
         binding.tvCash.text = "Наличные: ${currencyFormat.format(player.cash)}"
         binding.tvSalary.text = "Зарплата: ${currencyFormat.format(player.salary)}"
         binding.tvPassiveIncome.text = "Пассивный доход: ${currencyFormat.format(player.passiveIncome)}"
         binding.tvExpenses.text = "Расходы: ${currencyFormat.format(player.totalExpenses)}"
         binding.tvCashFlow.text = "Денежный поток: ${currencyFormat.format(player.getCashFlow())}"
-        
-        // Отображаем возраст с цветовой индикацией
+
         val ageColor = when {
-            player.isInCriticalAge() -> "🔴" // Критический возраст
-            player.getYearsLeft() <= 10 -> "🟡" // Предупреждение
-            else -> "🟢" // Нормальный возраст
+            player.isInCriticalAge() -> "🔴"
+            player.getYearsLeft() <= 10 -> "🟡"
+            else -> "🟢"
         }
-        
         binding.tvAge.text = "$ageColor Возраст: ${player.age} лет (осталось: ${player.getYearsLeft()})"
         binding.tvHealthStatus.text = player.getHealthStatus()
-        
-        // Обновляем визуализацию игрового поля
-        updateGameTrackVisualization(player)
-        
-        // Проверяем новые профессиональные риски
-        player.lastRiskActivated?.let { risk ->
-            showMessage("⚠️ ПРОФЕССИОНАЛЬНЫЙ РИСК!\n\n${risk.icon} ${risk.name}\n\n${risk.description}\n\nЭто повлияет на ваши доходы и расходы! Проверьте статус здоровья.")
-            player.lastRiskActivated = null // Сбрасываем флаг
+
+        // Обновить календарь (подсветка сегодняшнего дня)
+        (binding.recyclerCalendar.adapter as? CalendarAdapter)?.let { adapter ->
+            val todayIndex = (player.currentDayOfMonth - 1) % 28
+            binding.recyclerCalendar.adapter = CalendarAdapter((0 until 28).map { idx ->
+                val icons = listOf(
+                    R.drawable.ic_runner,
+                    R.drawable.ic_finance_logo,
+                    R.drawable.ic_businessman_successful,
+                    R.drawable.ic_car,
+                    R.drawable.ic_engineer_successful,
+                    R.drawable.ic_teacher
+                )
+                icons[idx % icons.size]
+            }, todayIndex)
+        } ?: run {
+            setupCalendarRecycler()
         }
-        
-        // Изменяем интерфейс в зависимости от трека
-        if (player.isInFastTrack) {
-            binding.tvTrackInfo.text = "🏎️ Мчитесь к мечте на роскошном автомобиле!"
-            
-            // Меняем фон на скоростную дорожку
-            try {
-                binding.root.setBackgroundResource(R.drawable.bg_main_screen)
-            } catch (e: Exception) {
-                // Игнорируем если фон не найден
-            }
-            
-        } else {
-            binding.tvTrackInfo.text = "🏃 Бегите от зарплаты до зарплаты"
-            
-            // Возвращаем обычный фон
-            try {
-                binding.root.setBackgroundResource(R.drawable.bg_game_field)
-            } catch (e: Exception) {
-                // Игнорируем если фон не найден
-            }
-        }
-        
-        // Обновляем список активов
-        val adapter = AssetAdapter(player.assets) { assetIndex ->
-            // Обработка продажи актива
-            AlertDialog.Builder(this)
-                .setTitle("Продать актив?")
-                .setMessage("Вы уверены, что хотите продать этот актив?")
-                .setPositiveButton("Продать") { _, _ ->
-                    val assetToSell = player.assets[assetIndex]
-                    if (gameManager.sellAsset(assetIndex)) {
-                        // Логируем продажу актива
-                        player.logIncome(
-                            FinancialCategory.ASSET_SALE,
-                            assetToSell.value,
-                            "Продажа актива: ${assetToSell.name}"
-                        )
-                        updateUI()
-                        showMessage("Актив продан!")
-                    }
-                }
-                .setNegativeButton("Отмена", null)
-                .show()
-        }
-        binding.recyclerViewAssets.adapter = adapter
-        
-        // Проверяем, может ли игрок выйти из крысиных бегов
+
+        // Проверка выхода из крыс. бегов
         if (player.canEscapeRatRace() && !player.isInFastTrack) {
             showEscapeRatRaceDialog()
         }
