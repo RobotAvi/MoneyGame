@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/background_color">
 
-    <!-- Верхняя панель в AppBarLayout, чтобы контент корректно скроллился под ней -->
+    <!-- Верхняя панель -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/headerPanel"
         android:layout_width="match_parent"
@@ -25,93 +25,103 @@
             app:navigationIconTint="@color/white"
             app:menu="@menu/game_actions" />
 
+        <!-- Шапка: слева аватар+имя/профессия/возраст, справа мечта (личный остров) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingTop="8dp">
+
+            <ImageView
+                android:id="@+id/iv_player_avatar"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:src="@drawable/player_token"
+                android:contentDescription="Аватар игрока"
+                android:background="@drawable/bg_avatar_circle"
+                android:layout_marginEnd="16dp" />
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-                <ImageView
-                    android:id="@+id/iv_player_avatar"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/player_token"
-                    android:contentDescription="Аватар игрока"
-                    android:background="@drawable/bg_avatar_circle"
-                    android:layout_marginEnd="16dp" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
+                <TextView
+                    android:id="@+id/tv_player_name"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:text="Имя игрока"
+                    android:textSize="18sp"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
 
-                    <TextView
-                        android:id="@+id/tv_profession"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Профессия: Учитель"
-                        android:textSize="14sp"
-                        android:textColor="@color/white"
-                        android:textStyle="bold"
-                        android:maxLines="1"
-                        android:ellipsize="end" />
+                <TextView
+                    android:id="@+id/tv_profession"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Профессия: Учитель"
+                    android:textSize="14sp"
+                    android:textColor="@color/white"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
 
-                    <TextView
-                        android:id="@+id/tv_current_date"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="1 Января 2024"
-                        android:textSize="18sp"
-                        android:textColor="@color/white"
-                        android:textStyle="bold"
-                        android:maxLines="1"
-                        android:ellipsize="end" />
-                </LinearLayout>
+                <TextView
+                    android:id="@+id/tv_age"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="25 лет"
+                    android:textColor="@color/white"
+                    android:textSize="14sp" />
 
+                <!-- Сохраняем текущую дату (используется в коде), меньшим шрифтом -->
+                <TextView
+                    android:id="@+id/tv_current_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1 Января 2024"
+                    android:textSize="12sp"
+                    android:textColor="@color/white"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/tv_age"
-                android:layout_width="359dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:background="@drawable/bg_age_chip"
-                android:clickable="true"
-                android:ellipsize="end"
-                android:focusable="true"
-                android:maxLines="1"
-                android:padding="8dp"
-                android:text="25 лет"
-                android:textColor="@color/text_primary"
-                android:textSize="16sp" />
-
-            <ProgressBar
-                android:id="@+id/progress_life"
-                style="@android:style/Widget.ProgressBar.Horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="8dp"
-                android:progress="60"
-                android:max="100"
-                android:progressTint="@color/success_color"
-                android:backgroundTint="@color/primary_color_light"
-                android:layout_marginTop="12dp" />
+            <ImageView
+                android:id="@+id/iv_dream_island"
+                android:layout_width="88dp"
+                android:layout_height="64dp"
+                android:src="@drawable/dream_island"
+                android:contentDescription="Мечта: личный остров"
+                android:scaleType="centerCrop"
+                android:background="@drawable/card_bg"
+                android:padding="4dp"
+                android:layout_marginStart="8dp" />
         </LinearLayout>
+
+        <!-- Индикатор жизни (оставлен) -->
+        <ProgressBar
+            android:id="@+id/progress_life"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:progress="60"
+            android:max="100"
+            android:progressTint="@color/success_color"
+            android:backgroundTint="@color/primary_color_light"
+            android:layout_marginTop="12dp" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Основной скроллируемый контент под шапкой -->
+    <!-- Контент -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/contentScroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:clipToPadding="false"
-        android:paddingBottom="72dp">
+        android:paddingBottom="88dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -133,7 +143,8 @@
                 app:cardElevation="8dp"
                 app:cardCornerRadius="20dp"
                 app:strokeColor="@color/primary_color"
-                app:strokeWidth="2dp">
+                app:strokeWidth="2dp"
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -204,13 +215,14 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Игровое поле -->
+            <!-- Игровое поле (скрыто, чтобы не мешать новому дизайну, но оставить id для кода) -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardElevation="4dp"
                 app:cardCornerRadius="16dp"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="16dp"
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -256,64 +268,117 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Карточка кубика -->
+            <!-- Календарь на 4 недели (7x4) -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_dice"
+                android:id="@+id/card_calendar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardElevation="4dp"
                 app:cardCornerRadius="16dp"
-                android:layout_marginBottom="16dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground">
+                android:layout_marginBottom="16dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="24dp"
-                    android:gravity="center">
-
-                    <ImageView
-                        android:id="@+id/iv_dice"
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:layout_marginBottom="8dp"
-                        android:background="@drawable/dice_1"
-                        android:contentDescription="Кубик" />
+                    android:padding="16dp">
 
                     <TextView
-                        android:id="@+id/tv_dice_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Брось кубик!"
-                        android:textSize="20sp"
+                        android:text="Календарь (4 недели)"
                         android:textStyle="bold"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp"
                         android:layout_marginBottom="8dp" />
+
+                    <LinearLayout
+                        android:id="@+id/weekdays_header"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Пн"
+                            android:textColor="@color/text_secondary"
+                            android:textStyle="bold"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Вт"
+                            android:textColor="@color/text_secondary"
+                            android:textStyle="bold"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Ср"
+                            android:textColor="@color/text_secondary"
+                            android:textStyle="bold"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Чт"
+                            android:textColor="@color/text_secondary"
+                            android:textStyle="bold"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Пт"
+                            android:textColor="@color/text_secondary"
+                            android:textStyle="bold"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Сб"
+                            android:textColor="@color/text_secondary"
+                            android:textStyle="bold"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Вс"
+                            android:textColor="@color/text_secondary"
+                            android:textStyle="bold"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerCalendar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Кнопки действий игрока -->
-            <LinearLayout
-                android:id="@+id/layoutGameActions"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:background="@color/white"
-                android:padding="8dp"
-                android:layout_marginBottom="16dp">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnFinancialStatement"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Фин. отчет" />
-            </LinearLayout>
-
-            <!-- Служебные/временные элементы (раньше были свободными детьми) -->
+            <!-- Скрытые служебные элементы -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnHealthStatus"
                 android:layout_width="wrap_content"
@@ -348,19 +413,77 @@
                 android:layout_height="wrap_content"
                 android:text="Финальная цель"
                 android:visibility="gone" />
-
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Единственный нижний навбар -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_navigation"
+    <!-- Нижняя панель из 4 круглых кнопок -->
+    <LinearLayout
+        android:id="@+id/bottom_actions"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="80dp"
         android:layout_gravity="bottom"
         android:background="@color/white"
-        app:itemIconTint="@color/primary_color"
-        app:itemTextColor="@color/primary_color"
-        app:menu="@menu/bottom_nav_menu" />
+        android:padding="12dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btnUp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/btn_circle_bg"
+            android:src="@android:drawable/arrow_up_float"
+            android:scaleType="center"
+            android:contentDescription="Повышение"
+            android:padding="12dp"
+            android:tint="@color/success_color"
+            app:tint="@color/success_color" />
+
+        <Space
+            android:layout_width="16dp"
+            android:layout_height="1dp" />
+
+        <ImageButton
+            android:id="@+id/btnDown"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/btn_circle_bg"
+            android:src="@android:drawable/arrow_down_float"
+            android:scaleType="center"
+            android:contentDescription="Понижение"
+            android:padding="12dp"
+            android:tint="@color/error_color"
+            app:tint="@color/error_color" />
+
+        <Space
+            android:layout_width="16dp"
+            android:layout_height="1dp" />
+
+        <ImageButton
+            android:id="@+id/btnChart"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/btn_circle_bg"
+            android:src="@drawable/ic_finance_logo"
+            android:scaleType="center"
+            android:contentDescription="Статистика и отчёты"
+            android:padding="12dp"
+            android:tint="@color/primary_color"
+            app:tint="@color/primary_color" />
+
+        <Space
+            android:layout_width="16dp"
+            android:layout_height="1dp" />
+
+        <ImageButton
+            android:id="@+id/btnDice"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/btn_circle_bg"
+            android:src="@drawable/dice_1"
+            android:scaleType="centerCrop"
+            android:contentDescription="Бросить кубик"
+            android:padding="8dp" />
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

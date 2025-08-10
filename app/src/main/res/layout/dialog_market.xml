@@ -1,76 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/background_color">
+    android:orientation="vertical"
+    android:padding="16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="0dp">
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="12dp">
 
-        <!-- Заголовок -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@color/primary_color"
-            android:padding="20dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Рынок инвестиций"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:textColor="@color/white" />
-        </LinearLayout>
-
-        <!-- Фильтры -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:padding="12dp">
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnFilterAssets"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Активы"
-                android:textSize="15sp"
-                style="@style/Widget.Material3.Button.OutlinedButton" />
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnFilterInvestments"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Инвестиции"
-                android:textSize="15sp"
-                style="@style/Widget.Material3.Button.OutlinedButton" />
-        </LinearLayout>
-
-        <!-- Список активов/инвестиций -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewMarket"
-            android:layout_width="match_parent"
-            android:layout_height="400dp"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginBottom="16dp"
-            android:scrollbars="vertical" />
-
-        <!-- Кнопка обновления -->
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnRefreshMarket"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="Обновить рынок"
-            android:textSize="16sp"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginBottom="24dp"
+            android:id="@+id/btnFilterAssets"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Активы"
+            android:textSize="15sp"
+            style="@style/Widget.Material3.Button.OutlinedButton" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFilterInvestments"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Инвестиции"
+            android:textSize="15sp"
             style="@style/Widget.Material3.Button" />
     </LinearLayout>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <!-- Список активов/инвестиций -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewMarket"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:nestedScrollingEnabled="true" />
+
+    <!-- Кнопка обновления -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnRefreshMarket"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Обновить"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_marginTop="12dp" />
+</LinearLayout>

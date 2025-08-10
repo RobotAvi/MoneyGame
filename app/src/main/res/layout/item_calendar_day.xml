@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:minWidth="44dp"
+    android:minHeight="44dp"
+    android:layout_margin="4dp"
+    android:background="@drawable/bg_day_chip">
+
+    <ImageView
+        android:id="@+id/ivDayIcon"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_gravity="center"
+        android:contentDescription="Иконка дня"
+        android:scaleType="centerInside"
+        android:tint="@color/primary_color"
+        android:src="@drawable/ic_runner" />
+
+    <ImageView
+        android:id="@+id/ivPlayerToken"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:contentDescription="Токен игрока"
+        android:src="@drawable/player_token" />
+
+    <TextView
+        android:id="@+id/tvDayNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:layout_margin="4dp"
+        android:text="1"
+        android:textSize="10sp"
+        android:textColor="@color/text_secondary" />
+</FrameLayout>

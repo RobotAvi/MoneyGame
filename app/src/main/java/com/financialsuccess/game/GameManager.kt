@@ -2,6 +2,7 @@ package com.financialsuccess.game
 
 import com.financialsuccess.game.models.*
 import kotlin.random.Random
+import java.util.Calendar
 
 class GameManager {
     
@@ -44,90 +45,72 @@ class GameManager {
     }
     
     fun startNewGameWithPlayer(player: Player): GameState {
-        // Обновляем зарплату с учетом образования/опыта/навыков
         player.updateSalaryWithBonuses()
-        
-        // Обновляем доходы и расходы с учетом семьи и новых параметров
         player.updateTotalIncome()
         player.updateTotalExpenses()
-        
-        // Добавляем начальную запись в журнал (фиксируем стартовый кэш)
         player.logIncome(
             FinancialCategory.GAME_START,
             player.cash,
             "Начальный капитал для старта игры"
         )
-        
         gameState = GameState(player = player)
         return gameState!!
     }
     
-    fun rollDice(): Int {
-        val diceValue = Random.nextInt(1, 7)
-        return diceValue
-    }
+    fun rollDice(): Int = Random.nextInt(1, 7)
     
     fun movePlayer(steps: Int): GameState {
         val currentState = gameState ?: throw IllegalStateException("Game not started")
-        val oldPosition = currentState.player.position
-        val newPosition = (oldPosition + steps) % 24
+        val player = currentState.player
 
-        // Увеличиваем игровой день на выпавшее число
-        currentState.player.currentDayOfMonth += steps
-
-        // Если переполнили месяц — переходим к новому месяцу, переносим остаток
-        while (currentState.player.currentDayOfMonth > Player.DAYS_IN_MONTH) {
-            currentState.player.currentDayOfMonth -= Player.DAYS_IN_MONTH
-            currentState.player.passMonth()
+        // Текущая реальная игровая дата
+        val cal = Calendar.getInstance().apply {
+            if (player.startDateMillis != null) timeInMillis = player.startDateMillis!! else set(2024, Calendar.JANUARY, 1)
+            add(Calendar.MONTH, player.monthsPlayed)
+            set(Calendar.DAY_OF_MONTH, player.currentDayOfMonth)
+            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
         }
 
-        // Проверяем наступление дня рождения относительно текущей симулированной даты
-        run {
-            val player = currentState.player
-            val startDateMillis = player.startDateMillis
-            val nextAgeChangeMillis = player.nextAgeChangeMillis
-            if (startDateMillis != null && nextAgeChangeMillis != null) {
-                val cal = java.util.Calendar.getInstance().apply {
-                    timeInMillis = startDateMillis
-                    // Переносим календарь на текущий игровой месяц и день
-                    add(java.util.Calendar.MONTH, player.monthsPlayed)
-                    set(java.util.Calendar.DAY_OF_MONTH, player.currentDayOfMonth)
-                    set(java.util.Calendar.HOUR_OF_DAY, 0)
-                    set(java.util.Calendar.MINUTE, 0)
-                    set(java.util.Calendar.SECOND, 0)
-                    set(java.util.Calendar.MILLISECOND, 0)
-                }
-                if (cal.timeInMillis >= nextAgeChangeMillis) {
-                    player.age += 1
-                    // Сдвигаем следующую дату увеличения возраста ровно на 1 год вперёд
-                    val nb = java.util.Calendar.getInstance().apply {
-                        timeInMillis = nextAgeChangeMillis
-                        add(java.util.Calendar.YEAR, 1)
-                    }
-                    player.nextAgeChangeMillis = nb.timeInMillis
-                }
+        // Двигаем по дням
+        repeat(steps) {
+            cal.add(Calendar.DAY_OF_MONTH, 1)
+            player.currentDayOfMonth = cal.get(Calendar.DAY_OF_MONTH)
+            // Новый месяц
+            if (player.currentDayOfMonth == 1) {
+                // Зарплата 1-го числа
+                player.cash += player.salary
+                player.logIncome(
+                    FinancialCategory.SALARY,
+                    player.salary,
+                    "Ежемесячная зарплата по профессии ${player.profession.name}"
+                )
+                // Ежемесячные операции
+                player.processMonthlyOperations()
+                // Счётчик месяцев
+                player.monthsPlayed++
             }
         }
 
-        // Если прошли полный круг (вернулись на старт)
-        val passedStart = (oldPosition + steps) >= 24
-        if (passedStart) {
-            // Сначала выплачиваем зарплату при завершении полного круга
-            currentState.player.cash += currentState.player.salary
-            currentState.player.logIncome(
-                com.financialsuccess.game.models.FinancialCategory.SALARY,
-                currentState.player.salary,
-                "Ежемесячная зарплата по профессии ${currentState.player.profession.name}"
-            )
-            // Затем списываем ежемесячные расходы
-            currentState.player.processMonthlyOperations()
+        // Позиция теперь не критична для логики, но оставим инкремент для совместимости
+        player.position = (player.position + steps) % 30
+
+        // День рождения по точной дате
+        val startDateMillis = player.startDateMillis
+        val nextAgeChangeMillis = player.nextAgeChangeMillis
+        if (startDateMillis != null && nextAgeChangeMillis != null) {
+            if (cal.timeInMillis >= nextAgeChangeMillis) {
+                player.age += 1
+                val nb = Calendar.getInstance().apply {
+                    timeInMillis = nextAgeChangeMillis
+                    add(Calendar.YEAR, 1)
+                }
+                player.nextAgeChangeMillis = nb.timeInMillis
+            }
         }
 
-        currentState.player.position = newPosition
-
-        // Проверяем, может ли игрок выйти из крысиных бегов
-        if (!currentState.player.isInFastTrack && currentState.player.canEscapeRatRace()) {
-            currentState.player.isInFastTrack = true
+        // Выход из крысиных бегов
+        if (!player.isInFastTrack && player.canEscapeRatRace()) {
+            player.isInFastTrack = true
         }
 
         return currentState
@@ -135,9 +118,7 @@ class GameManager {
     
     fun buyAsset(asset: Asset): Boolean {
         val player = gameState?.player ?: return false
-        
         if (player.cash >= asset.downPayment) {
-            // Просто вызываем addAsset - вся логика списания там
             player.addAsset(asset)
             return true
         }
@@ -146,7 +127,6 @@ class GameManager {
     
     fun sellAsset(assetIndex: Int): Boolean {
         val player = gameState?.player ?: return false
-        
         if (assetIndex in 0 until player.assets.size) {
             val asset = player.assets.removeAt(assetIndex)
             player.cash += asset.value
@@ -158,7 +138,6 @@ class GameManager {
     
     fun payOffLiability(liabilityIndex: Int): Boolean {
         val player = gameState?.player ?: return false
-        
         if (liabilityIndex in 0 until player.liabilities.size) {
             val liability = player.liabilities[liabilityIndex]
             if (player.cash >= liability.amount) {
@@ -172,14 +151,6 @@ class GameManager {
     }
     
     fun getCurrentState(): GameState = gameState ?: throw IllegalStateException("Game not started")
-    
-    fun saveGameState(): String {
-        // Здесь можно добавить сериализацию в JSON для сохранения игры
-        return ""
-    }
-    
-    fun loadGameState(): GameState? {
-        // Здесь можно добавить десериализацию из JSON для загрузки игры
-        return null
-    }
+    fun saveGameState(): String = ""
+    fun loadGameState(): GameState? = null
 }
