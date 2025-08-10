@@ -4,16 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.financialsuccess.game.databinding.ActivityMainBinding
-import android.widget.Button
-import com.financialsuccess.game.data.GameSaveManager
-import com.financialsuccess.game.models.Player
-import android.view.View
-import com.financialsuccess.game.GameActivity
-import android.widget.TextView
-import com.financialsuccess.game.BuildConfig
 import android.media.MediaPlayer
 import com.financialsuccess.game.animation.MainScreenAnimationManager
 import android.util.Log
+import com.financialsuccess.game.BuildConfig
 
 /**
  * Главная активность приложения - стартовый экран
@@ -24,17 +18,9 @@ import android.util.Log
  * - Навигация к другим экранам приложения
  * - Управление жизненным циклом анимации
  * 
- * Анимация:
- * - Автоматический запуск при создании активности
- * - Перезапуск при возвращении на экран
- * - Остановка при уходе с экрана
- * - Сброс к начальному состоянию
- * 
  * Меню:
- * - "Новая игра" → CharacterCreationActivity
- * - "Создать персонажа" → CharacterCreationActivity  
+ * - "Начать" → CharacterCreationActivity
  * - "Правила" → RulesActivity
- * - "Выход" → закрытие приложения
  */
 class MainActivity : AppCompatActivity() {
     
@@ -90,41 +76,15 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun setupButtons() {
-        // Кнопка "Новая игра"
-        binding.newGameButton.setOnClickListener {
-            startNewGame()
-        }
-        
-        // Кнопка "Создать персонажа"
-        binding.createCharacterButton.setOnClickListener {
-            createCharacter()
-        }
+        // Кнопка "Начать"
+        binding.newGameButton.setOnClickListener { startNewGame() }
         
         // Кнопка "Правила"
-        binding.rulesButton.setOnClickListener {
-            showRules()
-        }
-        
-        // Кнопка "Выход"
-        binding.exitButton.setOnClickListener {
-            exitGame()
-        }
+        binding.rulesButton.setOnClickListener { showRules() }
     }
     
     private fun updateVersionInfo() {
         binding.versionInfo.text = "Версия ${BuildConfig.VERSION_NAME}"
-    }
-    
-    private fun checkExistingSave() {
-        // Убираем проверку сохранения, так как кнопка "Продолжить" больше не нужна
-        // val existingPlayer = GameSaveManager.loadPlayer(this)
-        // if (existingPlayer != null) {
-        //     binding.continueButton.visibility = View.VISIBLE
-        //     binding.continueButton.isEnabled = true
-        // } else {
-        //     binding.continueButton.visibility = View.GONE
-        //     binding.continueButton.isEnabled = false
-        // }
     }
     
     private fun startMainScreenAnimation() {
@@ -171,16 +131,6 @@ class MainActivity : AppCompatActivity() {
         finish()
     }
     
-    private fun createCharacter() {
-        // Остановка анимации
-        animationManager.stopAnimation()
-        
-        // Запуск создания персонажа
-        val intent = Intent(this, CharacterCreationActivity::class.java)
-        startActivity(intent)
-        finish()
-    }
-    
     private fun showRules() {
         // Остановка анимации
         animationManager.stopAnimation()
@@ -188,14 +138,6 @@ class MainActivity : AppCompatActivity() {
         // Запуск активности с правилами
         val intent = Intent(this, RulesActivity::class.java)
         startActivity(intent)
-    }
-    
-    private fun exitGame() {
-        // Остановка анимации
-        animationManager.stopAnimation()
-        
-        // Выход из приложения
-        finish()
     }
     
     override fun onResume() {
@@ -238,14 +180,12 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "onDestroy called")
-
-        // Освобождаем ресурсы
         try {
-            animationManager.stopAnimation()
+            menuPlayer?.stop()
             menuPlayer?.release()
             menuPlayer = null
         } catch (e: Exception) {
-            Log.e(TAG, "Error in onDestroy: ${e.message}")
+            Log.e(TAG, "Error releasing music: ${e.message}")
         }
     }
 }
