@@ -184,6 +184,9 @@ class GameActivity : AppCompatActivity() {
             showAgeStatistics()
         }
         
+        // Подсказки по формулам для чисел на экране
+        setupNumberHints()
+        
         setupAssetsRecyclerView()
     }
     
@@ -1342,6 +1345,125 @@ class GameActivity : AppCompatActivity() {
             .setNeutralButton("💪 Здоровье") { _, _ ->
                 showHealthStatus()
             }
+            .show()
+    }
+
+    private fun setupNumberHints() {
+        // Наличные
+        binding.tvCash.setOnClickListener {
+            val player = currentGameState?.player ?: return@setOnClickListener
+            val message = """
+                Как считается сумма «Наличные»:
+                
+                Наличные — это текущий баланс денег на руках.
+                Общая логика: Наличные = Наличные прошлого хода + Зарплата + Пассивный доход − Расходы ± События/сделки
+                
+                Сейчас:
+                • Зарплата: ${currencyFormat.format(player.salary)}
+                • Пассивный доход: ${currencyFormat.format(player.passiveIncome)}
+                • Расходы: ${currencyFormat.format(player.totalExpenses)}
+                • Денежный поток (в месяц): ${currencyFormat.format(player.getCashFlow())}
+            """.trimIndent()
+            showHintDialog("Наличные", message)
+        }
+
+        // Зарплата
+        binding.tvSalary.setOnClickListener {
+            val player = currentGameState?.player ?: return@setOnClickListener
+            val baseSalary = player.profession.salary
+            val reduction = (baseSalary - player.salary).coerceAtLeast(0)
+            val message = """
+                Как считается «Зарплата»:
+                
+                Базовая зарплата по профессии: ${currencyFormat.format(baseSalary)}
+                Минус снижения из-за рисков/событий: ${currencyFormat.format(reduction)}
+                
+                Текущая зарплата = ${currencyFormat.format(player.salary)}
+            """.trimIndent()
+            showHintDialog("Зарплата", message)
+        }
+
+        // Пассивный доход
+        binding.tvPassiveIncome.setOnClickListener {
+            val player = currentGameState?.player ?: return@setOnClickListener
+            val assetsIncome = player.assets.sumOf { it.cashFlow }
+            val investIncome = player.investments.sumOf { it.expectedReturn }
+            val message = """
+                Как считается «Пассивный доход»:
+                
+                Пассивный доход = Доход от активов + Доход от инвестиций
+                = ${currencyFormat.format(assetsIncome)} + ${currencyFormat.format(investIncome)}
+                
+                Итого: ${currencyFormat.format(player.passiveIncome)}
+            """.trimIndent()
+            showHintDialog("Пассивный доход", message)
+        }
+
+        // Расходы
+        binding.tvExpenses.setOnClickListener {
+            val player = currentGameState?.player ?: return@setOnClickListener
+            val liabilitiesPayments = player.liabilities.sumOf { it.payment }
+            val familyExtra = if (player.maritalStatus == com.financialsuccess.game.models.MaritalStatus.MARRIED) 10000 else 0
+            val message = """
+                Как считаются «Расходы»:
+                
+                Расходы = Еда + Транспорт + Жильё + Дети + Налоги + Прочее + Платежи по кредитам + Семейные расходы
+                = ${currencyFormat.format(player.foodExpenses)} + ${currencyFormat.format(player.transportExpenses)} + ${currencyFormat.format(player.housingExpenses)} + ${currencyFormat.format(player.childrenExpenses)} + ${currencyFormat.format(player.taxes)} + ${currencyFormat.format(player.otherExpenses)} + ${currencyFormat.format(liabilitiesPayments)} + ${currencyFormat.format(familyExtra)}
+                
+                Итого: ${currencyFormat.format(player.totalExpenses)}
+            """.trimIndent()
+            showHintDialog("Расходы", message)
+        }
+
+        // Денежный поток
+        binding.tvCashFlow.setOnClickListener {
+            val player = currentGameState?.player ?: return@setOnClickListener
+            val message = """
+                Как считается «Денежный поток»:
+                
+                Денежный поток = Доходы + Пассивный доход − Расходы
+                = ${currencyFormat.format(player.totalIncome)} + ${currencyFormat.format(player.passiveIncome)} − ${currencyFormat.format(player.totalExpenses)}
+                
+                Итого: ${currencyFormat.format(player.getCashFlow())}
+            """.trimIndent()
+            showHintDialog("Денежный поток", message)
+        }
+
+        // Возраст
+        binding.tvAge.setOnClickListener {
+            val player = currentGameState?.player ?: return@setOnClickListener
+            val yearsFromMonths = player.monthsPlayed / 12
+            val message = """
+                Как считается «Возраст»:
+                
+                Возраст увеличивается на 1 год каждые 12 месяцев игры.
+                Текущий возраст = Базовый возраст при старте + полные годы, прошедшие в игре
+                
+                Сейчас:
+                • Базовый возраст: ${player.age - yearsFromMonths}
+                • Сыграно месяцев: ${player.monthsPlayed}
+                • Возраст смерти (рандом): ${player.deathAge}
+                • Осталось лет: ${player.getYearsLeft()}
+            """.trimIndent()
+            showHintDialog("Возраст", message)
+        }
+
+        // Значение кубика
+        binding.tvDiceValue.setOnClickListener {
+            val message = """
+                Как получается число на кубике:
+                
+                Случайное число от 1 до 6, равновероятно.
+            """.trimIndent()
+            showHintDialog("Кубик", message)
+        }
+    }
+
+    private fun showHintDialog(title: String, message: String) {
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("Понятно", null)
             .show()
     }
 }
