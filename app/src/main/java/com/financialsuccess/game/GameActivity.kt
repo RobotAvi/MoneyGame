@@ -540,6 +540,7 @@ class GameActivity : AppCompatActivity() {
             primaryText = "OK",
             onPrimary = { /* close */ }
         )
+    }
     
     
     private fun showDoodadEvent() {
