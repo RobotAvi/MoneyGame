@@ -35,6 +35,8 @@ import java.text.NumberFormat
 import java.util.Locale
 import android.speech.tts.TextToSpeech
 import java.text.SimpleDateFormat
+import android.content.SharedPreferences
+import java.util.Date
 
 class CharacterCreationActivity : AppCompatActivity() {
     // Переменные для сбора данных персонажа
@@ -60,6 +62,8 @@ class CharacterCreationActivity : AppCompatActivity() {
     // TTS для голосового приветствия
     private var textToSpeech: TextToSpeech? = null
 
+    private lateinit var prefs: SharedPreferences
+
     private val currencyFormat: NumberFormat by lazy {
         NumberFormat.getInstance(Locale("ru")).apply {
             maximumFractionDigits = 0
@@ -70,6 +74,7 @@ class CharacterCreationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        prefs = getSharedPreferences("character_prefs", MODE_PRIVATE)
         if (intent.getBooleanExtra("custom", false)) {
             setContentView(R.layout.activity_character_creation)
             setupCustomUI()
@@ -404,7 +409,6 @@ class CharacterCreationActivity : AppCompatActivity() {
         val stepTitle = view.findViewById<TextView>(R.id.tvStepTitle)
         stepTitle.text = "ШАГ 1/3"
         val etName = view.findViewById<android.widget.EditText>(R.id.etPlayerName)
-        etName.setText(playerName)
         etName.setTextColor(resources.getColor(R.color.white, null))
         etName.setHintTextColor(resources.getColor(R.color.white, null))
 
@@ -414,6 +418,26 @@ class CharacterCreationActivity : AppCompatActivity() {
         val btnPickStart = view.findViewById<Button>(R.id.btnPickStartDate)
 
         val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale("ru", "RU"))
+
+        // Загрузить сохранённые значения (если есть), иначе применить значения по умолчанию
+        val savedName = prefs.getString("player_name", null)
+        val savedBirth = prefs.getLong("birth_date", -1L).takeIf { it > 0L }
+        val savedStart = prefs.getLong("start_date", -1L).takeIf { it > 0L }
+
+        if (playerName.isBlank()) {
+            playerName = savedName ?: "Захар"
+        }
+        etName.setText(playerName)
+
+        if (birthDateMillis == null) {
+            birthDateMillis = savedBirth ?: Calendar.getInstance().apply { set(2000, Calendar.JANUARY, 1); set(Calendar.HOUR_OF_DAY,0); set(Calendar.MINUTE,0); set(Calendar.SECOND,0); set(Calendar.MILLISECOND,0) }.timeInMillis
+        }
+        etBirthDate.setText(dateFormat.format(Date(birthDateMillis!!)))
+
+        if (selectedStartDate == null) {
+            selectedStartDate = savedStart ?: Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY,0); set(Calendar.MINUTE,0); set(Calendar.SECOND,0); set(Calendar.MILLISECOND,0) }.timeInMillis
+        }
+        etStartDate.setText(dateFormat.format(Date(selectedStartDate!!)))
 
         fun showDatePicker(targetEt: android.widget.EditText, assign: (Long) -> Unit) {
             val calendar = Calendar.getInstance()
@@ -432,59 +456,33 @@ class CharacterCreationActivity : AppCompatActivity() {
             datePicker.show()
         }
 
-        btnPickBirth.setOnClickListener {
-            showDatePicker(etBirthDate) { picked -> birthDateMillis = picked }
-        }
-        btnPickStart.setOnClickListener {
-            showDatePicker(etStartDate) { picked -> selectedStartDate = picked }
-        }
+        btnPickBirth.setOnClickListener { showDatePicker(etBirthDate) { picked -> birthDateMillis = picked } }
+        btnPickStart.setOnClickListener { showDatePicker(etStartDate) { picked -> selectedStartDate = picked } }
 
         val btnNext = view.findViewById<Button>(R.id.btnNextName)
         btnNext.setOnClickListener {
-            playerName = etName.text.toString().trim()
-            if (playerName.isEmpty()) {
-                etName.error = "Введите имя персонажа"
-                return@setOnClickListener
-            }
+            playerName = etName.text.toString().trim().ifEmpty { "Захар" }
 
-            // Parse manual DOB if needed
-            if (birthDateMillis == null && etBirthDate.text.toString().isNotBlank()) {
-                try {
-                    val parsed = dateFormat.parse(etBirthDate.text.toString().trim())
-                    birthDateMillis = parsed?.time
-                } catch (_: Exception) { }
-            }
+            // Сохранить введённые значения
+            prefs.edit()
+                .putString("player_name", playerName)
+                .putLong("birth_date", birthDateMillis ?: 0L)
+                .putLong("start_date", selectedStartDate ?: 0L)
+                .apply()
+
+            // Валидация дат
             if (birthDateMillis == null) {
                 etBirthDate.error = "Введите дату рождения"
                 return@setOnClickListener
-            }
-
-            // Parse manual start date if needed (default to today if empty)
-            if (selectedStartDate == null) {
-                if (etStartDate.text.toString().isNotBlank()) {
-                    try {
-                        val parsed = dateFormat.parse(etStartDate.text.toString().trim())
-                        selectedStartDate = parsed?.time
-                    } catch (_: Exception) { }
-                } else {
-                    val today = Calendar.getInstance()
-                    today.set(Calendar.HOUR_OF_DAY, 0)
-                    today.set(Calendar.MINUTE, 0)
-                    today.set(Calendar.SECOND, 0)
-                    today.set(Calendar.MILLISECOND, 0)
-                    selectedStartDate = today.timeInMillis
-                    etStartDate.setText(dateFormat.format(today.time))
-                }
             }
             if (selectedStartDate == null) {
                 etStartDate.error = "Введите дату начала"
                 return@setOnClickListener
             }
 
-            // Compute age at start date and next birthday date
+            // Вычисление возраста на дату начала
             val startCal = Calendar.getInstance().apply { timeInMillis = selectedStartDate!! }
             val dobCal = Calendar.getInstance().apply { timeInMillis = birthDateMillis!! }
-
             var years = startCal.get(Calendar.YEAR) - dobCal.get(Calendar.YEAR)
             val startMonth = startCal.get(Calendar.MONTH)
             val startDay = startCal.get(Calendar.DAY_OF_MONTH)
@@ -493,7 +491,7 @@ class CharacterCreationActivity : AppCompatActivity() {
             if (startMonth < birthMonth || (startMonth == birthMonth && startDay < birthDay)) years--
             playerAge = years.coerceAtLeast(0)
 
-            // Next birthday from start date
+            // Следующий ДР
             val nextBirthday = Calendar.getInstance().apply {
                 set(Calendar.YEAR, startCal.get(Calendar.YEAR))
                 set(Calendar.MONTH, dobCal.get(Calendar.MONTH))

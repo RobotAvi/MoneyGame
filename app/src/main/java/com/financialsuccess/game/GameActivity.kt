@@ -727,6 +727,18 @@ class GameActivity : AppCompatActivity() {
         // Обновляем 4-недельное окно календаря; при переходе конца недели текущее сместится наверх
         setupCalendarRecycler()
         if (player.canEscapeRatRace() && !player.isInFastTrack) { showEscapeRatRaceDialog() }
+
+        // Установить иконку мечты в шапке в соответствии с выбранной мечтой
+        val dreamIconRes = when (player.dream.id) {
+            "yacht" -> R.drawable.dream_yacht
+            "restaurant" -> R.drawable.dream_restaurant
+            "charity" -> R.drawable.dream_charity
+            "island" -> R.drawable.dream_island
+            "space_trip" -> R.drawable.dream_space
+            "business_empire" -> R.drawable.dream_business
+            else -> R.drawable.ic_dream_placeholder
+        }
+        binding.ivDream.setImageResource(dreamIconRes)
     }
     
     // Метод updateMonthProgressBar удален - monthProgressBar больше не используется

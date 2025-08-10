@@ -25,7 +25,7 @@
             app:navigationIconTint="@color/white"
             app:menu="@menu/game_actions" />
 
-        <!-- Шапка: слева аватар+имя/профессия/возраст, справа мечта (личный остров) -->
+        <!-- Шапка: слева аватар+имя/профессия/возраст, справа мечта (динамическая) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -90,11 +90,10 @@
             </LinearLayout>
 
             <ImageView
-                android:id="@+id/iv_dream_island"
+                android:id="@+id/iv_dream"
                 android:layout_width="88dp"
                 android:layout_height="64dp"
-                android:src="@drawable/dream_island"
-                android:contentDescription="Мечта: личный остров"
+                android:contentDescription="Мечта"
                 android:scaleType="centerCrop"
                 android:background="@drawable/card_bg"
                 android:padding="4dp"
@@ -199,18 +198,18 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Расходы: 60 000₽"
+                            android:text="Расходы: 100 000₽"
                             android:textSize="14sp"
-                            android:textColor="@color/error_color" />
+                            android:textColor="@color/expense_red" />
 
                         <TextView
                             android:id="@+id/tv_cash_flow"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Поток: 40 000₽"
+                            android:text="Поток: 30 000₽"
                             android:textSize="14sp"
-                            android:textColor="@color/success_color" />
+                            android:textColor="@color/primary_color" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
