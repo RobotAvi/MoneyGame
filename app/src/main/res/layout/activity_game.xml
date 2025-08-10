@@ -74,21 +74,22 @@
                         android:ellipsize="end" />
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/tv_age"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="25 лет"
-                    android:textColor="@color/text_primary"
-                    android:textSize="16sp"
-                    android:background="@drawable/bg_age_chip"
-                    android:padding="8dp"
-                    android:layout_marginStart="8dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:maxLines="1"
-                    android:ellipsize="end" />
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_age"
+                android:layout_width="359dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_age_chip"
+                android:clickable="true"
+                android:ellipsize="end"
+                android:focusable="true"
+                android:maxLines="1"
+                android:padding="8dp"
+                android:text="25 лет"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp" />
 
             <ProgressBar
                 android:id="@+id/progress_life"
