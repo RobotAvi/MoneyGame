@@ -17,6 +17,15 @@
         android:tint="@color/primary_color"
         android:src="@drawable/ic_runner" />
 
+    <ImageView
+        android:id="@+id/ivPlayerToken"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:contentDescription="Токен игрока"
+        android:src="@drawable/player_token" />
+
     <TextView
         android:id="@+id/tvDayNumber"
         android:layout_width="wrap_content"

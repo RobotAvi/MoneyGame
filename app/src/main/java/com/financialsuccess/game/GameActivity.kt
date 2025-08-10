@@ -38,7 +38,6 @@ class GameActivity : AppCompatActivity() {
         binding = ActivityGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
-        // Toolbar menu actions
         binding.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.menu_save -> {
@@ -63,142 +62,80 @@ class GameActivity : AppCompatActivity() {
         setupUI()
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (gamePlayer == null) {
-            gamePlayer = MediaPlayer.create(this, R.raw.game).apply {
-                isLooping = true
-                setVolume(0.4f, 0.4f)
-                start()
-            }
-        } else {
-            gamePlayer?.start()
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        gamePlayer?.pause()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        gamePlayer?.release()
-        gamePlayer = null
-    }
+    override fun onResume() { super.onResume(); if (gamePlayer == null) { gamePlayer = MediaPlayer.create(this, R.raw.game).apply { isLooping = true; setVolume(0.4f, 0.4f); start() } } else { gamePlayer?.start() } }
+    override fun onPause() { super.onPause(); gamePlayer?.pause() }
+    override fun onDestroy() { super.onDestroy(); gamePlayer?.release(); gamePlayer = null }
     
     private fun initGame() {
         val player: Player? = if (Build.VERSION.SDK_INT >= 33) {
             intent.getParcelableExtra("player", Player::class.java)
-        } else {
-            @Suppress("DEPRECATION") intent.getParcelableExtra("player")
-        }
-        
+        } else { @Suppress("DEPRECATION") intent.getParcelableExtra("player") }
         if (player != null) {
             gameManager = GameManager()
             currentGameState = gameManager.startNewGameWithPlayer(player)
             updateUI()
         } else {
-            val profession: Profession? = if (Build.VERSION.SDK_INT >= 33) {
-                intent.getParcelableExtra("profession", Profession::class.java)
-            } else {
-                @Suppress("DEPRECATION") intent.getParcelableExtra("profession")
-            }
-            val dream: Dream? = if (Build.VERSION.SDK_INT >= 33) {
-                intent.getParcelableExtra("dream", Dream::class.java)
-            } else {
-                @Suppress("DEPRECATION") intent.getParcelableExtra("dream")
-            }
+            val profession: Profession? = if (Build.VERSION.SDK_INT >= 33) { intent.getParcelableExtra("profession", Profession::class.java) } else { @Suppress("DEPRECATION") intent.getParcelableExtra("profession") }
+            val dream: Dream? = if (Build.VERSION.SDK_INT >= 33) { intent.getParcelableExtra("dream", Dream::class.java) } else { @Suppress("DEPRECATION") intent.getParcelableExtra("dream") }
             val playerAge = intent.getIntExtra("playerAge", 25)
             val playerName = intent.getStringExtra("playerName")
             val startDateMillis = intent.getLongExtra("startDate", 0L).takeIf { it != 0L }
-            
             if (profession != null && dream != null) {
                 gameManager = GameManager()
-                currentGameState = gameManager.startNewGame(
-                    profession,
-                    dream,
-                    playerAge,
-                    playerName,
-                    startDateMillis
-                )
+                currentGameState = gameManager.startNewGame(profession, dream, playerAge, playerName, startDateMillis)
                 updateUI()
-            } else {
-                finish()
-            }
+            } else finish()
         }
     }
     
     private fun setupUI() {
-        // Новые круглые кнопки снизу
         binding.btnDice.setOnClickListener { rollDiceAndMove() }
         binding.btnChart.setOnClickListener { showFinancialStatement() }
-        binding.btnUp.setOnClickListener {
-            currentGameState?.player?.let { player ->
-                val bonus = 5000
-                player.salary += bonus
-                player.updateTotalIncome()
-                showMessage("Повышение: +${currencyFormat.format(bonus)} к зарплате")
-                updateUI()
-            }
-        }
-        binding.btnDown.setOnClickListener {
-            currentGameState?.player?.let { player ->
-                val cut = 5000
-                player.salary = (player.salary - cut).coerceAtLeast(0)
-                player.updateTotalIncome()
-                showMessage("Понижение: -${currencyFormat.format(cut)} к зарплате")
-                updateUI()
-            }
-        }
-
-        // Делаем возраст кликабельным
+        binding.btnUp.setOnClickListener { currentGameState?.player?.let { it.salary += 5000; it.updateTotalIncome(); showMessage("Повышение: +${currencyFormat.format(5000)} к зарплате"); updateUI() } }
+        binding.btnDown.setOnClickListener { currentGameState?.player?.let { it.salary = (it.salary - 5000).coerceAtLeast(0); it.updateTotalIncome(); showMessage("Понижение: -${currencyFormat.format(5000)} к зарплате"); updateUI() } }
         binding.tvAge.setOnClickListener { showAgeStatistics() }
-
         setupAssetsRecyclerView()
         setupCalendarRecycler()
     }
     
     private fun setupCalendarRecycler() {
         binding.recyclerCalendar.layoutManager = GridLayoutManager(this, 7)
-        val icons = listOf(
-            R.drawable.ic_runner,
-            R.drawable.ic_finance_logo,
-            R.drawable.ic_businessman_successful,
-            R.drawable.ic_car,
-            R.drawable.ic_engineer_successful,
-            R.drawable.ic_teacher
+        val player = currentGameState?.player ?: return
+        val cal = Calendar.getInstance().apply {
+            if (player.startDateMillis != null) timeInMillis = player.startDateMillis!! else set(2024, Calendar.JANUARY, 1)
+            add(Calendar.MONTH, player.monthsPlayed)
+        }
+        val year = cal.get(Calendar.YEAR)
+        val month = cal.get(Calendar.MONTH)
+        val today = player.currentDayOfMonth
+        val iconProvider: (Int) -> Int = { day ->
+            // Простейший провайдер иконок: разные типы по дню
+            when (day % 6) {
+                0 -> R.drawable.ic_finance_logo
+                1 -> R.drawable.ic_runner
+                2 -> R.drawable.ic_businessman_successful
+                3 -> R.drawable.ic_car
+                4 -> R.drawable.ic_engineer_successful
+                else -> R.drawable.ic_teacher
+            }
+        }
+        binding.recyclerCalendar.adapter = CalendarAdapter(
+            year = year,
+            monthZeroBased = month,
+            currentDayOfMonth = today,
+            playerDayOfMonth = today,
+            iconProvider = iconProvider
         )
-        val days = MutableList(28) { index -> icons[index % icons.size] }
-        val todayIndex = (currentGameState?.player?.currentDayOfMonth ?: 1).let { (it - 1) % 28 }
-        binding.recyclerCalendar.adapter = CalendarAdapter(days, todayIndex)
     }
     
     private fun rollDiceAndMove() {
         val diceValue = gameManager.rollDice()
         lastDiceValue = diceValue
         val player = currentGameState?.player ?: return
-        
-        // Устанавливаем соответствующее изображение на кнопку кубика
-        val diceRes = when (diceValue) {
-            1 -> R.drawable.dice_1
-            2 -> R.drawable.dice_2
-            3 -> R.drawable.dice_3
-            4 -> R.drawable.dice_4
-            5 -> R.drawable.dice_5
-            6 -> R.drawable.dice_6
-            else -> R.drawable.dice_1
-        }
+        val diceRes = when (diceValue) { 1 -> R.drawable.dice_1; 2 -> R.drawable.dice_2; 3 -> R.drawable.dice_3; 4 -> R.drawable.dice_4; 5 -> R.drawable.dice_5; 6 -> R.drawable.dice_6; else -> R.drawable.dice_1 }
         binding.btnDice.setImageResource(diceRes)
-        
-        // Показ сообщения о результате
         showMessage("Выпало $diceValue")
-        
-        if (player.isInFastTrack) {
-            handleFastTrackDice(diceValue)
-        } else {
-            handleSlowTrackDice(diceValue)
-        }
+        handleSlowTrackDice(diceValue)
     }
     
     private fun handleFastTrackDice(diceValue: Int) {
@@ -232,13 +169,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun handleSlowTrackDice(diceValue: Int) {
-        val oldPosition = currentGameState?.player?.position ?: 0
         currentGameState = gameManager.movePlayer(diceValue)
-        val passedStart = (oldPosition + diceValue) >= 24
-        if (passedStart) {
-            val salaryAmount = currentGameState?.player?.salary ?: 0
-            showMessage("💼 Зарплата получена: ${currencyFormat.format(salaryAmount)}")
-        }
         updateUI()
         handlePositionEvent()
     }
@@ -695,61 +626,27 @@ class GameActivity : AppCompatActivity() {
         RiskLevel.HIGH -> "🔴 Высокий"
     }
     
-    private fun setupAssetsRecyclerView() {
-        binding.recyclerViewAssets.layoutManager = LinearLayoutManager(this)
-    }
-    
+    private fun setupAssetsRecyclerView() { binding.recyclerViewAssets.layoutManager = LinearLayoutManager(this) }
+
     private fun updateUI() {
         val player = currentGameState?.player ?: return
-        if (!player.isAlive()) {
-            showDeathDialog()
-            return
-        }
-        
-        // Шапка
+        if (!player.isAlive()) { showDeathDialog(); return }
         binding.tvPlayerName.text = player.name ?: "Игрок"
         updateCurrentDate(player)
         updateGameStatus(player)
         updatePlayerAvatar(player)
-
-        // Основные метрики
         binding.tvProfession.text = "Профессия: ${player.profession.name}"
         binding.tvCash.text = "Наличные: ${currencyFormat.format(player.cash)}"
         binding.tvSalary.text = "Зарплата: ${currencyFormat.format(player.salary)}"
         binding.tvPassiveIncome.text = "Пассивный доход: ${currencyFormat.format(player.passiveIncome)}"
         binding.tvExpenses.text = "Расходы: ${currencyFormat.format(player.totalExpenses)}"
         binding.tvCashFlow.text = "Денежный поток: ${currencyFormat.format(player.getCashFlow())}"
-
-        val ageColor = when {
-            player.isInCriticalAge() -> "🔴"
-            player.getYearsLeft() <= 10 -> "🟡"
-            else -> "🟢"
-        }
+        val ageColor = when { player.isInCriticalAge() -> "🔴"; player.getYearsLeft() <= 10 -> "🟡"; else -> "🟢" }
         binding.tvAge.text = "$ageColor Возраст: ${player.age} лет (осталось: ${player.getYearsLeft()})"
         binding.tvHealthStatus.text = player.getHealthStatus()
-
-        // Обновить календарь (подсветка сегодняшнего дня)
-        (binding.recyclerCalendar.adapter as? CalendarAdapter)?.let { adapter ->
-            val todayIndex = (player.currentDayOfMonth - 1) % 28
-            binding.recyclerCalendar.adapter = CalendarAdapter((0 until 28).map { idx ->
-                val icons = listOf(
-                    R.drawable.ic_runner,
-                    R.drawable.ic_finance_logo,
-                    R.drawable.ic_businessman_successful,
-                    R.drawable.ic_car,
-                    R.drawable.ic_engineer_successful,
-                    R.drawable.ic_teacher
-                )
-                icons[idx % icons.size]
-            }, todayIndex)
-        } ?: run {
-            setupCalendarRecycler()
-        }
-
-        // Проверка выхода из крыс. бегов
-        if (player.canEscapeRatRace() && !player.isInFastTrack) {
-            showEscapeRatRaceDialog()
-        }
+        // Реинициализация календаря (позиция токена и подсветка сегодня)
+        setupCalendarRecycler()
+        if (player.canEscapeRatRace() && !player.isInFastTrack) { showEscapeRatRaceDialog() }
     }
     
     // Метод updateMonthProgressBar удален - monthProgressBar больше не используется
