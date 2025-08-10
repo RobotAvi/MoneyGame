@@ -22,7 +22,7 @@ import com.financialsuccess.game.BuildConfig
  * - "Начать" → CharacterCreationActivity
  * - "Правила" → RulesActivity
  */
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity() { init { com.google.android.material.color.DynamicColors.applyToActivitiesIfAvailable(application) }
     
     private lateinit var binding: ActivityMainBinding
     private var menuPlayer: MediaPlayer? = null
