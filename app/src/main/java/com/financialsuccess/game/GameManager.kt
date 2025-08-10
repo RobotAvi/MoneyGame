@@ -105,11 +105,17 @@ class GameManager {
                 player.processMonthlyOperations()
                 // Увеличиваем счётчик месяцев
                 player.monthsPlayed++
+                // Упрощённое увеличение возраста, если нет точной даты рождения
+                if (player.birthDateMillis == null || player.nextAgeChangeMillis == null) {
+                    if (player.monthsPlayed % 12 == 0) {
+                        player.age += 1
+                    }
+                }
             }
         }
 
         // Обновляем position для совместимости, чтобы логика событий могла использовать прежний диапазон
-        player.position = (player.position + steps) % 24
+        player.position = (player.position + steps) % 30
 
         // Проверяем возраст (ДР) по точной дате
         run {
