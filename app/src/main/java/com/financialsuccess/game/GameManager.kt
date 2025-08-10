@@ -46,7 +46,8 @@ class GameManager {
     fun startNewGameWithPlayer(player: Player): GameState {
         // Зарплата уже установлена правильно в конструкторе Player
         
-        // Обновляем расходы с учетом семьи
+        // Обновляем доходы и расходы с учетом текущего состояния игрока
+        player.updateTotalIncome()
         player.updateTotalExpenses()
         
         // Добавляем начальную запись в журнал
