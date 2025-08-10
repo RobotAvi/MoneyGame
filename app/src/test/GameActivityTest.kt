@@ -65,6 +65,54 @@ class GameActivityTest {
         // Проверяем, что showMessage вызывается с "Журнал финансов пуст"
         verify(activity).showMessage(contains("Журнал финансов пуст"))
     }
+    
+    @Test
+    fun testExportJournalToTxt() {
+        // Создаем тестовые записи журнала
+        val testEntries = listOf(
+            FinancialEntry(
+                type = FinancialEntryType.INCOME,
+                category = FinancialCategory.SALARY,
+                amount = 50000,
+                description = "Зарплата за месяц",
+                playerAge = 25,
+                monthNumber = 1,
+                balanceAfter = 50000,
+                realDate = "1 января 2024"
+            ),
+            FinancialEntry(
+                type = FinancialEntryType.EXPENSE,
+                category = FinancialCategory.FOOD,
+                amount = -5000,
+                description = "Продукты",
+                playerAge = 25,
+                monthNumber = 1,
+                balanceAfter = 45000,
+                realDate = "1 января 2024"
+            )
+        )
+        
+        `when`(mockPlayer.getRecentJournalEntries(100)).thenReturn(testEntries)
+        `when`(mockPlayer.name).thenReturn("Тестовый игрок")
+        `when`(mockPlayer.profession).thenReturn(Profession("Тестер", 50000, "Тестирование"))
+        `when`(mockPlayer.age).thenReturn(25)
+        `when`(mockPlayer.monthsPlayed).thenReturn(1)
+        `when`(mockPlayer.dream).thenReturn(Dream("Тестовая мечта", 1000000))
+        `when`(mockPlayer.cash).thenReturn(45000)
+        `when`(mockPlayer.getNetWorth()).thenReturn(45000)
+        `when`(mockPlayer.passiveIncome).thenReturn(0)
+        `when`(mockPlayer.getCategoryStats()).thenReturn(mapOf(
+            FinancialCategory.SALARY to 50000,
+            FinancialCategory.FOOD to -5000
+        ))
+        `when`(mockPlayer.getMonthlyStats(1)).thenReturn(Pair(50000, 5000))
+        
+        // Вызываем экспорт
+        activity.exportJournalToTxt(mockPlayer, testEntries)
+        
+        // Проверяем, что метод выполнился без ошибок
+        // В реальном тесте здесь можно проверить создание Intent
+    }
 
     @Test
     fun testBuyAssetDeductsOnlyDownPayment() {

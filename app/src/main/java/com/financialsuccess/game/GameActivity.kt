@@ -18,6 +18,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import android.os.Build
 import android.media.MediaPlayer
+import android.content.Intent
 
 class GameActivity : AppCompatActivity() {
     
@@ -498,7 +499,7 @@ class GameActivity : AppCompatActivity() {
     }
     
     private fun showDoodadEvent() {
-        val expenses = listOf(5000, 10000, 15000, 20000, 25000)
+        val expenses = listOf(1000, 2000, 3000, 4000, 5000)
         val expense = expenses.random()
         
         val expenseReasons = listOf(
@@ -653,12 +654,6 @@ class GameActivity : AppCompatActivity() {
             .setMessage(message)
             .setPositiveButton("💰 Купить") { _, _ ->
                 if (gameManager.buyAsset(asset)) {
-                    // Логируем покупку актива
-                    currentGameState?.player?.logExpense(
-                        FinancialCategory.ASSET_PURCHASE,
-                        asset.downPayment,
-                        "Покупка на рынке: ${asset.name} (денежный поток: +${currencyFormat.format(asset.cashFlow)}/мес)"
-                    )
                     updateUI()
                     showMessage("✅ Актив приобретён!")
                 } else {
@@ -906,6 +901,7 @@ class GameActivity : AppCompatActivity() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_financial_journal, null)
         val recyclerView = dialogView.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerViewJournal)
         val tvStats = dialogView.findViewById<android.widget.TextView>(R.id.tvJournalStats)
+        val btnExportTxt = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnExportTxt)
         
         // Настраиваем RecyclerView
         recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
@@ -926,6 +922,11 @@ class GameActivity : AppCompatActivity() {
             📈 Записей в журнале: ${player.financialJournal.size}
         """.trimIndent()
         
+        // Обработка нажатия на кнопку экспорта
+        btnExportTxt.setOnClickListener {
+            exportJournalToTxt(player, entries)
+        }
+        
         AlertDialog.Builder(this)
             .setTitle("📊 Журнал финансов")
             .setView(dialogView)
@@ -934,6 +935,128 @@ class GameActivity : AppCompatActivity() {
                 showJournalAnalytics()
             }
             .show()
+    }
+    
+    /**
+     * Экспортирует финансовый журнал в TXT формат и делится им
+     */
+    private fun exportJournalToTxt(player: Player, entries: List<FinancialEntry>) {
+        try {
+            val txtContent = generateJournalTxtContent(player, entries)
+            
+            // Создаем Intent для отправки текста
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                type = "text/plain"
+                putExtra(Intent.EXTRA_SUBJECT, "📊 Финансовый журнал - ${player.name ?: "Игрок"}")
+                putExtra(Intent.EXTRA_TEXT, txtContent)
+            }
+            
+            // Запускаем диалог выбора приложения для отправки
+            startActivity(Intent.createChooser(shareIntent, "📤 Экспорт журнала в TXT"))
+            
+        } catch (e: Exception) {
+            showMessage("❌ Ошибка при экспорте: ${e.message}")
+        }
+    }
+    
+    /**
+     * Генерирует содержимое TXT файла из данных журнала
+     */
+    private fun generateJournalTxtContent(player: Player, entries: List<FinancialEntry>): String {
+        val sb = StringBuilder()
+        
+        // Заголовок
+        sb.append("=" * 80).append("\n")
+        sb.append("📊 ФИНАНСОВЫЙ ЖУРНАЛ - ИГРА 'ФИНАНСОВЫЙ УСПЕХ'\n")
+        sb.append("=" * 80).append("\n\n")
+        
+        // Информация об игроке
+        sb.append("👤 ИНФОРМАЦИЯ ОБ ИГРОКЕ:\n")
+        sb.append("-".repeat(40)).append("\n")
+        sb.append("Имя: ${player.name ?: "Не указано"}\n")
+        sb.append("Профессия: ${player.profession.name}\n")
+        sb.append("Возраст: ${player.age} лет\n")
+        sb.append("Месяцев в игре: ${player.monthsPlayed}\n")
+        sb.append("Мечта: ${player.dream.name}\n")
+        sb.append("Текущий баланс: ${currencyFormat.format(player.cash)}\n")
+        sb.append("Чистая стоимость: ${currencyFormat.format(player.getNetWorth())}\n")
+        sb.append("Пассивный доход: ${currencyFormat.format(player.passiveIncome)}\n\n")
+        
+        // Общая статистика
+        val totalIncome = entries.filter { it.amount > 0 }.sumOf { it.amount }
+        val totalExpenses = entries.filter { it.amount < 0 }.sumOf { kotlin.math.abs(it.amount) }
+        val balance = totalIncome - totalExpenses
+        
+        sb.append("📈 ОБЩАЯ СТАТИСТИКА:\n")
+        sb.append("-".repeat(40)).append("\n")
+        sb.append("Всего доходов: ${currencyFormat.format(totalIncome)}\n")
+        sb.append("Всего расходов: ${currencyFormat.format(totalExpenses)}\n")
+        sb.append("Чистый результат: ${currencyFormat.format(balance)}\n")
+        sb.append("Всего записей: ${entries.size}\n\n")
+        
+        // Статистика по категориям
+        val categoryStats = player.getCategoryStats()
+        sb.append("🏷️ СТАТИСТИКА ПО КАТЕГОРИЯМ:\n")
+        sb.append("-".repeat(40)).append("\n")
+        
+        // Доходы
+        sb.append("💰 ДОХОДЫ:\n")
+        categoryStats.filter { it.value > 0 }
+            .toList()
+            .sortedByDescending { it.second }
+            .forEach { (category, amount) ->
+                sb.append("  ${category.getIcon()} ${category.getDisplayName()}: ${currencyFormat.format(amount)}\n")
+            }
+        
+        sb.append("\n💸 РАСХОДЫ:\n")
+        categoryStats.filter { it.value < 0 }
+            .toList()
+            .sortedBy { it.second } // От больших расходов к меньшим
+            .forEach { (category, amount) ->
+                sb.append("  ${category.getIcon()} ${category.getDisplayName()}: ${currencyFormat.format(kotlin.math.abs(amount))}\n")
+            }
+        
+        // Месячная статистика
+        if (player.monthsPlayed > 0) {
+            val (monthIncome, monthExpense) = player.getMonthlyStats(player.monthsPlayed)
+            sb.append("\n📅 ТЕКУЩИЙ МЕСЯЦ (${player.monthsPlayed}):\n")
+            sb.append("  Доходы: ${currencyFormat.format(monthIncome)}\n")
+            sb.append("  Расходы: ${currencyFormat.format(monthExpense)}\n")
+            sb.append("  Баланс: ${currencyFormat.format(monthIncome - monthExpense)}\n\n")
+        }
+        
+        // Детальные записи
+        sb.append("📝 ДЕТАЛЬНЫЕ ЗАПИСИ:\n")
+        sb.append("-".repeat(80)).append("\n")
+        
+        entries.forEachIndexed { index, entry ->
+            val entryNumber = index + 1
+            val isPositive = entry.amount > 0
+            val amountText = if (isPositive) {
+                "+${currencyFormat.format(entry.amount)}"
+            } else {
+                currencyFormat.format(entry.amount)
+            }
+            
+            sb.append("${entryNumber}. ${entry.category.getIcon()} ${entry.category.getDisplayName()}\n")
+            sb.append("   Описание: ${entry.description}\n")
+            sb.append("   Сумма: $amountText\n")
+            sb.append("   Дата: ${entry.realDate}\n")
+            sb.append("   Возраст игрока: ${entry.playerAge} лет\n")
+            sb.append("   Месяц игры: ${entry.monthNumber}\n")
+            sb.append("   Баланс после: ${currencyFormat.format(entry.balanceAfter)}\n")
+            sb.append("   Тип: ${if (isPositive) "Доход" else "Расход"}\n")
+            sb.append("-".repeat(60)).append("\n")
+        }
+        
+        // Футер
+        sb.append("\n" + "=" * 80).append("\n")
+        sb.append("📅 Дата экспорта: ${java.text.SimpleDateFormat("dd.MM.yyyy HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())}\n")
+        sb.append("🎮 Версия игры: ${packageManager.getPackageInfo(packageName, 0).versionName}\n")
+        sb.append("=" * 80).append("\n")
+        
+        return sb.toString()
     }
     
     private fun showJournalAnalytics() {

@@ -44,8 +44,7 @@ class GameManager {
     }
     
     fun startNewGameWithPlayer(player: Player): GameState {
-        // Обновляем зарплату с учетом всех бонусов
-        player.updateSalaryWithBonuses()
+        // Зарплата уже установлена правильно в конструкторе Player
         
         // Обновляем расходы с учетом семьи
         player.updateTotalExpenses()

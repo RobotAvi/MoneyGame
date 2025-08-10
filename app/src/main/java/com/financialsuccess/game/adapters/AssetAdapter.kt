@@ -40,27 +40,14 @@ class AssetAdapter(
                 else -> R.drawable.asset_real_estate
             }
             
-            try {
-                val iconField = binding.javaClass.getDeclaredField("ivAssetIcon")
-                val imageView = iconField.get(binding) as? android.widget.ImageView
-                imageView?.setBackgroundResource(iconRes)
-            } catch (e: Exception) {
-                // Игнорируем если поле не найдено (совместимость)
-            }
+            binding.ivAssetIcon.setBackgroundResource(iconRes)
             
             // Расчет и показ ROI
             val roi = if (asset.downPayment > 0) {
                 (asset.cashFlow * 12.0 / asset.downPayment) * 100
             } else 0.0
             
-            // Проверяем, есть ли поле ROI в layout (добавлено в новой версии)
-            try {
-                val roiField = binding.javaClass.getDeclaredField("tvRoi")
-                val tvRoi = roiField.get(binding) as? android.widget.TextView
-                tvRoi?.text = "ROI: ${String.format("%.1f", roi)}%"
-            } catch (e: Exception) {
-                // Игнорируем если поле не найдено (совместимость со старой версией)
-            }
+            binding.tvRoi.text = "ROI: ${String.format("%.1f", roi)}%"
             
             if (asset.shares > 1) {
                 binding.tvShares.text = "Количество: ${asset.shares}"

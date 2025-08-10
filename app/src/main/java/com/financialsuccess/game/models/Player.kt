@@ -8,7 +8,7 @@ import java.util.Calendar
 data class Player(
     var position: Int = 0,
     var cash: Int = 0,
-    var salary: Int = 0,
+    var salary: Int = 0, // Будет установлено в конструкторе
     var totalIncome: Int = 0,
     var totalExpenses: Int = 0,
     var passiveIncome: Int = 0,
@@ -72,6 +72,12 @@ data class Player(
     var businessFailures: Int = 0, // Количество неудачных бизнесов
     var successfulInvestments: Int = 0 // Количество успешных инвестиций
 ) : Parcelable {
+    
+    init {
+        // Устанавливаем зарплату из профессии при инициализации
+        // Теперь profession уже инициализирован, так как это параметр конструктора
+        salary = profession.salary
+    }
     
     companion object {
         const val DAYS_IN_MONTH = 30
@@ -141,6 +147,13 @@ data class Player(
         if (cash >= asset.downPayment) {
             cash -= asset.downPayment
             assets.add(asset)
+            
+            // Логируем покупку актива
+            logExpense(
+                FinancialCategory.ASSET_PURCHASE,
+                asset.downPayment,
+                "Покупка актива: ${asset.name} (денежный поток: +${asset.cashFlow}/мес)"
+            )
             
             // Добавляем долг, если есть кредит
             if (asset.loan > 0) {
