@@ -517,15 +517,22 @@
     </androidx.core.widget.NestedScrollView>
 
     <!-- Нижняя панель из 4 круглых кнопок -->
-    <LinearLayout
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/bottom_actions"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="88dp"
         android:layout_gravity="bottom"
-        android:background="@color/white"
         android:padding="12dp"
-        android:gravity="center"
-        android:orientation="horizontal">
+        app:cardCornerRadius="24dp"
+        app:cardElevation="12dp"
+        app:strokeWidth="0dp"
+        app:cardBackgroundColor="@color/surface_color">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="horizontal">
 
         <ImageButton
             android:id="@+id/btnUp"
@@ -564,7 +571,7 @@
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:background="@drawable/btn_circle_bg"
-            android:src="@drawable/ic_finance_logo"
+            android:src="@drawable/ic_action_report"
             android:scaleType="center"
             android:contentDescription="Статистика и отчёты"
             android:padding="12dp"
