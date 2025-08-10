@@ -85,11 +85,25 @@ class GameActivity : AppCompatActivity() {
     private fun setupUI() {
         binding.btnDice.setOnClickListener { rollDiceAndMove() }
         binding.btnChart.setOnClickListener { showBalancePanel() }
-        binding.btnUp.setOnClickListener { currentGameState?.player?.let { it.salary += 5000; it.updateTotalIncome(); showMessage("Повышение: +${currencyFormat.format(5000)} к зарплате"); updateUI() } }
+        binding.btnUp.setOnClickListener { showActionsMenu() }
         binding.btnDown.setOnClickListener { currentGameState?.player?.let { it.salary = (it.salary - 5000).coerceAtLeast(0); it.updateTotalIncome(); showMessage("Понижение: -${currencyFormat.format(5000)} к зарплате"); updateUI() } }
         binding.tvAge.setOnClickListener { showAgeStatistics() }
         setupAssetsRecyclerView()
         setupCalendarRecycler()
+    }
+
+    private fun showActionsMenu() {
+        val options = arrayOf("📦 Активы", "🏪 Рынок", "📊 Портфель")
+        AlertDialog.Builder(this)
+            .setTitle("Действия")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> showAssets()
+                    1 -> showMarket()
+                    2 -> showPortfolio()
+                }
+            }
+            .show()
     }
     
     private fun showBalancePanel() {
@@ -102,6 +116,7 @@ class GameActivity : AppCompatActivity() {
         val tvCashFlow = dialogView.findViewById<android.widget.TextView>(R.id.tvBalanceCashFlow)
         val btnJournal = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnOpenJournal)
         val btnAnalytics = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnOpenAnalytics)
+        val btnOldReport = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnOpenOldReport)
 
         tvCash.text = "Наличные: ${currencyFormat.format(player.cash)}"
         tvSalary.text = "Зарплата: ${currencyFormat.format(player.salary)}"
@@ -117,6 +132,7 @@ class GameActivity : AppCompatActivity() {
 
         btnJournal.setOnClickListener { dialog.dismiss(); showFinancialJournal() }
         btnAnalytics.setOnClickListener { dialog.dismiss(); showJournalAnalytics() }
+        btnOldReport.setOnClickListener { dialog.dismiss(); showFinancialStatement() }
 
         dialog.show()
     }
