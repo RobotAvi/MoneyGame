@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/nav_home" android:icon="@android:drawable/ic_menu_view" android:title="Главная"/>
-    <item android:id="@+id/nav_assets" android:icon="@android:drawable/ic_menu_agenda" android:title="Активы"/>
-    <item android:id="@+id/nav_market" android:icon="@android:drawable/ic_menu_manage" android:title="Рынок"/>
+    <item android:id="@+id/nav_assets" android:icon="@drawable/asset_business" android:title="Активы"/>
+    <item android:id="@+id/nav_market" android:icon="@drawable/asset_stocks" android:title="Рынок"/>
     <item android:id="@+id/nav_journal" android:icon="@android:drawable/ic_menu_edit" android:title="Журнал"/>
-    <item android:id="@+id/nav_health" android:icon="@android:drawable/ic_menu_info_details" android:title="Здоровье"/>
+    <item android:id="@+id/nav_health" android:icon="@android:drawable/ic_menu_help" android:title="Здоровье"/>
 </menu>

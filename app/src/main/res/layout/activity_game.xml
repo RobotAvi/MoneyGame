@@ -204,17 +204,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Прогресс-бар месяца (кастомный) -->
-            <LinearLayout
-                android:id="@+id/monthProgressBar"
-                android:layout_width="match_parent"
-                android:layout_height="16dp"
-                android:orientation="horizontal"
-                android:background="@color/primary_color_light"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="16dp"
-                android:padding="2dp" />
-
             <!-- Игровое поле -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
@@ -314,7 +303,7 @@
                 android:gravity="center"
                 android:background="@color/white"
                 android:padding="8dp"
-                android:layout_marginBottom="8dp">
+                android:layout_marginBottom="16dp">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnFinancialStatement"
@@ -322,31 +311,6 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Фин. отчет" />
-            </LinearLayout>
-
-            <!-- Кнопки Сохранить/Выйти -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:background="@color/white"
-                android:padding="8dp"
-                android:layout_marginBottom="16dp">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSaveGame"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Сохранить игру" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnExit"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Выйти" />
             </LinearLayout>
 
             <!-- Служебные/временные элементы (раньше были свободными детьми) -->

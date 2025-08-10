@@ -108,6 +108,7 @@ class GameManager {
         val player = gameState?.player ?: return false
         
         if (player.cash >= asset.downPayment) {
+            // Просто вызываем addAsset - вся логика списания там
             player.addAsset(asset)
             return true
         }

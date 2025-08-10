@@ -59,13 +59,9 @@ class GameActivity : AppCompatActivity() {
         initGame()
         setupUI()
 
-        // Legacy buttons still available lower in content
-        binding.btnSaveGame.setOnClickListener {
-            currentGameState?.let { GameSaveManager.saveGameState(this, it) }
-            currentGameState?.player?.let { GameSaveManager.savePlayer(this, it) }
-            Toast.makeText(this, "Игра сохранена!", Toast.LENGTH_SHORT).show()
-        }
-        binding.btnExit.setOnClickListener { finish() }
+        // Убираем дублирующиеся кнопки - функционал уже есть в toolbar
+        // binding.btnSaveGame.setOnClickListener { ... }
+        // binding.btnExit.setOnClickListener { ... }
     }
 
     override fun onResume() {
@@ -162,11 +158,6 @@ class GameActivity : AppCompatActivity() {
         // Нижняя панель навигации
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> {
-                    // Возвращаемся к основной карточке/скроллу
-                    binding.contentScroll.smoothScrollTo(0, 0)
-                    true
-                }
                 R.id.nav_assets -> {
                     showAssets()
                     true
@@ -759,7 +750,7 @@ class GameActivity : AppCompatActivity() {
         
         // Обновляем дату и статус игры
         updateCurrentDate(player)
-        updateMonthProgressBar(player.currentDayOfMonth) // <-- снова используем день месяца
+        // updateMonthProgressBar(player.currentDayOfMonth) // Убрано - monthProgressBar удален
         updateGameStatus(player)
         updatePlayerAvatar(player)
         
@@ -844,25 +835,7 @@ class GameActivity : AppCompatActivity() {
         }
     }
     
-    private fun updateMonthProgressBar(currentDay: Int) {
-        val progressBar = binding.monthProgressBar
-        progressBar.removeAllViews()
-        val daysInMonth = 30
-        val filledColor = ContextCompat.getColor(this, R.color.primary_color)
-        val emptyColor = ContextCompat.getColor(this, R.color.primary_color_light)
-        val chipMargin = 2
-        for (i in 1..daysInMonth) {
-            val dayView = View(this)
-            val params = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
-            params.marginEnd = chipMargin
-            dayView.layoutParams = params
-            dayView.setBackgroundResource(R.drawable.bg_day_chip)
-            // Анимация заполнения
-            val color = if (i <= currentDay) filledColor else emptyColor
-            dayView.background.setTint(color)
-            progressBar.addView(dayView)
-        }
-    }
+    // Метод updateMonthProgressBar удален - monthProgressBar больше не используется
     
     private fun showEscapeRatRaceDialog() {
         val player = currentGameState?.player ?: return

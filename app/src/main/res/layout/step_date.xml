@@ -33,6 +33,7 @@
             android:layout_height="wrap_content"
             android:text="Дата не выбрана"
             android:textSize="22sp"
+            android:textColor="@color/white"
             android:layout_marginBottom="24dp" />
         <Button
             android:id="@+id/btnPickDate"

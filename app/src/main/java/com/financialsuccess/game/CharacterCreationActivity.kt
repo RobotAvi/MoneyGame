@@ -332,7 +332,7 @@ class CharacterCreationActivity : AppCompatActivity() {
         numberPicker.maxValue = 65
         numberPicker.value = playerAge
 
-        // Set white for all numbers by default
+        // Set white for all numbers by default with consistent size
         val defaultTextColor = resources.getColor(R.color.white, null)
         val selectedTextColor = resources.getColor(R.color.error_color, null) // red for selected
         val childCount = numberPicker.childCount
@@ -340,7 +340,7 @@ class CharacterCreationActivity : AppCompatActivity() {
             val child = numberPicker.getChildAt(i)
             if (child is TextView) {
                 child.setTextColor(defaultTextColor)
-                child.textSize = 36f
+                child.textSize = 40f
             }
         }
         // Also set selector wheel paint (for non-selected numbers) to white
@@ -357,9 +357,9 @@ class CharacterCreationActivity : AppCompatActivity() {
             for (i in 0 until picker.childCount) {
                 val child = picker.getChildAt(i)
                 if (child is TextView) {
-                    // Heuristic: the central displayed value usually has isSelected or higher alpha/scale
-                    // We explicitly set all to white, then try to color the middle (current value) red
+                    // Set all numbers to white with consistent size
                     child.setTextColor(defaultTextColor)
+                    child.textSize = 40f
                 }
             }
             try {

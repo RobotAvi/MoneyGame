@@ -96,24 +96,7 @@ class GameActivityTest {
         assertTrue(player.assets.contains(asset))
     }
 
-    @Test
-    fun testMonthProgressBarColors() {
-        val activityController = Robolectric.buildActivity(GameActivity::class.java).setup()
-        val activity = activityController.get()
-        val currentDay = 10
-        activity.updateMonthProgressBar(currentDay)
-        val progressBar = activity.findViewById<LinearLayout>(R.id.monthProgressBar)
-        assertEquals(30, progressBar.childCount)
-        for (i in 0 until 30) {
-            val dayView = progressBar.getChildAt(i)
-            val color = (dayView.background as? android.graphics.drawable.ColorDrawable)?.color
-            if (i < currentDay) {
-                assertEquals(Color.WHITE, color)
-            } else {
-                assertEquals(Color.LTGRAY, color)
-            }
-        }
-    }
+    // Тест testMonthProgressBarColors удален - monthProgressBar больше не используется
 
     @Test
     fun testPlayerIconPositionMatchesMonthProgress() {

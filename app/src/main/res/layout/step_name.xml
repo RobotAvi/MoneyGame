@@ -35,7 +35,9 @@
             android:textSize="22sp"
             android:maxLength="20"
             android:inputType="textPersonName"
-            android:gravity="center" />
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white" />
         <Button
             android:id="@+id/btnVoiceInput"
             android:layout_width="200dp"
