@@ -22,8 +22,7 @@
             android:background="@color/primary_color"
             app:title=""
             app:titleTextColor="@android:color/transparent"
-            app:navigationIconTint="@color/white"
-            app:menu="@menu/game_actions" />
+            app:navigationIconTint="@color/white" />
 
         <!-- Шапка: слева аватар+имя/профессия/возраст, справа мечта (динамическая) -->
         <LinearLayout
@@ -611,6 +610,22 @@
                 app:lottie_autoPlay="false"
                 app:lottie_loop="false" />
         </FrameLayout>
+
+        <Space
+            android:layout_width="16dp"
+            android:layout_height="1dp" />
+
+        <ImageButton
+            android:id="@+id/btnMore"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/btn_circle_bg"
+            android:src="@android:drawable/ic_menu_more"
+            android:scaleType="center"
+            android:contentDescription="Ещё"
+            android:padding="12dp"
+            android:tint="@color/primary_color"
+            app:tint="@color/primary_color" />
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

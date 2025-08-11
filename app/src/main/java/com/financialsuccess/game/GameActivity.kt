@@ -26,6 +26,7 @@ import android.media.AudioAttributes
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.collectLatest
+import androidx.appcompat.widget.PopupMenu
 
 class GameActivity : AppCompatActivity() {
     
@@ -51,19 +52,7 @@ class GameActivity : AppCompatActivity() {
         
         initSounds()
         
-        binding.toolbar.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.menu_save -> {
-                    currentGameState?.let { GameSaveManager.saveGameState(this, it) }
-                    currentGameState?.player?.let { GameSaveManager.savePlayer(this, it) }
-                    Toast.makeText(this, "Игра сохранена!", Toast.LENGTH_SHORT).show()
-                    true
-                }
-                R.id.menu_rules -> { startActivity(android.content.Intent(this, RulesActivity::class.java)); true }
-                R.id.menu_exit -> { finish(); true }
-                else -> false
-            }
-        }
+        // Удаляем меню с верхнего тулбара: никаких обработчиков не навешиваем
 
         // Observe event panel state from ViewModel
         lifecycleScope.launchWhenStarted {
@@ -136,6 +125,7 @@ class GameActivity : AppCompatActivity() {
         binding.btnUp.setOnClickListener { showActionsMenu() }
         binding.btnDown.setOnClickListener { currentGameState?.player?.let { it.salary = (it.salary - 5000).coerceAtLeast(0); it.updateTotalIncome(); showMessage("Понижение: -${currencyFormat.format(5000)} к зарплате"); updateUI() } }
         binding.tvAge.setOnClickListener { showAgeStatistics() }
+        binding.btnMore.setOnClickListener { v -> showBottomOverflowMenu(v) }
         setupAssetsRecyclerView()
         setupCalendarRecycler()
     }
@@ -1416,5 +1406,26 @@ class GameActivity : AppCompatActivity() {
                 showHealthStatus()
             }
             .show()
+    }
+
+    private fun showBottomOverflowMenu(anchor: View) {
+        val popup = PopupMenu(this, anchor)
+        popup.menu.add(0, R.id.menu_save, 0, "Сохранить")
+        popup.menu.add(0, R.id.menu_rules, 1, "Правила")
+        popup.menu.add(0, R.id.menu_exit, 2, "Выйти")
+        popup.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.menu_save -> {
+                    currentGameState?.let { GameSaveManager.saveGameState(this, it) }
+                    currentGameState?.player?.let { GameSaveManager.savePlayer(this, it) }
+                    Toast.makeText(this, "Игра сохранена!", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                R.id.menu_rules -> { startActivity(Intent(this, RulesActivity::class.java)); true }
+                R.id.menu_exit -> { finish(); true }
+                else -> false
+            }
+        }
+        popup.show()
     }
 }
