@@ -34,16 +34,6 @@
             android:background="@drawable/bg_glass_card">
 
             <ImageView
-                android:id="@+id/ivDayIcon"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_gravity="center"
-                android:contentDescription="Иконка дня"
-                android:scaleType="centerInside"
-                android:tint="@color/primary_color"
-                android:src="@drawable/ic_runner" />
-
-            <ImageView
                 android:id="@+id/ivPlayerToken"
                 android:layout_width="32dp"
                 android:layout_height="32dp"

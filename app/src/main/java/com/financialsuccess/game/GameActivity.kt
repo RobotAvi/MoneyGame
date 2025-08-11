@@ -258,7 +258,6 @@ class GameActivity : AppCompatActivity() {
         }
         val adapter = com.financialsuccess.game.adapters.CalendarAdapter(
             currentDate = currentCal,
-            iconProvider = iconProvider,
             typeProvider = typeProvider,
             selectedDate = calendarAnchor!!
         ) { date ->

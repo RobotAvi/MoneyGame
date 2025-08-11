@@ -16,7 +16,6 @@ import java.util.Calendar
 
 class CalendarAdapter(
     private val currentDate: Calendar,
-    private val iconProvider: (Calendar) -> Int,
     private val typeProvider: (Calendar) -> DayType,
     private var selectedDate: Calendar = currentDate,
     private val onDayClick: (Calendar) -> Unit = {}
@@ -52,7 +51,6 @@ class CalendarAdapter(
         val dayNumber = date.get(Calendar.DAY_OF_MONTH)
 
         holder.dayNumber.text = dayNumber.toString()
-        holder.icon.setImageResource(iconProvider(date))
 
         val isToday = sameDay(date, currentDate)
         val isSelected = sameDay(date, selectedDate)
@@ -101,8 +99,6 @@ class CalendarAdapter(
             holder.lottie?.visibility = View.GONE
         }
 
-        holder.icon.isVisible = !isToday
-        holder.dayNumber.isVisible = true
         holder.playerToken.isVisible = isToday
 
         card.contentDescription = "День $dayNumber: ${type.name}"
@@ -124,7 +120,6 @@ class CalendarAdapter(
 
     class DayViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val container: FrameLayout = view.findViewById(R.id.dayContainer)
-        val icon: ImageView = view.findViewById(R.id.ivDayIcon)
         val dayNumber: TextView = view.findViewById(R.id.tvDayNumber)
         val playerToken: ImageView = view.findViewById(R.id.ivPlayerToken)
         val colorStrip: View = view.findViewById(R.id.vColorStrip)
