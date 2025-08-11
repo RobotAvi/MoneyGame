@@ -15,14 +15,6 @@
         android:padding="20dp"
         app:elevation="4dp">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/primary_color"
-            app:title=""
-            app:titleTextColor="@android:color/transparent"
-            app:navigationIconTint="@color/white" />
 
         <!-- Шапка: слева аватар+имя/профессия/возраст, справа мечта (динамическая) -->
         <LinearLayout
