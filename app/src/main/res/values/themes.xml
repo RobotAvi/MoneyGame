@@ -19,7 +19,7 @@
         <item name="colorOnSurface">@color/text_primary</item>
         
         <!-- Status bar color -->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
         
         <!-- Customize your theme here -->
         <item name="windowActionBar">false</item>

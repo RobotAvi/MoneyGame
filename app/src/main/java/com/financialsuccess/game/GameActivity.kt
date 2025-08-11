@@ -248,16 +248,7 @@ class GameActivity : AppCompatActivity() {
         calendarAnchor = (currentCal.clone() as Calendar)
         val dates = buildFourWeekWindow(calendarAnchor!!)
 
-        val iconProvider: (Calendar) -> Int = { date ->
-            when (date.get(Calendar.DAY_OF_MONTH) % 6) {
-                0 -> R.drawable.ic_finance_logo
-                1 -> R.drawable.ic_runner
-                2 -> R.drawable.ic_businessman_successful
-                3 -> R.drawable.ic_car
-                4 -> R.drawable.ic_engineer_successful
-                else -> R.drawable.ic_teacher
-            }
-        }
+        val iconProvider: (Calendar) -> Int = { _ -> 0 }
         val typeProvider: (Calendar) -> com.financialsuccess.game.adapters.CalendarAdapter.DayType = { date ->
             when (date.get(Calendar.DAY_OF_MONTH) % 4) {
                 0 -> com.financialsuccess.game.adapters.CalendarAdapter.DayType.FINANCE
@@ -278,7 +269,6 @@ class GameActivity : AppCompatActivity() {
         binding.recyclerCalendar.adapter = adapter
         adapter.submitList(dates)
         updateMonthLabel()
-        setupCalendarNav()
     }
     
     private fun rollDiceAndMove() {
@@ -855,33 +845,9 @@ class GameActivity : AppCompatActivity() {
         binding.tvMonthLabel.text = monthName
     }
 
-    private fun setupCalendarNav() {
-        binding.btnPrevMonth.setOnClickListener {
-            calendarAnchor = (calendarAnchor ?: Calendar.getInstance()).apply { add(Calendar.MONTH, -1) }
-            setupCalendarRecycler()
-        }
-        binding.btnNextMonth.setOnClickListener {
-            calendarAnchor = (calendarAnchor ?: Calendar.getInstance()).apply { add(Calendar.MONTH, 1) }
-            setupCalendarRecycler()
-        }
-        // Simple swipe gestures without GestureDetector (for broad compatibility)
-        var startX = 0f
-        val swipeThreshold = 100
-        binding.recyclerCalendar.setOnTouchListener { v, event ->
-            when (event.actionMasked) {
-                android.view.MotionEvent.ACTION_DOWN -> { startX = event.x; v.parent.requestDisallowInterceptTouchEvent(true); true }
-                android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
-                    val diffX = event.x - startX
-                    v.parent.requestDisallowInterceptTouchEvent(false)
-                    if (kotlin.math.abs(diffX) > swipeThreshold) {
-                        if (diffX < 0) binding.btnNextMonth.performClick() else binding.btnPrevMonth.performClick()
-                        true
-                    } else false
-                }
-                else -> false
-            }
-        }
-    }
+    // Month navigation removed per new design; calendar shows a fixed 4-week window around current week.
+    // If needed later, implement swipe-based navigation here without visible buttons.
+    private fun setupCalendarNav() { /* no-op */ }
 
     private fun showEscapeRatRaceDialog() {
         val player = currentGameState?.player ?: return

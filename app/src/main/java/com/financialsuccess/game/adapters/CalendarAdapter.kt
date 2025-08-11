@@ -40,9 +40,10 @@ class CalendarAdapter(
         val parentWidth = parent.measuredWidth.takeIf { it > 0 } ?: parent.resources.displayMetrics.widthPixels
         val spacingPx = (parent.resources.displayMetrics.density * 8).toInt()
         val rawSize = (parentWidth - spacingPx * 8) / 7
-        val minSize = (parent.resources.displayMetrics.density * 64).toInt()
+        val minSize = (parent.resources.displayMetrics.density * 48).toInt()
         val cellSize = maxOf(rawSize, minSize)
         val params = RecyclerView.LayoutParams(cellSize, cellSize)
+        params.bottomMargin = (parent.resources.displayMetrics.density * 6).toInt()
         view.layoutParams = params
         return DayViewHolder(view)
     }
@@ -52,26 +53,29 @@ class CalendarAdapter(
         val dayNumber = date.get(Calendar.DAY_OF_MONTH)
 
         holder.dayNumber.text = dayNumber.toString()
-        holder.icon.setImageResource(iconProvider(date))
+        // Icons removed from day cells; show only numbers
+        // holder.icon.setImageResource(iconProvider(date))
 
         val isToday = sameDay(date, currentDate)
         val isSelected = sameDay(date, selectedDate)
         val rowIndex = position / 7
 
         val type = typeProvider(date)
-        val colorRes = when (type) {
-            DayType.WORK -> R.color.info_color
-            DayType.GAME -> R.color.secondary_color
-            DayType.FINANCE -> R.color.asset_blue
-            DayType.REST -> R.color.success_color
-        }
-        holder.colorStrip.setBackgroundResource(colorRes)
+        // Color strip hidden in new design
+        // val colorRes = when (type) {
+        //     DayType.WORK -> R.color.info_color
+        //     DayType.GAME -> R.color.secondary_color
+        //     DayType.FINANCE -> R.color.asset_blue
+        //     DayType.REST -> R.color.success_color
+        // }
+        // holder.colorStrip.setBackgroundResource(colorRes)
+        holder.colorStrip.isVisible = false
 
         val card = holder.itemView as MaterialCardView
         val density = holder.itemView.resources.displayMetrics.density
         val strokeBase = (density * 1).toInt().coerceAtLeast(1)
-        val strokeWeek = (density * 3).toInt().coerceAtLeast(2)
-        val strokeSelected = (density * 4).toInt().coerceAtLeast(3)
+        val strokeWeek = (density * 2).toInt().coerceAtLeast(1)
+        val strokeSelected = (density * 3).toInt().coerceAtLeast(2)
         val accentWeekColor = holder.itemView.context.getColor(R.color.secondary_variant)
         val normalStrokeColor = holder.itemView.context.getColor(R.color.primary_color)
         val todayStrokeColor = holder.itemView.context.getColor(R.color.primary_variant)
@@ -101,7 +105,7 @@ class CalendarAdapter(
             holder.lottie?.visibility = View.GONE
         }
 
-        holder.icon.isVisible = !isToday
+        holder.icon.isVisible = false
         holder.dayNumber.isVisible = true
         holder.playerToken.isVisible = isToday
 

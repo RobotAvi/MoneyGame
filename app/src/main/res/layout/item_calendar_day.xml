@@ -7,8 +7,8 @@
     android:minHeight="64dp"
     android:layout_margin="4dp"
     app:cardCornerRadius="12dp"
-    app:cardUseCompatPadding="true"
-    app:cardElevation="4dp"
+    app:cardUseCompatPadding="false"
+    app:cardElevation="2dp"
     app:strokeWidth="1dp"
     app:strokeColor="@color/primary_color"
     android:contentDescription="Карточка дня">
@@ -20,8 +20,9 @@
 
         <View
             android:id="@+id/vColorStrip"
-            android:layout_width="4dp"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:visibility="gone"
             android:background="@color/primary_color"
             android:contentDescription="Цветовой индикатор типа дня" />
 
@@ -33,20 +34,18 @@
             android:padding="4dp"
             android:background="@drawable/bg_glass_card">
 
+            <!-- Removed day icon per new simple calendar design -->
             <ImageView
                 android:id="@+id/ivDayIcon"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_gravity="center"
-                android:contentDescription="Иконка дня"
-                android:scaleType="centerInside"
-                android:tint="@color/primary_color"
-                android:src="@drawable/ic_runner" />
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone"
+                android:contentDescription="Иконка дня" />
 
             <ImageView
                 android:id="@+id/ivPlayerToken"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_gravity="center"
                 android:visibility="gone"
                 android:contentDescription="Токен игрока"
@@ -56,17 +55,13 @@
                 android:id="@+id/tvDayNumber"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="top|start"
+                android:layout_gravity="top|end"
                 android:layout_margin="6dp"
                 android:text="1"
                 android:textStyle="bold"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:fontFamily="sans-serif-medium"
-                android:textColor="@color/text_primary"
-                android:shadowColor="#80000000"
-                android:shadowDx="0"
-                android:shadowDy="1"
-                android:shadowRadius="2" />
+                android:textColor="@android:color/white" />
 
             <com.airbnb.lottie.LottieAnimationView
                 android:id="@+id/lottieDaySelect"
