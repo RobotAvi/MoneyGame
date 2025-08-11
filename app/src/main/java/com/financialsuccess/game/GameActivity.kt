@@ -846,24 +846,8 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun setupCalendarNav() {
-        // Removed button listeners; keep swipe navigation only
-        var startX = 0f
-        val swipeThreshold = 100
-        binding.recyclerCalendar.setOnTouchListener { v, event ->
-            when (event.actionMasked) {
-                android.view.MotionEvent.ACTION_DOWN -> { startX = event.x; v.parent.requestDisallowInterceptTouchEvent(true); true }
-                android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
-                    val diffX = event.x - startX
-                    v.parent.requestDisallowInterceptTouchEvent(false)
-                    if (kotlin.math.abs(diffX) > swipeThreshold) {
-                        calendarAnchor = (calendarAnchor ?: Calendar.getInstance()).apply { add(Calendar.MONTH, if (diffX < 0) 1 else -1) }
-                        setupCalendarRecycler()
-                        true
-                    } else false
-                }
-                else -> false
-            }
-        }
+        // Листание месяца отключено
+        binding.recyclerCalendar.setOnTouchListener(null)
     }
 
     private fun showEscapeRatRaceDialog() {
