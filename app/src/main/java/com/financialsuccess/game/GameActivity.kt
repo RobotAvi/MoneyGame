@@ -21,9 +21,15 @@ import android.media.MediaPlayer
 import android.content.Intent
 import androidx.recyclerview.widget.GridLayoutManager
 import com.financialsuccess.game.adapters.CalendarAdapter
+import android.media.SoundPool
+import android.media.AudioAttributes
+import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.collectLatest
 
 class GameActivity : AppCompatActivity() {
     
+    private val viewModel: GameViewModel by viewModels()
     private lateinit var binding: ActivityGameBinding
     private lateinit var gameManager: GameManager
     private var currentGameState: GameState? = null
@@ -32,11 +38,18 @@ class GameActivity : AppCompatActivity() {
     
     private var lastDiceValue: Int? = null
     private var gamePlayer: MediaPlayer? = null
+
+    private var soundPool: SoundPool? = null
+    private var sfxDice: Int = 0
+    private var sfxOk: Int = 0
+    private var sfxError: Int = 0
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        
+        initSounds()
         
         binding.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
@@ -52,13 +65,48 @@ class GameActivity : AppCompatActivity() {
             }
         }
 
+        // Observe event panel state from ViewModel
+        lifecycleScope.launchWhenStarted {
+            viewModel.eventPanel.collectLatest { state ->
+                if (state == null) {
+                    binding.eventMotion.transitionToStart()
+                } else {
+                    binding.tvEventTitle.text = state.title
+                    binding.tvEventMessage.text = state.message
+                    binding.btnEventPrimary.visibility = if (state.primaryText != null && state.onPrimary != null) View.VISIBLE else View.GONE
+                    binding.btnEventSecondary.visibility = if (state.secondaryText != null && state.onSecondary != null) View.VISIBLE else View.GONE
+                    state.primaryText?.let { binding.btnEventPrimary.text = it }
+                    state.secondaryText?.let { binding.btnEventSecondary.text = it }
+                    binding.btnEventPrimary.setOnClickListener { state.onPrimary?.invoke(); viewModel.hideEventPanel() }
+                    binding.btnEventSecondary.setOnClickListener { state.onSecondary?.invoke(); viewModel.hideEventPanel() }
+                    binding.eventMotion.transitionToEnd()
+                }
+            }
+        }
+
         initGame()
         setupUI()
     }
 
     override fun onResume() { super.onResume(); if (gamePlayer == null) { gamePlayer = MediaPlayer.create(this, R.raw.game).apply { isLooping = true; setVolume(0.4f, 0.4f); start() } } else { gamePlayer?.start() } }
     override fun onPause() { super.onPause(); gamePlayer?.pause() }
-    override fun onDestroy() { super.onDestroy(); gamePlayer?.release(); gamePlayer = null }
+    override fun onDestroy() { super.onDestroy(); gamePlayer?.release(); gamePlayer = null; soundPool?.release(); soundPool = null }
+
+    private fun initSounds() {
+        val attrs = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_GAME)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+        soundPool = SoundPool.Builder()
+            .setMaxStreams(4)
+            .setAudioAttributes(attrs)
+            .build()
+        sfxDice = soundPool?.load(this, R.raw.dice_drop, 1) ?: 0
+        sfxOk = soundPool?.load(this, R.raw.ok, 1) ?: 0
+        sfxError = soundPool?.load(this, R.raw.error, 1) ?: 0
+    }
+
+    private fun playSfx(id: Int) { if (id != 0) soundPool?.play(id, 0.8f, 0.8f, 1, 0, 1f) }
     
     private fun initGame() {
         val player: Player? = if (Build.VERSION.SDK_INT >= 33) {
@@ -190,11 +238,16 @@ class GameActivity : AppCompatActivity() {
         return dates
     }
 
+    private var calendarAnchor: Calendar? = null
+
     private fun setupCalendarRecycler() {
         binding.recyclerCalendar.layoutManager = GridLayoutManager(this, 7)
         val player = currentGameState?.player ?: return
         val currentCal = realPlayerCalendar(player)
-        val dates = buildFourWeekWindow(currentCal)
+        // Делаем текущую неделю второй строкой
+        calendarAnchor = (currentCal.clone() as Calendar)
+        val dates = buildFourWeekWindow(calendarAnchor!!)
+
         val iconProvider: (Calendar) -> Int = { date ->
             when (date.get(Calendar.DAY_OF_MONTH) % 6) {
                 0 -> R.drawable.ic_finance_logo
@@ -205,7 +258,27 @@ class GameActivity : AppCompatActivity() {
                 else -> R.drawable.ic_teacher
             }
         }
-        binding.recyclerCalendar.adapter = CalendarAdapter(dates, currentCal, iconProvider)
+        val typeProvider: (Calendar) -> com.financialsuccess.game.adapters.CalendarAdapter.DayType = { date ->
+            when (date.get(Calendar.DAY_OF_MONTH) % 4) {
+                0 -> com.financialsuccess.game.adapters.CalendarAdapter.DayType.FINANCE
+                1 -> com.financialsuccess.game.adapters.CalendarAdapter.DayType.WORK
+                2 -> com.financialsuccess.game.adapters.CalendarAdapter.DayType.GAME
+                else -> com.financialsuccess.game.adapters.CalendarAdapter.DayType.REST
+            }
+        }
+        val adapter = com.financialsuccess.game.adapters.CalendarAdapter(
+            currentDate = currentCal,
+            iconProvider = iconProvider,
+            typeProvider = typeProvider,
+            selectedDate = calendarAnchor!!
+        ) { date ->
+            calendarAnchor = (date.clone() as Calendar)
+            updateMonthLabel()
+        }
+        binding.recyclerCalendar.adapter = adapter
+        adapter.submitList(dates)
+        updateMonthLabel()
+        setupCalendarNav()
     }
     
     private fun rollDiceAndMove() {
@@ -214,7 +287,16 @@ class GameActivity : AppCompatActivity() {
         val player = currentGameState?.player ?: return
         val diceRes = when (diceValue) { 1 -> R.drawable.dice_1; 2 -> R.drawable.dice_2; 3 -> R.drawable.dice_3; 4 -> R.drawable.dice_4; 5 -> R.drawable.dice_5; 6 -> R.drawable.dice_6; else -> R.drawable.dice_1 }
         binding.btnDice.setImageResource(diceRes)
-        showMessage("Выпало $diceValue")
+        // Lottie animation if available
+        binding.lottieDice.apply {
+            visibility = View.VISIBLE
+            alpha = 1f
+            progress = 0f
+            playAnimation()
+            postDelayed({ animate().alpha(0f).setDuration(150).withEndAction { visibility = View.GONE } }, 600)
+        }
+        playSfx(sfxDice)
+        // Hint removed to reduce noise
         handleSlowTrackDice(diceValue)
     }
     
@@ -270,19 +352,15 @@ class GameActivity : AppCompatActivity() {
     
     private fun showVictoryDialog() {
         val player = currentGameState?.player ?: return
-        
-        AlertDialog.Builder(this)
-            .setTitle("🎉 ПОБЕДА!")
-            .setMessage("Поздравляем! Вы достигли своей мечты: ${player.dream.name}!\n\nВы успешно вышли из крысиных бегов и осуществили финансовую мечту!\n\nИтоговый капитал: ${currencyFormat.format(player.cash)}\nПассивный доход: ${currencyFormat.format(player.passiveIncome)}")
-            .setPositiveButton("🎊 Новая игра") { _, _ ->
-                // Перезапуск игры
-                finish()
-            }
-            .setNegativeButton("📊 Итоги") { _, _ ->
-                showFinalStats()
-            }
-            .setCancelable(false)
-            .show()
+        val message = "Поздравляем! Вы достигли своей мечты: ${player.dream.name}!\n\nВы успешно вышли из крысиных бегов и осуществили финансовую мечту!\n\nИтоговый капитал: ${currencyFormat.format(player.cash)}\nПассивный доход: ${currencyFormat.format(player.passiveIncome)}"
+        showEventPanel(
+            title = "🎉 ПОБЕДА!",
+            message = message,
+            primaryText = "🎊 Новая игра",
+            onPrimary = { finish() },
+            secondaryText = "📊 Итоги",
+            onSecondary = { showFinalStats() }
+        )
     }
     
     private fun showFinalStats() {
@@ -301,13 +379,12 @@ class GameActivity : AppCompatActivity() {
             🎉 Вы успешно прошли путь от крысиных бегов до финансовой свободы!
         """.trimIndent()
         
-        AlertDialog.Builder(this)
-            .setTitle("📊 Итоги игры")
-            .setMessage(message)
-            .setPositiveButton("🔄 Новая игра") { _, _ ->
-                finish()
-            }
-            .show()
+        showEventPanel(
+            title = "📊 Итоги игры",
+            message = message,
+            primaryText = "🔄 Новая игра",
+            onPrimary = { finish() }
+        )
     }
     
     private fun handlePositionEvent() {
@@ -326,13 +403,14 @@ class GameActivity : AppCompatActivity() {
     private fun showSmallDeal() {
         val deals = GameDataManager.getSmallDeals()
         val deal = deals.random()
-        
-        AlertDialog.Builder(this)
-            .setTitle("Малая сделка")
-            .setMessage("${deal.name}\nПервоначальный взнос: ${currencyFormat.format(deal.downPayment)}\nДенежный поток: +${currencyFormat.format(deal.cashFlow)}/мес")
-            .setPositiveButton("Купить") { _, _ ->
+
+        val message = "${deal.name}\nПервоначальный взнос: ${currencyFormat.format(deal.downPayment)}\nДенежный поток: +${currencyFormat.format(deal.cashFlow)}/мес"
+        showEventPanel(
+            title = "Малая сделка",
+            message = message,
+            primaryText = "Купить",
+            onPrimary = {
                 if (gameManager.buyAsset(deal)) {
-                    // Логируем покупку актива (без повторного списания)
                     currentGameState?.player?.addFinancialEntry(
                         FinancialEntryType.EXPENSE,
                         FinancialCategory.ASSET_PURCHASE,
@@ -340,25 +418,29 @@ class GameActivity : AppCompatActivity() {
                         "Малая сделка: ${deal.name} (денежный поток: +${currencyFormat.format(deal.cashFlow)}/мес)"
                     )
                     updateUI()
+                    playSfx(sfxOk)
                     showMessage("Актив приобретён!")
                 } else {
+                    playSfx(sfxError)
                     showMessage("Недостаточно средств")
                 }
-            }
-            .setNegativeButton("Пропустить", null)
-            .show()
+            },
+            secondaryText = "Пропустить",
+            onSecondary = { /* no-op */ }
+        )
     }
     
     private fun showBigDeal() {
         val deals = GameDataManager.getBigDeals()
         val deal = deals.random()
-        
-        AlertDialog.Builder(this)
-            .setTitle("Крупная сделка")
-            .setMessage("${deal.name}\nПервоначальный взнос: ${currencyFormat.format(deal.downPayment)}\nДенежный поток: +${currencyFormat.format(deal.cashFlow)}/мес")
-            .setPositiveButton("Купить") { _, _ ->
+
+        val message = "${deal.name}\nПервоначальный взнос: ${currencyFormat.format(deal.downPayment)}\nДенежный поток: +${currencyFormat.format(deal.cashFlow)}/мес"
+        showEventPanel(
+            title = "Крупная сделка",
+            message = message,
+            primaryText = "Купить",
+            onPrimary = {
                 if (gameManager.buyAsset(deal)) {
-                    // Логируем покупку актива (без повторного списания)
                     currentGameState?.player?.addFinancialEntry(
                         FinancialEntryType.EXPENSE,
                         FinancialCategory.ASSET_PURCHASE,
@@ -366,13 +448,16 @@ class GameActivity : AppCompatActivity() {
                         "Крупная сделка: ${deal.name} (денежный поток: +${currencyFormat.format(deal.cashFlow)}/мес)"
                     )
                     updateUI()
+                    playSfx(sfxOk)
                     showMessage("Актив приобретён!")
                 } else {
+                    playSfx(sfxError)
                     showMessage("Недостаточно средств")
                 }
-            }
-            .setNegativeButton("Пропустить", null)
-            .show()
+            },
+            secondaryText = "Пропустить",
+            onSecondary = { /* no-op */ }
+        )
     }
     
     private fun showPaycheck() {
@@ -410,15 +495,18 @@ class GameActivity : AppCompatActivity() {
                 bonusName
             )
             updateUI()
-            showMessage("🎁 $bonusName: +${currencyFormat.format(bonusAmount)}")
+            showEventPanel(
+                title = "🎁 Бонус",
+                message = "$bonusName: +${currencyFormat.format(bonusAmount)}",
+                primaryText = "OK",
+                onPrimary = { /* close */ }
+            )
         }
     }
     
     private fun showMarketEvent() {
         val event = GameDataManager.getRandomEvent()
         
-        // Риски проверяются в processMonthlyOperations, здесь просто показываем событие
-
         // Обработка специальных событий
         when {
             event.contains("ребёнок") -> {
@@ -470,8 +558,14 @@ class GameActivity : AppCompatActivity() {
             }
         }
         
-        showMessage("🎲 $event")
+        showEventPanel(
+            title = "🎲 Событие",
+            message = event,
+            primaryText = "OK",
+            onPrimary = { /* close */ }
+        )
     }
+    
     
     private fun showDoodadEvent() {
         val expenses = listOf(1000, 2000, 3000, 4000, 5000)
@@ -486,21 +580,28 @@ class GameActivity : AppCompatActivity() {
         )
         
         currentGameState?.player?.let { player ->
+            val reason = expenseReasons.random()
             player.logExpense(
                 FinancialCategory.EMERGENCY,
                 expense,
-                expenseReasons.random()
+                reason
             )
             updateUI()
-            showMessage("Непредвиденные расходы: ${currencyFormat.format(expense)}")
+            showEventPanel(
+                title = "💥 Непредвиденные расходы",
+                message = "$reason: -${currencyFormat.format(expense)}",
+                primaryText = "OK",
+                onPrimary = { /* close */ }
+            )
         }
     }
     
     private fun showCharityEvent() {
-        AlertDialog.Builder(this)
-            .setTitle("Благотворительность")
-            .setMessage("Хотите пожертвовать 10% от вашего дохода на благотворительность?")
-            .setPositiveButton("Да") { _, _ ->
+        showEventPanel(
+            title = "Благотворительность",
+            message = "Хотите пожертвовать 10% от вашего дохода на благотворительность?",
+            primaryText = "Да",
+            onPrimary = {
                 currentGameState?.player?.let { player ->
                     val donation = (player.totalIncome * 0.1).toInt()
                     player.logExpense(
@@ -509,11 +610,13 @@ class GameActivity : AppCompatActivity() {
                         "Пожертвование на благотворительность (10% от дохода)"
                     )
                     updateUI()
+                    playSfx(sfxOk)
                     showMessage("Спасибо за пожертвование: ${currencyFormat.format(donation)}")
                 }
-            }
-            .setNegativeButton("Нет", null)
-            .show()
+            },
+            secondaryText = "Нет",
+            onSecondary = { /* no-op */ }
+        )
     }
     
     private fun showFinancialStatement() {
@@ -543,11 +646,12 @@ class GameActivity : AppCompatActivity() {
                 ${if (player.canEscapeRatRace()) "🎉 Готов к скоростной дорожке!" else "💪 Увеличивайте пассивный доход"}
             """.trimIndent()
             
-            AlertDialog.Builder(this)
-                .setTitle("📋 Финансовый отчёт")
-                .setMessage(message)
-                .setPositiveButton("OK", null)
-                .show()
+            showEventPanel(
+                title = "📋 Финансовый отчёт",
+                message = message,
+                primaryText = "OK",
+                onPrimary = { /* close panel */ }
+            )
         }
     }
     
@@ -669,8 +773,10 @@ class GameActivity : AppCompatActivity() {
                         )
                         
                         updateUI()
+                        playSfx(sfxOk)
                         showMessage("✅ Инвестиция оформлена!")
                     } else {
+                        playSfx(sfxError)
                         showMessage("❌ Недостаточно средств")
                     }
                 }
@@ -743,6 +849,40 @@ class GameActivity : AppCompatActivity() {
     
     // Метод updateMonthProgressBar удален - monthProgressBar больше не используется
     
+    private fun updateMonthLabel() {
+        val anchor = calendarAnchor ?: return
+        val monthName = android.text.format.DateFormat.format("MMMM yyyy", anchor).toString().replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString() }
+        binding.tvMonthLabel.text = monthName
+    }
+
+    private fun setupCalendarNav() {
+        binding.btnPrevMonth.setOnClickListener {
+            calendarAnchor = (calendarAnchor ?: Calendar.getInstance()).apply { add(Calendar.MONTH, -1) }
+            setupCalendarRecycler()
+        }
+        binding.btnNextMonth.setOnClickListener {
+            calendarAnchor = (calendarAnchor ?: Calendar.getInstance()).apply { add(Calendar.MONTH, 1) }
+            setupCalendarRecycler()
+        }
+        // Simple swipe gestures without GestureDetector (for broad compatibility)
+        var startX = 0f
+        val swipeThreshold = 100
+        binding.recyclerCalendar.setOnTouchListener { v, event ->
+            when (event.actionMasked) {
+                android.view.MotionEvent.ACTION_DOWN -> { startX = event.x; v.parent.requestDisallowInterceptTouchEvent(true); true }
+                android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
+                    val diffX = event.x - startX
+                    v.parent.requestDisallowInterceptTouchEvent(false)
+                    if (kotlin.math.abs(diffX) > swipeThreshold) {
+                        if (diffX < 0) binding.btnNextMonth.performClick() else binding.btnPrevMonth.performClick()
+                        true
+                    } else false
+                }
+                else -> false
+            }
+        }
+    }
+
     private fun showEscapeRatRaceDialog() {
         val player = currentGameState?.player ?: return
         
@@ -1209,6 +1349,28 @@ class GameActivity : AppCompatActivity() {
             "🔄\nКруг"
         }
     }
+    
+    private fun showEventPanel(
+        title: String,
+        message: String,
+        primaryText: String? = null,
+        onPrimary: (() -> Unit)? = null,
+        secondaryText: String? = null,
+        onSecondary: (() -> Unit)? = null
+    ) {
+        viewModel.showEventPanel(
+            EventPanelState(
+                title = title,
+                message = message,
+                primaryText = primaryText,
+                onPrimary = onPrimary,
+                secondaryText = secondaryText,
+                onSecondary = onSecondary
+            )
+        )
+    }
+
+    private fun hideEventPanel() { viewModel.hideEventPanel() }
     
     private fun showAgeStatistics() {
         val player = currentGameState?.player ?: return

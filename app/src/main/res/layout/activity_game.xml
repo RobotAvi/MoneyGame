@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_color">
+    android:background="@drawable/bg_app_gradient">
 
     <!-- Верхняя панель -->
     <com.google.android.material.appbar.AppBarLayout
@@ -20,8 +20,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/primary_color"
-            app:title="@string/app_name"
-            app:titleTextColor="@color/white"
+            app:title=""
+            app:titleTextColor="@android:color/transparent"
             app:navigationIconTint="@color/white"
             app:menu="@menu/game_actions" />
 
@@ -282,14 +282,51 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:id="@+id/calendar_header"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Календарь (4 недели)"
-                        android:textStyle="bold"
-                        android:textColor="@color/text_primary"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="8dp" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/bg_header_chip"
+                        android:padding="8dp">
+
+                        <ImageButton
+                            android:id="@+id/btnPrevMonth"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/btn_circle_bg"
+                            android:contentDescription="Предыдущий месяц"
+                            android:src="@android:drawable/ic_media_previous"
+                            android:tint="@color/primary_color"
+                            app:tint="@color/primary_color" />
+
+                        <TextView
+                            android:id="@+id/tvMonthLabel"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Январь 2024"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary"
+                            android:shadowColor="#66FFFFFF"
+                            android:shadowDx="0"
+                            android:shadowDy="1"
+                            android:shadowRadius="2"
+                            android:textSize="20sp" />
+
+                        <ImageButton
+                            android:id="@+id/btnNextMonth"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/btn_circle_bg"
+                            android:contentDescription="Следующий месяц"
+                            android:src="@android:drawable/ic_media_next"
+                            android:tint="@color/primary_color"
+                            app:tint="@color/primary_color" />
+                    </LinearLayout>
 
                     <LinearLayout
                         android:id="@+id/weekdays_header"
@@ -377,6 +414,76 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Панель событий под календарём (MotionLayout) -->
+            <androidx.constraintlayout.motion.widget.MotionLayout
+                android:id="@+id/eventMotion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:layoutDescription="@xml/event_panel_scene">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_event_panel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="8dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/primary_color">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/tvEventTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Событие"
+                            android:textStyle="bold"
+                            android:textSize="18sp"
+                            android:textColor="@color/text_primary" />
+
+                        <TextView
+                            android:id="@+id/tvEventMessage"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Описание события"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_secondary" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="end"
+                            android:layout_marginTop="12dp">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnEventSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Отмена"
+                                style="@style/Widget.App.Button" />
+
+                            <Space
+                                android:layout_width="12dp"
+                                android:layout_height="1dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnEventPrimary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Действие"
+                                style="@style/Widget.App.Button" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </androidx.constraintlayout.motion.widget.MotionLayout>
+
             <!-- Скрытые служебные элементы -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnHealthStatus"
@@ -416,15 +523,22 @@
     </androidx.core.widget.NestedScrollView>
 
     <!-- Нижняя панель из 4 круглых кнопок -->
-    <LinearLayout
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/bottom_actions"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="88dp"
         android:layout_gravity="bottom"
-        android:background="@color/white"
         android:padding="12dp"
-        android:gravity="center"
-        android:orientation="horizontal">
+        app:cardCornerRadius="24dp"
+        app:cardElevation="12dp"
+        app:strokeWidth="0dp"
+        app:cardBackgroundColor="@color/surface_color">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="horizontal">
 
         <ImageButton
             android:id="@+id/btnUp"
@@ -463,7 +577,7 @@
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:background="@drawable/btn_circle_bg"
-            android:src="@drawable/ic_finance_logo"
+            android:src="@drawable/ic_action_report"
             android:scaleType="center"
             android:contentDescription="Статистика и отчёты"
             android:padding="12dp"
@@ -474,15 +588,30 @@
             android:layout_width="16dp"
             android:layout_height="1dp" />
 
-        <ImageButton
-            android:id="@+id/btnDice"
+        <FrameLayout
             android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:background="@drawable/btn_circle_bg"
-            android:src="@drawable/dice_1"
-            android:scaleType="centerCrop"
-            android:contentDescription="Бросить кубик"
-            android:padding="8dp" />
+            android:layout_height="56dp">
+
+            <ImageButton
+                android:id="@+id/btnDice"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/btn_circle_bg"
+                android:src="@drawable/dice_1"
+                android:scaleType="centerCrop"
+                android:contentDescription="Бросить кубик"
+                android:padding="8dp" />
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/lottieDice"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                app:lottie_rawRes="@raw/dice_roll"
+                app:lottie_autoPlay="false"
+                app:lottie_loop="false" />
+        </FrameLayout>
     </LinearLayout>
 
+</com.google.android.material.card.MaterialCardView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

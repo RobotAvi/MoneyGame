@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.FinancialSuccess" parent="Theme.Material3.DayNight">
+        <item name="colorPrimary">#90CAF9</item>
+        <item name="colorPrimaryVariant">#42A5F5</item>
+        <item name="colorOnPrimary">#000000</item>
+
+        <item name="android:colorBackground">#121212</item>
+        <item name="colorSurface">#1E1E1E</item>
+        <item name="colorOnBackground">#FFFFFF</item>
+        <item name="colorOnSurface">#FFFFFF</item>
+
+        <item name="materialCardViewStyle">@style/Widget.App.CardView</item>
+        <item name="materialButtonStyle">@style/Widget.App.Button</item>
+    </style>
+</resources>
