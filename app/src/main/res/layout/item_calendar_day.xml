@@ -1,66 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="0dp"
-    android:layout_height="0dp"
-    android:minWidth="64dp"
-    android:minHeight="64dp"
-    android:layout_margin="4dp"
-    app:cardCornerRadius="12dp"
-    app:cardUseCompatPadding="true"
-    app:cardElevation="4dp"
-    app:strokeWidth="1dp"
-    app:strokeColor="@color/primary_color"
-    android:contentDescription="Карточка дня">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="64dp"
+    android:layout_height="64dp"
+    android:layout_margin="2dp"
+    android:background="@android:color/white">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
+    <TextView
+        android:id="@+id/tvDayNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="1"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:contentDescription="День календаря" />
 
-        <!-- Removed left color strip -->
+    <ImageView
+        android:id="@+id/ivPlayerToken"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:src="@drawable/player_token"
+        android:contentDescription="Токен игрока" />
 
-        <FrameLayout
-            android:id="@+id/dayContainer"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:padding="4dp"
-            android:background="@drawable/bg_glass_card">
-
-            <ImageView
-                android:id="@+id/ivPlayerToken"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_gravity="center"
-                android:visibility="gone"
-                android:contentDescription="Токен игрока"
-                android:src="@drawable/player_token" />
-
-            <TextView
-                android:id="@+id/tvDayNumber"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top|start"
-                android:layout_margin="6dp"
-                android:text="1"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:fontFamily="sans-serif-medium"
-                android:textColor="@color/text_primary"
-                android:shadowColor="#80000000"
-                android:shadowDx="0"
-                android:shadowDy="1"
-                android:shadowRadius="2" />
-
-            <com.airbnb.lottie.LottieAnimationView
-                android:id="@+id/lottieDaySelect"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="gone"
-                app:lottie_rawRes="@raw/day_select"
-                app:lottie_autoPlay="false"
-                app:lottie_loop="false" />
-        </FrameLayout>
-    </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+</FrameLayout>

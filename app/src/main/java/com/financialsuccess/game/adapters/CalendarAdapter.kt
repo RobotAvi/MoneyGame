@@ -1,17 +1,15 @@
 package com.financialsuccess.game.adapters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.financialsuccess.game.R
-import com.google.android.material.card.MaterialCardView
 import java.util.Calendar
 
 class CalendarAdapter(
@@ -36,13 +34,6 @@ class CalendarAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DayViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_calendar_day, parent, false)
-        val parentWidth = parent.measuredWidth.takeIf { it > 0 } ?: parent.resources.displayMetrics.widthPixels
-        val spacingPx = (parent.resources.displayMetrics.density * 8).toInt()
-        val rawSize = (parentWidth - spacingPx * 8) / 7
-        val minSize = (parent.resources.displayMetrics.density * 64).toInt()
-        val cellSize = maxOf(rawSize, minSize)
-        val params = RecyclerView.LayoutParams(cellSize, cellSize)
-        view.layoutParams = params
         return DayViewHolder(view)
     }
 
@@ -50,60 +41,22 @@ class CalendarAdapter(
         val date = getItem(position)
         val dayNumber = date.get(Calendar.DAY_OF_MONTH)
 
+        // Устанавливаем номер дня
         holder.dayNumber.text = dayNumber.toString()
 
+        // Проверяем, является ли этот день текущим
         val isToday = sameDay(date, currentDate)
-        val isSelected = sameDay(date, selectedDate)
-        val rowIndex = position / 7
-
-        val type = typeProvider(date)
-        val card = holder.itemView as MaterialCardView
-        val density = holder.itemView.resources.displayMetrics.density
-        val strokeBase = (density * 1).toInt().coerceAtLeast(1)
-        val strokeWeek = (density * 3).toInt().coerceAtLeast(2)
-        val strokeSelected = (density * 4).toInt().coerceAtLeast(3)
-        val accentWeekColor = holder.itemView.context.getColor(R.color.secondary_variant)
-        val normalStrokeColor = holder.itemView.context.getColor(R.color.primary_color)
-        val todayStrokeColor = holder.itemView.context.getColor(R.color.primary_variant)
-
-        // Цвет рамки по типу дня
-        val typeStrokeColor = when (type) {
-            DayType.WORK -> holder.itemView.context.getColor(R.color.info_color)
-            DayType.GAME -> holder.itemView.context.getColor(R.color.secondary_color)
-            DayType.FINANCE -> holder.itemView.context.getColor(R.color.asset_blue)
-            DayType.REST -> holder.itemView.context.getColor(R.color.success_color)
+        
+        // Показываем токен только на текущем дне
+        holder.playerToken.visibility = if (isToday) View.VISIBLE else View.GONE
+        
+        // Логирование для отладки
+        if (isToday) {
+            Log.d("CalendarAdapter", "Токен отображается на дне $dayNumber (позиция $position)")
         }
 
-        card.strokeWidth = when {
-            isSelected -> strokeSelected
-            rowIndex == 1 -> strokeWeek
-            else -> strokeBase
-        }
-        card.strokeColor = when {
-            isSelected -> todayStrokeColor
-            rowIndex == 1 -> accentWeekColor
-            isToday -> todayStrokeColor
-            else -> typeStrokeColor
-        }
-        card.cardElevation = if (isSelected) 10f else 4f
-        if (isSelected) {
-            card.animate().scaleX(1.06f).scaleY(1.06f).setDuration(120).start()
-            holder.lottie?.apply {
-                visibility = View.VISIBLE
-                progress = 0f
-                playAnimation()
-                postDelayed({ visibility = View.GONE }, 400)
-            }
-        } else {
-            card.animate().scaleX(1f).scaleY(1f).setDuration(120).start()
-            holder.lottie?.visibility = View.GONE
-        }
-
-        holder.playerToken.isVisible = isToday
-
-        card.contentDescription = "День $dayNumber: ${type.name}"
-
-        card.setOnClickListener {
+        // Обработка клика
+        holder.itemView.setOnClickListener {
             val prev = selectedDate
             selectedDate = date
             val prevIndex = currentList.indexOfFirst { sameDay(it, prev) }
@@ -119,9 +72,7 @@ class CalendarAdapter(
     }
 
     class DayViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val container: FrameLayout = view.findViewById(R.id.dayContainer)
         val dayNumber: TextView = view.findViewById(R.id.tvDayNumber)
         val playerToken: ImageView = view.findViewById(R.id.ivPlayerToken)
-        val lottie: com.airbnb.lottie.LottieAnimationView? = view.findViewById(R.id.lottieDaySelect)
     }
 }

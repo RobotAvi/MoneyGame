@@ -27,6 +27,7 @@ import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.collectLatest
 import androidx.appcompat.widget.PopupMenu
+import android.util.Log
 
 class GameActivity : AppCompatActivity() {
     
@@ -204,6 +205,10 @@ class GameActivity : AppCompatActivity() {
         add(Calendar.MONTH, player.monthsPlayed)
         set(Calendar.DAY_OF_MONTH, player.currentDayOfMonth)
         set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+        
+        // Логирование для отладки
+        Log.d("GameActivity", "realPlayerCalendar: monthsPlayed=${player.monthsPlayed}, currentDayOfMonth=${player.currentDayOfMonth}")
+        Log.d("GameActivity", "realPlayerCalendar: результат = ${get(Calendar.DAY_OF_MONTH)}.${get(Calendar.MONTH) + 1}.${get(Calendar.YEAR)}")
     }
 
     private fun weekStart(cal: Calendar): Calendar {
@@ -234,31 +239,18 @@ class GameActivity : AppCompatActivity() {
         binding.recyclerCalendar.layoutManager = GridLayoutManager(this, 7)
         val player = currentGameState?.player ?: return
         val currentCal = realPlayerCalendar(player)
+        
+        // Логирование для отладки
+        Log.d("GameActivity", "setupCalendarRecycler: текущая дата игрока = ${currentCal.get(Calendar.DAY_OF_MONTH)}.${currentCal.get(Calendar.MONTH) + 1}.${currentCal.get(Calendar.YEAR)}")
+        
         // Делаем текущую неделю второй строкой
         calendarAnchor = (currentCal.clone() as Calendar)
         val dates = buildFourWeekWindow(calendarAnchor!!)
 
-        val iconProvider: (Calendar) -> Int = { date ->
-            when (date.get(Calendar.DAY_OF_MONTH) % 6) {
-                0 -> R.drawable.ic_finance_logo
-                1 -> R.drawable.ic_runner
-                2 -> R.drawable.ic_businessman_successful
-                3 -> R.drawable.ic_car
-                4 -> R.drawable.ic_engineer_successful
-                else -> R.drawable.ic_teacher
-            }
-        }
-        val typeProvider: (Calendar) -> com.financialsuccess.game.adapters.CalendarAdapter.DayType = { date ->
-            when (date.get(Calendar.DAY_OF_MONTH) % 4) {
-                0 -> com.financialsuccess.game.adapters.CalendarAdapter.DayType.FINANCE
-                1 -> com.financialsuccess.game.adapters.CalendarAdapter.DayType.WORK
-                2 -> com.financialsuccess.game.adapters.CalendarAdapter.DayType.GAME
-                else -> com.financialsuccess.game.adapters.CalendarAdapter.DayType.REST
-            }
-        }
+        // Упрощенный адаптер без сложной логики
         val adapter = com.financialsuccess.game.adapters.CalendarAdapter(
             currentDate = currentCal,
-            typeProvider = typeProvider,
+            typeProvider = { _ -> com.financialsuccess.game.adapters.CalendarAdapter.DayType.REST }, // Простой тип по умолчанию
             selectedDate = calendarAnchor!!
         ) { date ->
             calendarAnchor = (date.clone() as Calendar)
@@ -268,6 +260,42 @@ class GameActivity : AppCompatActivity() {
         adapter.submitList(dates)
         updateMonthLabel()
         setupCalendarNav()
+        
+        // Сохраняем ссылку на адаптер для обновления
+        calendarAdapter = adapter
+    }
+    
+    // Переменная для хранения ссылки на адаптер календаря
+    private var calendarAdapter: com.financialsuccess.game.adapters.CalendarAdapter? = null
+    
+    // Функция для принудительного обновления токена игрока
+    private fun updatePlayerToken() {
+        val player = currentGameState?.player ?: return
+        val currentCal = realPlayerCalendar(player)
+        
+        Log.d("GameActivity", "updatePlayerToken: обновляем токен на дату ${currentCal.get(Calendar.DAY_OF_MONTH)}.${currentCal.get(Calendar.MONTH) + 1}.${currentCal.get(Calendar.YEAR)}")
+        
+        // Обновляем текущую дату в адаптере
+        calendarAdapter?.let { adapter ->
+            // Создаем новый адаптер с обновленной датой
+            val newAdapter = com.financialsuccess.game.adapters.CalendarAdapter(
+                currentDate = currentCal,
+                typeProvider = { _ -> com.financialsuccess.game.adapters.CalendarAdapter.DayType.REST },
+                selectedDate = calendarAnchor ?: currentCal
+            ) { date ->
+                calendarAnchor = (date.clone() as Calendar)
+                updateMonthLabel()
+            }
+            
+            binding.recyclerCalendar.adapter = newAdapter
+            calendarAdapter = newAdapter
+            
+            // Пересоздаем список дат
+            val dates = buildFourWeekWindow(calendarAnchor ?: currentCal)
+            newAdapter.submitList(dates)
+            
+            Log.d("GameActivity", "updatePlayerToken: календарь обновлен")
+        }
     }
     
     private fun rollDiceAndMove() {
@@ -821,6 +849,8 @@ class GameActivity : AppCompatActivity() {
         binding.tvHealthStatus.text = player.getHealthStatus()
         // Обновляем 4-недельное окно календаря; при переходе конца недели текущее сместится наверх
         setupCalendarRecycler()
+        // Обновляем токен игрока на календаре
+        updatePlayerToken()
         if (player.canEscapeRatRace() && !player.isInFastTrack) { showEscapeRatRaceDialog() }
 
         // Установить иконку мечты в шапке в соответствии с выбранной мечтой
