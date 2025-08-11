@@ -18,12 +18,7 @@
         android:layout_height="match_parent"
         android:orientation="horizontal">
 
-        <View
-            android:id="@+id/vColorStrip"
-            android:layout_width="4dp"
-            android:layout_height="match_parent"
-            android:background="@color/primary_color"
-            android:contentDescription="Цветовой индикатор типа дня" />
+        <!-- Removed left color strip -->
 
         <FrameLayout
             android:id="@+id/dayContainer"

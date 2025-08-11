@@ -57,14 +57,6 @@ class CalendarAdapter(
         val rowIndex = position / 7
 
         val type = typeProvider(date)
-        val colorRes = when (type) {
-            DayType.WORK -> R.color.info_color
-            DayType.GAME -> R.color.secondary_color
-            DayType.FINANCE -> R.color.asset_blue
-            DayType.REST -> R.color.success_color
-        }
-        holder.colorStrip.setBackgroundResource(colorRes)
-
         val card = holder.itemView as MaterialCardView
         val density = holder.itemView.resources.displayMetrics.density
         val strokeBase = (density * 1).toInt().coerceAtLeast(1)
@@ -73,6 +65,14 @@ class CalendarAdapter(
         val accentWeekColor = holder.itemView.context.getColor(R.color.secondary_variant)
         val normalStrokeColor = holder.itemView.context.getColor(R.color.primary_color)
         val todayStrokeColor = holder.itemView.context.getColor(R.color.primary_variant)
+
+        // Цвет рамки по типу дня
+        val typeStrokeColor = when (type) {
+            DayType.WORK -> holder.itemView.context.getColor(R.color.info_color)
+            DayType.GAME -> holder.itemView.context.getColor(R.color.secondary_color)
+            DayType.FINANCE -> holder.itemView.context.getColor(R.color.asset_blue)
+            DayType.REST -> holder.itemView.context.getColor(R.color.success_color)
+        }
 
         card.strokeWidth = when {
             isSelected -> strokeSelected
@@ -83,7 +83,7 @@ class CalendarAdapter(
             isSelected -> todayStrokeColor
             rowIndex == 1 -> accentWeekColor
             isToday -> todayStrokeColor
-            else -> normalStrokeColor
+            else -> typeStrokeColor
         }
         card.cardElevation = if (isSelected) 10f else 4f
         if (isSelected) {
@@ -122,7 +122,6 @@ class CalendarAdapter(
         val container: FrameLayout = view.findViewById(R.id.dayContainer)
         val dayNumber: TextView = view.findViewById(R.id.tvDayNumber)
         val playerToken: ImageView = view.findViewById(R.id.ivPlayerToken)
-        val colorStrip: View = view.findViewById(R.id.vColorStrip)
         val lottie: com.airbnb.lottie.LottieAnimationView? = view.findViewById(R.id.lottieDaySelect)
     }
 }
