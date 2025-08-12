@@ -6,7 +6,7 @@
     android:minWidth="40dp"
     android:minHeight="40dp"
     android:layout_margin="4dp"
-    app:cardCornerRadius="12dp"
+    app:cardCornerRadius="0dp"
     app:cardUseCompatPadding="true"
     app:cardElevation="4dp"
     app:strokeWidth="1dp"
@@ -52,6 +52,7 @@
                 android:contentDescription="Иконка дня"
                 android:scaleType="centerInside"
                 android:tint="@color/primary_color"
+            android:alpha="0.7"
                 android:src="@drawable/ic_runner" />
 
             <ImageView
@@ -68,12 +69,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top|start"
-                android:layout_margin="6dp"
+                android:layout_margin="4dp"
                 android:text="1"
                 android:textStyle="bold"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:fontFamily="sans-serif-medium"
-                android:textColor="@color/text_primary"
+                android:textColor="@color/black"
                 android:shadowColor="#80000000"
                 android:shadowDx="0"
                 android:shadowDy="1"

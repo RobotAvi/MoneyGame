@@ -102,6 +102,11 @@ class CalendarAdapter(
         // Ensure number and token are above other layers
         holder.dayNumber.bringToFront()
         holder.playerToken.bringToFront()
+        // Explicit Z-order for clarity
+        holder.colorStrip.translationZ = 0f
+        holder.icon.translationZ = 2f
+        holder.dayNumber.translationZ = 3f
+        holder.playerToken.translationZ = 4f
 
         card.contentDescription = "День $dayNumber: ${type.name}"
 
