@@ -856,15 +856,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun setupCalendarNav() {
-        binding.btnPrevMonth.setOnClickListener {
-            calendarAnchor = (calendarAnchor ?: Calendar.getInstance()).apply { add(Calendar.MONTH, -1) }
-            setupCalendarRecycler()
-        }
-        binding.btnNextMonth.setOnClickListener {
-            calendarAnchor = (calendarAnchor ?: Calendar.getInstance()).apply { add(Calendar.MONTH, 1) }
-            setupCalendarRecycler()
-        }
-        // Simple swipe gestures without GestureDetector (for broad compatibility)
+        // Swipe gestures for month navigation without header buttons
         var startX = 0f
         val swipeThreshold = 100
         binding.recyclerCalendar.setOnTouchListener { v, event ->
@@ -874,7 +866,8 @@ class GameActivity : AppCompatActivity() {
                     val diffX = event.x - startX
                     v.parent.requestDisallowInterceptTouchEvent(false)
                     if (kotlin.math.abs(diffX) > swipeThreshold) {
-                        if (diffX < 0) binding.btnNextMonth.performClick() else binding.btnPrevMonth.performClick()
+                        calendarAnchor = (calendarAnchor ?: Calendar.getInstance()).apply { add(Calendar.MONTH, if (diffX < 0) 1 else -1) }
+                        setupCalendarRecycler()
                         true
                     } else false
                 }

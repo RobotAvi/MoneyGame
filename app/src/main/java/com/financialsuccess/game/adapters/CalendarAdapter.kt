@@ -40,7 +40,7 @@ class CalendarAdapter(
         val parentWidth = parent.measuredWidth.takeIf { it > 0 } ?: parent.resources.displayMetrics.widthPixels
         val spacingPx = (parent.resources.displayMetrics.density * 8).toInt()
         val rawSize = (parentWidth - spacingPx * 8) / 7
-        val minSize = (parent.resources.displayMetrics.density * 64).toInt()
+        val minSize = (parent.resources.displayMetrics.density * 40).toInt()
         val cellSize = maxOf(rawSize, minSize)
         val params = RecyclerView.LayoutParams(cellSize, cellSize)
         view.layoutParams = params
