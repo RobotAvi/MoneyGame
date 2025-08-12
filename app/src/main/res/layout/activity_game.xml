@@ -15,6 +15,7 @@
         android:padding="20dp"
         app:elevation="4dp">
 
+        <!-- Toolbar removed as per request
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -24,6 +25,7 @@
             app:titleTextColor="@android:color/transparent"
             app:navigationIconTint="@color/white"
             app:menu="@menu/game_actions" />
+        -->
 
         <!-- Шапка: слева аватар+имя/профессия/возраст, справа мечта (динамическая) -->
         <LinearLayout

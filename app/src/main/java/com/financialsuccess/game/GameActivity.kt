@@ -51,18 +51,21 @@ class GameActivity : AppCompatActivity() {
         
         initSounds()
         
-        binding.toolbar.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.menu_save -> {
-                    currentGameState?.let { GameSaveManager.saveGameState(this, it) }
-                    currentGameState?.player?.let { GameSaveManager.savePlayer(this, it) }
-                    Toast.makeText(this, "Игра сохранена!", Toast.LENGTH_SHORT).show()
-                    true
+        // Toolbar removed; menu actions will be handled via system back press
+        onBackPressedDispatcher.addCallback(this) {
+            // Show actions that were previously in the toolbar menu
+            val options = arrayOf("Сохранить игру", "Правила", "Выход")
+            AlertDialog.Builder(this@GameActivity)
+                .setTitle("Меню")
+                .setItems(options) { _, which ->
+                    when (which) {
+                        0 -> { currentGameState?.let { GameSaveManager.saveGameState(this@GameActivity, it) }; currentGameState?.player?.let { GameSaveManager.savePlayer(this@GameActivity, it) }; Toast.makeText(this@GameActivity, "Игра сохранена!", Toast.LENGTH_SHORT).show() }
+                        1 -> startActivity(android.content.Intent(this@GameActivity, RulesActivity::class.java))
+                        2 -> finish()
+                    }
                 }
-                R.id.menu_rules -> { startActivity(android.content.Intent(this, RulesActivity::class.java)); true }
-                R.id.menu_exit -> { finish(); true }
-                else -> false
-            }
+                .setNegativeButton("Закрыть", null)
+                .show()
         }
 
         // Observe event panel state from ViewModel
@@ -248,15 +251,8 @@ class GameActivity : AppCompatActivity() {
         calendarAnchor = (currentCal.clone() as Calendar)
         val dates = buildFourWeekWindow(calendarAnchor!!)
 
-        val iconProvider: (Calendar) -> Int = { date ->
-            when (date.get(Calendar.DAY_OF_MONTH) % 6) {
-                0 -> R.drawable.ic_finance_logo
-                1 -> R.drawable.ic_runner
-                2 -> R.drawable.ic_businessman_successful
-                3 -> R.drawable.ic_car
-                4 -> R.drawable.ic_engineer_successful
-                else -> R.drawable.ic_teacher
-            }
+        val iconProvider: (Calendar) -> Int = { _ ->
+            0 // icons disabled for calendar cells
         }
         val typeProvider: (Calendar) -> com.financialsuccess.game.adapters.CalendarAdapter.DayType = { date ->
             when (date.get(Calendar.DAY_OF_MONTH) % 4) {

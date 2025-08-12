@@ -52,8 +52,14 @@ class CalendarAdapter(
         val dayNumber = date.get(Calendar.DAY_OF_MONTH)
 
         holder.dayNumber.text = dayNumber.toString()
-        holder.icon.setImageResource(iconProvider(date))
-        holder.icon.alpha = 0.6f
+        val iconRes = iconProvider(date)
+        if (iconRes != 0) {
+            holder.icon.setImageResource(iconRes)
+            holder.icon.isVisible = true
+            holder.icon.alpha = 0.6f
+        } else {
+            holder.icon.isVisible = false
+        }
 
         val isToday = sameDay(date, currentDate)
         val isSelected = sameDay(date, selectedDate)
