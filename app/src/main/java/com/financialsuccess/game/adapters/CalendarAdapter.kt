@@ -90,15 +90,10 @@ class CalendarAdapter(
         card.cardElevation = if (isSelected) 10f else 4f
         if (isSelected) {
             card.animate().scaleX(1.06f).scaleY(1.06f).setDuration(120).start()
-            holder.lottie?.apply {
-                visibility = View.VISIBLE
-                progress = 0f
-                playAnimation()
-                postDelayed({ visibility = View.GONE }, 400)
-            }
+            // Lottie disabled
         } else {
             card.animate().scaleX(1f).scaleY(1f).setDuration(120).start()
-            holder.lottie?.visibility = View.GONE
+            // Lottie disabled
         }
 
         holder.icon.isVisible = !isToday
@@ -131,6 +126,6 @@ class CalendarAdapter(
         val dayNumber: TextView = view.findViewById(R.id.tvDayNumber)
         val playerToken: ImageView = view.findViewById(R.id.ivPlayerToken)
         val colorStrip: View = view.findViewById(R.id.vColorStrip)
-        val lottie: com.airbnb.lottie.LottieAnimationView? = view.findViewById(R.id.lottieDaySelect)
+        // val lottie: com.airbnb.lottie.LottieAnimationView? = view.findViewById(R.id.lottieDaySelect)
     }
 }

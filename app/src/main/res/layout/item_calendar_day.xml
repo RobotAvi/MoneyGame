@@ -33,6 +33,7 @@
             android:padding="4dp"
             android:background="@drawable/bg_glass_card">
 
+            <!--
             <com.airbnb.lottie.LottieAnimationView
                 android:id="@+id/lottieDaySelect"
                 android:layout_width="match_parent"
@@ -41,6 +42,7 @@
                 app:lottie_rawRes="@raw/day_select"
                 app:lottie_autoPlay="false"
                 app:lottie_loop="false" />
+            -->
 
             <ImageView
                 android:id="@+id/ivDayIcon"
