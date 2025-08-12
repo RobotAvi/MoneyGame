@@ -53,6 +53,7 @@ class CalendarAdapter(
 
         holder.dayNumber.text = dayNumber.toString()
         holder.icon.setImageResource(iconProvider(date))
+        holder.icon.alpha = 0.6f
 
         val isToday = sameDay(date, currentDate)
         val isSelected = sameDay(date, selectedDate)
@@ -98,7 +99,8 @@ class CalendarAdapter(
 
         holder.icon.isVisible = !isToday
         holder.dayNumber.isVisible = true
-        holder.playerToken.isVisible = isToday
+        holder.playerToken.isVisible = true
+        holder.playerToken.alpha = 1f
         // Ensure number and token are above other layers
         holder.dayNumber.bringToFront()
         holder.playerToken.bringToFront()
