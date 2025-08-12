@@ -104,6 +104,9 @@ class CalendarAdapter(
         holder.icon.isVisible = !isToday
         holder.dayNumber.isVisible = true
         holder.playerToken.isVisible = isToday
+        // Ensure number and token are above other layers
+        holder.dayNumber.bringToFront()
+        holder.playerToken.bringToFront()
 
         card.contentDescription = "День $dayNumber: ${type.name}"
 
