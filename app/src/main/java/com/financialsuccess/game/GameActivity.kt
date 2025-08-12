@@ -24,6 +24,7 @@ import com.financialsuccess.game.adapters.CalendarAdapter
 import android.media.SoundPool
 import android.media.AudioAttributes
 import androidx.activity.viewModels
+import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.collectLatest
 
@@ -52,21 +53,22 @@ class GameActivity : AppCompatActivity() {
         initSounds()
         
         // Toolbar removed; menu actions will be handled via system back press
-        onBackPressedDispatcher.addCallback(this) {
-            // Show actions that were previously in the toolbar menu
-            val options = arrayOf("Сохранить игру", "Правила", "Выход")
-            AlertDialog.Builder(this@GameActivity)
-                .setTitle("Меню")
-                .setItems(options) { _, which ->
-                    when (which) {
-                        0 -> { currentGameState?.let { GameSaveManager.saveGameState(this@GameActivity, it) }; currentGameState?.player?.let { GameSaveManager.savePlayer(this@GameActivity, it) }; Toast.makeText(this@GameActivity, "Игра сохранена!", Toast.LENGTH_SHORT).show() }
-                        1 -> startActivity(android.content.Intent(this@GameActivity, RulesActivity::class.java))
-                        2 -> finish()
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val options = arrayOf("Сохранить игру", "Правила", "Выход")
+                AlertDialog.Builder(this@GameActivity)
+                    .setTitle("Меню")
+                    .setItems(options) { _, which ->
+                        when (which) {
+                            0 -> { currentGameState?.let { GameSaveManager.saveGameState(this@GameActivity, it) }; currentGameState?.player?.let { GameSaveManager.savePlayer(this@GameActivity, it) }; Toast.makeText(this@GameActivity, "Игра сохранена!", Toast.LENGTH_SHORT).show() }
+                            1 -> startActivity(android.content.Intent(this@GameActivity, RulesActivity::class.java))
+                            2 -> finish()
+                        }
                     }
-                }
-                .setNegativeButton("Закрыть", null)
-                .show()
-        }
+                    .setNegativeButton("Закрыть", null)
+                    .show()
+            }
+        })
 
         // Observe event panel state from ViewModel
         lifecycleScope.launchWhenStarted {
