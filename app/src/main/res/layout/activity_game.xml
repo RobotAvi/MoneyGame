@@ -4,104 +4,132 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_app_gradient">
+    android:background="@drawable/bg_cartoon_gradient">
 
     <!-- Верхняя панель -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/headerPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/primary_color"
+                 android:background="@color/cartoon_header_bg"
         android:padding="20dp"
         app:elevation="4dp">
 
-
-        <!-- Шапка: слева аватар+имя/профессия/возраст, справа мечта (динамическая) -->
+        <!-- Шапка: ИКОНКА ПРОФЕССИИ слева, ИКОНКА МЕЧТЫ справа -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:paddingTop="8dp">
+            android:paddingTop="8dp"
+            android:background="@drawable/bg_cartoon_header">
 
+            <!-- ИКОНКА ПРОФЕССИИ слева -->
             <ImageView
-                android:id="@+id/iv_player_avatar"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:src="@drawable/player_token"
-                android:contentDescription="Аватар игрока"
-                android:background="@drawable/bg_avatar_circle"
-                android:layout_marginEnd="16dp" />
+                android:id="@+id/iv_profession_icon"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/ic_teacher"
+                android:contentDescription="Иконка профессии"
+                android:background="@drawable/bg_cartoon_circle"
+                android:padding="12dp"
+                android:layout_marginEnd="20dp" />
 
+            <!-- ЦЕНТРАЛЬНАЯ ИНФОРМАЦИЯ -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
 
+                <!-- ИМЯ И ВОЗРАСТ -->
                 <TextView
-                    android:id="@+id/tv_player_name"
+                    android:id="@+id/tv_player_name_age"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Имя игрока"
-                    android:textSize="18sp"
-                    android:textColor="@color/white"
+                    android:text="Иван, 25 лет"
+                    android:textColor="@color/cartoon_text_primary"
+                    android:textSize="20sp"
                     android:textStyle="bold"
-                    android:maxLines="1"
-                    android:ellipsize="end" />
+                    android:gravity="center"
+                    android:fontFamily="cursive"
+                    android:shadowColor="#66FFFFFF"
+                    android:shadowDx="2"
+                    android:shadowDy="2"
+                    android:shadowRadius="4" />
 
+                <!-- ЦЕЛЬ (3 ТИПА) -->
                 <TextView
-                    android:id="@+id/tv_profession"
+                    android:id="@+id/tv_financial_goal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Профессия: Учитель"
-                    android:textSize="14sp"
-                    android:textColor="@color/white"
-                    android:maxLines="1"
-                    android:ellipsize="end" />
-
-                <TextView
-                    android:id="@+id/tv_age"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="25 лет"
-                    android:textColor="@color/white"
-                    android:textSize="14sp" />
-
-                <!-- Сохраняем текущую дату (используется в коде), меньшим шрифтом -->
-                <TextView
-                    android:id="@+id/tv_current_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="1 Января 2024"
-                    android:textSize="12sp"
-                    android:textColor="@color/white"
-                    android:maxLines="1"
-                    android:ellipsize="end" />
+                    android:text="Цель: Накопить 1,000,000₽"
+                    android:textColor="@color/cartoon_text_secondary"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="cursive"
+                    android:background="@drawable/bg_cartoon_goal"
+                    android:padding="8dp" />
             </LinearLayout>
 
+            <!-- ИКОНКА МЕЧТЫ справа -->
             <ImageView
-                android:id="@+id/iv_dream"
-                android:layout_width="88dp"
+                android:id="@+id/iv_dream_icon"
+                android:layout_width="64dp"
                 android:layout_height="64dp"
-                android:contentDescription="Мечта"
+                android:contentDescription="Иконка мечты"
                 android:scaleType="centerCrop"
-                android:background="@drawable/card_bg"
-                android:padding="4dp"
-                android:layout_marginStart="8dp" />
+                android:background="@drawable/bg_cartoon_circle"
+                android:padding="12dp"
+                android:layout_marginStart="20dp" />
         </LinearLayout>
 
-        <!-- Индикатор жизни (оставлен) -->
-        <ProgressBar
-            android:id="@+id/progress_life"
-            style="@android:style/Widget.ProgressBar.Horizontal"
+        <!-- ШКАЛА ЖИЗНИ (мультяшная) -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="8dp"
-            android:progress="60"
-            android:max="100"
-            android:progressTint="@color/success_color"
-            android:backgroundTint="@color/primary_color_light"
-            android:layout_marginTop="12dp" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_cartoon_life_track"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="👶 0"
+                    android:textColor="@color/cartoon_text_primary"
+                    android:textSize="14sp"
+                    android:layout_marginEnd="12dp"
+                    android:fontFamily="cursive" />
+
+                <ProgressBar
+                    android:id="@+id/progress_life"
+                    style="@style/Widget.App.ProgressBar.Cartoon"
+                    android:layout_width="0dp"
+                    android:layout_height="16dp"
+                    android:layout_weight="1"
+                    android:progress="30"
+                    android:max="100" />
+
+                <TextView
+                    android:id="@+id/tv_death_age"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="💀 85"
+                    android:textColor="@color/cartoon_text_primary"
+                    android:textSize="14sp"
+                    android:layout_marginStart="12dp"
+                    android:fontFamily="cursive" />
+            </LinearLayout>
+        </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- Контент -->
@@ -119,10 +147,141 @@
             android:orientation="vertical"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="16dp">
+            android:paddingTop="16dp">
 
-            <!-- Карточка баланса -->
+            <!-- КАЛЕНДАРЬ (мультяшный стиль) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_calendar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardElevation="8dp"
+                app:cardCornerRadius="24dp"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="@color/cartoon_card"
+                app:strokeColor="@color/cartoon_primary"
+                app:strokeWidth="3dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp"
+                    android:background="@drawable/bg_cartoon_calendar">
+
+                    <!-- Заголовок с ПОЛНОЙ ДАТОЙ -->
+                    <TextView
+                        android:id="@+id/tvMonthLabel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text=""
+                        android:textStyle="bold"
+                        android:textColor="@color/cartoon_text_primary"
+                        android:textSize="24sp"
+                        android:layout_marginBottom="20dp"
+                        android:fontFamily="cursive"
+                        android:background="@drawable/bg_cartoon_month_header"
+                        android:padding="12dp" />
+
+                    <!-- ЗАГОЛОВКИ ДНЕЙ НЕДЕЛИ (мультяшные) -->
+                    <LinearLayout
+                        android:id="@+id/weekdays_header"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="16dp">
+
+                        <!-- ПН-ПТ МУЛЬТЯШНЫМ -->
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Пн"
+                            android:textColor="@color/cartoon_weekday"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:fontFamily="cursive" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Вт"
+                            android:textColor="@color/cartoon_weekday"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:fontFamily="cursive" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Ср"
+                            android:textColor="@color/cartoon_weekday"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:fontFamily="cursive" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Чт"
+                            android:textColor="@color/cartoon_weekday"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:fontFamily="cursive" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Пт"
+                            android:textColor="@color/cartoon_weekday"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:fontFamily="cursive" />
+
+                        <!-- СУББОТА - МУЛЬТЯШНО КРАСНЫМ -->
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Сб"
+                            android:textColor="@color/cartoon_weekend"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:fontFamily="cursive" />
+
+                        <!-- ВОСКРЕСЕНЬЕ - МУЛЬТЯШНО КРАСНЫМ -->
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Вс"
+                            android:textColor="@color/cartoon_weekend"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:fontFamily="cursive" />
+                    </LinearLayout>
+
+                    <!-- Календарная сетка -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerCalendar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Скрытые элементы для совместимости -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_balance"
                 android:layout_width="match_parent"
@@ -150,7 +309,7 @@
                         android:textSize="32sp"
                         android:textStyle="bold"
                         android:textColor="@color/primary_color"
-                        android:drawableLeft="@drawable/icon_income"
+                        android:drawableLeft="@drawable/ic_action_assets"
                         android:drawablePadding="8dp" />
 
                     <LinearLayout
@@ -202,185 +361,6 @@
                             android:textSize="14sp"
                             android:textColor="@color/primary_color" />
                     </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Игровое поле (скрыто, чтобы не мешать новому дизайну, но оставить id для кода) -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="16dp"
-                android:layout_marginBottom="16dp"
-                android:visibility="gone">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:id="@+id/tv_game_status"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="🐀 Крысиные бега"
-                        android:textSize="16sp"
-                        android:textColor="@color/primary_color"
-                        android:textStyle="bold"
-                        android:layout_gravity="center_horizontal" />
-
-                    <LinearLayout
-                        android:id="@+id/ll_game_track"
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:padding="8dp">
-
-                        <LinearLayout
-                            android:id="@+id/ll_track_line"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
-                            android:background="@drawable/track_line"
-                            android:gravity="center_vertical">
-
-                            <ImageView
-                                android:id="@+id/iv_player_on_track"
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:src="@drawable/ic_runner"
-                                android:contentDescription="Игрок на дорожке" />
-                        </LinearLayout>
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Календарь на 4 недели (7x4) -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_calendar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="16dp"
-                android:layout_marginBottom="16dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:id="@+id/calendar_header"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="8dp"
-                        android:background="@drawable/bg_header_chip"
-                        android:padding="8dp">
-
-                        <TextView
-                            android:id="@+id/tvMonthLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:text="Январь 2024"
-                            android:textStyle="bold"
-                            android:textColor="@color/text_primary"
-                            android:shadowColor="#66FFFFFF"
-                            android:shadowDx="0"
-                            android:shadowDy="1"
-                            android:shadowRadius="2"
-                            android:textSize="20sp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/weekdays_header"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="8dp">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:text="Пн"
-                            android:textColor="@color/text_secondary"
-                            android:textStyle="bold"
-                            android:textSize="12sp" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:text="Вт"
-                            android:textColor="@color/text_secondary"
-                            android:textStyle="bold"
-                            android:textSize="12sp" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:text="Ср"
-                            android:textColor="@color/text_secondary"
-                            android:textStyle="bold"
-                            android:textSize="12sp" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:text="Чт"
-                            android:textColor="@color/text_secondary"
-                            android:textStyle="bold"
-                            android:textSize="12sp" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:text="Пт"
-                            android:textColor="@color/text_secondary"
-                            android:textStyle="bold"
-                            android:textSize="12sp" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:text="Сб"
-                            android:textColor="@color/text_secondary"
-                            android:textStyle="bold"
-                            android:textSize="12sp" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:text="Вс"
-                            android:textColor="@color/text_secondary"
-                            android:textStyle="bold"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recyclerCalendar"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:nestedScrollingEnabled="false" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -492,17 +472,18 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Нижняя панель из 4 круглых кнопок -->
+    <!-- ПОДВАЛ: 4 МУЛЬТЯШНЫЕ КНОПКИ -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/bottom_actions"
         android:layout_width="match_parent"
-        android:layout_height="88dp"
+        android:layout_height="100dp"
         android:layout_gravity="bottom"
-        android:padding="12dp"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="12dp"
-        app:strokeWidth="0dp"
-        app:cardBackgroundColor="@color/surface_color">
+        android:padding="16dp"
+        app:cardCornerRadius="32dp"
+        app:cardElevation="16dp"
+        app:cardBackgroundColor="@color/cartoon_surface"
+        app:strokeColor="@color/cartoon_primary"
+        app:strokeWidth="4dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -510,94 +491,121 @@
             android:gravity="center"
             android:orientation="horizontal">
 
-        <ImageButton
-            android:id="@+id/btnUp"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:background="@drawable/btn_circle_bg"
-            android:src="@android:drawable/arrow_up_float"
-            android:scaleType="center"
-            android:contentDescription="Повышение"
-            android:padding="12dp"
-            android:tint="@color/success_color"
-            app:tint="@color/success_color" />
-
-        <Space
-            android:layout_width="16dp"
-            android:layout_height="1dp" />
-
-        <ImageButton
-            android:id="@+id/btnDown"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:background="@drawable/btn_circle_bg"
-            android:src="@android:drawable/arrow_down_float"
-            android:scaleType="center"
-            android:contentDescription="Понижение"
-            android:padding="12dp"
-            android:tint="@color/error_color"
-            app:tint="@color/error_color" />
-
-        <Space
-            android:layout_width="16dp"
-            android:layout_height="1dp" />
-
-        <ImageButton
-            android:id="@+id/btnChart"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:background="@drawable/btn_circle_bg"
-            android:src="@drawable/ic_action_report"
-            android:scaleType="center"
-            android:contentDescription="Статистика и отчёты"
-            android:padding="12dp"
-            android:tint="@color/primary_color"
-            app:tint="@color/primary_color" />
-
-        <Space
-            android:layout_width="16dp"
-            android:layout_height="1dp" />
-
-        <FrameLayout
-            android:layout_width="56dp"
-            android:layout_height="56dp">
-
-            <ImageButton
-                android:id="@+id/btnDice"
-                android:layout_width="match_parent"
+            <!-- ДОХОДЫ (мультяшная) -->
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:background="@drawable/btn_circle_bg"
-                android:src="@drawable/dice_1"
-                android:scaleType="centerCrop"
-                android:contentDescription="Бросить кубик"
-                android:padding="8dp" />
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
 
-            <com.airbnb.lottie.LottieAnimationView
-                android:id="@+id/lottieDice"
-                android:layout_width="match_parent"
+                <ImageButton
+                    android:id="@+id/btn_income"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="@drawable/bg_cartoon_button_income"
+                    android:src="@drawable/ic_action_assets"
+                    android:scaleType="center"
+                    android:contentDescription="Доходы"
+                    android:padding="12dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="💰 Доходы"
+                    android:textColor="@color/cartoon_text_primary"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="cursive" />
+            </LinearLayout>
+
+            <!-- РАСХОДЫ (мультяшная) -->
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:visibility="gone"
-                app:lottie_rawRes="@raw/dice_roll"
-                app:lottie_autoPlay="false"
-                app:lottie_loop="false" />
-        </FrameLayout>
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
 
-        <Space
-            android:layout_width="16dp"
-            android:layout_height="1dp" />
+                <ImageButton
+                    android:id="@+id/btn_expenses"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="@drawable/bg_cartoon_button_expenses"
+                    android:src="@android:drawable/arrow_down_float"
+                    android:scaleType="center"
+                    android:contentDescription="Расходы"
+                    android:padding="12dp" />
 
-        <ImageButton
-            android:id="@+id/btnMore"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:background="@drawable/btn_circle_bg"
-            android:src="@android:drawable/ic_menu_more"
-            android:scaleType="center"
-            android:contentDescription="Ещё"
-            android:padding="12dp"
-            android:tint="@color/primary_color"
-            app:tint="@color/primary_color" />
-    </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="💸 Расходы"
+                    android:textColor="@color/cartoon_text_primary"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="cursive" />
+            </LinearLayout>
 
-</com.google.android.material.card.MaterialCardView>
+            <!-- ВОЗМОЖНОСТИ (мультяшная) -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageButton
+                    android:id="@+id/btn_opportunities"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="@drawable/bg_cartoon_button_opportunities"
+                    android:src="@drawable/ic_action_market"
+                    android:scaleType="center"
+                    android:contentDescription="Возможности"
+                    android:padding="12dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🎯 Возможности"
+                    android:textColor="@color/cartoon_text_primary"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="cursive" />
+            </LinearLayout>
+
+            <!-- СЛЕДУЮЩИЙ ХОД (мультяшная) -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageButton
+                    android:id="@+id/btn_next_turn"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="@drawable/bg_cartoon_button_next"
+                    android:src="@android:drawable/ic_media_play"
+                    android:scaleType="center"
+                    android:contentDescription="Следующий ход"
+                    android:padding="12dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="▶️ След.ход"
+                    android:textColor="@color/cartoon_text_primary"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="cursive" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -20,6 +20,22 @@
     <string name="assets">Активы</string>
     <string name="market">Рынок</string>
     
+    <!-- New Game Interface -->
+    <string name="income">Доходы</string>
+    <string name="expenses">Расходы</string>
+    <string name="opportunities">Возможности</string>
+    <string name="next_turn">Следующий ход</string>
+    
+    <!-- Financial Goals -->
+    <string name="goal_save_money">Накопить нужную сумму</string>
+    <string name="goal_zero_expenses">Вывести затраты в ноль</string>
+    <string name="goal_financial_independence">Финансовая независимость</string>
+    <string name="goal_prefix">Цель: %s</string>
+    
+    <!-- Life Progress -->
+    <string name="life_progress">Жизненный путь</string>
+    <string name="years_old">%d лет</string>
+    
     <!-- Game Messages -->
     <string name="buy">Купить</string>
     <string name="sell">Продать</string>

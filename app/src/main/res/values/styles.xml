@@ -1,0 +1,8 @@
+<resources>
+    <!-- Мультяшный ProgressBar -->
+    <style name="Widget.App.ProgressBar.Cartoon" parent="Widget.AppCompat.ProgressBar.Horizontal">
+                        <item name="android:progressTint">@color/cartoon_accent</item>
+                <item name="android:backgroundTint">#E5E7EB</item>
+                <item name="android:progressBackgroundTint">#E5E7EB</item>
+    </style>
+</resources>

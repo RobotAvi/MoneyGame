@@ -38,4 +38,32 @@
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="transparent">#00000000</color>
+    
+    <!-- МУЛЬТЯШНЫЕ ЦВЕТА (мужской премиум стиль) -->
+    <color name="cartoon_primary">#1A1A1A</color>        <!-- Глубокий черный для рамок -->
+    <color name="cartoon_primary_light">#2D2D2D</color>  <!-- Темно-серый -->
+    <color name="cartoon_secondary">#2C5F2D</color>      <!-- Темно-зеленый -->
+    <color name="cartoon_accent">#D4AF37</color>         <!-- Золотой -->
+    <color name="cartoon_warm">#8B4513</color>           <!-- Коричневый -->
+    <color name="cartoon_soft_blue">#1E3A8A</color>     <!-- Темно-синий -->
+    
+    <!-- Фон и поверхности -->
+    <color name="cartoon_background">#F8F6F1</color>    <!-- Светло-кремовый -->
+    <color name="cartoon_surface">#E8E6E1</color>        <!-- Светло-серый -->
+    <color name="cartoon_card">#FFFFFF</color>           <!-- Белый -->
+    <color name="cartoon_header_bg">#2C1810</color>      <!-- Темно-коричневый для шапки -->
+    
+    <!-- Текст -->
+    <color name="cartoon_text_primary">#1A1A1A</color>  <!-- Глубокий черный -->
+    <color name="cartoon_text_secondary">#E8E6E1</color>        <!-- Светло-серый -->
+    
+    <!-- Дни недели -->
+    <color name="cartoon_weekday">#1A1A1A</color>       <!-- Пн-Пт -->
+    <color name="cartoon_weekend">#DC2626</color>        <!-- Сб-Вс -->
+    
+    <!-- Кнопки -->
+    <color name="cartoon_income">#059669</color>         <!-- Темно-зеленый -->
+    <color name="cartoon_expenses">#DC2626</color>       <!-- Темно-красный -->
+    <color name="cartoon_opportunities">#1E3A8A</color>  <!-- Темно-синий -->
+    <color name="cartoon_next_turn">#7C3AED</color>      <!-- Темно-фиолетовый -->
 </resources>

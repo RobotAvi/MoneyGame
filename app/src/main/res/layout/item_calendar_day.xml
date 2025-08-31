@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="64dp"
+    android:layout_width="0dp"
     android:layout_height="64dp"
+    android:layout_weight="1"
     android:layout_margin="2dp"
-    android:background="@android:color/white">
+    android:background="@drawable/bg_cartoon_day"
+    android:padding="4dp">
 
     <TextView
         android:id="@+id/tvDayNumber"
@@ -13,14 +15,15 @@
         android:text="1"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:textColor="@android:color/black"
+        android:textColor="@color/cartoon_text_primary"
+        android:fontFamily="cursive"
         android:contentDescription="День календаря" />
 
     <ImageView
         android:id="@+id/ivPlayerToken"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_gravity="center"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_gravity="bottom|end"
         android:visibility="gone"
         android:src="@drawable/player_token"
         android:contentDescription="Токен игрока" />

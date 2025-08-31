@@ -28,6 +28,9 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.collectLatest
 import androidx.appcompat.widget.PopupMenu
 import android.util.Log
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope.launch
+import androidx.lifecycle.repeatOnLifecycle
 
 class GameActivity : AppCompatActivity() {
     
@@ -56,20 +59,22 @@ class GameActivity : AppCompatActivity() {
         // Удаляем меню с верхнего тулбара: никаких обработчиков не навешиваем
 
         // Observe event panel state from ViewModel
-        lifecycleScope.launchWhenStarted {
-            viewModel.eventPanel.collectLatest { state ->
-                if (state == null) {
-                    binding.eventMotion.transitionToStart()
-                } else {
-                    binding.tvEventTitle.text = state.title
-                    binding.tvEventMessage.text = state.message
-                    binding.btnEventPrimary.visibility = if (state.primaryText != null && state.onPrimary != null) View.VISIBLE else View.GONE
-                    binding.btnEventSecondary.visibility = if (state.secondaryText != null && state.onSecondary != null) View.VISIBLE else View.GONE
-                    state.primaryText?.let { binding.btnEventPrimary.text = it }
-                    state.secondaryText?.let { binding.btnEventSecondary.text = it }
-                    binding.btnEventPrimary.setOnClickListener { state.onPrimary?.invoke(); viewModel.hideEventPanel() }
-                    binding.btnEventSecondary.setOnClickListener { state.onSecondary?.invoke(); viewModel.hideEventPanel() }
-                    binding.eventMotion.transitionToEnd()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.eventPanel.collectLatest { state ->
+                    if (state == null) {
+                        binding.eventMotion.transitionToStart()
+                    } else {
+                        binding.tvEventTitle.text = state.title
+                        binding.tvEventMessage.text = state.message
+                        binding.btnEventPrimary.visibility = if (state.primaryText != null && state.onPrimary != null) View.VISIBLE else View.GONE
+                        binding.btnEventSecondary.visibility = if (state.secondaryText != null && state.onSecondary != null) View.VISIBLE else View.GONE
+                        state.primaryText?.let { binding.btnEventPrimary.text = it }
+                        state.secondaryText?.let { binding.btnEventSecondary.text = it }
+                        binding.btnEventPrimary.setOnClickListener { state.onPrimary?.invoke(); viewModel.hideEventPanel() }
+                        binding.btnEventSecondary.setOnClickListener { state.onSecondary?.invoke(); viewModel.hideEventPanel() }
+                        binding.eventMotion.transitionToEnd()
+                    }
                 }
             }
         }
@@ -121,14 +126,160 @@ class GameActivity : AppCompatActivity() {
     }
     
     private fun setupUI() {
-        binding.btnDice.setOnClickListener { rollDiceAndMove() }
-        binding.btnChart.setOnClickListener { showBalancePanel() }
-        binding.btnUp.setOnClickListener { showActionsMenu() }
-        binding.btnDown.setOnClickListener { currentGameState?.player?.let { it.salary = (it.salary - 5000).coerceAtLeast(0); it.updateTotalIncome(); showMessage("Понижение: -${currencyFormat.format(5000)} к зарплате"); updateUI() } }
-        binding.tvAge.setOnClickListener { showAgeStatistics() }
-        binding.btnMore.setOnClickListener { v -> showBottomOverflowMenu(v) }
+        // Новые кнопки согласно требованиям
+        setupNewButtons()
+        
         setupAssetsRecyclerView()
         setupCalendarRecycler()
+    }
+
+    private fun setupNewButtons() {
+        // Кнопка доходы
+        binding.btnIncome.setOnClickListener {
+            showIncomeDialog()
+        }
+        
+        // Кнопка расходы
+        binding.btnExpenses.setOnClickListener {
+            showExpensesDialog()
+        }
+        
+        // Кнопка возможности
+        binding.btnOpportunities.setOnClickListener {
+            showOpportunitiesDialog()
+        }
+        
+        // Кнопка следующий ход
+        binding.btnNextTurn.setOnClickListener {
+            performNextTurn()
+        }
+    }
+
+    private fun showIncomeDialog() {
+        // Показать диалог с доходами
+        val incomeText = buildString {
+            appendLine("Зарплата: ${currencyFormat.format(currentGameState?.player?.salary ?: 0)}")
+            appendLine("Пассивный доход: ${currencyFormat.format(currentGameState?.player?.passiveIncome ?: 0)}")
+            appendLine("Общий доход: ${currencyFormat.format(currentGameState?.player?.totalIncome ?: 0)}")
+        }
+        
+        AlertDialog.Builder(this)
+            .setTitle("💰 Доходы")
+            .setMessage(incomeText)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun showExpensesDialog() {
+        // Показать диалог с расходами
+        val expensesText = buildString {
+            appendLine("Общие расходы: ${currencyFormat.format(currentGameState?.player?.totalExpenses ?: 0)}")
+            appendLine("Налоги: ${currencyFormat.format(currentGameState?.player?.taxes ?: 0)}")
+            appendLine("Жилье: ${currencyFormat.format(currentGameState?.player?.housingExpenses ?: 0)}")
+            appendLine("Транспорт: ${currencyFormat.format(currentGameState?.player?.transportExpenses ?: 0)}")
+            appendLine("Питание: ${currencyFormat.format(currentGameState?.player?.foodExpenses ?: 0)}")
+        }
+        
+        AlertDialog.Builder(this)
+            .setTitle("💸 Расходы")
+            .setMessage(expensesText)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun showOpportunitiesDialog() {
+        // Показать диалог с возможностями
+        val opportunitiesText = buildString {
+            appendLine("Доступные возможности:")
+            appendLine("• Инвестиции в акции")
+            appendLine("• Покупка недвижимости")
+            appendLine("• Открытие бизнеса")
+            appendLine("• Образование и навыки")
+        }
+        
+        AlertDialog.Builder(this)
+            .setTitle("🎯 Возможности")
+            .setMessage(opportunitiesText)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun performNextTurn() {
+        // Выполнить следующий ход
+        currentGameState?.let { gameState ->
+            // Увеличить месяц
+            gameState.player.monthsPlayed++
+            
+            // Обновить возраст если прошло 12 месяцев
+            if (gameState.player.monthsPlayed % 12 == 0) {
+                gameState.player.age++
+                updateLifeProgress()
+            }
+            
+            // Обновить UI
+            updatePlayerInfo()
+            updateCalendar()
+            
+            // Показать сообщение
+            Toast.makeText(this, "Ход завершен! Возраст: ${gameState.player.age} лет", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun updatePlayerInfo() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            
+            // Обновить информацию об игроке
+            binding.tvPlayerNameAge?.text = "${player.name ?: "Игрок"}, ${player.age} лет"
+            
+            // Обновить цель
+            updateFinancialGoal(player)
+            
+            // Обновить шкалу жизни
+            updateLifeProgress()
+        }
+    }
+
+    private fun updateFinancialGoal(player: Player) {
+        val goalText = when {
+            player.financialGoals.isNotEmpty() -> {
+                val goal = player.financialGoals.first()
+                "Цель: ${goal.description}"
+            }
+            player.cash < 0 -> "Цель: Вывести затраты в ноль"
+            player.passiveIncome < player.totalExpenses -> "Цель: Финансовая независимость"
+            else -> "Цель: Накопить 1,000,000₽"
+        }
+        
+        binding.tvFinancialGoal?.text = goalText
+    }
+
+    private fun updateLifeProgress() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val progress = ((player.age.toFloat() / player.deathAge.toFloat()) * 100).toInt()
+            
+            binding.progressLife?.progress = progress
+            binding.tvDeathAge?.text = "${player.deathAge}"
+        }
+    }
+
+    private fun updateCalendar() {
+        // Обновляем календарь
+        currentGameState?.let { gameState ->
+            // Здесь можно добавить логику обновления календаря
+            // Например, обновить текущую дату или позицию игрока
+            binding.tvMonthLabel?.text = getCurrentMonthText()
+        }
+    }
+
+    private fun getCurrentMonthText(): String {
+        val calendar = Calendar.getInstance()
+        val month = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.ENGLISH)
+        val year = calendar.get(Calendar.YEAR)
+        
+        // Возвращаем формат: "August 2025"
+        return "$month $year"
     }
 
     private fun showActionsMenu() {
@@ -301,17 +452,11 @@ class GameActivity : AppCompatActivity() {
     private fun rollDiceAndMove() {
         val diceValue = gameManager.rollDice()
         lastDiceValue = diceValue
-        val player = currentGameState?.player ?: return
-        val diceRes = when (diceValue) { 1 -> R.drawable.dice_1; 2 -> R.drawable.dice_2; 3 -> R.drawable.dice_3; 4 -> R.drawable.dice_4; 5 -> R.drawable.dice_5; 6 -> R.drawable.dice_6; else -> R.drawable.dice_1 }
-        binding.btnDice.setImageResource(diceRes)
-        // Lottie animation if available
-        binding.lottieDice.apply {
-            visibility = View.VISIBLE
-            alpha = 1f
-            progress = 0f
-            playAnimation()
-            postDelayed({ animate().alpha(0f).setDuration(150).withEndAction { visibility = View.GONE } }, 600)
-        }
+        
+        // Убираем ссылки на несуществующие элементы
+        // binding.btnDice.setImageResource(diceRes)
+        // binding.lottieDice.apply { ... }
+        
         playSfx(sfxDice)
         // Hint removed to reduce noise
         handleSlowTrackDice(diceValue)
@@ -834,18 +979,20 @@ class GameActivity : AppCompatActivity() {
     private fun updateUI() {
         val player = currentGameState?.player ?: return
         if (!player.isAlive()) { showDeathDialog(); return }
-        binding.tvPlayerName.text = player.name ?: "Игрок"
+        binding.tvPlayerNameAge?.text = "${player.name ?: "Игрок"}, ${player.age} лет"
         updateCurrentDate(player)
         updateGameStatus(player)
         updatePlayerAvatar(player)
-        binding.tvProfession.text = "Профессия: ${player.profession.name}"
+        // Профессия теперь отображается в шапке
+        // binding.tvProfession.text = "Профессия: ${player.profession.name}"
         binding.tvCash.text = "Наличные: ${currencyFormat.format(player.cash)}"
         binding.tvSalary.text = "Зарплата: ${currencyFormat.format(player.salary)}"
         binding.tvPassiveIncome.text = "Пассивный доход: ${currencyFormat.format(player.passiveIncome)}"
         binding.tvExpenses.text = "Расходы: ${currencyFormat.format(player.totalExpenses)}"
         binding.tvCashFlow.text = "Денежный поток: ${currencyFormat.format(player.getCashFlow())}"
         val ageColor = when { player.isInCriticalAge() -> "🔴"; player.getYearsLeft() <= 10 -> "🟡"; else -> "🟢" }
-        binding.tvAge.text = "$ageColor Возраст: ${player.age} лет (осталось: ${player.getYearsLeft()})"
+        // Возраст теперь отображается в шапке
+        // binding.tvAge.text = "$ageColor Возраст: ${player.age} лет (осталось: ${player.getYearsLeft()})"
         binding.tvHealthStatus.text = player.getHealthStatus()
         // Обновляем 4-недельное окно календаря; при переходе конца недели текущее сместится наверх
         setupCalendarRecycler()
@@ -863,14 +1010,14 @@ class GameActivity : AppCompatActivity() {
             "business_empire" -> R.drawable.dream_business
             else -> R.drawable.ic_dream_placeholder
         }
-        binding.ivDream.setImageResource(dreamIconRes)
+        binding.ivDreamIcon?.setImageResource(dreamIconRes)
     }
     
     // Метод updateMonthProgressBar удален - monthProgressBar больше не используется
     
     private fun updateMonthLabel() {
         val anchor = calendarAnchor ?: return
-        val monthName = android.text.format.DateFormat.format("MMMM yyyy", anchor).toString().replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString() }
+        val monthName = android.text.format.DateFormat.format("d MMMM yyyy", anchor).toString().replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString() }
         binding.tvMonthLabel.text = monthName
     }
 
@@ -1267,7 +1414,8 @@ class GameActivity : AppCompatActivity() {
     // === НОВЫЕ МЕТОДЫ ДЛЯ УЛУЧШЕННОГО ИНТЕРФЕЙСА ===
     
     private fun updateCurrentDate(player: Player) {
-        binding.tvCurrentDate.text = player.getCurrentDateString()
+        // Текущая дата теперь отображается в шапке
+        // binding.tvCurrentDate.text = player.getCurrentDateString()
     }
     
     private fun updateGameStatus(player: Player) {
@@ -1276,74 +1424,23 @@ class GameActivity : AppCompatActivity() {
         } else {
             "🐀 Крысиные бега"
         }
-        binding.tvGameStatus.text = status
+        // Статус игры больше не отображается
+        // binding.tvGameStatus.text = status
     }
     
     private fun updatePlayerAvatar(player: Player) {
         val avatarResource = player.profession.avatarResId
         try {
-            binding.ivPlayerAvatar.setImageResource(avatarResource)
+            // Аватар игрока теперь отображается в шапке
+            // binding.ivPlayerAvatar.setImageResource(avatarResource)
         } catch (e: Exception) {
-            binding.ivPlayerAvatar.setImageResource(R.drawable.player_token)
+            // binding.ivPlayerAvatar.setImageResource(R.drawable.player_token)
         }
     }
     
     private fun updateGameTrackVisualization(player: Player) {
-        // Обновляем позицию игрока на треке
-        // Fix: Используем binding.llTrackLine вместо getChildAt(1)
-        val trackLayout = binding.llTrackLine
-        val playerIcon = trackLayout.findViewById<ImageView>(R.id.iv_player_on_track)
-        
-        // Позиционируем игрока на треке (процент от 0 до 100)
-        val progress = if (player.isInFastTrack) {
-            val dreamCost = player.dream.cost
-            ((player.cash.toFloat() / dreamCost.toFloat()) * 100).coerceAtMost(100f)
-        } else {
-            // Теперь используем день месяца (1..30)
-            ((player.currentDayOfMonth.toFloat() - 1f) / 29f) * 100f
-        }
-        
-        // Устанавливаем позицию (в процентах от ширины трека)
-        trackLayout.post {
-            val trackWidth = trackLayout.width - playerIcon.width
-            val newX = (trackWidth * progress / 100).toInt()
-            playerIcon.translationX = newX.toFloat()
-        }
-        
-        // Обновляем иконку игрока на треке
-        val trackIconResource = when {
-            player.isInFastTrack -> when {
-                player.passiveIncome > 100000 -> R.drawable.ic_luxury_car  // Роскошный автомобиль
-                player.passiveIncome > 50000 -> R.drawable.ic_car          // Обычный автомобиль
-                else -> R.drawable.ic_motorcycle                           // Мотоцикл
-            }
-            else -> R.drawable.player_token  // Токен игрока по умолчанию
-        }
-        try {
-            playerIcon.setImageResource(trackIconResource)
-        } catch (e: Exception) {
-            playerIcon.setImageResource(R.drawable.player_token)
-        }
-        
-        // Обновляем информацию о треке
-        val trackInfo = if (player.isInFastTrack) {
-            val vehicleType = when {
-                player.passiveIncome > 100000 -> "🏎️ Мчитесь к мечте на роскошном автомобиле!"
-                player.passiveIncome > 50000 -> "🚗 Едете к мечте на автомобиле!"
-                else -> "🏍️ Летите к мечте на мотоцикле!"
-            }
-            vehicleType
-        } else {
-            "🏃 Бегите от зарплаты до зарплаты"
-        }
-        binding.tvTrackInfo.text = trackInfo
-        
-        // Обновляем финиш/мечту
-        binding.tvFinishGoal.text = if (player.isInFastTrack) {
-            "🎯\n${player.dream.name}"
-        } else {
-            "🔄\nКруг"
-        }
+        // Игровое поле больше не отображается в новом дизайне
+        // Вся логика перенесена в календарь
     }
     
     private fun showEventPanel(

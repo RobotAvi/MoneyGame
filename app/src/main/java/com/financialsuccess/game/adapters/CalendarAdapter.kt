@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -40,9 +41,23 @@ class CalendarAdapter(
     override fun onBindViewHolder(holder: DayViewHolder, position: Int) {
         val date = getItem(position)
         val dayNumber = date.get(Calendar.DAY_OF_MONTH)
+        val dayOfWeek = date.get(Calendar.DAY_OF_WEEK)
 
         // Устанавливаем номер дня
         holder.dayNumber.text = dayNumber.toString()
+
+        // Устанавливаем цвет в зависимости от дня недели
+        val context = holder.itemView.context
+        when (dayOfWeek) {
+            Calendar.SATURDAY, Calendar.SUNDAY -> {
+                // Суббота и воскресенье - красным
+                holder.dayNumber.setTextColor(ContextCompat.getColor(context, R.color.error_color))
+            }
+            else -> {
+                // Понедельник-пятница - черным
+                holder.dayNumber.setTextColor(ContextCompat.getColor(context, R.color.black))
+            }
+        }
 
         // Проверяем, является ли этот день текущим
         val isToday = sameDay(date, currentDate)

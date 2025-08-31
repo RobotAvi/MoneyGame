@@ -357,7 +357,7 @@ class CharacterCreationActivity : AppCompatActivity() {
         } catch (e: Exception) { }
 
         // Listen for value changes to highlight the selected number in red
-        numberPicker.setOnValueChangedListener { picker, oldVal, newVal ->
+        numberPicker.setOnValueChangedListener { picker, _, _ ->
             for (i in 0 until picker.childCount) {
                 val child = picker.getChildAt(i)
                 if (child is TextView) {
