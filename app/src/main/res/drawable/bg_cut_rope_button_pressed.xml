@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    
+    <!-- Градиент при нажатии -->
+    <gradient
+        android:startColor="#E55A2B"
+        android:centerColor="#D44A1B"
+        android:endColor="#B23A0B"
+        android:angle="45" />
+    
+    <!-- Обводка при нажатии -->
+    <stroke
+        android:width="4dp"
+        android:color="#8B2A0B" />
+    
+    <!-- Внутренняя тень при нажатии -->
+    <stroke
+        android:width="2dp"
+        android:color="#FFFFFF"
+        android:dashWidth="1dp"
+        android:dashGap="2dp" />
+</shape>

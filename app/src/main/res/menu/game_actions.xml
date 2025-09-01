@@ -9,6 +9,55 @@
         android:id="@+id/menu_rules"
         android:title="Правила"
         app:showAsAction="never" />
+    
+    <!-- Финансовые функции -->
+    <item
+        android:id="@+id/menu_financial_statement"
+        android:title="📋 Финансовый отчёт"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_balance_panel"
+        android:title="💰 Финансовая сводка"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_financial_journal"
+        android:title="📊 Журнал финансов"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_journal_analytics"
+        android:title="📈 Финансовая аналитика"
+        app:showAsAction="never" />
+    
+    <!-- Рыночные функции -->
+    <item
+        android:id="@+id/menu_market"
+        android:title="🏪 Финансовый рынок"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_assets"
+        android:title="📦 Мои активы"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_portfolio"
+        android:title="💼 Мой портфель"
+        app:showAsAction="never" />
+    
+    <!-- Здоровье и статистика -->
+    <item
+        android:id="@+id/menu_health_status"
+        android:title="🏥 Здоровье"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_age_statistics"
+        android:title="📊 Статистика по возрасту"
+        app:showAsAction="never" />
+    
+    <!-- Разделитель -->
+    <item
+        android:id="@+id/menu_separator"
+        android:title=""
+        app:showAsAction="never" />
+        
     <item
         android:id="@+id/menu_exit"
         android:title="Выйти"

@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/background_color">
+    android:background="@drawable/bg_cartoon_calendar">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,15 +17,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@color/primary_color"
+            android:background="@drawable/bg_cartoon_header"
             android:padding="20dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Финансовый журнал"
+                android:text="📊 Финансовый журнал"
                 android:textSize="22sp"
                 android:textStyle="bold"
-                android:textColor="@color/white" />
+                android:textColor="@color/cartoon_text_secondary"
+                android:fontFamily="cursive" />
         </LinearLayout>
 
         <!-- Статистика -->
@@ -33,17 +34,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp">
+            app:cardCornerRadius="24dp"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="@color/cartoon_card"
+            app:strokeColor="@color/cartoon_primary"
+            app:strokeWidth="3dp">
             <TextView
                 android:id="@+id/tvJournalStats"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/rounded_background"
+                android:background="@drawable/bg_cartoon_calendar"
                 android:padding="16dp"
                 android:text="📊 СТАТИСТИКА:\n\n➕ Общие доходы: 0₽\n➖ Общие расходы: 0₽\n💰 Чистый результат: 0₽"
                 android:textSize="15sp"
-                android:textColor="@color/primary_text_color" />
+                android:textColor="@color/cartoon_text_primary"
+                android:fontFamily="cursive" />
         </com.google.android.material.card.MaterialCardView>
 
         <!-- Кнопка экспорта -->
@@ -56,10 +61,13 @@
             android:text="📤 Экспорт в TXT"
             android:textSize="16sp"
             android:padding="12dp"
+            android:textColor="@color/cartoon_text_secondary"
+            android:fontFamily="cursive"
+            android:background="@drawable/bg_cartoon_button_opportunities"
             app:icon="@android:drawable/ic_menu_share"
             app:iconGravity="textStart"
             app:iconPadding="8dp"
-            app:cornerRadius="12dp" />
+            app:cornerRadius="20dp" />
 
         <!-- Список записей -->
         <androidx.recyclerview.widget.RecyclerView

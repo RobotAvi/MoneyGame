@@ -14,9 +14,9 @@ import com.financialsuccess.game.R
 import java.util.Calendar
 
 class CalendarAdapter(
-    private val currentDate: Calendar,
+    var currentDate: Calendar, // ИЗМЕНЕНО: var вместо val
     private val typeProvider: (Calendar) -> DayType,
-    private var selectedDate: Calendar = currentDate,
+    var selectedDate: Calendar = currentDate, // ИЗМЕНЕНО: var вместо val
     private val onDayClick: (Calendar) -> Unit = {}
 ) : ListAdapter<Calendar, CalendarAdapter.DayViewHolder>(Diff) {
 
@@ -32,7 +32,14 @@ class CalendarAdapter(
         }
     }
 
+    override fun submitList(list: List<Calendar>?) {
+        Log.d("CalendarAdapter", "submitList: получен список из ${list?.size ?: 0} элементов")
+        super.submitList(list)
+        Log.d("CalendarAdapter", "submitList: список установлен, текущий размер: ${currentList.size}")
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DayViewHolder {
+        Log.d("CalendarAdapter", "onCreateViewHolder: создается ViewHolder для типа $viewType")
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_calendar_day, parent, false)
         return DayViewHolder(view)
@@ -42,6 +49,9 @@ class CalendarAdapter(
         val date = getItem(position)
         val dayNumber = date.get(Calendar.DAY_OF_MONTH)
         val dayOfWeek = date.get(Calendar.DAY_OF_WEEK)
+
+        // Отладочная информация
+        Log.d("CalendarAdapter", "onBindViewHolder: позиция $position, день $dayNumber, день недели $dayOfWeek")
 
         // Устанавливаем номер дня
         holder.dayNumber.text = dayNumber.toString()
@@ -79,6 +89,12 @@ class CalendarAdapter(
             notifyItemChanged(position)
             onDayClick(date)
         }
+    }
+
+    override fun getItemCount(): Int {
+        val count = currentList.size
+        Log.d("CalendarAdapter", "getItemCount: $count элементов")
+        return count
     }
 
     private fun sameDay(a: Calendar, b: Calendar): Boolean {

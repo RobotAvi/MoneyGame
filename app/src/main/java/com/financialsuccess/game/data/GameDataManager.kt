@@ -297,45 +297,54 @@ object GameDataManager {
         )
         return events.random()
     }
-}
+    
+    object GameSaveManager {
+        private const val PLAYER_FILE = "player.json"
+        private const val GAME_FILE = "game_state.json"
+        private val gson = Gson()
 
-object GameSaveManager {
-    private const val PLAYER_FILE = "player.json"
-    private const val GAME_FILE = "game_state.json"
-    private val gson = Gson()
+        fun saveGame(context: Context, gameState: GameState) {
+            saveGameState(context, gameState)
+        }
+        
+        fun loadGame(context: Context): GameState? {
+            return loadGameState(context)
+        }
 
-    fun savePlayer(context: Context, player: Player) {
-        val file = File(context.filesDir, PLAYER_FILE)
-        file.writeText(gson.toJson(player))
-    }
+        fun savePlayer(context: Context, player: Player) {
+            val file = File(context.filesDir, PLAYER_FILE)
+            file.writeText(gson.toJson(player))
+        }
 
-    fun loadPlayer(context: Context): Player? {
-        val file = File(context.filesDir, PLAYER_FILE)
-        if (!file.exists()) return null
-        return try {
-            gson.fromJson(file.readText(), Player::class.java)
-        } catch (e: Exception) {
-            null
+        fun loadPlayer(context: Context): Player? {
+            val file = File(context.filesDir, PLAYER_FILE)
+            if (!file.exists()) return null
+            return try {
+                gson.fromJson(file.readText(), Player::class.java)
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        fun saveGameState(context: Context, gameState: GameState) {
+            val file = File(context.filesDir, GAME_FILE)
+            file.writeText(gson.toJson(gameState))
+        }
+
+        fun loadGameState(context: Context): GameState? {
+            val file = File(context.filesDir, GAME_FILE)
+            if (!file.exists()) return null
+            return try {
+                gson.fromJson(file.readText(), GameState::class.java)
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        fun deleteSaves(context: Context) {
+            File(context.filesDir, PLAYER_FILE).delete()
+            File(context.filesDir, GAME_FILE).delete()
         }
     }
-
-    fun saveGameState(context: Context, gameState: GameState) {
-        val file = File(context.filesDir, GAME_FILE)
-        file.writeText(gson.toJson(gameState))
-    }
-
-    fun loadGameState(context: Context): GameState? {
-        val file = File(context.filesDir, GAME_FILE)
-        if (!file.exists()) return null
-        return try {
-            gson.fromJson(file.readText(), GameState::class.java)
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    fun deleteSaves(context: Context) {
-        File(context.filesDir, PLAYER_FILE).delete()
-        File(context.filesDir, GAME_FILE).delete()
-    }
 }
+

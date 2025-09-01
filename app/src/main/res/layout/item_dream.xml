@@ -7,16 +7,18 @@
     android:layout_height="wrap_content"
     android:layout_margin="12dp"
     android:checkable="true"
-    app:cardElevation="6dp"
-    app:cardCornerRadius="16dp"
-    app:strokeColor="@color/primary_color"
-    app:strokeWidth="2dp">
+    app:cardElevation="8dp"
+    app:cardCornerRadius="24dp"
+    app:strokeColor="@color/cartoon_primary"
+    app:strokeWidth="3dp"
+    app:cardBackgroundColor="@color/cartoon_card">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="20dp">
+        android:padding="20dp"
+        android:background="@drawable/bg_cartoon_calendar">
 
         <ImageView
             android:id="@+id/iv_dream_icon"
@@ -24,7 +26,8 @@
             android:layout_height="64dp"
             android:layout_marginEnd="20dp"
             android:scaleType="centerCrop"
-            android:background="@drawable/bg_avatar_circle"
+            android:background="@drawable/bg_cartoon_circle"
+            android:padding="12dp"
             android:contentDescription="Иконка мечты" />
 
         <LinearLayout
@@ -37,11 +40,12 @@
                 android:id="@+id/tv_dream_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Мечта"
+                android:text="🌟 Мечта"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="@color/primary_color"
-                android:layout_marginBottom="4dp" />
+                android:textColor="@color/cartoon_text_primary"
+                android:layout_marginBottom="4dp"
+                android:fontFamily="cursive" />
 
             <TextView
                 android:id="@+id/tv_dream_description"
@@ -49,8 +53,9 @@
                 android:layout_height="wrap_content"
                 android:text="Описание мечты"
                 android:textSize="14sp"
-                android:textColor="@color/text_secondary"
-                android:layout_marginBottom="8dp" />
+                android:textColor="@color/cartoon_text_secondary"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="cursive" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -62,19 +67,21 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Стоимость: 0 ₽"
+                    android:text="💰 Стоимость: 0 ₽"
                     android:textSize="13sp"
-                    android:textColor="@color/primary_color" />
+                    android:textColor="@color/cartoon_text_primary"
+                    android:fontFamily="cursive" />
 
                 <TextView
                     android:id="@+id/tv_cash_flow_required"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Поток: 0 ₽"
+                    android:text="💸 Поток: 0 ₽"
                     android:textSize="13sp"
-                    android:textColor="@color/success_color"
-                    android:gravity="end" />
+                    android:textColor="@color/cartoon_income"
+                    android:gravity="end"
+                    android:fontFamily="cursive" />
 
             </LinearLayout>
 

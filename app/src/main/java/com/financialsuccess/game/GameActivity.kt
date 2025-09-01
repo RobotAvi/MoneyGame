@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.financialsuccess.game.adapters.AssetAdapter
 import com.financialsuccess.game.data.GameDataManager
-import com.financialsuccess.game.data.GameSaveManager
 import com.financialsuccess.game.databinding.ActivityGameBinding
 import com.financialsuccess.game.models.*
 import java.text.NumberFormat
@@ -29,14 +28,15 @@ import kotlinx.coroutines.flow.collectLatest
 import androidx.appcompat.widget.PopupMenu
 import android.util.Log
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope.launch
 import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
 
 class GameActivity : AppCompatActivity() {
     
     private val viewModel: GameViewModel by viewModels()
     private lateinit var binding: ActivityGameBinding
     private lateinit var gameManager: GameManager
+    private lateinit var adaptiveMenuManager: AdaptiveMenuManager
     private var currentGameState: GameState? = null
     
     private val currencyFormat = NumberFormat.getCurrencyInstance(Locale("ru", "RU"))
@@ -81,73 +81,110 @@ class GameActivity : AppCompatActivity() {
 
         initGame()
         setupUI()
+        
+        // Инициализируем адаптивное меню
+        adaptiveMenuManager = AdaptiveMenuManager(this, binding, this)
+        currentGameState?.let { gameState ->
+            adaptiveMenuManager.initializeMenu(gameState.player)
+        }
     }
 
     override fun onResume() { super.onResume(); if (gamePlayer == null) { gamePlayer = MediaPlayer.create(this, R.raw.game).apply { isLooping = true; setVolume(0.4f, 0.4f); start() } } else { gamePlayer?.start() } }
     override fun onPause() { super.onPause(); gamePlayer?.pause() }
     override fun onDestroy() { super.onDestroy(); gamePlayer?.release(); gamePlayer = null; soundPool?.release(); soundPool = null }
-
-    private fun initSounds() {
-        val attrs = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_GAME)
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .build()
-        soundPool = SoundPool.Builder()
-            .setMaxStreams(4)
-            .setAudioAttributes(attrs)
-            .build()
-        sfxDice = soundPool?.load(this, R.raw.dice_drop, 1) ?: 0
-        sfxOk = soundPool?.load(this, R.raw.ok, 1) ?: 0
-        sfxError = soundPool?.load(this, R.raw.error, 1) ?: 0
+    
+    override fun onBackPressed() {
+        showExtendedBackMenu()
     }
-
-    private fun playSfx(id: Int) { if (id != 0) soundPool?.play(id, 0.8f, 0.8f, 1, 0, 1f) }
+    
+    private fun showExtendedBackMenu() {
+        val popupMenu = PopupMenu(this, binding.root)
+        popupMenu.menuInflater.inflate(R.menu.game_actions, popupMenu.menu)
+        
+        popupMenu.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.menu_save -> {
+                    saveGame()
+                    true
+                }
+                R.id.menu_exit -> {
+                    finish()
+                    true
+                }
+                else -> false
+            }
+        }
+        
+        popupMenu.show()
+    }
+    
+    private fun initSounds() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val audioAttributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_GAME)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
+            soundPool = SoundPool.Builder()
+                .setMaxStreams(5)
+                .setAudioAttributes(audioAttributes)
+                .build()
+        } else {
+            soundPool = SoundPool(5, android.media.AudioManager.STREAM_MUSIC, 0)
+        }
+        
+        // Загружаем звуки (если они есть)
+        try {
+            sfxDice = soundPool?.load(this, R.raw.dice_drop, 1) ?: 0
+            sfxOk = soundPool?.load(this, R.raw.ok, 1) ?: 0
+            sfxError = soundPool?.load(this, R.raw.error, 1) ?: 0
+        } catch (e: Exception) {
+            // Звуки могут отсутствовать
+        }
+    }
     
     private fun initGame() {
-        val player: Player? = if (Build.VERSION.SDK_INT >= 33) {
-            intent.getParcelableExtra("player", Player::class.java)
-        } else { @Suppress("DEPRECATION") intent.getParcelableExtra("player") }
-        if (player != null) {
-            gameManager = GameManager()
-            currentGameState = gameManager.startNewGameWithPlayer(player)
-            updateUI()
-        } else {
-            val profession: Profession? = if (Build.VERSION.SDK_INT >= 33) { intent.getParcelableExtra("profession", Profession::class.java) } else { @Suppress("DEPRECATION") intent.getParcelableExtra("profession") }
-            val dream: Dream? = if (Build.VERSION.SDK_INT >= 33) { intent.getParcelableExtra("dream", Dream::class.java) } else { @Suppress("DEPRECATION") intent.getParcelableExtra("dream") }
-            val playerAge = intent.getIntExtra("playerAge", 25)
-            val playerName = intent.getStringExtra("playerName")
-            val startDateMillis = intent.getLongExtra("startDate", 0L).takeIf { it != 0L }
-            if (profession != null && dream != null) {
-                gameManager = GameManager()
-                currentGameState = gameManager.startNewGame(profession, dream, playerAge, playerName, startDateMillis)
-                updateUI()
-            } else finish()
+        gameManager = GameManager()
+        
+        // Загружаем сохраненную игру или создаем новую
+        try {
+            currentGameState = GameDataManager.GameSaveManager.loadGame(this)
+            if (currentGameState == null) {
+                currentGameState = createNewGame()
+            }
+        } catch (e: Exception) {
+            // Если нет сохраненной игры, создаем новую
+            currentGameState = createNewGame()
         }
+        
+        updateUI()
+    }
+    
+    private fun createNewGame(): GameState {
+        // Создаем базовую игру с дефолтными значениями
+        val profession = Profession(
+            id = "teacher",
+            name = "Учитель",
+            description = "Преподаватель в школе",
+            salary = 50000,
+            expenses = 30000,
+            taxes = 5000,
+            education = "Высшее"
+        )
+        
+        val dream = Dream(
+            id = "travel",
+            name = "Путешествие по миру",
+            description = "Посетить все континенты",
+            cost = 1000000,
+            cashFlowRequired = 50000
+        )
+        
+        return gameManager.startNewGame(profession, dream, 25, "Игрок")
     }
     
     private fun setupUI() {
-        // Новые кнопки согласно требованиям
-        setupNewButtons()
-        
-        setupAssetsRecyclerView()
-        setupCalendarRecycler()
-    }
-
-    private fun setupNewButtons() {
-        // Кнопка доходы
-        binding.btnIncome.setOnClickListener {
-            showIncomeDialog()
-        }
-        
-        // Кнопка расходы
-        binding.btnExpenses.setOnClickListener {
-            showExpensesDialog()
-        }
-        
-        // Кнопка возможности
-        binding.btnOpportunities.setOnClickListener {
-            showOpportunitiesDialog()
-        }
+        // Настройка кнопок
+        binding.btnNextTurn.setOnClickListener { performNextTurn() }
         
         // Кнопка следующий ход
         binding.btnNextTurn.setOnClickListener {
@@ -155,1380 +192,887 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
-    private fun showIncomeDialog() {
-        // Показать диалог с доходами
-        val incomeText = buildString {
-            appendLine("Зарплата: ${currencyFormat.format(currentGameState?.player?.salary ?: 0)}")
-            appendLine("Пассивный доход: ${currencyFormat.format(currentGameState?.player?.passiveIncome ?: 0)}")
-            appendLine("Общий доход: ${currencyFormat.format(currentGameState?.player?.totalIncome ?: 0)}")
-        }
-        
-        AlertDialog.Builder(this)
-            .setTitle("💰 Доходы")
-            .setMessage(incomeText)
-            .setPositiveButton("OK", null)
-            .show()
-    }
-
-    private fun showExpensesDialog() {
-        // Показать диалог с расходами
-        val expensesText = buildString {
-            appendLine("Общие расходы: ${currencyFormat.format(currentGameState?.player?.totalExpenses ?: 0)}")
-            appendLine("Налоги: ${currencyFormat.format(currentGameState?.player?.taxes ?: 0)}")
-            appendLine("Жилье: ${currencyFormat.format(currentGameState?.player?.housingExpenses ?: 0)}")
-            appendLine("Транспорт: ${currencyFormat.format(currentGameState?.player?.transportExpenses ?: 0)}")
-            appendLine("Питание: ${currencyFormat.format(currentGameState?.player?.foodExpenses ?: 0)}")
-        }
-        
-        AlertDialog.Builder(this)
-            .setTitle("💸 Расходы")
-            .setMessage(expensesText)
-            .setPositiveButton("OK", null)
-            .show()
-    }
-
-    private fun showOpportunitiesDialog() {
-        // Показать диалог с возможностями
-        val opportunitiesText = buildString {
-            appendLine("Доступные возможности:")
-            appendLine("• Инвестиции в акции")
-            appendLine("• Покупка недвижимости")
-            appendLine("• Открытие бизнеса")
-            appendLine("• Образование и навыки")
-        }
-        
-        AlertDialog.Builder(this)
-            .setTitle("🎯 Возможности")
-            .setMessage(opportunitiesText)
-            .setPositiveButton("OK", null)
-            .show()
-    }
-
-    private fun performNextTurn() {
+    fun performNextTurn() {
         // Выполнить следующий ход
         currentGameState?.let { gameState ->
-            // Увеличить месяц
-            gameState.player.monthsPlayed++
+            // Обновляем счетчики для системы уровней
+            gameState.player.updateLevelCounters()
             
-            // Обновить возраст если прошло 12 месяцев
-            if (gameState.player.monthsPlayed % 12 == 0) {
-                gameState.player.age++
-                updateLifeProgress()
-            }
+            // Выполняем ход
+            val diceValue = gameManager.rollDice()
+            gameManager.movePlayer(diceValue)
             
-            // Обновить UI
-            updatePlayerInfo()
-            updateCalendar()
+            // Обновляем уровень игрока
+            gameState.player.updateLevel()
             
-            // Показать сообщение
-            Toast.makeText(this, "Ход завершен! Возраст: ${gameState.player.age} лет", Toast.LENGTH_SHORT).show()
+            // Обновляем адаптивное меню
+            adaptiveMenuManager.updateMenu(gameState.player)
+            
+            // Проверяем повышение уровня
+            adaptiveMenuManager.checkLevelUp()
+            
+            updateUI()
+            saveGame()
         }
     }
-
-    private fun updatePlayerInfo() {
+    
+    private fun updateUI() {
         currentGameState?.let { gameState ->
-            val player = gameState.player
-            
-            // Обновить информацию об игроке
-            binding.tvPlayerNameAge?.text = "${player.name ?: "Игрок"}, ${player.age} лет"
-            
-            // Обновить цель
-            updateFinancialGoal(player)
-            
-            // Обновить шкалу жизни
+            updatePlayerInfo(gameState.player)
+            updateGameBoard(gameState)
             updateLifeProgress()
         }
     }
-
-    private fun updateFinancialGoal(player: Player) {
-        val goalText = when {
-            player.financialGoals.isNotEmpty() -> {
-                val goal = player.financialGoals.first()
-                "Цель: ${goal.description}"
-            }
-            player.cash < 0 -> "Цель: Вывести затраты в ноль"
-            player.passiveIncome < player.totalExpenses -> "Цель: Финансовая независимость"
-            else -> "Цель: Накопить 1,000,000₽"
-        }
+    
+    private fun updatePlayerInfo(player: Player) {
+        // Обновляем информацию игрока в соответствии с реальным layout
+        binding.tvPlayerNameAge.text = "${player.name ?: "Игрок"}, ${player.age} лет"
         
-        binding.tvFinancialGoal?.text = goalText
+        // Обновляем цель
+        val goalText = "Цель: ${player.dream.name} (${currencyFormat.format(player.dream.cost)})"
+        binding.tvFinancialGoal.text = goalText
+        
+        // Обновляем шкалу жизни
+        updateLifeProgress()
+        
+        // Обновляем отображение уровня
+        updateLevelDisplay(player)
     }
-
+    
+    private fun updateLevelDisplay(player: Player) {
+        val levelInfo = player.getLevelInfo()
+        // Здесь можно добавить обновление TextView для отображения уровня
+        // Например: binding.tvLevelInfo?.text = levelInfo
+    }
+    
+    private fun updateGameBoard(gameState: GameState) {
+        val player = gameState.player
+        
+        // Обновляем информацию о текущем месяце и годе
+        val currentMonth = (player.monthsPlayed % 12) + 1
+        val currentYear = 2024 + (player.monthsPlayed / 12)
+        
+        // Обновляем календарь
+        updateCalendar(currentMonth, currentYear)
+    }
+    
+    private fun updateCalendar(month: Int, year: Int) {
+        // Обновляем календарь если есть RecyclerView
+        // binding.recyclerViewCalendar?.let { recyclerView ->
+        //     val calendarAdapter = CalendarAdapter(month, year)
+        //     recyclerView.adapter = calendarAdapter
+        //     recyclerView.layoutManager = GridLayoutManager(this, 7)
+        // }
+    }
+    
     private fun updateLifeProgress() {
         currentGameState?.let { gameState ->
             val player = gameState.player
-            val progress = ((player.age.toFloat() / player.deathAge.toFloat()) * 100).toInt()
+            val lifeProgress = (player.getNetWorth() * 100 / player.dream.cost).coerceAtMost(100)
             
-            binding.progressLife?.progress = progress
-            binding.tvDeathAge?.text = "${player.deathAge}"
-        }
-    }
-
-    private fun updateCalendar() {
-        // Обновляем календарь
-        currentGameState?.let { gameState ->
-            // Здесь можно добавить логику обновления календаря
-            // Например, обновить текущую дату или позицию игрока
-            binding.tvMonthLabel?.text = getCurrentMonthText()
-        }
-    }
-
-    private fun getCurrentMonthText(): String {
-        val calendar = Calendar.getInstance()
-        val month = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.ENGLISH)
-        val year = calendar.get(Calendar.YEAR)
-        
-        // Возвращаем формат: "August 2025"
-        return "$month $year"
-    }
-
-    private fun showActionsMenu() {
-        val options = arrayOf("📦 Активы", "🏪 Рынок", "📊 Портфель")
-        AlertDialog.Builder(this)
-            .setTitle("Действия")
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> showAssets()
-                    1 -> showMarketDialog()
-                    2 -> showPortfolio()
-                }
-            }
-            .show()
-    }
-
-    private fun showMarketDialog() {
-        val view = layoutInflater.inflate(R.layout.dialog_market, null)
-        val recycler = view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerViewMarket)
-        val btnAssets = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnFilterAssets)
-        val btnInvest = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnFilterInvestments)
-        val btnRefresh = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnRefreshMarket)
-        recycler.layoutManager = LinearLayoutManager(this)
-
-        fun loadAssets() { showAvailableAssets() }
-        fun loadInvestments() { showAvailableInvestments() }
-
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("🏪 Финансовый рынок")
-            .setView(view)
-            .setNegativeButton("Закрыть", null)
-            .create()
-
-        btnAssets.setOnClickListener { dialog.dismiss(); loadAssets() }
-        btnInvest.setOnClickListener { dialog.dismiss(); loadInvestments() }
-        btnRefresh.setOnClickListener { dialog.dismiss(); showMarket() }
-
-        dialog.show()
-    }
-    
-    private fun showBalancePanel() {
-        val player = currentGameState?.player ?: return
-        val dialogView = layoutInflater.inflate(R.layout.dialog_balance_panel, null)
-        val tvCash = dialogView.findViewById<android.widget.TextView>(R.id.tvBalanceCash)
-        val tvSalary = dialogView.findViewById<android.widget.TextView>(R.id.tvBalanceSalary)
-        val tvPassive = dialogView.findViewById<android.widget.TextView>(R.id.tvBalancePassive)
-        val tvExpenses = dialogView.findViewById<android.widget.TextView>(R.id.tvBalanceExpenses)
-        val tvCashFlow = dialogView.findViewById<android.widget.TextView>(R.id.tvBalanceCashFlow)
-        val btnJournal = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnOpenJournal)
-        val btnAnalytics = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnOpenAnalytics)
-        val btnOldReport = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnOpenOldReport)
-
-        tvCash.text = "Наличные: ${currencyFormat.format(player.cash)}"
-        tvSalary.text = "Зарплата: ${currencyFormat.format(player.salary)}"
-        tvPassive.text = "Пассивный доход: ${currencyFormat.format(player.passiveIncome)}"
-        tvExpenses.text = "Расходы: ${currencyFormat.format(player.totalExpenses)}"
-        tvCashFlow.text = "Денежный поток: ${currencyFormat.format(player.getCashFlow())}"
-
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("📊 Финансовая сводка")
-            .setView(dialogView)
-            .setPositiveButton("Закрыть", null)
-            .create()
-
-        btnJournal.setOnClickListener { dialog.dismiss(); showFinancialJournal() }
-        btnAnalytics.setOnClickListener { dialog.dismiss(); showJournalAnalytics() }
-        btnOldReport.setOnClickListener { dialog.dismiss(); showFinancialStatement() }
-
-        dialog.show()
-    }
-    
-    private fun realPlayerCalendar(player: Player): Calendar = Calendar.getInstance().apply {
-        if (player.startDateMillis != null) timeInMillis = player.startDateMillis!! else set(2024, Calendar.JANUARY, 1)
-        add(Calendar.MONTH, player.monthsPlayed)
-        set(Calendar.DAY_OF_MONTH, player.currentDayOfMonth)
-        set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-        
-        // Логирование для отладки
-        Log.d("GameActivity", "realPlayerCalendar: monthsPlayed=${player.monthsPlayed}, currentDayOfMonth=${player.currentDayOfMonth}")
-        Log.d("GameActivity", "realPlayerCalendar: результат = ${get(Calendar.DAY_OF_MONTH)}.${get(Calendar.MONTH) + 1}.${get(Calendar.YEAR)}")
-    }
-
-    private fun weekStart(cal: Calendar): Calendar {
-        val c = cal.clone() as Calendar
-        // Понедельник — начало недели
-        while (c.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
-            c.add(Calendar.DAY_OF_MONTH, -1)
-        }
-        return c
-    }
-
-    private fun buildFourWeekWindow(anchor: Calendar): List<Calendar> {
-        val startOfCurrentWeek = weekStart(anchor)
-        val startOfPrevWeek = (startOfCurrentWeek.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, -7) }
-        val dates = mutableListOf<Calendar>()
-        // 4 недели: пред + текущая + 2 будущих
-        var cursor = startOfPrevWeek.clone() as Calendar
-        repeat(28) {
-            dates.add((cursor.clone() as Calendar))
-            cursor.add(Calendar.DAY_OF_MONTH, 1)
-        }
-        return dates
-    }
-
-    private var calendarAnchor: Calendar? = null
-
-    private fun setupCalendarRecycler() {
-        binding.recyclerCalendar.layoutManager = GridLayoutManager(this, 7)
-        val player = currentGameState?.player ?: return
-        val currentCal = realPlayerCalendar(player)
-        
-        // Логирование для отладки
-        Log.d("GameActivity", "setupCalendarRecycler: текущая дата игрока = ${currentCal.get(Calendar.DAY_OF_MONTH)}.${currentCal.get(Calendar.MONTH) + 1}.${currentCal.get(Calendar.YEAR)}")
-        
-        // Делаем текущую неделю второй строкой
-        calendarAnchor = (currentCal.clone() as Calendar)
-        val dates = buildFourWeekWindow(calendarAnchor!!)
-
-        // Упрощенный адаптер без сложной логики
-        val adapter = com.financialsuccess.game.adapters.CalendarAdapter(
-            currentDate = currentCal,
-            typeProvider = { _ -> com.financialsuccess.game.adapters.CalendarAdapter.DayType.REST }, // Простой тип по умолчанию
-            selectedDate = calendarAnchor!!
-        ) { date ->
-            calendarAnchor = (date.clone() as Calendar)
-            updateMonthLabel()
-        }
-        binding.recyclerCalendar.adapter = adapter
-        adapter.submitList(dates)
-        updateMonthLabel()
-        setupCalendarNav()
-        
-        // Сохраняем ссылку на адаптер для обновления
-        calendarAdapter = adapter
-    }
-    
-    // Переменная для хранения ссылки на адаптер календаря
-    private var calendarAdapter: com.financialsuccess.game.adapters.CalendarAdapter? = null
-    
-    // Функция для принудительного обновления токена игрока
-    private fun updatePlayerToken() {
-        val player = currentGameState?.player ?: return
-        val currentCal = realPlayerCalendar(player)
-        
-        Log.d("GameActivity", "updatePlayerToken: обновляем токен на дату ${currentCal.get(Calendar.DAY_OF_MONTH)}.${currentCal.get(Calendar.MONTH) + 1}.${currentCal.get(Calendar.YEAR)}")
-        
-        // Обновляем текущую дату в адаптере
-        calendarAdapter?.let { adapter ->
-            // Создаем новый адаптер с обновленной датой
-            val newAdapter = com.financialsuccess.game.adapters.CalendarAdapter(
-                currentDate = currentCal,
-                typeProvider = { _ -> com.financialsuccess.game.adapters.CalendarAdapter.DayType.REST },
-                selectedDate = calendarAnchor ?: currentCal
-            ) { date ->
-                calendarAnchor = (date.clone() as Calendar)
-                updateMonthLabel()
-            }
-            
-            binding.recyclerCalendar.adapter = newAdapter
-            calendarAdapter = newAdapter
-            
-            // Пересоздаем список дат
-            val dates = buildFourWeekWindow(calendarAnchor ?: currentCal)
-            newAdapter.submitList(dates)
-            
-            Log.d("GameActivity", "updatePlayerToken: календарь обновлен")
+            // Обновляем прогресс если есть ProgressBar
+            // binding.progressBarLife?.progress = lifeProgress
+            // binding.tvLifeProgress?.text = "$lifeProgress%"
         }
     }
     
-    private fun rollDiceAndMove() {
-        val diceValue = gameManager.rollDice()
+    private fun rollDice() {
+        val diceValue = (1..6).random()
         lastDiceValue = diceValue
         
-        // Убираем ссылки на несуществующие элементы
-        // binding.btnDice.setImageResource(diceRes)
-        // binding.lottieDice.apply { ... }
+        // Анимация кубика
+        // binding.ivDice?.setImageResource(getDiceResource(diceValue))
         
-        playSfx(sfxDice)
-        // Hint removed to reduce noise
-        handleSlowTrackDice(diceValue)
+        // Звук кубика
+        soundPool?.play(sfxDice, 1f, 1f, 1, 0, 1f)
+        
+        // Показываем результат
+        Toast.makeText(this, "Выпало: $diceValue", Toast.LENGTH_SHORT).show()
     }
     
-    private fun handleFastTrackDice(diceValue: Int) {
-        val player = currentGameState?.player ?: return
-        val dreamNumber = player.dream.fastTrackNumber
-        
-        if (diceValue == dreamNumber) {
-            if (player.cash >= player.dream.cost) {
-                showVictoryDialog()
-            } else {
-                val needed = player.dream.cost - player.cash
-                showMessage("🎯 Вы попали на свою мечту! Не хватает ${currencyFormat.format(needed)}")
-                player.cash += player.getCashFlow()
-                updateUI()
-            }
-        } else {
-            val messages = listOf(
-                "🎲 Мимо! Попробуйте ещё раз.",
-                "🎯 Почти попали! Следующий бросок будет удачнее.",
-                "💪 Не сдавайтесь! Ваша мечта близко.",
-                "📈 Время инвестировать больше и копить деньги!",
-                "🚀 Каждый бросок приближает к цели!"
-            )
-            showMessage(messages.random())
-            player.cash += player.getCashFlow()
-            if (diceValue == 1 || diceValue == 6) {
-                handleFastTrackEvent()
-            }
-            updateUI()
+    private fun getDiceResource(value: Int): Int {
+        return when (value) {
+            1 -> R.drawable.ic_calendar_rest
+            2 -> R.drawable.ic_calendar_work
+            3 -> R.drawable.ic_calendar_game
+            4 -> R.drawable.ic_calendar_finance
+            5 -> R.drawable.ic_action_report
+            6 -> R.drawable.ic_action_market
+            else -> R.drawable.ic_calendar_rest
         }
+    }
+    
+    private fun saveGame() {
+        currentGameState?.let { gameState ->
+            try {
+                GameDataManager.GameSaveManager.saveGame(this, gameState)
+                Toast.makeText(this, "Игра сохранена", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(this, "Ошибка сохранения: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    
+    private fun getCurrentMonthText(month: Int): String {
+        val monthNames = arrayOf(
+            "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+            "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+        )
+        return monthNames[month - 1]
     }
 
-    private fun handleSlowTrackDice(diceValue: Int) {
-        currentGameState = gameManager.movePlayer(diceValue)
-        updateUI()
-        handlePositionEvent()
-    }
+    // === МЕТОДЫ ДЛЯ АДАПТИВНОГО МЕНЮ ===
     
-    private fun handleFastTrackEvent() {
-        val events = listOf(
-            "💰 Дивиденды от инвестиций: +100,000₽" to 100000,
-            "📈 Удачная сделка: +200,000₽" to 200000, 
-            "🎁 Бонус от клиента: +50,000₽" to 50000,
-            "💎 Рост акций: +150,000₽" to 150000,
-            "🏆 Премия за результат: +75,000₽" to 75000
-        )
-        
-        val (message, amount) = events.random()
-        currentGameState?.player?.cash = (currentGameState?.player?.cash ?: 0) + amount
-        showMessage(message)
-    }
-    
-    private fun showVictoryDialog() {
-        val player = currentGameState?.player ?: return
-        val message = "Поздравляем! Вы достигли своей мечты: ${player.dream.name}!\n\nВы успешно вышли из крысиных бегов и осуществили финансовую мечту!\n\nИтоговый капитал: ${currencyFormat.format(player.cash)}\nПассивный доход: ${currencyFormat.format(player.passiveIncome)}"
-        showEventPanel(
-            title = "🎉 ПОБЕДА!",
-            message = message,
-            primaryText = "🎊 Новая игра",
-            onPrimary = { finish() },
-            secondaryText = "📊 Итоги",
-            onSecondary = { showFinalStats() }
-        )
-    }
-    
-    private fun showFinalStats() {
-        val player = currentGameState?.player ?: return
-        
-        val message = """
-            🏆 ФИНАЛЬНАЯ СТАТИСТИКА
-            
-            🎯 Мечта: ${player.dream.name}
-            💰 Итоговый капитал: ${currencyFormat.format(player.cash)}
-            📊 Пассивный доход: ${currencyFormat.format(player.passiveIncome)}
-            🏠 Активов: ${player.assets.size}
-            💼 Инвестиций: ${player.investments.size}
-            💳 Чистая стоимость: ${currencyFormat.format(player.getNetWorth())}
-            
-            🎉 Вы успешно прошли путь от крысиных бегов до финансовой свободы!
-        """.trimIndent()
-        
-        showEventPanel(
-            title = "📊 Итоги игры",
-            message = message,
-            primaryText = "🔄 Новая игра",
-            onPrimary = { finish() }
-        )
-    }
-    
-    private fun handlePositionEvent() {
-        val position = currentGameState?.player?.position ?: return
-        
-        when (position % 6) {
-            0 -> showSmallDeal()
-            1 -> showBonusEvent() // Заменяем зарплату на бонусное событие
-            2 -> showMarketEvent()
-            3 -> showBigDeal()
-            4 -> showDoodadEvent()
-            5 -> showCharityEvent()
-        }
-    }
-    
-    private fun showSmallDeal() {
-        val deals = GameDataManager.getSmallDeals()
-        val deal = deals.random()
-
-        val message = "${deal.name}\nПервоначальный взнос: ${currencyFormat.format(deal.downPayment)}\nДенежный поток: +${currencyFormat.format(deal.cashFlow)}/мес"
-        showEventPanel(
-            title = "Малая сделка",
-            message = message,
-            primaryText = "Купить",
-            onPrimary = {
-                if (gameManager.buyAsset(deal)) {
-                    currentGameState?.player?.addFinancialEntry(
-                        FinancialEntryType.EXPENSE,
-                        FinancialCategory.ASSET_PURCHASE,
-                        -deal.downPayment,
-                        "Малая сделка: ${deal.name} (денежный поток: +${currencyFormat.format(deal.cashFlow)}/мес)"
-                    )
-                    updateUI()
-                    playSfx(sfxOk)
-                    showMessage("Актив приобретён!")
-                } else {
-                    playSfx(sfxError)
-                    showMessage("Недостаточно средств")
-                }
-            },
-            secondaryText = "Пропустить",
-            onSecondary = { /* no-op */ }
-        )
-    }
-    
-    private fun showBigDeal() {
-        val deals = GameDataManager.getBigDeals()
-        val deal = deals.random()
-
-        val message = "${deal.name}\nПервоначальный взнос: ${currencyFormat.format(deal.downPayment)}\nДенежный поток: +${currencyFormat.format(deal.cashFlow)}/мес"
-        showEventPanel(
-            title = "Крупная сделка",
-            message = message,
-            primaryText = "Купить",
-            onPrimary = {
-                if (gameManager.buyAsset(deal)) {
-                    currentGameState?.player?.addFinancialEntry(
-                        FinancialEntryType.EXPENSE,
-                        FinancialCategory.ASSET_PURCHASE,
-                        -deal.downPayment,
-                        "Крупная сделка: ${deal.name} (денежный поток: +${currencyFormat.format(deal.cashFlow)}/мес)"
-                    )
-                    updateUI()
-                    playSfx(sfxOk)
-                    showMessage("Актив приобретён!")
-                } else {
-                    playSfx(sfxError)
-                    showMessage("Недостаточно средств")
-                }
-            },
-            secondaryText = "Пропустить",
-            onSecondary = { /* no-op */ }
-        )
-    }
-    
-    private fun showPaycheck() {
-        currentGameState?.player?.let { player ->
-            player.cash += player.salary
-            
-            // Логируем получение зарплаты
-            player.logIncome(
-                FinancialCategory.SALARY,
-                player.salary,
-                "Ежемесячная зарплата по профессии ${player.profession.name}"
-            )
-            
-            updateUI()
-            showMessage("Зарплата получена: ${currencyFormat.format(player.salary)}")
-        }
-    }
-    
-    private fun showBonusEvent() {
-        val bonuses = listOf(
-            "Премия за отличную работу" to 3000,
-            "Бонус за проект" to 5000,
-            "Награда за инициативу" to 2000,
-            "Доплата за сверхурочные" to 4000,
-            "Бонус за экономию" to 2500
-        )
-        
-        val (bonusName, bonusAmount) = bonuses.random()
-        
-        currentGameState?.player?.let { player ->
-            player.cash += bonusAmount
-            player.logIncome(
-                FinancialCategory.BONUS,
-                bonusAmount,
-                bonusName
-            )
-            updateUI()
-            showEventPanel(
-                title = "🎁 Бонус",
-                message = "$bonusName: +${currencyFormat.format(bonusAmount)}",
-                primaryText = "OK",
-                onPrimary = { /* close */ }
-            )
-        }
-    }
-    
-    private fun showMarketEvent() {
-        val event = GameDataManager.getRandomEvent()
-        
-        // Обработка специальных событий
-        when {
-            event.contains("ребёнок") -> {
-                currentGameState?.player?.let { player ->
-                    player.addChild()
-                    player.logExpense(
-                        FinancialCategory.CHILDREN,
-                        8000,
-                        "Рождение ребенка - дополнительные расходы 8000₽/мес"
-                    )
-                    updateUI()
-                }
-            }
-            event.contains("Повышение") -> {
-                currentGameState?.player?.let { player ->
-                    val bonus = 5000
-                    player.salary += bonus
-                    player.updateTotalIncome()
-                    player.logIncome(
-                        FinancialCategory.BONUS,
-                        bonus,
-                        "Повышение зарплаты на ${currencyFormat.format(bonus)}"
-                    )
-                    updateUI()
-                }
-            }
-            event.contains("Налоговая") -> {
-                currentGameState?.player?.let { player ->
-                    val taxAmount = 15000
-                    player.logExpense(
-                        FinancialCategory.TAXES,
-                        taxAmount,
-                        "Доплата налогов по результатам проверки"
-                    )
-                    updateUI()
-                }
-            }
-            event.contains("Наследство") -> {
-                currentGameState?.player?.let { player ->
-                    val inheritanceAmount = 100000
-                    player.cash += inheritanceAmount
-                    player.logIncome(
-                        FinancialCategory.INHERITANCE,
-                        inheritanceAmount,
-                        "Неожиданное наследство от дальнего родственника"
-                    )
-                    updateUI()
-                }
-            }
-        }
-        
-        showEventPanel(
-            title = "🎲 Событие",
-            message = event,
-            primaryText = "OK",
-            onPrimary = { /* close */ }
-        )
-    }
-    
-    
-    private fun showDoodadEvent() {
-        val expenses = listOf(1000, 2000, 3000, 4000, 5000)
-        val expense = expenses.random()
-        
-        val expenseReasons = listOf(
-            "Поломка автомобиля",
-            "Срочный ремонт бытовой техники", 
-            "Медицинские расходы",
-            "Штраф за нарушение ПДД",
-            "Поломка смартфона"
-        )
-        
-        currentGameState?.player?.let { player ->
-            val reason = expenseReasons.random()
-            player.logExpense(
-                FinancialCategory.EMERGENCY,
-                expense,
-                reason
-            )
-            updateUI()
-            showEventPanel(
-                title = "💥 Непредвиденные расходы",
-                message = "$reason: -${currencyFormat.format(expense)}",
-                primaryText = "OK",
-                onPrimary = { /* close */ }
-            )
-        }
-    }
-    
-    private fun showCharityEvent() {
-        showEventPanel(
-            title = "Благотворительность",
-            message = "Хотите пожертвовать 10% от вашего дохода на благотворительность?",
-            primaryText = "Да",
-            onPrimary = {
-                currentGameState?.player?.let { player ->
-                    val donation = (player.totalIncome * 0.1).toInt()
-                    player.logExpense(
-                        FinancialCategory.CHARITY,
-                        donation,
-                        "Пожертвование на благотворительность (10% от дохода)"
-                    )
-                    updateUI()
-                    playSfx(sfxOk)
-                    showMessage("Спасибо за пожертвование: ${currencyFormat.format(donation)}")
-                }
-            },
-            secondaryText = "Нет",
-            onSecondary = { /* no-op */ }
-        )
-    }
-    
-    private fun showFinancialStatement() {
-        currentGameState?.player?.let { player ->
+    // Финансы и инвестиции
+    fun showIncomeDialog() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
             val message = """
-                💰 ДОХОДЫ:
-                Зарплата: ${currencyFormat.format(player.totalIncome)}
+                💰 Доходы:
+                
+                Зарплата: ${currencyFormat.format(player.salary)}
                 Пассивный доход: ${currencyFormat.format(player.passiveIncome)}
-                Общий доход: ${currencyFormat.format(player.totalIncome + player.passiveIncome)}
+                Общий доход: ${currencyFormat.format(player.totalIncome)}
                 
-                💸 РАСХОДЫ:
-                Еда: ${currencyFormat.format(player.foodExpenses)}
-                Транспорт: ${currencyFormat.format(player.transportExpenses)} 
-                Жильё: ${currencyFormat.format(player.housingExpenses)}
-                Дети: ${currencyFormat.format(player.childrenExpenses)}
-                Налоги: ${currencyFormat.format(player.taxes)}
-                Прочее: ${currencyFormat.format(player.otherExpenses)}
-                Кредиты: ${currencyFormat.format(player.liabilities.sumOf { it.payment })}
-                Общие расходы: ${currencyFormat.format(player.totalExpenses)}
-                
-                📊 ИТОГО:
-                Наличные: ${currencyFormat.format(player.cash)}
                 Денежный поток: ${currencyFormat.format(player.getCashFlow())}
-                Чистая стоимость: ${currencyFormat.format(player.getNetWorth())}
-                Активы: ${player.assets.size} шт.
-                
-                ${if (player.canEscapeRatRace()) "🎉 Готов к скоростной дорожке!" else "💪 Увеличивайте пассивный доход"}
-            """.trimIndent()
-            
-            showEventPanel(
-                title = "📋 Финансовый отчёт",
-                message = message,
-                primaryText = "OK",
-                onPrimary = { /* close panel */ }
-            )
-        }
-    }
-    
-    private fun showAssets() {
-        val player = currentGameState?.player
-        if (player == null || player.assets.isEmpty()) {
-            Toast.makeText(this, "У вас пока нет активов. Купите первый актив на рынке!", Toast.LENGTH_SHORT).show()
-            return
-        }
-        // Показываем список активов игрока
-        binding.recyclerViewAssets.visibility = 
-            if (binding.recyclerViewAssets.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-    }
-    
-    private fun showMarket() {
-        val items = arrayOf("📈 Активы", "💼 Инвестиции", "📊 Портфель")
-        
-        AlertDialog.Builder(this)
-            .setTitle("🏪 Финансовый рынок")
-            .setItems(items) { _, which ->
-                when (which) {
-                    0 -> showAvailableAssets()
-                    1 -> showAvailableInvestments()
-                    2 -> showPortfolio()
-                }
-            }
-            .show()
-    }
-    
-    private fun showAvailableAssets() {
-        val smallDeals = GameDataManager.getSmallDeals()
-        val bigDeals = GameDataManager.getBigDeals()
-        val allDeals = smallDeals + bigDeals
-        
-        val names = allDeals.map { "${it.name} - ${currencyFormat.format(it.downPayment)}" }.toTypedArray()
-        
-        AlertDialog.Builder(this)
-            .setTitle("📈 Доступные активы")
-            .setItems(names) { _, which ->
-                val asset = allDeals[which]
-                showAssetDetails(asset)
-            }
-            .show()
-    }
-    
-    private fun showAvailableInvestments() {
-        val investments = GameDataManager.getInvestments()
-        val names = investments.map { 
-            "${it.name} - ${currencyFormat.format(it.cost)} (${getRiskText(it.riskLevel)})"
-        }.toTypedArray()
-        
-        AlertDialog.Builder(this)
-            .setTitle("💼 Инвестиционные возможности")
-            .setItems(names) { _, which ->
-                val investment = investments[which]
-                showInvestmentDetails(investment)
-            }
-            .show()
-    }
-    
-    private fun showAssetDetails(asset: Asset) {
-        val roi = if (asset.downPayment > 0) {
-            (asset.cashFlow * 12.0 / asset.downPayment) * 100
-        } else 0.0
-        
-        val message = """
-            ${asset.name}
-            
-            Первоначальный взнос: ${currencyFormat.format(asset.downPayment)}
-            Стоимость: ${currencyFormat.format(asset.value)}
-            Денежный поток: +${currencyFormat.format(asset.cashFlow)}/мес
-            ROI: ${String.format("%.1f", roi)}% годовых
-            
-            ${if (asset.loan > 0) "Кредит: ${currencyFormat.format(asset.loan)} (${currencyFormat.format(asset.loanPayment)}/мес)" else "Без кредита"}
-        """.trimIndent()
-        
-        AlertDialog.Builder(this)
-            .setTitle("📊 Детали актива")
-            .setMessage(message)
-            .setPositiveButton("💰 Купить") { _, _ ->
-                if (gameManager.buyAsset(asset)) {
-                    updateUI()
-                    showMessage("✅ Актив приобретён!")
-                } else {
-                    showMessage("❌ Недостаточно средств")
-                }
-            }
-            .setNegativeButton("❌ Отмена", null)
-            .show()
-    }
-    
-    private fun showInvestmentDetails(investment: Investment) {
-        val roi = if (investment.cost > 0) {
-            (investment.expectedReturn * 12.0 / investment.cost) * 100
-        } else 0.0
-        
-        val message = """
-            ${investment.name}
-            
-            Стоимость: ${currencyFormat.format(investment.cost)}
-            Ожидаемая доходность: ${currencyFormat.format(investment.expectedReturn)}/мес
-            ROI: ${String.format("%.1f", roi)}% годовых
-            Риск: ${getRiskText(investment.riskLevel)}
-        """.trimIndent()
-        
-        AlertDialog.Builder(this)
-            .setTitle("💼 Детали инвестиции")
-            .setMessage(message)
-            .setPositiveButton("💰 Инвестировать") { _, _ ->
-                currentGameState?.player?.let { player ->
-                    if (player.cash >= investment.cost) {
-                        player.investments.add(investment)
-                        
-                        // Логируем инвестицию
-                        player.logExpense(
-                            FinancialCategory.INVESTMENT,
-                            investment.cost,
-                            "Инвестиция: ${investment.name} (доходность: +${currencyFormat.format(investment.expectedReturn)}/мес)"
-                        )
-                        
-                        updateUI()
-                        playSfx(sfxOk)
-                        showMessage("✅ Инвестиция оформлена!")
-                    } else {
-                        playSfx(sfxError)
-                        showMessage("❌ Недостаточно средств")
-                    }
-                }
-            }
-            .setNegativeButton("❌ Отмена", null)
-            .show()
-    }
-    
-    private fun showPortfolio() {
-        currentGameState?.player?.let { player ->
-            val message = """
-                📈 АКТИВЫ (${player.assets.size} шт.):
-                ${player.assets.joinToString("\n") { "• ${it.name}: +${currencyFormat.format(it.cashFlow)}/мес" }}
-                
-                💼 ИНВЕСТИЦИИ (${player.investments.size} шт.):
-                ${player.investments.joinToString("\n") { "• ${it.name}: +${currencyFormat.format(it.expectedReturn)}/мес" }}
-                
-                📊 ОБЩИЙ ПАССИВНЫЙ ДОХОД:
-                ${currencyFormat.format(player.passiveIncome + player.investments.sumOf { it.expectedReturn })}
             """.trimIndent()
             
             AlertDialog.Builder(this)
-                .setTitle("📊 Мой портфель")
+                .setTitle("💰 Доходы")
                 .setMessage(message)
                 .setPositiveButton("OK", null)
                 .show()
         }
     }
     
-    private fun getRiskText(risk: RiskLevel): String = when (risk) {
-        RiskLevel.LOW -> "🟢 Низкий"
-        RiskLevel.MEDIUM -> "🟡 Средний" 
-        RiskLevel.HIGH -> "🔴 Высокий"
-    }
-    
-    private fun setupAssetsRecyclerView() { binding.recyclerViewAssets.layoutManager = LinearLayoutManager(this) }
-
-    private fun updateUI() {
-        val player = currentGameState?.player ?: return
-        if (!player.isAlive()) { showDeathDialog(); return }
-        binding.tvPlayerNameAge?.text = "${player.name ?: "Игрок"}, ${player.age} лет"
-        updateCurrentDate(player)
-        updateGameStatus(player)
-        updatePlayerAvatar(player)
-        // Профессия теперь отображается в шапке
-        // binding.tvProfession.text = "Профессия: ${player.profession.name}"
-        binding.tvCash.text = "Наличные: ${currencyFormat.format(player.cash)}"
-        binding.tvSalary.text = "Зарплата: ${currencyFormat.format(player.salary)}"
-        binding.tvPassiveIncome.text = "Пассивный доход: ${currencyFormat.format(player.passiveIncome)}"
-        binding.tvExpenses.text = "Расходы: ${currencyFormat.format(player.totalExpenses)}"
-        binding.tvCashFlow.text = "Денежный поток: ${currencyFormat.format(player.getCashFlow())}"
-        val ageColor = when { player.isInCriticalAge() -> "🔴"; player.getYearsLeft() <= 10 -> "🟡"; else -> "🟢" }
-        // Возраст теперь отображается в шапке
-        // binding.tvAge.text = "$ageColor Возраст: ${player.age} лет (осталось: ${player.getYearsLeft()})"
-        binding.tvHealthStatus.text = player.getHealthStatus()
-        // Обновляем 4-недельное окно календаря; при переходе конца недели текущее сместится наверх
-        setupCalendarRecycler()
-        // Обновляем токен игрока на календаре
-        updatePlayerToken()
-        if (player.canEscapeRatRace() && !player.isInFastTrack) { showEscapeRatRaceDialog() }
-
-        // Установить иконку мечты в шапке в соответствии с выбранной мечтой
-        val dreamIconRes = when (player.dream.id) {
-            "yacht" -> R.drawable.dream_yacht
-            "restaurant" -> R.drawable.dream_restaurant
-            "charity" -> R.drawable.dream_charity
-            "island" -> R.drawable.dream_island
-            "space_trip" -> R.drawable.dream_space
-            "business_empire" -> R.drawable.dream_business
-            else -> R.drawable.ic_dream_placeholder
-        }
-        binding.ivDreamIcon?.setImageResource(dreamIconRes)
-    }
-    
-    // Метод updateMonthProgressBar удален - monthProgressBar больше не используется
-    
-    private fun updateMonthLabel() {
-        val anchor = calendarAnchor ?: return
-        val monthName = android.text.format.DateFormat.format("d MMMM yyyy", anchor).toString().replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString() }
-        binding.tvMonthLabel.text = monthName
-    }
-
-    private fun setupCalendarNav() {
-        // Листание месяца отключено
-        binding.recyclerCalendar.setOnTouchListener(null)
-    }
-
-    private fun showEscapeRatRaceDialog() {
-        val player = currentGameState?.player ?: return
-        
-        AlertDialog.Builder(this)
-            .setTitle("🎉 Поздравляем!")
-            .setMessage("Ваш пассивный доход превысил расходы!\n\nВы можете выйти из крысиных бегов на скоростную дорожку!\n\n🎯 На скоростной дорожке:\n• Ваша цель: ${player.dream.name}\n• Нужно выбросить: ${player.dream.fastTrackNumber}\n• Стоимость мечты: ${currencyFormat.format(player.dream.cost)}\n• Вы получаете денежный поток каждый ход")
-            .setPositiveButton("🚀 Перейти") { _, _ ->
-                currentGameState?.player?.isInFastTrack = true
-                updateUI()
-                showFastTrackWelcome()
-            }
-            .setNegativeButton("Остаться", null)
-            .show()
-    }
-    
-    private fun showFastTrackWelcome() {
-        val player = currentGameState?.player ?: return
-        
-        AlertDialog.Builder(this)
-            .setTitle("🎯 Скоростная дорожка!")
-            .setMessage("Добро пожаловать на скоростную дорожку!\n\n🎲 Как играть:\n• Бросайте кубик каждый ход\n• Нужно выбросить ${player.dream.fastTrackNumber} для вашей мечты\n• При попадании вы можете купить мечту если хватает денег\n• Каждый ход вы получаете денежный поток\n• При 1 или 6 возможны бонусы!\n\n💰 Ваши деньги: ${currencyFormat.format(player.cash)}\n🎯 Нужно для мечты: ${currencyFormat.format(player.dream.cost)}")
-            .setPositiveButton("🎮 Играть!", null)
-            .show()
-    }
-    
-    private fun showDeathDialog() {
-        val player = currentGameState?.player ?: return
-        
-        val finalStats = """
-            ⚰️ ИГРА ОКОНЧЕНА ⚰️
+    fun showExpensesDialog() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val message = """
+                💸 Расходы:
+                
+                Общие расходы: ${currencyFormat.format(player.totalExpenses)}
+                Налоги: ${currencyFormat.format(player.taxes)}
+                Жилье: ${currencyFormat.format(player.housingExpenses)}
+                Транспорт: ${currencyFormat.format(player.transportExpenses)}
+                Питание: ${currencyFormat.format(player.foodExpenses)}
+            """.trimIndent()
             
-            👴 Возраст смерти: ${player.age} лет
-            🎮 Игра длилась: ${player.monthsPlayed} месяцев (${player.monthsPlayed / 12} лет)
-            
-            💰 ФИНАЛЬНЫЕ РЕЗУЛЬТАТЫ:
-            💵 Итоговый капитал: ${currencyFormat.format(player.cash)}
-            📊 Пассивный доход: ${currencyFormat.format(player.passiveIncome)}
-            🏠 Активов: ${player.assets.size}
-            💼 Инвестиций: ${player.investments.size}
-            💳 Чистая стоимость: ${currencyFormat.format(player.getNetWorth())}
-            
-            ${if (player.isInFastTrack) "🎯 Достигли скоростной дорожки!" else "💼 Остались в крысиных бегах"}
-            
-            💡 Помните: жизнь коротка, инвестируйте мудро!
-        """.trimIndent()
-        
-        AlertDialog.Builder(this)
-            .setTitle("💀 Конец жизни")
-            .setMessage(finalStats)
-            .setPositiveButton("🔄 Новая жизнь") { _, _ ->
-                finish() // Возврат к выбору профессии
-            }
-            .setCancelable(false)
-            .show()
-    }
-    
-    private fun showFinancialJournal() {
-        val player = currentGameState?.player ?: return
-        val entries = player.getRecentJournalEntries(100) // Последние 100 записей
-        
-        if (entries.isEmpty()) {
-            showMessage("📋 Журнал финансов пуст")
-            return
-        }
-        
-        // Создаем диалог с RecyclerView
-        val dialogView = layoutInflater.inflate(R.layout.dialog_financial_journal, null)
-        val recyclerView = dialogView.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerViewJournal)
-        val tvStats = dialogView.findViewById<android.widget.TextView>(R.id.tvJournalStats)
-        val btnExportTxt = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnExportTxt)
-        
-        // Настраиваем RecyclerView
-        recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
-        recyclerView.adapter = com.financialsuccess.game.adapters.FinancialJournalAdapter(entries)
-        
-        // Статистика
-        val totalIncome = entries.filter { it.amount > 0 }.sumOf { it.amount }
-        val totalExpenses = entries.filter { it.amount < 0 }.sumOf { kotlin.math.abs(it.amount) }
-        val balance = totalIncome - totalExpenses
-        
-        tvStats.text = """
-            📊 СТАТИСТИКА (последние ${entries.size} операций):
-            
-            ➕ Общие доходы: ${currencyFormat.format(totalIncome)}
-            ➖ Общие расходы: ${currencyFormat.format(totalExpenses)}
-            💰 Чистый результат: ${currencyFormat.format(balance)}
-            
-            📈 Записей в журнале: ${player.financialJournal.size}
-        """.trimIndent()
-        
-        // Обработка нажатия на кнопку экспорта
-        btnExportTxt.setOnClickListener {
-            exportJournalToTxt(player, entries)
-        }
-        
-        AlertDialog.Builder(this)
-            .setTitle("📊 Журнал финансов")
-            .setView(dialogView)
-            .setPositiveButton("Закрыть", null)
-            .setNeutralButton("📈 Аналитика") { _, _ ->
-                showJournalAnalytics()
-            }
-            .show()
-    }
-    
-    /**
-     * Экспортирует финансовый журнал в TXT формат и делится им
-     */
-    private fun exportJournalToTxt(player: Player, entries: List<FinancialEntry>) {
-        try {
-            val txtContent = generateJournalTxtContent(player, entries)
-            
-            // Создаем Intent для отправки текста
-            val shareIntent = Intent().apply {
-                action = Intent.ACTION_SEND
-                type = "text/plain"
-                putExtra(Intent.EXTRA_SUBJECT, "📊 Финансовый журнал - ${player.name ?: "Игрок"}")
-                putExtra(Intent.EXTRA_TEXT, txtContent)
-            }
-            
-            // Запускаем диалог выбора приложения для отправки
-            startActivity(Intent.createChooser(shareIntent, "📤 Экспорт журнала в TXT"))
-            
-        } catch (e: Exception) {
-            showMessage("❌ Ошибка при экспорте: ${e.message}")
+            AlertDialog.Builder(this)
+                .setTitle("💸 Расходы")
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show()
         }
     }
     
-    /**
-     * Генерирует содержимое TXT файла из данных журнала
-     */
-    private fun generateJournalTxtContent(player: Player, entries: List<FinancialEntry>): String {
-        val sb = StringBuilder()
-        
-        // Заголовок
-        sb.append("=".repeat(80)).append("\n")
-        sb.append("📊 ФИНАНСОВЫЙ ЖУРНАЛ - ИГРА 'ФИНАНСОВЫЙ УСПЕХ'\n")
-        sb.append("=".repeat(80)).append("\n\n")
-        
-        // Информация об игроке
-        sb.append("👤 ИНФОРМАЦИЯ ОБ ИГРОКЕ:\n")
-        sb.append("-".repeat(40)).append("\n")
-        sb.append("Имя: ${player.name ?: "Не указано"}\n")
-        sb.append("Профессия: ${player.profession.name}\n")
-        sb.append("Возраст: ${player.age} лет\n")
-        sb.append("Месяцев в игре: ${player.monthsPlayed}\n")
-        sb.append("Мечта: ${player.dream.name}\n")
-        sb.append("Текущий баланс: ${currencyFormat.format(player.cash)}\n")
-        sb.append("Чистая стоимость: ${currencyFormat.format(player.getNetWorth())}\n")
-        sb.append("Пассивный доход: ${currencyFormat.format(player.passiveIncome)}\n\n")
-        
-        // Общая статистика
-        val totalIncome = entries.filter { it.amount > 0 }.sumOf { it.amount }
-        val totalExpenses = entries.filter { it.amount < 0 }.sumOf { kotlin.math.abs(it.amount) }
-        val balance = totalIncome - totalExpenses
-        
-        sb.append("📈 ОБЩАЯ СТАТИСТИКА:\n")
-        sb.append("-".repeat(40)).append("\n")
-        sb.append("Всего доходов: ${currencyFormat.format(totalIncome)}\n")
-        sb.append("Всего расходов: ${currencyFormat.format(totalExpenses)}\n")
-        sb.append("Чистый результат: ${currencyFormat.format(balance)}\n")
-        sb.append("Всего записей: ${entries.size}\n\n")
-        
-        // Статистика по категориям
-        val categoryStats = player.getCategoryStats()
-        sb.append("🏷️ СТАТИСТИКА ПО КАТЕГОРИЯМ:\n")
-        sb.append("-".repeat(40)).append("\n")
-        
-        // Доходы
-        sb.append("💰 ДОХОДЫ:\n")
-        categoryStats.filter { it.value > 0 }
-            .toList()
-            .sortedByDescending { it.second }
-            .forEach { (category, amount) ->
-                sb.append("  ${category.getIcon()} ${category.getDisplayName()}: ${currencyFormat.format(amount)}\n")
-            }
-        
-        sb.append("\n💸 РАСХОДЫ:\n")
-        categoryStats.filter { it.value < 0 }
-            .toList()
-            .sortedBy { it.second } // От больших расходов к меньшим
-            .forEach { (category, amount) ->
-                sb.append("  ${category.getIcon()} ${category.getDisplayName()}: ${currencyFormat.format(kotlin.math.abs(amount))}\n")
-            }
-        
-        // Месячная статистика
-        if (player.monthsPlayed > 0) {
-            val (monthIncome, monthExpense) = player.getMonthlyStats(player.monthsPlayed)
-            sb.append("\n📅 ТЕКУЩИЙ МЕСЯЦ (${player.monthsPlayed}):\n")
-            sb.append("  Доходы: ${currencyFormat.format(monthIncome)}\n")
-            sb.append("  Расходы: ${currencyFormat.format(monthExpense)}\n")
-            sb.append("  Баланс: ${currencyFormat.format(monthIncome - monthExpense)}\n\n")
-        }
-        
-        // Детальные записи
-        sb.append("📝 ДЕТАЛЬНЫЕ ЗАПИСИ:\n")
-        sb.append("-".repeat(80)).append("\n")
-        
-        entries.forEachIndexed { index, entry ->
-            val entryNumber = index + 1
-            val isPositive = entry.amount > 0
-            val amountText = if (isPositive) {
-                "+${currencyFormat.format(entry.amount)}"
-            } else {
-                currencyFormat.format(entry.amount)
-            }
+    fun showBalancePanel() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val message = """
+                💼 Баланс:
+                
+                Наличные: ${currencyFormat.format(player.cash)}
+                Активы: ${currencyFormat.format(player.assets.sumOf { it.value })}
+                Инвестиции: ${currencyFormat.format(player.investments.sumOf { it.cost })}
+                
+                Последние записи: ${player.financialJournal.size}
+            """.trimIndent()
             
-            sb.append("${entryNumber}. ${entry.category.getIcon()} ${entry.category.getDisplayName()}\n")
-            sb.append("   Описание: ${entry.description}\n")
-            sb.append("   Сумма: $amountText\n")
-            sb.append("   Дата: ${entry.realDate}\n")
-            sb.append("   Возраст игрока: ${entry.playerAge} лет\n")
-            sb.append("   Месяц игры: ${entry.monthNumber}\n")
-            sb.append("   Баланс после: ${currencyFormat.format(entry.balanceAfter)}\n")
-            sb.append("   Тип: ${if (isPositive) "Доход" else "Расход"}\n")
-            sb.append("-".repeat(60)).append("\n")
+            AlertDialog.Builder(this)
+                .setTitle("💼 Баланс")
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show()
         }
-        
-        // Футер
-        sb.append("\n" + "=".repeat(80)).append("\n")
-        sb.append("📅 Дата экспорта: ${java.text.SimpleDateFormat("dd.MM.yyyy HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())}\n")
-        sb.append("🎮 Версия игры: ${packageManager.getPackageInfo(packageName, 0).versionName}\n")
-        sb.append("=".repeat(80)).append("\n")
-        
-        return sb.toString()
     }
     
-    private fun showJournalAnalytics() {
-        val player = currentGameState?.player ?: return
-        val stats = player.getCategoryStats()
-        
-        val analyticsText = buildString {
-            append("📈 АНАЛИТИКА ПО КАТЕГОРИЯМ:\n\n")
-            
-            append("💰 ДОХОДЫ:\n")
-            stats.filter { it.value > 0 }.toList()
-                .sortedByDescending { it.second }
-                .forEach { (category, amount) ->
-                    append("${category.getIcon()} ${category.getDisplayName()}: ${currencyFormat.format(amount)}\n")
-                }
-            
-            append("\n💸 РАСХОДЫ:\n")
-            stats.filter { it.value < 0 }.toList()
-                .sortedBy { it.second } // От больших расходов к меньшим
-                .forEach { (category, amount) ->
-                    append("${category.getIcon()} ${category.getDisplayName()}: ${currencyFormat.format(kotlin.math.abs(amount))}\n")
-                }
-            
-            val currentMonth = player.monthsPlayed
-            if (currentMonth > 0) {
-                val (monthIncome, monthExpense) = player.getMonthlyStats(currentMonth)
-                append("\n📅 ТЕКУЩИЙ МЕСЯЦ (${currentMonth}):\n")
-                append("➕ Доходы: ${currencyFormat.format(monthIncome)}\n")
-                append("➖ Расходы: ${currencyFormat.format(monthExpense)}\n")
-                append("💰 Баланс: ${currencyFormat.format(monthIncome - monthExpense)}\n")
-            }
-        }
-        
-        AlertDialog.Builder(this)
-            .setTitle("📈 Финансовая аналитика")
-            .setMessage(analyticsText)
-            .setPositiveButton("OK", null)
-            .show()
-    }
-    
-    private fun showHealthStatus() {
-        val player = currentGameState?.player ?: return
-        
-        val healthInfo = buildString {
-            append("🏥 СОСТОЯНИЕ ЗДОРОВЬЯ:\n\n")
-            append("📊 Общий статус: ${player.getHealthStatus()}\n\n")
-            
-            if (player.activeRisks.isNotEmpty()) {
-                append("⚠️ АКТИВНЫЕ ПРОФЕССИОНАЛЬНЫЕ РИСКИ:\n")
-                player.activeRisks.forEach { risk ->
-                    append("${risk.icon} ${risk.name}\n")
-                    append("   ${risk.description}\n")
-                    risk.effects.forEach { effect ->
-                        append("   💰 Расходы: +${currencyFormat.format(effect.expenseIncrease)}\n")
-                        if (effect.salaryReduction > 0) {
-                            append("   💼 Снижение зарплаты: -${currencyFormat.format(effect.salaryReduction)}\n")
-                        }
-                        if (effect.recoveryTime > 0) {
-                            append("   ⏰ Восстановление: ${effect.recoveryTime} мес.\n")
-                        }
-                        if (effect.careerEnd) {
-                            append("   🚫 Завершение карьеры\n")
-                        }
-                    }
-                    append("\n")
+    fun showFinancialJournal() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val entries = player.financialJournal.takeLast(10)
+            val message = if (entries.isNotEmpty()) {
+                entries.joinToString("\n") { entry ->
+                    "${entry.realDate}: ${entry.description} - ${currencyFormat.format(entry.amount)}"
                 }
             } else {
-                append("✅ Нет активных профессиональных рисков\n\n")
+                "Записей пока нет"
             }
             
-            // Информация о рисках профессии
-            val professionRisks = ProfessionalRisks.getRisksForProfession(player.profession.name)
-            if (professionRisks.isNotEmpty()) {
-                append("⚠️ ВОЗМОЖНЫЕ РИСКИ ПРОФЕССИИ:\n")
-                professionRisks.forEach { risk ->
-                    val isActive = player.activeRisks.any { it.name == risk.name }
-                    val ageMatch = player.age in risk.ageRange
-                    
-                    append("${risk.icon} ${risk.name}")
-                    when {
-                        isActive -> append(" (АКТИВЕН)")
-                        !ageMatch -> append(" (возраст ${risk.ageRange.first}-${risk.ageRange.last})")
-                        else -> append(" (риск ${(risk.probability * 100).toInt()}%)")
+            AlertDialog.Builder(this)
+                .setTitle("📊 Финансовый журнал")
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show()
+        }
+    }
+    
+    fun showJournalAnalytics() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val message = """
+                📈 Аналитика:
+                
+                Общий доход: ${currencyFormat.format(player.totalEarned)}
+                Общие расходы: ${currencyFormat.format(player.totalSpent)}
+                Чистая прибыль: ${currencyFormat.format(player.totalEarned - player.totalSpent)}
+                Количество сделок: ${player.financialJournal.size}
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("📈 Аналитика журнала")
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show()
+        }
+    }
+    
+    fun showFinancialStatement() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val message = """
+                📋 Финансовый отчет:
+                
+                Активы:
+                - Наличные: ${currencyFormat.format(player.cash)}
+                - Активы: ${currencyFormat.format(player.assets.sumOf { it.value })}
+                - Инвестиции: ${currencyFormat.format(player.investments.sumOf { it.cost })}
+                
+                Пассивы:
+                - Обязательства: ${currencyFormat.format(player.liabilities.sumOf { it.amount })}
+                
+                Чистая стоимость: ${currencyFormat.format(player.getNetWorth())}
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("📋 Финансовый отчет")
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show()
+        }
+    }
+    
+    fun showMarketDialog() {
+        currentGameState?.let { gameState ->
+            val message = """
+                📈 Рынок:
+                
+                Доступные активы:
+                - Недвижимость
+                - Акции
+                - Бизнес
+                - Криптовалюты
+                
+                Требуется уровень: Инвестор
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("📈 Рынок")
+                .setMessage(message)
+                .setPositiveButton("Просмотреть активы") { _, _ ->
+                    showAvailableAssets()
+                }
+                .setNegativeButton("Отмена", null)
+                .show()
+        }
+    }
+    
+    fun showAvailableAssets() {
+        currentGameState?.let { gameState ->
+            val message = """
+                🏠 Доступные активы:
+                
+                Недвижимость:
+                - Квартира (50,000₽)
+                - Дом (200,000₽)
+                - Коммерческая недвижимость (500,000₽)
+                
+                Акции:
+                - Дивидендные акции (10,000₽)
+                - Ростовые акции (25,000₽)
+                
+                Требуется уровень: Инвестор
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("🏠 Доступные активы")
+                .setMessage(message)
+                .setPositiveButton("Просмотреть инвестиции") { _, _ ->
+                    showAvailableInvestments()
+                }
+                .setNegativeButton("Отмена", null)
+                .show()
+        }
+    }
+    
+    fun showAssetDetails() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val message = if (player.assets.isNotEmpty()) {
+                player.assets.joinToString("\n\n") { asset ->
+                    """
+                    ${asset.name}:
+                    - Стоимость: ${currencyFormat.format(asset.value)}
+                    - Денежный поток: ${currencyFormat.format(asset.cashFlow)}
+                    - Первоначальный взнос: ${currencyFormat.format(asset.downPayment)}
+                    - Кредит: ${currencyFormat.format(asset.loan)}
+                    """.trimIndent()
+                }
+            } else {
+                "У вас пока нет активов"
+            }
+            
+            AlertDialog.Builder(this)
+                .setTitle("🏠 Детали активов")
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show()
+        }
+    }
+    
+    fun showAvailableInvestments() {
+        currentGameState?.let { gameState ->
+            val message = """
+                💹 Доступные инвестиции:
+                
+                Облигации:
+                - Государственные облигации (5,000₽)
+                - Корпоративные облигации (15,000₽)
+                
+                Фонды:
+                - Индексный фонд (20,000₽)
+                - ETF (30,000₽)
+                
+                Требуется уровень: Инвестор
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("💹 Доступные инвестиции")
+                .setMessage(message)
+                .setPositiveButton("Портфель") { _, _ ->
+                    showPortfolio()
+                }
+                .setNegativeButton("Отмена", null)
+                .show()
+        }
+    }
+    
+    fun showInvestmentDetails() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val message = if (player.investments.isNotEmpty()) {
+                player.investments.joinToString("\n\n") { investment ->
+                    """
+                    ${investment.name}:
+                    - Стоимость: ${currencyFormat.format(investment.cost)}
+                    - Ожидаемая доходность: ${currencyFormat.format(investment.expectedReturn)}
+                    - Уровень риска: ${investment.riskLevel}
+                    """.trimIndent()
+                }
+            } else {
+                "У вас пока нет инвестиций"
+            }
+            
+            AlertDialog.Builder(this)
+                .setTitle("💹 Детали инвестиций")
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show()
+        }
+    }
+    
+    fun showPortfolio() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val totalAssets = player.assets.sumOf { it.value }
+            val totalInvestments = player.investments.sumOf { it.cost }
+            val totalValue = totalAssets + totalInvestments
+            
+            val message = """
+                📊 Портфель:
+                
+                Активы: ${currencyFormat.format(totalAssets)}
+                Инвестиции: ${currencyFormat.format(totalInvestments)}
+                Общая стоимость: ${currencyFormat.format(totalValue)}
+                
+                Распределение:
+                - Недвижимость: ${if (totalValue > 0) (player.assets.filter { it.type == AssetType.REAL_ESTATE }.sumOf { it.value } * 100 / totalValue).toInt() else 0}%
+                - Акции: ${if (totalValue > 0) (player.assets.filter { it.type == AssetType.STOCKS }.sumOf { it.value } * 100 / totalValue).toInt() else 0}%
+                - Облигации: ${if (totalValue > 0) (player.investments.filter { it.type == AssetType.BONDS }.sumOf { it.cost } * 100 / totalValue).toInt() else 0}%
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("📊 Портфель")
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show()
+        }
+    }
+    
+    // Здоровье и образ жизни
+    fun showHealthStatus() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val message = """
+                🏥 Статус здоровья:
+                
+                Возраст: ${player.age} лет
+                Ожидаемая продолжительность жизни: ${player.deathAge} лет
+                Осталось лет: ${player.deathAge - player.age}
+                
+                Факторы здоровья:
+                - Образование: ${player.education.displayName}
+                - Профессия: ${player.profession.name}
+                - Навыки: ${player.skills.size}
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("🏥 Статус здоровья")
+                .setMessage(message)
+                .setPositiveButton("Варианты страхования") { _, _ ->
+                    showHealthcareOptions()
+                }
+                .setNegativeButton("Отмена", null)
+                .show()
+        }
+    }
+    
+    fun showHealthcareOptions() {
+        currentGameState?.let { gameState ->
+            val message = """
+                🏥 Варианты страхования:
+                
+                Базовое страхование:
+                - Медицинская страховка (2,000₽/мес)
+                - Стоматологическая страховка (1,500₽/мес)
+                
+                Расширенное страхование:
+                - Полная медицинская страховка (5,000₽/мес)
+                - Страхование жизни (3,000₽/мес)
+                
+                Требуется уровень: Автономный
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("🏥 Варианты страхования")
+                .setMessage(message)
+                .setPositiveButton("Купить страховку") { _, _ ->
+                    buyHealthcare()
+                }
+                .setNegativeButton("Отмена", null)
+                .show()
+        }
+    }
+    
+    fun buyHealthcare() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val cost = 2000 // Базовая медицинская страховка
+            
+            if (player.cash >= cost) {
+                player.cash -= cost
+                player.totalExpenses += cost
+                
+                AlertDialog.Builder(this)
+                    .setTitle("✅ Страховка куплена")
+                    .setMessage("Вы приобрели базовую медицинскую страховку за ${currencyFormat.format(cost)}")
+                    .setPositiveButton("OK") { _, _ ->
+                        updateUI()
                     }
-                    append("\n")
+                    .show()
+            } else {
+                AlertDialog.Builder(this)
+                    .setTitle("❌ Недостаточно средств")
+                    .setMessage("Для покупки страховки нужно ${currencyFormat.format(cost)}")
+                    .setPositiveButton("OK", null)
+                    .show()
+            }
+        }
+    }
+    
+    fun showHabitsAndFamilyInfluence() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val message = """
+                👨‍👩‍👧‍👦 Привычки и влияние семьи:
+                
+                Текущие привычки:
+                - Финансовая грамотность: ${if (player.education != EducationLevel.HIGH_SCHOOL) "Высокая" else "Низкая"}
+                - Инвестиционные навыки: ${if (player.assets.isNotEmpty() || player.investments.isNotEmpty()) "Развиты" else "Не развиты"}
+                - Планирование: ${if (player.cash > 10000) "Хорошее" else "Требует улучшения"}
+                
+                Влияние семьи:
+                - Поддержка в образовании: ${if (player.education != EducationLevel.HIGH_SCHOOL) "Есть" else "Нет"}
+                - Финансовые традиции: "Передается из поколения в поколение"
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("👨‍👩‍👧‍👦 Привычки и влияние семьи")
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show()
+        }
+    }
+    
+    fun showHealthAndFamilyExpenses() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val message = """
+                💊 Расходы на здоровье и семью:
+                
+                Текущие расходы:
+                - Медицинские расходы: ${currencyFormat.format(player.totalExpenses * 0.1)}
+                - Семейные расходы: ${currencyFormat.format(player.totalExpenses * 0.2)}
+                - Образование детей: ${currencyFormat.format(player.totalExpenses * 0.15)}
+                
+                Рекомендации:
+                - Откладывать 10% на медицинские нужды
+                - Планировать семейные расходы
+                - Инвестировать в образование
+                
+                Требуется уровень: Автономный
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("💊 Расходы на здоровье и семью")
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show()
+        }
+    }
+    
+    fun showFamilyExpenses() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val message = """
+                👨‍👩‍👧‍👦 Семейные расходы:
+                
+                Текущие расходы:
+                - Питание семьи: ${currencyFormat.format(player.foodExpenses)}
+                - Жилье: ${currencyFormat.format(player.housingExpenses)}
+                - Транспорт: ${currencyFormat.format(player.transportExpenses)}
+                - Развлечения: ${currencyFormat.format(player.totalExpenses * 0.1)}
+                
+                Планирование:
+                - Бюджет на детей: ${currencyFormat.format(player.totalExpenses * 0.2)}
+                - Образование: ${currencyFormat.format(player.totalExpenses * 0.15)}
+                - Отдых: ${currencyFormat.format(player.totalExpenses * 0.1)}
+                
+                Требуется уровень: Инвестор
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("👨‍👩‍👧‍👦 Семейные расходы")
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show()
+        }
+    }
+    
+    fun showAgeStatistics() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val message = """
+                📊 Возрастная статистика:
+                
+                Текущий возраст: ${player.age} лет
+                Ожидаемая продолжительность жизни: ${player.deathAge} лет
+                Осталось лет: ${player.deathAge - player.age}
+                
+                Финансовые цели по возрастам:
+                - 25-30: Накопить первый капитал
+                - 30-40: Инвестировать в активы
+                - 40-50: Развивать пассивный доход
+                - 50+: Финансовая независимость
+                
+                Ваш прогресс: ${(player.getNetWorth() * 100 / player.dream.cost).coerceAtMost(100)}%
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("📊 Возрастная статистика")
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show()
+        }
+    }
+    
+    // Возможности и развитие
+    fun showEducationSkills() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val message = """
+                🎓 Образование и навыки:
+                
+                Текущее образование: ${player.education.displayName}
+                Навыки: ${player.skills.joinToString(", ") { it.name }}
+                
+                Доступные курсы:
+                - Финансовая грамотность (5,000₽)
+                - Инвестиции для начинающих (8,000₽)
+                - Управление бизнесом (12,000₽)
+                - Программирование (15,000₽)
+                
+                Рекомендации:
+                - Изучать финансовую грамотность
+                - Развивать профессиональные навыки
+                - Инвестировать в образование
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("🎓 Образование и навыки")
+                .setMessage(message)
+                .setPositiveButton("Курсы и тренинги") { _, _ ->
+                    showCoursesTraining()
                 }
-            }
+                .setNegativeButton("Отмена", null)
+                .show()
         }
-        
-        AlertDialog.Builder(this)
-            .setTitle("🏥 Здоровье и профессиональные риски")
-            .setMessage(healthInfo)
-            .setPositiveButton("OK", null)
-            .setNeutralButton("💊 Профилактика") { _, _ ->
-                showHealthcareOptions()
-            }
-            .show()
     }
     
-    private fun showHealthcareOptions() {
-        val player = currentGameState?.player ?: return
-        
-        val options = arrayOf(
-            "💊 Медосмотр (5,000₽) - Снижает риски на 20%",
-            "🏃 Спорт и диета (3,000₽) - Улучшает общее здоровье", 
-            "🧘 Психотерапия (8,000₽) - Снижает стресс и выгорание",
-            "🏥 Полное обследование (15,000₽) - Выявляет скрытые проблемы"
-        )
-        
-        AlertDialog.Builder(this)
-            .setTitle("💊 Профилактика и лечение")
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> buyHealthcare("Медосмотр", 5000, "Профилактический медосмотр")
-                    1 -> buyHealthcare("Спорт и диета", 3000, "Занятия спортом и здоровое питание")
-                    2 -> buyHealthcare("Психотерапия", 8000, "Сеансы психотерапии")
-                    3 -> buyHealthcare("Полное обследование", 15000, "Комплексное медицинское обследование")
+    fun showCoursesTraining() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val message = """
+                📚 Курсы и тренинги:
+                
+                Доступные курсы:
+                - Финансовая грамотность (5,000₽)
+                - Инвестиции для начинающих (8,000₽)
+                - Управление бизнесом (12,000₽)
+                - Программирование (15,000₽)
+                
+                Ваши навыки: ${player.skills.joinToString(", ") { it.name }}
+                
+                Рекомендации:
+                - Начать с финансовой грамотности
+                - Затем изучить инвестиции
+                - Развивать профессиональные навыки
+                
+                Требуется уровень: Автономный
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("📚 Курсы и тренинги")
+                .setMessage(message)
+                .setPositiveButton("Университет") { _, _ ->
+                    showUniversity()
                 }
-            }
-            .setNegativeButton("Отмена", null)
-            .show()
+                .setNegativeButton("Отмена", null)
+                .show()
+        }
     }
     
-    private fun buyHealthcare(name: String, cost: Int, description: String) {
-        val player = currentGameState?.player ?: return
-        
-        if (player.cash >= cost) {
-            player.logExpense(
-                FinancialCategory.EMERGENCY,
-                cost,
-                "Медицинские услуги: $description"
-            )
+    fun showUniversity() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val message = """
+                🎓 Университет:
+                
+                Доступные программы:
+                - Бакалавриат (200,000₽)
+                - Магистратура (300,000₽)
+                - MBA (500,000₽)
+                
+                Ваше образование: ${player.education.displayName}
+                
+                Преимущества высшего образования:
+                - Повышение зарплаты
+                - Лучшие карьерные возможности
+                - Доступ к престижным профессиям
+                - Развитие критического мышления
+                
+                Требуется уровень: Автономный
+            """.trimIndent()
             
-            // Простой эффект - небольшое улучшение здоровья
-            if (player.riskEffects.isNotEmpty()) {
-                // Ускоряем восстановление на 1-2 месяца
-                val effect = player.riskEffects.random()
-                if (effect.recoveryTime > 0) {
-                    val newEffect = effect.copy(recoveryTime = maxOf(0, effect.recoveryTime - 2))
-                    player.riskEffects.remove(effect)
-                    if (newEffect.recoveryTime > 0) {
-                        player.riskEffects.add(newEffect)
-                    }
+            AlertDialog.Builder(this)
+                .setTitle("🎓 Университет")
+                .setMessage(message)
+                .setPositiveButton("Личные отношения") { _, _ ->
+                    showPersonalRelationships()
                 }
-            }
-            
-            updateUI()
-            showMessage("✅ $name оплачен! Состояние здоровья улучшилось.")
-        } else {
-            showMessage("❌ Недостаточно средств для оплаты медицинских услуг")
+                .setNegativeButton("Отмена", null)
+                .show()
         }
     }
     
-    private fun showMessage(message: String) {
-        AlertDialog.Builder(this)
-            .setMessage(message)
-            .setPositiveButton("OK", null)
-            .show()
-    }
-    
-    // === НОВЫЕ МЕТОДЫ ДЛЯ УЛУЧШЕННОГО ИНТЕРФЕЙСА ===
-    
-    private fun updateCurrentDate(player: Player) {
-        // Текущая дата теперь отображается в шапке
-        // binding.tvCurrentDate.text = player.getCurrentDateString()
-    }
-    
-    private fun updateGameStatus(player: Player) {
-        val status = if (player.isInFastTrack) {
-            "🚀 Скоростная дорожка"
-        } else {
-            "🐀 Крысиные бега"
-        }
-        // Статус игры больше не отображается
-        // binding.tvGameStatus.text = status
-    }
-    
-    private fun updatePlayerAvatar(player: Player) {
-        val avatarResource = player.profession.avatarResId
-        try {
-            // Аватар игрока теперь отображается в шапке
-            // binding.ivPlayerAvatar.setImageResource(avatarResource)
-        } catch (e: Exception) {
-            // binding.ivPlayerAvatar.setImageResource(R.drawable.player_token)
-        }
-    }
-    
-    private fun updateGameTrackVisualization(player: Player) {
-        // Игровое поле больше не отображается в новом дизайне
-        // Вся логика перенесена в календарь
-    }
-    
-    private fun showEventPanel(
-        title: String,
-        message: String,
-        primaryText: String? = null,
-        onPrimary: (() -> Unit)? = null,
-        secondaryText: String? = null,
-        onSecondary: (() -> Unit)? = null
-    ) {
-        viewModel.showEventPanel(
-            EventPanelState(
-                title = title,
-                message = message,
-                primaryText = primaryText,
-                onPrimary = onPrimary,
-                secondaryText = secondaryText,
-                onSecondary = onSecondary
-            )
-        )
-    }
-
-    private fun hideEventPanel() { viewModel.hideEventPanel() }
-    
-    private fun showAgeStatistics() {
-        val player = currentGameState?.player ?: return
-        // Получаем статистику по социальной группе (по id профессии)
-        val averageLifeExpectancy = when (player.profession.id) {
-            "doctor" -> 78
-            "engineer" -> 75
-            "teacher" -> 77
-            "manager" -> 73
-            "mechanic" -> 72
-            "lawyer" -> 76
-            else -> 75
-        }
-        val socialGroup = when (player.profession.id) {
-            "doctor" -> "медицинских работников"
-            "engineer" -> "инженеров"
-            "teacher" -> "работников образования"
-            "manager" -> "менеджеров"
-            "mechanic" -> "механиков"
-            "lawyer" -> "юристов"
-            else -> "людей с вашей профессией"
-        }
-        val remainingYears = maxOf(0, averageLifeExpectancy - player.age)
-        val lifeProgress = (player.age.toFloat() / averageLifeExpectancy.toFloat() * 100).toInt()
-        val message = """
-            📊 СТАТИСТИКА ПО ВОЗРАСТУ
+    fun showPersonalRelationships() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val message = """
+                💕 Личные отношения:
+                
+                Текущий статус: ${if (player.age > 25) "В поисках партнера" else "Фокус на развитии"}
+                
+                Варианты развития:
+                - Знакомства и свидания
+                - Создание семьи
+                - Развитие отношений
+                - Семейное планирование
+                
+                Влияние на финансы:
+                - Совместные расходы
+                - Планирование бюджета
+                - Инвестиции в будущее семьи
+                
+                Требуется уровень: Автономный
+            """.trimIndent()
             
-            👤 Ваш текущий возраст: ${player.age} лет
-            📈 Средняя продолжительность жизни для $socialGroup: $averageLifeExpectancy лет
-            
-            ⏰ Статистически вам осталось примерно: $remainingYears лет
-            📊 Прожито: $lifeProgress% от средней продолжительности жизни
-            
-            💡 Помните: это средние данные, ваша реальная продолжительность жизни может отличаться в зависимости от образа жизни, здоровья и финансового положения.
-            
-            ${if (player.passiveIncome > player.totalExpenses) "✅ Ваша финансовая свобода увеличивает качество жизни!" else "⚠️ Финансовый стресс может влиять на здоровье и продолжительность жизни."}
-        """.trimIndent()
-        AlertDialog.Builder(this)
-            .setTitle("📈 Статистика продолжительности жизни")
-            .setMessage(message)
-            .setPositiveButton("OK", null)
-            .setNeutralButton("💪 Здоровье") { _, _ ->
-                showHealthStatus()
-            }
-            .show()
-    }
-
-    private fun showBottomOverflowMenu(anchor: View) {
-        val popup = PopupMenu(this, anchor)
-        popup.menu.add(0, R.id.menu_save, 0, "Сохранить")
-        popup.menu.add(0, R.id.menu_rules, 1, "Правила")
-        popup.menu.add(0, R.id.menu_exit, 2, "Выйти")
-        popup.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.menu_save -> {
-                    currentGameState?.let { GameSaveManager.saveGameState(this, it) }
-                    currentGameState?.player?.let { GameSaveManager.savePlayer(this, it) }
-                    Toast.makeText(this, "Игра сохранена!", Toast.LENGTH_SHORT).show()
-                    true
+            AlertDialog.Builder(this)
+                .setTitle("💕 Личные отношения")
+                .setMessage(message)
+                .setPositiveButton("Создание семьи") { _, _ ->
+                    showFamilyCreation()
                 }
-                R.id.menu_rules -> { startActivity(Intent(this, RulesActivity::class.java)); true }
-                R.id.menu_exit -> { finish(); true }
-                else -> false
-            }
+                .setNegativeButton("Отмена", null)
+                .show()
         }
-        popup.show()
+    }
+    
+    fun showFamilyCreation() {
+        currentGameState?.let { gameState ->
+            val message = """
+                👨‍👩‍👧‍👦 Создание семьи:
+                
+                Варианты:
+                - Брак (50,000₽)
+                - Рождение ребенка (100,000₽)
+                - Покупка семейного жилья (500,000₽)
+                
+                Финансовые аспекты:
+                - Совместный бюджет
+                - Планирование расходов
+                - Инвестиции в будущее детей
+                - Страхование семьи
+                
+                Требуется уровень: Инвестор
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("👨‍👩‍👧‍👦 Создание семьи")
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show()
+        }
+    }
+    
+    fun showCareerBusiness() {
+        currentGameState?.let { gameState ->
+            val player = gameState.player
+            val message = """
+                💼 Карьера и бизнес:
+                
+                Текущая профессия: ${player.profession.name}
+                Зарплата: ${currencyFormat.format(player.salary)}
+                
+                Варианты развития:
+                - Поиск новой работы
+                - Карьерный рост
+                - Создание бизнеса
+                - Фриланс
+                
+                Рекомендации:
+                - Развивать профессиональные навыки
+                - Искать возможности роста
+                - Рассматривать предпринимательство
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("💼 Карьера и бизнес")
+                .setMessage(message)
+                .setPositiveButton("Развитие бизнеса") { _, _ ->
+                    showBusinessDevelopment()
+                }
+                .setNegativeButton("Отмена", null)
+                .show()
+        }
+    }
+    
+    fun showBusinessDevelopment() {
+        currentGameState?.let { gameState ->
+            val message = """
+                🚀 Развитие бизнеса:
+                
+                Варианты бизнеса:
+                - Онлайн-бизнес (50,000₽)
+                - Розничная торговля (200,000₽)
+                - Услуги (100,000₽)
+                - Производство (500,000₽)
+                
+                Этапы развития:
+                1. Идея и планирование
+                2. Регистрация и запуск
+                3. Развитие и масштабирование
+                4. Выход на рынок
+                
+                Требуется уровень: Пассивный доход
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("🚀 Развитие бизнеса")
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show()
+        }
+    }
+    
+    fun showOtherOpportunities() {
+        currentGameState?.let { gameState ->
+            val message = """
+                🌟 Прочие возможности:
+                
+                Варианты развития:
+                - Хобби и увлечения
+                - Путешествия
+                - Проекты
+                - Благотворительность
+                
+                Финансовые возможности:
+                - Побочный доход
+                - Инвестиции в хобби
+                - Монетизация увлечений
+                - Социальные проекты
+                
+                Рекомендации:
+                - Развивать увлечения
+                - Искать новые возможности
+                - Балансировать работу и жизнь
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("🌟 Прочие возможности")
+                .setMessage(message)
+                .setPositiveButton("Благотворительность") { _, _ ->
+                    showPhilanthropy()
+                }
+                .setNegativeButton("Отмена", null)
+                .show()
+        }
+    }
+    
+    fun showPhilanthropy() {
+        currentGameState?.let { gameState ->
+            val message = """
+                🤝 Благотворительность:
+                
+                Варианты помощи:
+                - Денежные пожертвования
+                - Волонтерство
+                - Создание фондов
+                - Социальные проекты
+                
+                Финансовые аспекты:
+                - Налоговые льготы
+                - Социальная ответственность
+                - Наследие и репутация
+                
+                Требуется уровень: Финансовый мастер
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("🤝 Благотворительность")
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show()
+        }
     }
 }

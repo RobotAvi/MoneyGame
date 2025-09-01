@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+    
+    <!-- Фон -->
+    <path
+        android:fillColor="#FFF3E0"
+        android:pathData="M32,32m-30,0a30,30 0,1 1,60 0a30,30 0,1 1,-60 0"/>
+    
+    <!-- Голова -->
+    <path
+        android:fillColor="#FFD8A6"
+        android:pathData="M32,20m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0"/>
+    
+    <!-- Тело -->
+    <path
+        android:fillColor="#FF9800"
+        android:pathData="M20,50c0,-6 5.5,-12 12,-12s12,6 12,12v4H20v-4z"/>
+    
+    <!-- Кепка -->
+    <path
+        android:fillColor="#795548"
+        android:pathData="M24,16h16v4c0,2-2,4-4,4H28c-2,0-4,-2-4,-4v-4z"/>
+    
+    <!-- Гаечный ключ -->
+    <path
+        android:fillColor="#607D8B"
+        android:pathData="M26,38h4v8h-4z"/>
+    <path
+        android:fillColor="#607D8B"
+        android:pathData="M24,42h8v2h-8z"/>
+    
+    <!-- Масляное пятно -->
+    <path
+        android:fillColor="#424242"
+        android:pathData="M28,48m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0"/>
+</vector>

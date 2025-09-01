@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+    
+    <!-- Фон -->
+    <path
+        android:fillColor="#E3F2FD"
+        android:pathData="M32,32m-30,0a30,30 0,1 1,60 0a30,30 0,1 1,-60 0"/>
+    
+    <!-- Голова -->
+    <path
+        android:fillColor="#FFD8A6"
+        android:pathData="M32,20m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0"/>
+    
+    <!-- Тело -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M20,50c0,-6 5.5,-12 12,-12s12,6 12,12v4H20v-4z"/>
+    
+    <!-- Галстук -->
+    <path
+        android:fillColor="#FF5722"
+        android:pathData="M30,28h4v16h-4z"/>
+    <path
+        android:fillColor="#FF5722"
+        android:pathData="M28,44l4,4l4,-4z"/>
+    
+    <!-- Портфель -->
+    <path
+        android:fillColor="#795548"
+        android:pathData="M24,40h8v6h-8z"/>
+    <path
+        android:fillColor="#8D6E63"
+        android:pathData="M26,42h4v2h-4z"/>
+</vector>

@@ -88,8 +88,8 @@ class GameManagerTest {
     fun `test buy asset with sufficient cash`() {
         val gameState = gameManager.startNewGame(profession, dream)
         gameState.player.cash = 100000
-        val asset = Asset(name = "Акции", downPayment = 50000, cashFlow = 2000, loan = 0, loanPayment = 0)
-        val result = gameManager.buyAsset(asset)
+        val asset = Asset(type = AssetType.REAL_ESTATE, name = "Акции", downPayment = 50000, cashFlow = 2000, loan = 0, loanPayment = 0)
+        val result = gameManager.buyAsset(type = AssetType.REAL_ESTATE, asset)
         assertTrue(result)
         assertTrue(gameState.player.assets.contains(asset))
         assertEquals(50000, gameState.player.cash)

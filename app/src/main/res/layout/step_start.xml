@@ -1,18 +1,331 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_dollar_pattern">
+    android:background="@drawable/bg_cartoon_gradient">
 
-    <TextView
-        android:id="@+id/tvStartGame"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Начинаем!"
-        android:textSize="48sp"
-        android:textStyle="bold"
-        android:textColor="@color/success_color"
-        android:layout_gravity="center" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-    <!-- TODO: добавить анимацию и занавес -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:padding="24dp">
+
+            <!-- Заголовок -->
+            <TextView
+                android:id="@+id/tvStartGame"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🎮 Начинаем!"
+                android:textSize="48sp"
+                android:textStyle="bold"
+                android:textColor="@color/cartoon_text_secondary"
+                android:fontFamily="cursive"
+                android:shadowColor="#66FFFFFF"
+                android:shadowDx="2"
+                android:shadowDy="2"
+                android:shadowRadius="4"
+                android:layout_marginBottom="32dp" />
+
+            <!-- Карточка с характеристиками -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                app:cardElevation="8dp"
+                app:cardCornerRadius="24dp"
+                app:cardBackgroundColor="@color/cartoon_card"
+                app:strokeColor="@color/cartoon_primary"
+                app:strokeWidth="3dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <!-- Имя игрока -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="👤 Имя:"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/cartoon_text_primary"
+                            android:fontFamily="cursive"
+                            android:layout_marginEnd="16dp" />
+
+                        <TextView
+                            android:id="@+id/tvPlayerName"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Иван"
+                            android:textSize="20sp"
+                            android:textColor="@color/cartoon_text_secondary"
+                            android:fontFamily="cursive" />
+                    </LinearLayout>
+
+                    <!-- Возраст -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🎂 Возраст:"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/cartoon_text_primary"
+                            android:fontFamily="cursive"
+                            android:layout_marginEnd="16dp" />
+
+                        <TextView
+                            android:id="@+id/tvPlayerAge"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="25 лет"
+                            android:textSize="20sp"
+                            android:textColor="@color/cartoon_text_secondary"
+                            android:fontFamily="cursive" />
+                    </LinearLayout>
+
+                    <!-- Профессия -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="💼 Профессия:"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/cartoon_text_primary"
+                            android:fontFamily="cursive"
+                            android:layout_marginEnd="16dp" />
+
+                        <TextView
+                            android:id="@+id/tvProfession"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Учитель"
+                            android:textSize="20sp"
+                            android:textColor="@color/cartoon_text_secondary"
+                            android:fontFamily="cursive" />
+                    </LinearLayout>
+
+                    <!-- Зарплата -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="💰 Зарплата:"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/cartoon_text_primary"
+                            android:fontFamily="cursive"
+                            android:layout_marginEnd="16dp" />
+
+                        <TextView
+                            android:id="@+id/tvSalary"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="45,000₽/мес"
+                            android:textSize="20sp"
+                            android:textColor="@color/cartoon_text_secondary"
+                            android:fontFamily="cursive" />
+                    </LinearLayout>
+
+                    <!-- Расходы -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="💸 Расходы:"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/cartoon_text_primary"
+                            android:fontFamily="cursive"
+                            android:layout_marginEnd="16dp" />
+
+                        <TextView
+                            android:id="@+id/tvExpenses"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="38,000₽/мес"
+                            android:textSize="20sp"
+                            android:textColor="@color/cartoon_text_secondary"
+                            android:fontFamily="cursive" />
+                    </LinearLayout>
+
+                    <!-- Мечта -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🌟 Мечта:"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/cartoon_text_primary"
+                            android:fontFamily="cursive"
+                            android:layout_marginEnd="16dp" />
+
+                        <TextView
+                            android:id="@+id/tvDream"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Яхта"
+                            android:textSize="20sp"
+                            android:textColor="@color/cartoon_text_secondary"
+                            android:fontFamily="cursive" />
+                    </LinearLayout>
+
+                    <!-- Стоимость мечты -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="💎 Стоимость мечты:"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/cartoon_text_primary"
+                            android:fontFamily="cursive"
+                            android:layout_marginEnd="16dp" />
+
+                        <TextView
+                            android:id="@+id/tvDreamCost"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="2,500,000₽"
+                            android:textSize="20sp"
+                            android:textColor="@color/cartoon_text_secondary"
+                            android:fontFamily="cursive" />
+                    </LinearLayout>
+
+                    <!-- Начальный капитал -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="💵 Начальный капитал:"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/cartoon_text_primary"
+                            android:fontFamily="cursive"
+                            android:layout_marginEnd="16dp" />
+
+                        <TextView
+                            android:id="@+id/tvInitialCash"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="7,000₽"
+                            android:textSize="20sp"
+                            android:textColor="@color/cartoon_text_secondary"
+                            android:fontFamily="cursive" />
+                    </LinearLayout>
+
+                    <!-- Дата начала -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="📅 Дата начала:"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/cartoon_text_primary"
+                            android:fontFamily="cursive"
+                            android:layout_marginEnd="16dp" />
+
+                        <TextView
+                            android:id="@+id/tvStartDate"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="1 января 2025"
+                            android:textSize="20sp"
+                            android:textColor="@color/cartoon_text_secondary"
+                            android:fontFamily="cursive" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Кнопка "Запускаем жизнь!" -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnStartLife"
+                android:layout_width="280dp"
+                android:layout_height="80dp"
+                android:text="🚀 Запускаем жизнь!"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_cartoon_button_rounded"
+                android:textColor="@color/white"
+                android:fontFamily="cursive"
+                app:cornerRadius="20dp"
+                android:layout_marginTop="16dp" />
+        </LinearLayout>
+    </ScrollView>
 </FrameLayout>

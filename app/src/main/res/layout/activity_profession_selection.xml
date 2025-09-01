@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_app_gradient">
+    android:background="@drawable/bg_cartoon_gradient">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -21,15 +21,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:background="@color/primary_color"
+                android:background="@drawable/bg_cartoon_header"
                 android:padding="24dp">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Выберите профессию и мечту"
+                    android:text="🎯 Выберите профессию и мечту"
                     android:textSize="26sp"
                     android:textStyle="bold"
-                    android:textColor="@color/white" />
+                    android:textColor="@color/cartoon_text_secondary"
+                    android:fontFamily="cursive" />
             </LinearLayout>
 
             <!-- Профессии -->
@@ -37,21 +38,26 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="16dp">
+                app:cardElevation="8dp"
+                app:cardCornerRadius="24dp"
+                app:cardBackgroundColor="@color/cartoon_card"
+                app:strokeColor="@color/cartoon_primary"
+                app:strokeWidth="3dp">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="20dp"
+                    android:background="@drawable/bg_cartoon_calendar">
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Профессии"
+                        android:text="💼 Профессии"
                         android:textSize="20sp"
                         android:textStyle="bold"
-                        android:textColor="@color/primary_color"
-                        android:layout_marginBottom="16dp" />
+                        android:textColor="@color/cartoon_text_primary"
+                        android:layout_marginBottom="16dp"
+                        android:fontFamily="cursive" />
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recyclerViewProfessions"
                         android:layout_width="match_parent"
@@ -67,21 +73,26 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="16dp"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="16dp">
+                app:cardElevation="8dp"
+                app:cardCornerRadius="24dp"
+                app:cardBackgroundColor="@color/cartoon_card"
+                app:strokeColor="@color/cartoon_primary"
+                app:strokeWidth="3dp">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="20dp"
+                    android:background="@drawable/bg_cartoon_calendar">
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Мечты"
+                        android:text="🌟 Мечты"
                         android:textSize="20sp"
                         android:textStyle="bold"
-                        android:textColor="@color/primary_color"
-                        android:layout_marginBottom="16dp" />
+                        android:textColor="@color/cartoon_text_primary"
+                        android:layout_marginBottom="16dp"
+                        android:fontFamily="cursive" />
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recyclerViewDreams"
                         android:layout_width="match_parent"
@@ -97,21 +108,26 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="16dp"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="16dp">
+                app:cardElevation="8dp"
+                app:cardCornerRadius="24dp"
+                app:cardBackgroundColor="@color/cartoon_card"
+                app:strokeColor="@color/cartoon_primary"
+                app:strokeWidth="3dp">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="20dp"
+                    android:background="@drawable/bg_cartoon_calendar">
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="👤 Ваш возраст"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        android:textColor="@color/primary_color"
-                        android:layout_marginBottom="8dp" />
+                        android:textColor="@color/cartoon_text_primary"
+                        android:layout_marginBottom="8dp"
+                        android:fontFamily="cursive" />
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -124,16 +140,20 @@
                             android:hint="Введите ваш возраст (18-65)"
                             android:inputType="number"
                             android:text="25"
-                            android:maxLength="2" />
+                            android:maxLength="2"
+                            android:textColor="@color/cartoon_text_primary"
+                            android:textColorHint="@color/cartoon_text_secondary"
+                            android:fontFamily="cursive" />
                     </com.google.android.material.textfield.TextInputLayout>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Имя персонажа"
+                        android:text="👤 Имя персонажа"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        android:textColor="@color/primary_color"
-                        android:layout_marginBottom="8dp" />
+                        android:textColor="@color/cartoon_text_primary"
+                        android:layout_marginBottom="8dp"
+                        android:fontFamily="cursive" />
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -144,16 +164,20 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Введите имя персонажа"
-                            android:maxLength="20" />
+                            android:maxLength="20"
+                            android:textColor="@color/cartoon_text_primary"
+                            android:textColorHint="@color/cartoon_text_secondary"
+                            android:fontFamily="cursive" />
                     </com.google.android.material.textfield.TextInputLayout>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Дата начала игры"
+                        android:text="📅 Дата начала игры"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        android:textColor="@color/primary_color"
-                        android:layout_marginBottom="8dp" />
+                        android:textColor="@color/cartoon_text_primary"
+                        android:layout_marginBottom="8dp"
+                        android:fontFamily="cursive" />
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -165,7 +189,10 @@
                             android:layout_height="wrap_content"
                             android:hint="Выберите дату старта"
                             android:focusable="false"
-                            android:clickable="true" />
+                            android:clickable="true"
+                            android:textColor="@color/cartoon_text_primary"
+                            android:textColorHint="@color/cartoon_text_secondary"
+                            android:fontFamily="cursive" />
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -175,10 +202,14 @@
                 android:id="@+id/btn_start_game"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="Начать игру"
+                android:text="🎮 Начать игру"
                 android:textSize="18sp"
                 android:enabled="false"
                 android:layout_margin="24dp"
+                android:textColor="@color/cartoon_text_secondary"
+                android:fontFamily="cursive"
+                android:background="@drawable/bg_cartoon_button_opportunities"
+                app:cornerRadius="28dp"
                 style="@style/Widget.Material3.Button" />
         </LinearLayout>
     </ScrollView>

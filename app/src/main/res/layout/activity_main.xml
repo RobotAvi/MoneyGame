@@ -4,8 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:background="@drawable/bg_app_gradient">
-
+    android:background="@drawable/bg_cartoon_gradient">
 
     <!-- Реальный океанский фон -->
     <ImageView
@@ -30,7 +29,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
-        <!-- Основной контент (меню) -->
+    <!-- Основной контент (меню) -->
     <LinearLayout
         android:id="@+id/mainContent"
         android:layout_width="match_parent"
@@ -66,38 +65,43 @@
             android:text="@string/app_name"
             android:textSize="32sp"
             android:textStyle="bold"
-            android:textColor="@android:color/white"
-            android:shadowColor="@android:color/black"
+            android:textColor="@color/cartoon_text_secondary"
+            android:shadowColor="#66FFFFFF"
             android:shadowDx="2"
             android:shadowDy="2"
             android:shadowRadius="4"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="24dp"
+            android:fontFamily="cursive" />
 
         <!-- Кнопка "Начать" -->
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/newGameButton"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:text="Начать"
+            android:text="🎮 Начать"
             android:textSize="18sp"
             android:padding="16dp"
             android:layout_marginBottom="16dp"
-            android:background="@drawable/bg_button_primary"
-            android:textColor="@android:color/white"
-            android:elevation="8dp" />
+            android:background="@drawable/bg_cartoon_button_opportunities"
+            android:textColor="@color/cartoon_text_secondary"
+            android:elevation="8dp"
+            android:fontFamily="cursive"
+            app:cornerRadius="24dp" />
 
         <!-- Кнопка "Правила" -->
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/rulesButton"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:text="Правила"
+            android:text="📖 Правила"
             android:textSize="18sp"
             android:padding="16dp"
             android:layout_marginBottom="16dp"
-            android:background="@drawable/bg_button_secondary"
-            android:textColor="@android:color/white"
-            android:elevation="8dp" />
+            android:background="@drawable/bg_cartoon_button_next"
+            android:textColor="@color/cartoon_text_secondary"
+            android:elevation="8dp"
+            android:fontFamily="cursive"
+            app:cornerRadius="24dp" />
 
         <!-- Информация о версии -->
         <TextView
@@ -106,9 +110,10 @@
             android:layout_height="wrap_content"
             android:text="Версия 1.0"
             android:textSize="14sp"
-            android:textColor="@android:color/white"
+            android:textColor="@color/cartoon_text_secondary"
             android:alpha="0.8"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:fontFamily="cursive" />
 
     </LinearLayout>
 

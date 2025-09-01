@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/background_color"
+    android:background="@drawable/bg_cartoon_gradient"
     android:padding="16dp">
 
     <LinearLayout
@@ -21,19 +21,19 @@
             android:layout_width="10dp"
             android:layout_height="10dp"
             android:layout_margin="6dp"
-            android:background="@drawable/progress_dot_active" />
+            android:background="@drawable/bg_cartoon_circle" />
         <View
             android:id="@+id/dot2"
             android:layout_width="10dp"
             android:layout_height="10dp"
             android:layout_margin="6dp"
-            android:background="@drawable/progress_dot_inactive" />
+            android:background="@drawable/bg_cartoon_circle" />
         <View
             android:id="@+id/dot3"
             android:layout_width="10dp"
             android:layout_height="10dp"
             android:layout_margin="6dp"
-            android:background="@drawable/progress_dot_inactive" />
+            android:background="@drawable/bg_cartoon_circle" />
     </LinearLayout>
 
     <FrameLayout

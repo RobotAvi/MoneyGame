@@ -52,7 +52,14 @@ enum class FinancialCategory : Parcelable {
     // СПЕЦИАЛЬНЫЕ
     GAME_START,          // Начальный капитал
     FAST_TRACK_BONUS,    // Бонусы скоростной дорожки
-    DREAM_PURCHASE       // Покупка мечты
+    DREAM_PURCHASE,       // Покупка мечты
+    EDUCATION,           // Образование
+    FAMILY,              // Семья
+    CAREER,              // Карьера
+    BUSINESS,            // Бизнес
+    HOBBY,               // Хобби
+    TRAVEL,              // Путешествия
+    PROJECT              // Проекты
 }
 
 // Расширения для удобства
@@ -81,6 +88,13 @@ fun FinancialCategory.getIcon(): String = when (this) {
     FinancialCategory.CHARITY -> "❤️"
     
     // Специальные
+    FinancialCategory.EDUCATION -> "🎓"
+    FinancialCategory.FAMILY -> "👨‍👩‍👧‍👦"
+    FinancialCategory.CAREER -> "💼"
+    FinancialCategory.BUSINESS -> "🏢"
+    FinancialCategory.HOBBY -> "🎨"
+    FinancialCategory.TRAVEL -> "✈️"
+    FinancialCategory.PROJECT -> "🛠️"
     FinancialCategory.GAME_START -> "🎮"
     FinancialCategory.FAST_TRACK_BONUS -> "🚀"
     FinancialCategory.DREAM_PURCHASE -> "🎯"
@@ -111,6 +125,13 @@ fun FinancialCategory.getDisplayName(): String = when (this) {
     FinancialCategory.CHARITY -> "Благотворительность"
     
     // Специальные
+    FinancialCategory.EDUCATION -> "Образование"
+    FinancialCategory.FAMILY -> "Семья"
+    FinancialCategory.CAREER -> "Карьера"
+    FinancialCategory.BUSINESS -> "Бизнес"
+    FinancialCategory.HOBBY -> "Хобби"
+    FinancialCategory.TRAVEL -> "Путешествия"
+    FinancialCategory.PROJECT -> "Проекты"
     FinancialCategory.GAME_START -> "Начальный капитал"
     FinancialCategory.FAST_TRACK_BONUS -> "Бонус скоростной дорожки"
     FinancialCategory.DREAM_PURCHASE -> "Покупка мечты"

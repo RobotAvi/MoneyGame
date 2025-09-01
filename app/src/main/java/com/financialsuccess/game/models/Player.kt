@@ -45,6 +45,7 @@ data class Player(
     var education: EducationLevel = EducationLevel.BACHELOR,
     var workExperience: Int = 0, // Опыт работы в годах
     var skills: MutableList<Skill> = mutableListOf(),
+    var hobbies: MutableList<Hobby> = mutableListOf(), // Список хобби
     
     // Семейное положение
     var maritalStatus: MaritalStatus = MaritalStatus.SINGLE,
@@ -72,7 +73,12 @@ data class Player(
     var totalInvested: Int = 0, // Общая сумма инвестиций
     var careerPromotions: Int = 0, // Количество повышений
     var businessFailures: Int = 0, // Количество неудачных бизнесов
-    var successfulInvestments: Int = 0 // Количество успешных инвестиций
+    var successfulInvestments: Int = 0, // Количество успешных инвестиций
+    
+    // Система уровней
+    var currentLevel: PlayerLevel = PlayerLevel.NOVICE,
+    var consecutiveTurnsWithoutDeficit: Int = 0, // Счетчик ходов без дефицита бюджета
+    var consecutiveInvestmentTurns: Int = 0 // Счетчик ходов с инвестициями
 ) : Parcelable {
     
     init {
@@ -130,6 +136,23 @@ data class Player(
     @Deprecated("Используйте getCashFlow() вместо отдельного списания расходов")
     fun payMonthlyExpenses() {
         cash -= totalExpenses
+    }
+    
+    // Добавить навык
+    fun addSkill(skill: Skill) {
+        val existingSkill = skills.find { it.name == skill.name }
+        if (existingSkill != null) {
+            existingSkill.level += skill.level
+        } else {
+            skills.add(skill)
+        }
+    }
+    
+    // Добавить хобби
+    fun addHobby(hobby: Hobby) {
+        if (!hobbies.any { it.name == hobby.name }) {
+            hobbies.add(hobby)
+        }
     }
     
     // Добавить ребенка (увеличивает расходы)
@@ -349,6 +372,12 @@ data class Player(
         // Обновляем статистику
         totalEarned += totalIncome + passiveIncome
         totalSpent += totalExpenses
+        
+        // Обновляем счетчики для системы уровней
+        updateLevelCounters()
+        
+        // Обновляем уровень игрока
+        updateLevel()
      }
      
      // === ПРОФЕССИОНАЛЬНЫЕ РИСКИ ===
@@ -573,22 +602,90 @@ data class Player(
          return achievedGoals
      }
      
-     // Получить общую статистику жизни
-     fun getLifeStatistics(): Map<String, Any> {
-         return mapOf(
-             "totalEarned" to totalEarned,
-             "totalSpent" to totalSpent,
-             "totalInvested" to totalInvested,
-             "careerPromotions" to careerPromotions,
-             "businessFailures" to businessFailures,
-             "successfulInvestments" to successfulInvestments,
-             "yearsWorked" to workExperience,
-             "childrenCount" to childrenCount,
-             "netWorth" to getNetWorth(),
-             "passiveIncome" to passiveIncome,
-             "lifePercentage" to getLifePercentage()
-         )
-     }
+         // Получить общую статистику жизни
+    fun getLifeStatistics(): Map<String, Any> {
+        return mapOf(
+            "totalEarned" to totalEarned,
+            "totalSpent" to totalSpent,
+            "totalInvested" to totalInvested,
+            "careerPromotions" to careerPromotions,
+            "businessFailures" to businessFailures,
+            "successfulInvestments" to successfulInvestments,
+            "yearsWorked" to workExperience,
+            "childrenCount" to childrenCount,
+            "netWorth" to getNetWorth(),
+            "passiveIncome" to passiveIncome,
+            "lifePercentage" to getLifePercentage(),
+            "currentLevel" to currentLevel.displayName,
+            "levelProgress" to getLevelProgress().progress
+        )
+    }
+    
+    // === СИСТЕМА УРОВНЕЙ ===
+    
+    /**
+     * Обновить уровень игрока на основе текущего состояния
+     */
+    fun updateLevel() {
+        val newLevel = LevelTransitionChecker.determineCurrentLevel(this)
+        if (newLevel != currentLevel) {
+            currentLevel = newLevel
+        }
+    }
+    
+    /**
+     * Получить прогресс к следующему уровню
+     */
+    fun getLevelProgress(): LevelProgress {
+        val nextLevel = getNextLevel()
+        return LevelTransitionChecker.getLevelProgress(this, nextLevel)
+    }
+    
+    /**
+     * Получить следующий уровень
+     */
+    fun getNextLevel(): PlayerLevel {
+        val levels = PlayerLevel.values()
+        val currentIndex = levels.indexOf(currentLevel)
+        return if (currentIndex < levels.size - 1) levels[currentIndex + 1] else currentLevel
+    }
+    
+    /**
+     * Проверить, может ли игрок перейти на следующий уровень
+     */
+    fun canLevelUp(): Boolean {
+        val nextLevel = getNextLevel()
+        return LevelTransitionChecker.canTransitionToLevel(this, nextLevel)
+    }
+    
+    /**
+     * Обновить счетчики для системы уровней
+     */
+    fun updateLevelCounters() {
+        // Обновляем счетчик ходов без дефицита бюджета
+        if (getCashFlow() >= 0) {
+            consecutiveTurnsWithoutDeficit++
+        } else {
+            consecutiveTurnsWithoutDeficit = 0
+        }
+        
+        // Обновляем счетчик ходов с инвестициями
+        if (assets.isNotEmpty() || investments.isNotEmpty()) {
+            consecutiveInvestmentTurns++
+        } else {
+            consecutiveInvestmentTurns = 0
+        }
+    }
+    
+    /**
+     * Получить информацию о текущем уровне
+     */
+    fun getLevelInfo(): String {
+        val progress = getLevelProgress()
+        return "${currentLevel.emoji} ${currentLevel.displayName}\n" +
+               "Прогресс к следующему уровню: ${progress.progress}%\n" +
+               "${progress.description}"
+    }
 
     // Получить текущую игровую дату в виде строки (например, "1 января 2024")
     fun getCurrentDateString(): String {
@@ -654,10 +751,21 @@ enum class StressLevel(val displayName: String, val healthImpact: Double) {
 }
 
 enum class WorkLifeBalance(val displayName: String, val stressMultiplier: Double) {
-    WORK_FOCUSED("Работа", 1.3),
-    BALANCED("Баланс", 1.0),
-    LIFE_FOCUSED("Личная жизнь", 0.8)
+    WORKAHOLIC("Трудоголик", 1.5),
+    CAREER_FOCUSED("Карьерист", 1.2),
+    BALANCED("Сбалансированный", 1.0),
+    FAMILY_FOCUSED("Семейный", 0.8),
+    RELAXED("Расслабленный", 0.6)
 }
+
+// Класс для хобби
+@Parcelize
+data class Hobby(
+    val name: String,
+    val cost: Int = 0, // Стоимость за месяц
+    val stressReduction: Int = 0, // Насколько снижает стресс
+    val category: String = "Общее" // Категория хобби
+) : Parcelable
 
 enum class GoalType(val displayName: String) {
     PASSIVE_INCOME("Пассивный доход"),
@@ -669,9 +777,10 @@ enum class GoalType(val displayName: String) {
 @Parcelize
 data class Skill(
     val name: String,
-    val description: String,
-    val salaryBonus: Int,
-    val category: SkillCategory
+    val description: String = "",
+    val salaryBonus: Int = 0,
+    val category: SkillCategory = SkillCategory.TECHNICAL,
+    var level: Int = 1
 ) : Parcelable
 
 enum class SkillCategory(val displayName: String) {

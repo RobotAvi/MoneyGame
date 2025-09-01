@@ -51,7 +51,7 @@ class GameActivityTest {
         `when`(mockPlayer.isAlive()).thenReturn(true)
         val asset = Card("Тестовый актив", 5000)
         `when`(mockPlayer.assets).thenReturn(mutableListOf(asset))
-        `when`(mockGameManager.sellAsset(0)).thenReturn(true)
+        `when`(mockGameManager.sellAsset(type = AssetType.REAL_ESTATE, 0)).thenReturn(true)
         // Симулируем продажу актива через адаптер
         // Проверяем, что logIncome вызывается
         activity.updateUI()
@@ -124,7 +124,7 @@ class GameActivityTest {
             profession = null,
             dream = null
         )
-        val asset = Asset(
+        val asset = Asset(type = AssetType.REAL_ESTATE, 
             name = "Облигации федерального займа",
             downPayment = 50000,
             cashFlow = 1000,
@@ -138,7 +138,7 @@ class GameActivityTest {
         field.isAccessible = true
         field.set(manager, state)
 
-        val result = manager.buyAsset(asset)
+        val result = manager.buyAsset(type = AssetType.REAL_ESTATE, asset)
         assertTrue(result)
         assertEquals(5000, player.cash)
         assertTrue(player.assets.contains(asset))

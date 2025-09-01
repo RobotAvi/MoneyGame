@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@drawable/bg_cartoon_calendar">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,8 +19,12 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Активы"
+            android:text="💰 Активы"
             android:textSize="15sp"
+            android:textColor="@color/cartoon_text_secondary"
+            android:fontFamily="cursive"
+            android:background="@drawable/bg_cartoon_button_opportunities"
+            app:cornerRadius="20dp"
             style="@style/Widget.Material3.Button.OutlinedButton" />
 
         <com.google.android.material.button.MaterialButton
@@ -27,8 +32,12 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Инвестиции"
+            android:text="📈 Инвестиции"
             android:textSize="15sp"
+            android:textColor="@color/cartoon_text_secondary"
+            android:fontFamily="cursive"
+            android:background="@drawable/bg_cartoon_button_income"
+            app:cornerRadius="20dp"
             style="@style/Widget.Material3.Button" />
     </LinearLayout>
 
@@ -44,7 +53,11 @@
         android:id="@+id/btnRefreshMarket"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Обновить"
+        android:text="🔄 Обновить"
+        android:textColor="@color/cartoon_text_secondary"
+        android:fontFamily="cursive"
+        android:background="@drawable/bg_cartoon_button_next"
+        app:cornerRadius="20dp"
         style="@style/Widget.Material3.Button.OutlinedButton"
         android:layout_marginTop="12dp" />
 </LinearLayout>

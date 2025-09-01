@@ -66,4 +66,10 @@
     <color name="cartoon_expenses">#DC2626</color>       <!-- Темно-красный -->
     <color name="cartoon_opportunities">#1E3A8A</color>  <!-- Темно-синий -->
     <color name="cartoon_next_turn">#7C3AED</color>      <!-- Темно-фиолетовый -->
+    
+    <!-- Cut the Rope стиль для стрелок -->
+    <color name="cut_rope_primary">#FF6B35</color>       <!-- Оранжевый -->
+    <color name="cut_rope_secondary">#FF8C42</color>     <!-- Светло-оранжевый -->
+    <color name="cut_rope_accent">#FFD700</color>        <!-- Золотой -->
+    <color name="cut_rope_shadow">#E55A2B</color>        <!-- Темно-оранжевый -->
 </resources>

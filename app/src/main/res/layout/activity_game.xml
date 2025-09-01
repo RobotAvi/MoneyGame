@@ -15,7 +15,7 @@
         android:padding="20dp"
         app:elevation="4dp">
 
-        <!-- Шапка: ИКОНКА ПРОФЕССИИ слева, ИКОНКА МЕЧТЫ справа -->
+        <!-- Шапка: ИКОНКА ПРОФЕССИИ, ИКОНКА МЕЧТЫ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -24,7 +24,9 @@
             android:paddingTop="8dp"
             android:background="@drawable/bg_cartoon_header">
 
-            <!-- ИКОНКА ПРОФЕССИИ слева -->
+
+
+            <!-- ИКОНКА ПРОФЕССИИ -->
             <ImageView
                 android:id="@+id/iv_profession_icon"
                 android:layout_width="64dp"
@@ -32,7 +34,7 @@
                 android:src="@drawable/ic_teacher"
                 android:contentDescription="Иконка профессии"
                 android:background="@drawable/bg_cartoon_circle"
-                android:padding="12dp"
+                android:padding="8dp"
                 android:layout_marginEnd="20dp" />
 
             <!-- ЦЕНТРАЛЬНАЯ ИНФОРМАЦИЯ -->
@@ -49,7 +51,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Иван, 25 лет"
-                    android:textColor="@color/cartoon_text_primary"
+                    android:textColor="@color/cartoon_text_secondary"
                     android:textSize="20sp"
                     android:textStyle="bold"
                     android:gravity="center"
@@ -80,9 +82,9 @@
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:contentDescription="Иконка мечты"
-                android:scaleType="centerCrop"
+                android:scaleType="fitCenter"
                 android:background="@drawable/bg_cartoon_circle"
-                android:padding="12dp"
+                android:padding="8dp"
                 android:layout_marginStart="20dp" />
         </LinearLayout>
 
@@ -276,7 +278,7 @@
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recyclerCalendar"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="280dp"
                         android:nestedScrollingEnabled="false" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -491,7 +493,7 @@
             android:gravity="center"
             android:orientation="horizontal">
 
-            <!-- ДОХОДЫ (мультяшная) -->
+            <!-- ФИНАНСЫ (мультяшная) -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -504,23 +506,15 @@
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:background="@drawable/bg_cartoon_button_income"
-                    android:src="@drawable/ic_action_assets"
-                    android:scaleType="center"
-                    android:contentDescription="Доходы"
+                    android:src="@drawable/icon_income"
+                    android:scaleType="centerCrop"
+                    android:clipToOutline="true"
+                    android:contentDescription="Финансы"
                     android:padding="12dp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="💰 Доходы"
-                    android:textColor="@color/cartoon_text_primary"
-                    android:textSize="12sp"
-                    android:gravity="center"
-                    android:layout_marginTop="4dp"
-                    android:fontFamily="cursive" />
             </LinearLayout>
 
-            <!-- РАСХОДЫ (мультяшная) -->
+            <!-- ЗДОРОВЬЕ (мультяшная) -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -533,20 +527,12 @@
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:background="@drawable/bg_cartoon_button_expenses"
-                    android:src="@android:drawable/arrow_down_float"
-                    android:scaleType="center"
-                    android:contentDescription="Расходы"
-                    android:padding="12dp" />
+                    android:src="@drawable/icon_expenses"
+                    android:scaleType="centerCrop"
+                    android:clipToOutline="true"
+                    android:contentDescription="Здоровье"
+                    android:padding="8dp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="💸 Расходы"
-                    android:textColor="@color/cartoon_text_primary"
-                    android:textSize="12sp"
-                    android:gravity="center"
-                    android:layout_marginTop="4dp"
-                    android:fontFamily="cursive" />
             </LinearLayout>
 
             <!-- ВОЗМОЖНОСТИ (мультяшная) -->
@@ -562,20 +548,12 @@
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:background="@drawable/bg_cartoon_button_opportunities"
-                    android:src="@drawable/ic_action_market"
-                    android:scaleType="center"
+                    android:src="@drawable/icon_cashflow"
+                    android:scaleType="centerCrop"
+                    android:clipToOutline="true"
                     android:contentDescription="Возможности"
                     android:padding="12dp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🎯 Возможности"
-                    android:textColor="@color/cartoon_text_primary"
-                    android:textSize="12sp"
-                    android:gravity="center"
-                    android:layout_marginTop="4dp"
-                    android:fontFamily="cursive" />
             </LinearLayout>
 
             <!-- СЛЕДУЮЩИЙ ХОД (мультяшная) -->
@@ -591,20 +569,12 @@
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:background="@drawable/bg_cartoon_button_next"
-                    android:src="@android:drawable/ic_media_play"
-                    android:scaleType="center"
+                    android:src="@drawable/ic_arrow_next_cut_rope"
+                    android:scaleType="centerCrop"
+                    android:clipToOutline="true"
                     android:contentDescription="Следующий ход"
-                    android:padding="12dp" />
+                    android:padding="8dp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="▶️ След.ход"
-                    android:textColor="@color/cartoon_text_primary"
-                    android:textSize="12sp"
-                    android:gravity="center"
-                    android:layout_marginTop="4dp"
-                    android:fontFamily="cursive" />
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

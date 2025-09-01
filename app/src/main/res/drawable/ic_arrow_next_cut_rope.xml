@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    
+    <!-- Основная стрелка -->
+    <path
+        android:fillColor="#FF6B35"
+        android:pathData="M16,8 L32,24 L16,40 L20,36 L28,24 L20,12 Z" />
+    
+    <!-- Внутренняя стрелка для объема -->
+    <path
+        android:fillColor="#FF8C42"
+        android:pathData="M18,12 L30,24 L18,36 L22,32 L26,24 L22,16 Z" />
+    
+    <!-- Детали для игрового стиля -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M20,18 L24,24 L20,30 L22,28 L24,24 L22,20 Z" />
+    
+    <!-- Тень/обводка -->
+    <path
+        android:fillColor="#E55A2B"
+        android:pathData="M14,6 L34,24 L14,42 L18,38 L30,24 L18,10 Z" />
+</vector>

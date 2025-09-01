@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -15,117 +16,264 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tvStepTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="ШАГ 3/3"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:textColor="@color/primary_color"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="48dp"
-        android:layout_marginBottom="16dp" />
+        <!-- Заголовок -->
+        <TextView
+            android:id="@+id/tvStepTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🌟 ШАГ 3/3 - Выбор мечты"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@color/cartoon_text_secondary"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="48dp"
+            android:layout_marginBottom="16dp"
+            android:fontFamily="cursive" />
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fillViewport="true">
+        <!-- Верхняя часть: крупная картинка мечты -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="16dp">
 
+            <!-- Карточка мечты -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/dreamCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:gravity="center_horizontal"
+                app:cardElevation="8dp"
+                app:cardCornerRadius="24dp"
+                app:cardBackgroundColor="@color/cartoon_card"
+                app:strokeColor="@color/cartoon_primary"
+                app:strokeWidth="3dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp"
+                    android:gravity="center_horizontal"
+                    android:background="@drawable/bg_cartoon_calendar">
+
+                    <ImageView
+                        android:id="@+id/ivDreamPhoto"
+                        android:layout_width="280dp"
+                        android:layout_height="280dp"
+                        android:adjustViewBounds="true"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_dream_placeholder"
+                        android:background="@drawable/bg_cartoon_circle"
+                        android:padding="16dp" />
+
+                    <TextView
+                        android:id="@+id/tvDreamName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Мечта"
+                        android:textSize="28sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="24dp"
+                        android:textColor="@color/cartoon_text_primary"
+                        android:fontFamily="cursive" />
+
+                    <TextView
+                        android:id="@+id/tvDreamParams"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Параметры мечты"
+                        android:textSize="20sp"
+                        android:layout_marginTop="16dp"
+                        android:textColor="@color/cartoon_text_secondary"
+                        android:fontFamily="cursive"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:id="@+id/tvSwipeHint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Свайпните влево/вправо"
+                        android:textSize="14sp"
+                        android:layout_marginTop="8dp"
+                        android:textColor="@color/cartoon_text_secondary"
+                        android:fontFamily="cursive"
+                        android:gravity="center" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp">
+
+                        <Button
+                            android:id="@+id/btnSwipeLeft"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:text="←"
+                            android:textSize="20sp"
+                            android:background="@drawable/bg_cartoon_button_rounded"
+                            android:textColor="@color/white"
+                            android:layout_marginEnd="8dp" />
+
+                        <Button
+                            android:id="@+id/btnSwipeRight"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:text="→"
+                            android:textSize="20sp"
+                            android:background="@drawable/bg_cartoon_button_rounded"
+                            android:textColor="@color/white"
+                            android:layout_marginStart="8dp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <!-- Нижняя часть: иконки мечт -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center_horizontal"
-            android:paddingBottom="16dp">
+            android:background="@color/cartoon_card"
+            android:padding="16dp">
 
-            <!-- Карточка мечты -->
-            <LinearLayout
-                android:id="@+id/dreamCard"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Выберите мечту:"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/cartoon_text_primary"
+                android:fontFamily="cursive"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Сетка иконок мечт -->
+            <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/card_bg"
-                android:elevation="8dp"
-                android:padding="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:gravity="center_horizontal">
+                android:columnCount="3"
+                android:rowCount="2"
+                android:alignmentMode="alignMargins"
+                android:useDefaultMargins="true">
 
+                <!-- Яхта -->
                 <ImageView
-                    android:id="@+id/ivDreamPhoto"
-                    android:layout_width="220dp"
-                    android:layout_height="220dp"
-                    android:adjustViewBounds="true"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/ic_dream_placeholder" />
+                    android:id="@+id/ivDreamYacht"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/dream_yacht"
+                    android:background="@drawable/bg_cartoon_circle"
+                    android:padding="12dp"
+                    android:scaleType="fitCenter"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Яхта" />
 
-                <TextView
-                    android:id="@+id/tvDreamName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Мечта"
+                <!-- Ресторан -->
+                <ImageView
+                    android:id="@+id/ivDreamRestaurant"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/dream_restaurant"
+                    android:background="@drawable/bg_cartoon_circle"
+                    android:padding="12dp"
+                    android:scaleType="fitCenter"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Ресторан" />
+
+                <!-- Благотворительность -->
+                <ImageView
+                    android:id="@+id/ivDreamCharity"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/dream_charity"
+                    android:background="@drawable/bg_cartoon_circle"
+                    android:padding="12dp"
+                    android:scaleType="fitCenter"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Благотворительность" />
+
+                <!-- Остров -->
+                <ImageView
+                    android:id="@+id/ivDreamIsland"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/dream_island"
+                    android:background="@drawable/bg_cartoon_circle"
+                    android:padding="12dp"
+                    android:scaleType="fitCenter"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Остров" />
+
+                <!-- Космическое путешествие -->
+                <ImageView
+                    android:id="@+id/ivDreamSpace"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/dream_space"
+                    android:background="@drawable/bg_cartoon_circle"
+                    android:padding="12dp"
+                    android:scaleType="fitCenter"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Космическое путешествие" />
+
+                <!-- Бизнес-империя -->
+                <ImageView
+                    android:id="@+id/ivDreamBusiness"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/dream_business"
+                    android:background="@drawable/bg_cartoon_circle"
+                    android:padding="12dp"
+                    android:scaleType="fitCenter"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Бизнес-империя" />
+            </GridLayout>
+
+            <!-- Кнопка выбора и перехода -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="end"
+                android:layout_marginTop="16dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnChooseDream"
+                    android:layout_width="120dp"
+                    android:layout_height="60dp"
+                    android:text="✅ Выбрать"
+                    android:textSize="18sp"
+                    android:background="@drawable/bg_cartoon_button_rounded"
+                    android:textColor="@color/white"
+                    android:fontFamily="cursive"
+                    app:cornerRadius="20dp"
+                    android:layout_marginEnd="16dp" />
+
+                <!-- Круглая зеленая стрелка -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnNextStep"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:background="@drawable/bg_cartoon_button_next"
+                    android:text="→"
                     android:textSize="24sp"
                     android:textStyle="bold"
-                    android:layout_marginTop="24dp"
-                    android:textColor="@color/asset_blue" />
-
-                <TextView
-                    android:id="@+id/tvDreamParams"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Параметры мечты"
-                    android:textSize="18sp"
-                    android:layout_marginTop="12dp"
-                    android:textColor="@color/text_primary" />
-
-                <TextView
-                    android:id="@+id/tvSwipeHint"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Свайпайте влево/вправо"
-                    android:textSize="14sp"
-                    android:layout_marginTop="12dp"
-                    android:textColor="@color/text_secondary"/>
+                    android:textColor="@color/white"
+                    android:fontFamily="cursive"
+                    app:cornerRadius="30dp" />
             </LinearLayout>
         </LinearLayout>
-    </ScrollView>
-
-    <!-- Кнопки навигации снизу -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:paddingTop="8dp"
-        android:paddingBottom="24dp">
-
-        <Button
-            android:id="@+id/btnSwipeLeft"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:text="⟵"
-            android:textSize="32sp"
-            android:background="@drawable/btn_circle_bg" />
-
-        <Button
-            android:id="@+id/btnChooseDream"
-            android:layout_width="120dp"
-            android:layout_height="80dp"
-            android:text="Выбрать"
-            android:textSize="20sp"
-            android:background="@drawable/btn_primary_bg"
-            android:layout_marginStart="24dp"
-            android:layout_marginEnd="24dp" />
-
-        <Button
-            android:id="@+id/btnSwipeRight"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:text="⟶"
-            android:textSize="32sp"
-            android:background="@drawable/btn_circle_bg" />
-    </LinearLayout>
     </LinearLayout>
 </FrameLayout>

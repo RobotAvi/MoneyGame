@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    
+    <!-- Основной градиент -->
+    <gradient
+        android:startColor="#FF6B35"
+        android:centerColor="#FF8C42"
+        android:endColor="#FFD700"
+        android:angle="45" />
+    
+    <!-- Обводка в стиле игры -->
+    <stroke
+        android:width="4dp"
+        android:color="#E55A2B" />
+    
+    <!-- Внутренняя тень -->
+    <stroke
+        android:width="2dp"
+        android:color="#FFFFFF"
+        android:dashWidth="2dp"
+        android:dashGap="4dp" />
+</shape>

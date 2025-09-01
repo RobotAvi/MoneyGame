@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -10,104 +11,191 @@
         android:src="@drawable/ocean"
         android:scaleType="centerCrop" />
 
-    <TextView
-        android:id="@+id/tvStepTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="ШАГ 1/3"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:textColor="@color/asset_blue"
-        android:layout_gravity="top|center_horizontal"
-        android:layout_marginTop="48dp" />
-
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:gravity="center"
-        android:layout_gravity="center">
+        android:padding="24dp">
 
-        <EditText
-            android:id="@+id/etPlayerName"
-            android:layout_width="300dp"
+        <!-- Заголовок шага -->
+        <TextView
+            android:id="@+id/tvStepTitle"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Введите имя"
-            android:textSize="22sp"
-            android:maxLength="20"
-            android:inputType="textPersonName"
-            android:gravity="center"
+            android:text="ШАГ 1/3"
+            android:textSize="16sp"
             android:textColor="@color/white"
-            android:textColorHint="@color/white" />
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp" />
 
-        <!-- Дата рождения -->
-        <LinearLayout
-            android:layout_width="300dp"
+        <!-- Приветствие -->
+        <TextView
+            android:id="@+id/tvGreeting"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="16dp">
+            android:text="Привет! Давай знакомиться!"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="@color/cartoon_text_primary"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="32dp"
+            android:fontFamily="cursive"
+            android:shadowColor="#66FFFFFF"
+            android:shadowDx="2"
+            android:shadowDy="2"
+            android:shadowRadius="4" />
+
+        <!-- Поле ввода имени -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Как тебя зовут:"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/cartoon_text_primary"
+                android:fontFamily="cursive"
+                android:layout_marginBottom="12dp" />
 
             <EditText
-                android:id="@+id/etBirthDate"
-                android:layout_width="0dp"
+                android:id="@+id/etPlayerName"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Дата рождения (дд.мм.гггг)"
-                android:inputType="date"
-                android:textSize="18sp"
-                android:textColor="@color/white"
-                android:textColorHint="@color/white" />
-
-            <Button
-                android:id="@+id/btnPickBirthDate"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="8dp"
-                android:text="📅"
-                android:textSize="16sp"
-                android:textColor="@color/white"
-                android:background="@drawable/btn_circle_bg" />
+                android:hint="👤 Введите имя"
+                android:textSize="22sp"
+                android:maxLength="20"
+                android:inputType="textPersonName"
+                android:gravity="center"
+                android:textColor="@color/cartoon_text_primary"
+                android:textColorHint="@color/cartoon_text_secondary"
+                android:fontFamily="cursive"
+                android:background="@drawable/bg_cartoon_input"
+                android:padding="16dp" />
         </LinearLayout>
 
-        <!-- Дата начала игры -->
+        <!-- Поле ввода даты рождения -->
         <LinearLayout
-            android:layout_width="300dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="12dp">
+            android:orientation="vertical"
+            android:layout_marginBottom="24dp">
 
-            <EditText
-                android:id="@+id/etStartDate"
-                android:layout_width="0dp"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Дата начала игры (дд.мм.гггг)"
-                android:inputType="date"
-                android:textSize="18sp"
-                android:textColor="@color/white"
-                android:textColorHint="@color/white" />
+                android:text="Когда твой день рождения:"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/cartoon_text_primary"
+                android:fontFamily="cursive"
+                android:layout_marginBottom="12dp" />
 
-            <Button
-                android:id="@+id/btnPickStartDate"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="8dp"
-                android:text="📅"
-                android:textSize="16sp"
-                android:textColor="@color/white"
-                android:background="@drawable/btn_circle_bg" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <EditText
+                    android:id="@+id/etBirthDate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="🎂 Дата рождения (дд.мм.гггг)"
+                    android:inputType="date"
+                    android:textSize="18sp"
+                    android:textColor="@color/cartoon_text_primary"
+                    android:textColorHint="@color/cartoon_text_secondary"
+                    android:fontFamily="cursive"
+                    android:background="@drawable/bg_cartoon_input"
+                    android:padding="16dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPickBirthDate"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="12dp"
+                    android:text="📅"
+                    android:textSize="18sp"
+                    android:textColor="@color/cartoon_text_secondary"
+                    android:background="@drawable/bg_cartoon_button_rounded"
+                    android:fontFamily="cursive"
+                    app:cornerRadius="24dp" />
+            </LinearLayout>
         </LinearLayout>
+
+        <!-- Поле ввода даты начала игры -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="32dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="С какого дня начнем играть:"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/cartoon_text_primary"
+                android:fontFamily="cursive"
+                android:layout_marginBottom="12dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <EditText
+                    android:id="@+id/etStartDate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="🎮 Дата начала игры (дд.мм.гггг)"
+                    android:inputType="date"
+                    android:textSize="18sp"
+                    android:textColor="@color/cartoon_text_primary"
+                    android:textColorHint="@color/cartoon_text_secondary"
+                    android:fontFamily="cursive"
+                    android:background="@drawable/bg_cartoon_input"
+                    android:padding="16dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPickStartDate"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="12dp"
+                    android:text="📅"
+                    android:textSize="18sp"
+                    android:textColor="@color/cartoon_text_secondary"
+                    android:background="@drawable/bg_cartoon_button_rounded"
+                    android:fontFamily="cursive"
+                    app:cornerRadius="24dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Кнопка "Далее" -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnNextName"
+            android:layout_width="200dp"
+            android:layout_height="60dp"
+            android:text="Далее"
+            android:textSize="20sp"
+            android:background="@drawable/bg_cartoon_button_rounded"
+            android:textColor="@color/white"
+            android:fontFamily="cursive"
+            app:cornerRadius="20dp"
+            android:layout_gravity="center_horizontal"
+            app:icon="@drawable/ic_arrow_next_cut_rope"
+            app:iconSize="24dp"
+            app:iconGravity="textEnd"
+            app:iconTint="@color/white" />
     </LinearLayout>
-
-    <Button
-        android:id="@+id/btnNextName"
-        android:layout_width="200dp"
-        android:layout_height="60dp"
-        android:text="Далее"
-        android:textSize="20sp"
-        android:background="@drawable/btn_primary_bg"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="64dp" />
 </FrameLayout>

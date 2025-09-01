@@ -5,7 +5,8 @@
     android:layout_height="wrap_content"
     android:padding="16dp"
     android:textSize="16sp"
-    android:textColor="@color/text_primary"
-    android:background="@color/surface_color"
+    android:textColor="@color/cartoon_text_primary"
+    android:background="@drawable/bg_cartoon_input"
     android:singleLine="true"
-    android:ellipsize="end" />
+    android:ellipsize="end"
+    android:fontFamily="cursive" />

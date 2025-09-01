@@ -107,7 +107,7 @@ class PlayerTest {
     
     @Test
     fun `test net worth calculation`() {
-        val asset = Asset(
+        val asset = Asset(type = AssetType.REAL_ESTATE, 
             name = "Акции",
             downPayment = 50000,
             cashFlow = 2000,
